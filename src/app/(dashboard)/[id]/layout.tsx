@@ -10,10 +10,11 @@ import { AppSidebar, AppSidebarInset } from "@/components/app-sidebar";
 
 interface EventDashboardLayoutProps {
   children: React.ReactNode;
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 async function DashboardLayout({ children, params }: EventDashboardLayoutProps) {
+  const { id: eventId } = await params;
   const session = await auth();
 
   // Redirect to sign-in if not authenticated
@@ -21,51 +22,51 @@ async function DashboardLayout({ children, params }: EventDashboardLayoutProps) 
     redirect("/auth/signin");
   }
 
-  const event = await api.event.getById({ id: params.id });
+  const event = await api.event.getById({ id: eventId });
 
   const navItems = [
     {
-      href: `/${params.id}`,
+      href: `/${eventId}`,
       label: "Overview",
       icon: "AiFillDashboard",
     },
     {
-      href: `/${params.id}/attendees`,
+      href: `/${eventId}/attendees`,
       label: "Attendees",
       icon: "HiUsers",
       count: event._count?.registrations,
     },
     {
-      href: `/${params.id}/tickets`,
+      href: `/${eventId}/tickets`,
       label: "Tickets",
       icon: "HiTicket",
       count: event.ticketTypes?.length,
     },
     {
-      href: `/${params.id}/schedule`,
+      href: `/${eventId}/schedule`,
       label: "Schedule",
       icon: "FaCalendarAlt",
       count: event._count?.scheduleEntries,
     },
     {
-      href: `/${params.id}/speakers`,
+      href: `/${eventId}/speakers`,
       label: "Speakers",
       icon: "PiMicrophoneStageFill",
       count: event._count?.speakers,
     },
     {
-      href: `/${params.id}/cfp`,
+      href: `/${eventId}/cfp`,
       label: "Call for Papers",
       icon: "RiMegaphoneFill",
     },
     {
-      href: `/${params.id}/communications`,
+      href: `/${eventId}/communications`,
       label: "Communications",
       icon: "HiChatBubbleLeftRight",
       count: event._count?.emailCampaigns,
     },
     {
-      href: `/${params.id}/settings`,
+      href: `/${eventId}/settings`,
       label: "Settings",
       icon: "RiSettings3Fill",
     },

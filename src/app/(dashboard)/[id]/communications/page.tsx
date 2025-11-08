@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { use, useState } from "react";
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "flowbite-react";
 import { HiPlus } from "react-icons/hi";
 import { api } from "@/trpc/react";
@@ -10,9 +10,9 @@ import type { TRPCClientErrorLike } from "@trpc/client";
 import type { AppRouter } from "@/server/api/root";
 
 interface CommunicationsPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 function CommunicationsPage({ params }: CommunicationsPageProps) {
@@ -22,7 +22,7 @@ function CommunicationsPage({ params }: CommunicationsPageProps) {
   const [schedulingCampaignId, setSchedulingCampaignId] = useState<string | undefined>();
   const [scheduledDate, setScheduledDate] = useState("");
 
-  const eventId = params.id;
+  const { id: eventId } = use(params);
 
   // Fetch campaigns
   const { data: campaigns, isLoading } = api.communication.listCampaigns.useQuery({
@@ -93,10 +93,10 @@ function CommunicationsPage({ params }: CommunicationsPageProps) {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="space-y-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Email Campaigns</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Email Campaigns</h1>
           <p className="mt-2 text-gray-600">
             Send email communications to your attendees, speakers, or specific groups
           </p>
@@ -113,12 +113,15 @@ function CommunicationsPage({ params }: CommunicationsPageProps) {
       )}
 
       {!isLoading && campaigns?.items.length === 0 && (
-        <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
-          <h3 className="text-lg font-semibold text-gray-900">No campaigns yet</h3>
-          <p className="mt-2 text-gray-600">
+        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center dark:border-gray-700 dark:bg-gray-800">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
+            <HiPlus className="h-8 w-8 text-blue-600 dark:text-blue-300" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">No campaigns yet</h3>
+          <p className="mb-6 mt-2 text-gray-600">
             Create your first email campaign to communicate with your attendees
           </p>
-          <Button className="mt-4" onClick={handleCreateNew}>
+          <Button className="m-auto" onClick={handleCreateNew}>
             <HiPlus className="mr-2 h-5 w-5" />
             Create Campaign
           </Button>
