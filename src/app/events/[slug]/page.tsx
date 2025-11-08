@@ -11,13 +11,14 @@ import { formatDate, formatDateRange } from "@/lib/utils/date";
 import type { Metadata } from "next";
 
 interface EventPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({
   params,
 }: EventPageProps): Promise<Metadata> {
-  const event = await api.event.getBySlug({ slug: params.slug });
+  const { slug: eventSlug } = await params;
+  const event = await api.event.getBySlug({ slug: eventSlug });
 
   return {
     title: `${event.name} | Events Ting`,
@@ -26,7 +27,8 @@ export async function generateMetadata({
 }
 
 export default async function EventPage({ params }: EventPageProps) {
-  const event = await api.event.getBySlug({ slug: params.slug });
+  const { slug: eventSlug } = await params;
+  const event = await api.event.getBySlug({ slug: eventSlug });
 
   const isUpcoming = new Date(event.startDate) > new Date();
   const isPast = new Date(event.endDate) < new Date();
@@ -157,7 +159,7 @@ export default async function EventPage({ params }: EventPageProps) {
                   available
                 </p>
               </div>
-              <Link href={`/events/${params.slug}/register`}>
+              <Link href={`/events/${eventSlug}/register`}>
                 <Button size="lg">Register Now</Button>
               </Link>
             </div>
@@ -167,7 +169,7 @@ export default async function EventPage({ params }: EventPageProps) {
         {/* Quick Links */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {event._count?.scheduleEntries && event._count.scheduleEntries > 0 && (
-            <Link href={`/events/${params.slug}/schedule`}>
+            <Link href={`/events/${eventSlug}/schedule`}>
               <Card className="cursor-pointer hover:shadow-lg transition-shadow">
                 <div className="text-center">
                   <Calendar className="mx-auto h-8 w-8 text-primary-600 dark:text-primary-400" />
@@ -183,7 +185,7 @@ export default async function EventPage({ params }: EventPageProps) {
           )}
 
           {event._count?.speakers && event._count.speakers > 0 && (
-            <Link href={`/events/${params.slug}/speakers`}>
+            <Link href={`/events/${eventSlug}/speakers`}>
               <Card className="cursor-pointer hover:shadow-lg transition-shadow">
                 <div className="text-center">
                   <Users className="mx-auto h-8 w-8 text-primary-600 dark:text-primary-400" />
@@ -198,7 +200,7 @@ export default async function EventPage({ params }: EventPageProps) {
             </Link>
           )}
 
-          <Link href={`/events/${params.slug}/cfp`}>
+          <Link href={`/events/${eventSlug}/cfp`}>
             <Card className="cursor-pointer hover:shadow-lg transition-shadow">
               <div className="text-center">
                 <Video className="mx-auto h-8 w-8 text-primary-600 dark:text-primary-400" />
