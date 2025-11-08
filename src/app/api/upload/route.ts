@@ -4,14 +4,14 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { getServerAuthSession } from "~/server/auth";
+import { auth } from "@/server/auth";
 import {
   storage,
   generateUniqueFilename,
   validateFileType,
   validateFileSize,
   FILE_UPLOAD_LIMITS,
-} from "~/server/services/storage";
+} from "@/server/services/storage";
 
 /**
  * POST /api/upload
@@ -20,7 +20,7 @@ import {
 export async function POST(req: NextRequest) {
   try {
     // Check authentication
-    const session = await getServerAuthSession();
+    const session = await auth();
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     // Check authentication
-    const session = await getServerAuthSession();
+    const session = await auth();
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
