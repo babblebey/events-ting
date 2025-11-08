@@ -3,12 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import type { FC, SVGProps } from "react";
 import { BiBuoy } from "react-icons/bi";
+import { HiViewBoards, HiMenu, HiX } from "react-icons/hi";
 import { FaCalendarAlt } from "react-icons/fa";
-import { RiMegaphoneFill } from "react-icons/ri";
+import { RiMegaphoneFill, RiSettings3Fill } from "react-icons/ri";
 import { AiFillDashboard } from "react-icons/ai";
 import { GiPublicSpeaker } from "react-icons/gi";
 import { HiTicket, HiChatBubbleLeftRight, HiUsers } from "react-icons/hi2";
-import { HiInbox, HiViewBoards, HiMenu, HiX } from "react-icons/hi";
 import {
   Sidebar as FlowbiteSidebar,
   SidebarItem,
@@ -17,39 +17,45 @@ import {
   SidebarCollapse,
 } from "flowbite-react";
 
+// Icon mapping for string-based icon references
+const iconMap: Record<string, FC<SVGProps<SVGSVGElement>>> = {
+  AiFillDashboard,
+  HiUsers,
+  HiTicket,
+  FaCalendarAlt,
+  GiPublicSpeaker,
+  RiMegaphoneFill,
+  HiChatBubbleLeftRight,
+  RiSettings3Fill,
+  HiViewBoards,
+  BiBuoy,
+};
+
 interface AppSidebarProps {
-  menuItems?: SidebarMenuItem[];
-  footerItems?: SidebarMenuItem[];
+  menuItems?: AppSidebarMenuItem[];
+  footerItems?: AppSidebarMenuItem[];
   defaultOpen?: boolean;
 }
 
-const defaultMenuItems: SidebarMenuItem[] = [
-  { label: "Dashboard", href: "/", icon: AiFillDashboard },
-  { label: "Events", href: "/events", icon: FaCalendarAlt },
-  { label: "Tickets", href: "/tickets", icon: HiTicket },
-  { label: "Attendees", href: "/attendees", icon: HiUsers },
-  { label: "Schedule", href: "/schedule", icon: FaCalendarAlt },
-  {
-    label: "Call For Papers",
-    href: "/cfp",
-    icon: RiMegaphoneFill,
-    children: [
-      { label: "Settings", href: "/cfp" },
-      { label: "Submissions", href: "/cfp/submissions" },
-    ],
-  },
-  { label: "Speakers", href: "/speakers", icon: GiPublicSpeaker },
-  { label: "Communications", href: "/communications", icon: HiChatBubbleLeftRight },
+interface AppSidebarMenuItem {
+  label: string;
+  href: string;
+  icon?: string;
+  children?: Array<{
+    label: string;
+    href: string;
+  }>;
+  count?: number;
+}
+
+const defaultFooterItems: AppSidebarMenuItem[] = [
+  // { label: "Upgrade to Pro", href: "#", icon: "HiChartPie" },
+  { label: "Documentation", href: "#", icon: "HiViewBoards" },
+  { label: "Help", href: "#", icon: "BiBuoy" },
 ];
 
-const defaultFooterItems: SidebarMenuItem[] = [
-  // { label: "Upgrade to Pro", href: "#", icon: HiChartPie },
-  { label: "Documentation", href: "#", icon: HiViewBoards },
-  { label: "Help", href: "#", icon: BiBuoy },
-];
-
-function Sidebar({
-  menuItems = defaultMenuItems,
+function AppSidebar({
+  menuItems,
   footerItems = defaultFooterItems,
   defaultOpen = false,
 }: AppSidebarProps) {
@@ -88,7 +94,7 @@ function Sidebar({
   return (
     <>
       {/* Toggle Button */}
-      <SidebarToggle
+      <AppSidebarToggle
         isOpen={isOpen}
         onToggle={() => setIsOpen(!isOpen)}
         ariaControls="app-sidebar"
@@ -103,21 +109,37 @@ function Sidebar({
       )}
 
       {/* Sidebar */}
-      <div ref={sidebarRef}>
+      <aside ref={sidebarRef}>
         <FlowbiteSidebar
           id="app-sidebar"
           aria-label="Application sidebar"
-          className={`fixed top-0 left-0 z-40 h-screen w-72 transition-transform ${
+          className={`fixed top-0 left-0 z-40 h-screen w-72 transition-transform border-r border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 ${
             isOpen ? "translate-x-0" : "-translate-x-full"
           } sm:translate-x-0`}
         >
+          {
+          // WIP - DEFFERED
+          /* <div className="border-b">
+            <h5 id="drawer-navigation-label" className="text-base font-semibold text-gray-500 uppercase dark:text-gray-400">Menu</h5>
+            <button 
+              type="button" 
+              data-drawer-hide="drawer-navigation" 
+              aria-controls="drawer-navigation" 
+              className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 absolute top-2.5 end-2.5 inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white" 
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              <svg aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>
+              <span className="sr-only">Close menu</span>
+            </button>
+          </div> */}
           <SidebarItems className="flex h-full flex-col">
             <SidebarItemGroup>
-              {menuItems.map((item, index) =>
-                item.children ? (
+              {menuItems?.map((item, index) => {
+                const IconComponent = item.icon ? iconMap[item.icon] : undefined;
+                return item.children ? (
                   <SidebarCollapse
                     key={index}
-                    icon={item.icon}
+                    icon={IconComponent}
                     label={item.label}
                   >
                     {item.children.map((child, childIndex) => (
@@ -127,51 +149,49 @@ function Sidebar({
                     ))}
                   </SidebarCollapse>
                 ) : (
-                  <SidebarItem key={index} href={item.href} icon={item.icon}>
-                    {item.label}
+                  <SidebarItem key={index} href={item.href} icon={IconComponent} className="flex justify-between">
+                    <span>{item.label}</span>
+                    {/* {item.count !== undefined && (
+                      <span className="inline-flex items-center justify-center w-3 h-3 p-3 text-sm font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300">
+                        {item.count}
+                      </span>
+                    )} */}
                   </SidebarItem>
-                ),
-              )}
+                );
+              })}
             </SidebarItemGroup>
             {footerItems && footerItems.length > 0 && (
               <SidebarItemGroup className="mt-auto">
-                {footerItems.map((item, index) => (
-                  <SidebarItem key={index} href={item.href} icon={item.icon}>
-                    {item.label}
-                  </SidebarItem>
-                ))}
+                {footerItems.map((item, index) => {
+                  const IconComponent = item.icon ? iconMap[item.icon] : undefined;
+                  return (
+                    <SidebarItem key={index} href={item.href} icon={IconComponent}>
+                      {item.label}
+                    </SidebarItem>
+                  );
+                })}
               </SidebarItemGroup>
             )}
           </SidebarItems>
         </FlowbiteSidebar>
-      </div>
+      </aside>
     </>
   );
 }
 
-interface SidebarMenuItem {
-  label: string;
-  href: string;
-  icon: FC<SVGProps<SVGSVGElement>>;
-  children?: Array<{
-    label: string;
-    href: string;
-  }>;
-}
-
-interface SidebarToggleProps {
+interface AppSidebarToggleProps {
   isOpen: boolean;
   onToggle: () => void;
   className?: string;
   ariaControls?: string;
 }
 
-function SidebarToggle({
+function AppSidebarToggle({
   isOpen,
   onToggle,
   className = "",
   ariaControls = "sidebar",
-}: SidebarToggleProps) {
+}: AppSidebarToggleProps) {
   return (
     <button
       onClick={onToggle}
@@ -191,8 +211,8 @@ function SidebarToggle({
   );
 }
 
-function SidebarInset({ children }: { children: React.ReactNode }) {
-  return <div className="p-4 sm:ml-72 bg-gray-50 dark:bg-gray-900">{children}</div>;
+function AppSidebarInset({ children }: { children: React.ReactNode }) {
+  return <main className="p-4 sm:ml-72 bg-gray-50 dark:bg-gray-900">{children}</main>;
 }
 
-export { Sidebar, SidebarToggle, SidebarInset };
+export { AppSidebar, AppSidebarToggle, AppSidebarInset };
