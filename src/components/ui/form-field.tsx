@@ -30,7 +30,7 @@ export function FormField({
   return (
     <div className="mb-4">
       <div className="mb-2 block">
-        <Label htmlFor={inputId} value={label} />
+        <Label htmlFor={inputId}>{label}</Label>
         {required && <span className="ml-1 text-red-500">*</span>}
       </div>
 
@@ -40,8 +40,6 @@ export function FormField({
           name={name}
           rows={rows}
           color={error ? "failure" : undefined}
-          helperText={error ?? helpText}
-          required={required}
           {...(props as any)}
         />
       ) : (
@@ -50,10 +48,15 @@ export function FormField({
           name={name}
           type={type}
           color={error ? "failure" : undefined}
-          helperText={error ?? helpText}
           required={required}
           {...props}
         />
+      )}
+      
+      {(error ?? helpText) && (
+        <p className={`mt-2 text-sm ${error ? 'text-red-600 dark:text-red-500' : 'text-gray-500 dark:text-gray-400'}`}>
+          {error ?? helpText}
+        </p>
       )}
     </div>
   );

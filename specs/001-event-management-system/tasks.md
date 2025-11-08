@@ -70,20 +70,20 @@
 
 ### Implementation for User Story 1
 
-- [ ] T017 [P] [US1] Create event tRPC router in `src/server/api/routers/event.ts` with procedures: create, list, getBySlug, getById, update, archive, restore, delete
-- [ ] T018 [P] [US1] Create user tRPC router in `src/server/api/routers/user.ts` with procedures: getProfile, updateProfile, changePassword, deleteAccount
-- [ ] T019 [US1] Add event and user routers to root router in `src/server/api/root.ts`
-- [ ] T020 [P] [US1] Create EventForm component in `src/components/events/event-form.tsx` with validation for name, description, dates, location, timezone
-- [ ] T021 [P] [US1] Create EventCard component in `src/components/events/event-card.tsx` for event list display
-- [ ] T022 [P] [US1] Create EventMetrics component in `src/components/events/event-metrics.tsx` for dashboard summary cards
-- [ ] T023 [US1] Create events listing page in `src/app/events/page.tsx` (Server Component) showing all public events
-- [ ] T024 [US1] Create event creation page in `src/app/(dashboard)/create-event/page.tsx` (protected route)
-- [ ] T025 [US1] Create event dashboard layout in `src/app/(dashboard)/[id]/layout.tsx` with sidebar navigation
-- [ ] T026 [US1] Create event overview page in `src/app/(dashboard)/[id]/page.tsx` displaying metrics and quick actions
-- [ ] T027 [US1] Create event settings page in `src/app/(dashboard)/[id]/settings/page.tsx` for editing event details
-- [ ] T028 [US1] Create public event page in `src/app/events/[slug]/page.tsx` (Server Component) for attendee view
-- [ ] T029 [US1] Implement soft delete confirmation modal component in `src/components/events/archive-modal.tsx` with impact summary
-- [ ] T030 [US1] Add authentication check and redirect logic to dashboard layout
+- [X] T017 [P] [US1] Create event tRPC router in `src/server/api/routers/event.ts` with procedures: create, list, getBySlug, getById, update, archive, restore, delete
+- [X] T018 [P] [US1] Create user tRPC router in `src/server/api/routers/user.ts` with procedures: getProfile, updateProfile, changePassword, deleteAccount
+- [X] T019 [US1] Add event and user routers to root router in `src/server/api/root.ts`
+- [X] T020 [P] [US1] Create EventForm component in `src/components/events/event-form.tsx` with validation for name, description, dates, location, timezone
+- [X] T021 [P] [US1] Create EventCard component in `src/components/events/event-card.tsx` for event list display
+- [X] T022 [P] [US1] Create EventMetrics component in `src/components/events/event-metrics.tsx` for dashboard summary cards
+- [X] T023 [US1] Create events listing page in `src/app/events/page.tsx` (Server Component) showing all public events
+- [X] T024 [US1] Create event creation page in `src/app/(dashboard)/create-event/page.tsx` (protected route)
+- [X] T025 [US1] Create event dashboard layout in `src/app/(dashboard)/[id]/layout.tsx` with sidebar navigation
+- [X] T026 [US1] Create event overview page in `src/app/(dashboard)/[id]/page.tsx` displaying metrics and quick actions
+- [X] T027 [US1] Create event settings page in `src/app/(dashboard)/[id]/settings/page.tsx` for editing event details
+- [X] T028 [US1] Create public event page in `src/app/events/[slug]/page.tsx` (Server Component) for attendee view
+- [X] T029 [US1] Implement soft delete confirmation modal component in `src/components/events/archive-modal.tsx` with impact summary
+- [X] T030 [US1] Add authentication check and redirect logic to dashboard layout
 
 **Checkpoint**: User Story 1 complete - can create events, view dashboards, edit details independently
 

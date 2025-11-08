@@ -23,6 +23,17 @@ export function formatEventTime(
 }
 
 /**
+ * Alias for formatEventTime for convenience
+ */
+export function formatDate(
+  utcDate: Date,
+  timezone: string,
+  formatString = "PPpp"
+): string {
+  return formatEventTime(utcDate, timezone, formatString);
+}
+
+/**
  * Parse a local date/time string in the event's timezone and convert to UTC
  * @param localDateString - ISO date string (e.g., "2023-04-29T09:30:00")
  * @param eventTimezone - IANA timezone identifier
