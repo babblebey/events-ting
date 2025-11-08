@@ -56,7 +56,7 @@ export function EventForm({ initialData, onSuccess }: EventFormProps) {
       if (onSuccess) {
         onSuccess(data.id);
       } else {
-        router.push(`/(dashboard)/${data.id}`);
+        router.push(`/${data.id}`);
       }
     },
     onError: (error) => {
