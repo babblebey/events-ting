@@ -32,10 +32,10 @@
 
 **Purpose**: Project initialization and dependency installation
 
-- [ ] T001 Install new dependencies: `resend`, `@react-email/components`, `@react-email/render`, `date-fns`, `date-fns-tz` in package.json
-- [ ] T002 Install dev dependencies: `@react-email/cli` in package.json
-- [ ] T003 Run `pnpm install` to install all new dependencies
-- [ ] T004 Create email templates directory structure at `emails/`
+- [X] T001 Install new dependencies: `resend`, `@react-email/components`, `@react-email/render`, `date-fns`, `date-fns-tz` in package.json
+- [X] T002 Install dev dependencies: `react-email` (CLI) in package.json
+- [X] T003 Run `pnpm install` to install all new dependencies
+- [X] T004 Create email templates directory structure at `emails/`
 
 ---
 
