@@ -23,7 +23,11 @@ export const createEventSchema = z
       .max(100),
     locationType: z.enum(["in-person", "virtual", "hybrid"]),
     locationAddress: z.string().optional(),
-    locationUrl: z.string().url().optional(),
+    locationUrl: z
+      .string()
+      .optional()
+      .transform((val) => (!val || val.trim() === "" ? undefined : val))
+      .pipe(z.string().url().optional()),
     timezone: z.string(), // IANA timezone (validated separately)
     startDate: z.coerce.date(),
     endDate: z.coerce.date(),
@@ -65,7 +69,11 @@ export const updateEventSchema = z.object({
   slug: z.string().regex(/^[a-z0-9-]+$/).min(3).max(100).optional(),
   locationType: z.enum(["in-person", "virtual", "hybrid"]).optional(),
   locationAddress: z.string().optional(),
-  locationUrl: z.string().url().optional(),
+  locationUrl: z
+    .string()
+    .optional()
+    .transform((val) => (!val || val.trim() === "" ? undefined : val))
+    .pipe(z.string().url().optional()),
   timezone: z.string().optional(),
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
