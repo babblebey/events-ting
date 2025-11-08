@@ -24,22 +24,22 @@ interface AppSidebarProps {
 }
 
 const defaultMenuItems: SidebarMenuItem[] = [
-  { label: "Dashboard", href: "#", icon: AiFillDashboard },
-  { label: "Tickets", href: "#", icon: HiTicket },
-  { label: "Orders", href: "#", icon: HiInbox },
-  { label: "Attendees", href: "#", icon: HiUsers },
+  { label: "Dashboard", href: "/", icon: AiFillDashboard },
+  { label: "Events", href: "/events", icon: FaCalendarAlt },
+  { label: "Tickets", href: "/tickets", icon: HiTicket },
+  { label: "Attendees", href: "/attendees", icon: HiUsers },
+  { label: "Schedule", href: "/schedule", icon: FaCalendarAlt },
   {
-    label: "Call For Papers (CFP)",
-    href: "#",
+    label: "Call For Papers",
+    href: "/cfp",
     icon: RiMegaphoneFill,
     children: [
-      { label: "Forms", href: "#" },
-      { label: "Applications", href: "#" },
+      { label: "Settings", href: "/cfp" },
+      { label: "Submissions", href: "/cfp/submissions" },
     ],
   },
-  { label: "Speakers", href: "#", icon: GiPublicSpeaker },
-  { label: "Schedule", href: "#", icon: FaCalendarAlt },
-  { label: "Communications", href: "#", icon: HiChatBubbleLeftRight },
+  { label: "Speakers", href: "/speakers", icon: GiPublicSpeaker },
+  { label: "Communications", href: "/communications", icon: HiChatBubbleLeftRight },
 ];
 
 const defaultFooterItems: SidebarMenuItem[] = [

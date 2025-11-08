@@ -45,18 +45,18 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Update Prisma schema with all event management models in `prisma/schema.prisma` (based on data-model.md)
-- [ ] T006 Run `pnpm run db:generate` to create migration and regenerate Prisma client
-- [ ] T007 [P] Create shared Zod validation schemas in `src/lib/validators.ts` for events, tickets, registrations, schedules, speakers, CFP
-- [ ] T008 [P] Create date utility functions in `src/lib/utils/date.ts` for timezone handling with date-fns-tz
-- [ ] T009 [P] Create storage service interface in `src/server/services/storage.ts` with local filesystem adapter (MVP)
-- [ ] T010 [P] Create email service in `src/server/services/email.ts` with Resend integration
-- [ ] T011 [P] Create payment processor interface in `src/server/services/payment/types.ts` and free ticket processor in `src/server/services/payment/free.ts`
-- [ ] T012 Create file upload route handler in `src/app/api/upload/route.ts` for speaker photos and event images
-- [ ] T013 Create Resend webhook handler in `src/app/api/webhooks/resend/route.ts` for bounce tracking
-- [ ] T014 Update environment variable validation in `src/env.js` to include RESEND_API_KEY and optional OAuth credentials
-- [ ] T015 [P] Create shared UI components in `src/components/ui/` for forms, modals, badges, and tables using Flowbite React
-- [ ] T016 [P] Update sidebar component in `src/components/sidebar.tsx` to include event management navigation
+- [X] T005 Update Prisma schema with all event management models in `prisma/schema.prisma` (based on data-model.md)
+- [X] T006 Run `pnpm run db:generate` to create migration and regenerate Prisma client
+- [X] T007 [P] Create shared Zod validation schemas in `src/lib/validators.ts` for events, tickets, registrations, schedules, speakers, CFP
+- [X] T008 [P] Create date utility functions in `src/lib/utils/date.ts` for timezone handling with date-fns-tz
+- [X] T009 [P] Create storage service interface in `src/server/services/storage.ts` with local filesystem adapter (MVP)
+- [X] T010 [P] Create email service in `src/server/services/email.ts` with Resend integration
+- [X] T011 [P] Create payment processor interface in `src/server/services/payment/types.ts` and free ticket processor in `src/server/services/payment/free.ts`
+- [X] T012 Create file upload route handler in `src/app/api/upload/route.ts` for speaker photos and event images
+- [X] T013 Create Resend webhook handler in `src/app/api/webhooks/resend/route.ts` for bounce tracking
+- [X] T014 Update environment variable validation in `src/env.js` to include RESEND_API_KEY and optional OAuth credentials
+- [X] T015 [P] Create shared UI components in `src/components/ui/` for forms, modals, badges, and tables using Flowbite React
+- [X] T016 [P] Update sidebar component in `src/components/sidebar.tsx` to include event management navigation
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
