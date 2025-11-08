@@ -134,22 +134,22 @@ function AppSidebar({
           </div> */}
           <SidebarItems className="flex h-full flex-col">
             <SidebarItemGroup>
-              {menuItems?.map((item, index) => {
+              {menuItems?.map((item) => {
                 const IconComponent = item.icon ? iconMap[item.icon] : undefined;
                 return item.children ? (
                   <SidebarCollapse
-                    key={index}
+                    key={item.href}
                     icon={IconComponent}
                     label={item.label}
                   >
-                    {item.children.map((child, childIndex) => (
-                      <SidebarItem key={childIndex} href={child.href}>
+                    {item.children.map((child) => (
+                      <SidebarItem key={child.href} href={child.href}>
                         {child.label}
                       </SidebarItem>
                     ))}
                   </SidebarCollapse>
                 ) : (
-                  <SidebarItem key={index} href={item.href} icon={IconComponent} className="flex justify-between">
+                  <SidebarItem key={item.href} href={item.href} icon={IconComponent} className="flex justify-between">
                     <span>{item.label}</span>
                     {/* {item.count !== undefined && (
                       <span className="inline-flex items-center justify-center w-3 h-3 p-3 text-sm font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300">
@@ -162,10 +162,10 @@ function AppSidebar({
             </SidebarItemGroup>
             {footerItems && footerItems.length > 0 && (
               <SidebarItemGroup className="mt-auto">
-                {footerItems.map((item, index) => {
+                {footerItems.map((item) => {
                   const IconComponent = item.icon ? iconMap[item.icon] : undefined;
                   return (
-                    <SidebarItem key={index} href={item.href} icon={IconComponent}>
+                    <SidebarItem key={`footer-${item.label}`} href={item.href} icon={IconComponent}>
                       {item.label}
                     </SidebarItem>
                   );

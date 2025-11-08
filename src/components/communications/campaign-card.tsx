@@ -97,13 +97,13 @@ export function CampaignCard({
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <h3 className="text-xl font-bold text-gray-900">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
               {campaign.subject}
             </h3>
             {getStatusBadge()}
           </div>
           
-          <div className="mt-2 flex items-center gap-4 text-sm text-gray-600">
+          <div className="mt-2 flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
             <span>📧 {getRecipientTypeLabel()}</span>
             {campaign.totalRecipients !== null && (
               <span>👥 {campaign.totalRecipients} recipients</span>
