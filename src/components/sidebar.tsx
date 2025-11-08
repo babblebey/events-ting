@@ -6,8 +6,9 @@ import { BiBuoy } from "react-icons/bi";
 import { FaCalendarAlt } from "react-icons/fa";
 import { RiMegaphoneFill } from "react-icons/ri";
 import { AiFillDashboard } from "react-icons/ai";
+import { GiPublicSpeaker } from "react-icons/gi";
 import { HiTicket, HiChatBubbleLeftRight, HiUsers } from "react-icons/hi2";
-import { HiInbox, HiTable, HiViewBoards, HiMenu, HiX } from "react-icons/hi";
+import { HiInbox, HiViewBoards, HiMenu, HiX } from "react-icons/hi";
 import {
   Sidebar as FlowbiteSidebar,
   SidebarItem,
@@ -36,7 +37,7 @@ const defaultMenuItems: SidebarMenuItem[] = [
       { label: "Applications", href: "#" },
     ],
   },
-  { label: "Speakers", href: "#", icon: HiTable },
+  { label: "Speakers", href: "#", icon: GiPublicSpeaker },
   { label: "Schedule", href: "#", icon: FaCalendarAlt },
   { label: "Communications", href: "#", icon: HiChatBubbleLeftRight },
 ];
