@@ -171,7 +171,7 @@ export default function SpeakersPage() {
               Delete Speaker
             </h2>
             <div className="space-y-4">
-              <Alert color="warning" icon={AlertCircle}>
+              <Alert color="warning" icon={LuCircleAlert}>
                 <span className="font-medium">Warning:</span> This will also remove the
                 speaker from all assigned sessions. This action cannot be undone.
               </Alert>
