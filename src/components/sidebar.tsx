@@ -192,7 +192,7 @@ function SidebarToggle({
 }
 
 function SidebarInset({ children }: { children: React.ReactNode }) {
-  return <div className="p-4 sm:ml-72">{children}</div>;
+  return <div className="p-4 sm:ml-72 bg-gray-50 dark:bg-gray-900">{children}</div>;
 }
 
 export { Sidebar, SidebarToggle, SidebarInset };

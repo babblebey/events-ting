@@ -39,47 +39,47 @@ export default async function EventDashboardLayout({
 
   const navItems = [
     {
-      href: `/(dashboard)/${params.id}`,
+      href: `/${params.id}`,
       label: "Overview",
       icon: LayoutDashboard,
     },
     {
-      href: `/(dashboard)/${params.id}/attendees`,
+      href: `/${params.id}/attendees`,
       label: "Attendees",
       icon: Users,
       count: event._count?.registrations,
     },
     {
-      href: `/(dashboard)/${params.id}/tickets`,
+      href: `/${params.id}/tickets`,
       label: "Tickets",
       icon: Ticket,
       count: event.ticketTypes?.length,
     },
     {
-      href: `/(dashboard)/${params.id}/schedule`,
+      href: `/${params.id}/schedule`,
       label: "Schedule",
       icon: Calendar,
       count: event._count?.scheduleEntries,
     },
     {
-      href: `/(dashboard)/${params.id}/speakers`,
+      href: `/${params.id}/speakers`,
       label: "Speakers",
       icon: Mic,
       count: event._count?.speakers,
     },
     {
-      href: `/(dashboard)/${params.id}/cfp`,
+      href: `/${params.id}/cfp`,
       label: "Call for Papers",
       icon: FileText,
     },
     {
-      href: `/(dashboard)/${params.id}/communications`,
+      href: `/${params.id}/communications`,
       label: "Communications",
       icon: Mail,
       count: event._count?.emailCampaigns,
     },
     {
-      href: `/(dashboard)/${params.id}/settings`,
+      href: `/${params.id}/settings`,
       label: "Settings",
       icon: Settings,
     },
