@@ -50,3 +50,6 @@ yarn-error.log*
 # flowbite
 .flowbite/
 .flowbite-react/
+
+# Photo uploads development folder
+/public/uploads/
