@@ -6,14 +6,9 @@
  */
 
 import { Card } from "flowbite-react";
-import {
-  Users,
-  Ticket,
-  Calendar,
-  Mic,
-  Mail,
-  TrendingUp,
-} from "lucide-react";
+import { HiOutlineUsers } from "react-icons/hi2";
+import { PiMicrophoneStage } from "react-icons/pi";
+import { HiOutlineTicket, HiOutlineMail, HiOutlineTrendingUp, HiOutlineCalendar } from "react-icons/hi";
 
 interface Metric {
   label: string;
@@ -53,31 +48,31 @@ export function EventMetrics({
     {
       label: "Total Attendees",
       value: metrics.totalRegistrations,
-      icon: <Users className="h-5 w-5" />,
+      icon: <HiOutlineUsers className="h-5 w-5" />,
       description: "Registered attendees",
     },
     {
       label: "Ticket Types",
       value: metrics.totalTicketTypes,
-      icon: <Ticket className="h-5 w-5" />,
+      icon: <HiOutlineTicket className="h-5 w-5" />,
       description: "Available ticket options",
     },
     {
       label: "Schedule Entries",
       value: metrics.totalScheduleEntries,
-      icon: <Calendar className="h-5 w-5" />,
+      icon: <HiOutlineCalendar className="h-5 w-5" />,
       description: "Sessions scheduled",
     },
     {
       label: "Speakers",
       value: metrics.totalSpeakers,
-      icon: <Mic className="h-5 w-5" />,
+      icon: <PiMicrophoneStage className="h-5 w-5" />,
       description: "Confirmed speakers",
     },
     {
       label: "Email Campaigns",
       value: metrics.totalEmailCampaigns,
-      icon: <Mail className="h-5 w-5" />,
+      icon: <HiOutlineMail className="h-5 w-5" />,
       description: "Sent or scheduled",
     },
   ];
@@ -98,7 +93,7 @@ export function EventMetrics({
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               Recent Registrations
             </h3>
-            <TrendingUp className="h-5 w-5 text-gray-400" />
+            <HiOutlineTrendingUp className="h-5 w-5 text-gray-400" />
           </div>
           <div className="space-y-3">
             {recentRegistrations.map((registration) => (

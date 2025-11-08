@@ -8,7 +8,9 @@ import { api } from "@/trpc/server";
 import { EventMetrics, EventMetricsSkeleton } from "@/components/events/event-metrics";
 import { Button, Card } from "flowbite-react";
 import Link from "next/link";
-import { Calendar, ExternalLink, Settings } from "lucide-react";
+import { HiOutlineTicket, HiOutlineMail, HiOutlineExternalLink, HiOutlineCalendar } from "react-icons/hi";
+import { HiOutlineUsers } from "react-icons/hi2";
+import { IoSettingsOutline } from "react-icons/io5";
 import { formatDate, formatDateRange } from "@/lib/utils/date";
 
 interface EventOverviewPageProps {
@@ -35,13 +37,13 @@ export default async function EventOverviewPage({
         <div className="flex gap-2">
           <Link href={`/events/${event.slug}`}>
             <Button color="gray">
-              <ExternalLink className="mr-2 h-4 w-4" />
+              <HiOutlineExternalLink className="mr-2 h-4 w-4" />
               View Public Page
             </Button>
           </Link>
-          <Link href={`/(dashboard)/${params.id}/settings`}>
+          <Link href={`/${params.id}/settings`}>
             <Button>
-              <Settings className="mr-2 h-4 w-4" />
+              <IoSettingsOutline className="mr-2 h-4 w-4" />
               Event Settings
             </Button>
           </Link>
@@ -92,28 +94,28 @@ export default async function EventOverviewPage({
       {/* Quick Actions */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <QuickActionCard
-          href={`/(dashboard)/${params.id}/tickets`}
+          href={`/${params.id}/tickets`}
           title="Manage Tickets"
           description="Create and manage ticket types"
-          icon={<Calendar className="h-6 w-6" />}
+          icon={<HiOutlineTicket className="h-6 w-6" />}
         />
         <QuickActionCard
-          href={`/(dashboard)/${params.id}/attendees`}
+          href={`/${params.id}/attendees`}
           title="View Attendees"
           description="See who's registered"
-          icon={<Calendar className="h-6 w-6" />}
+          icon={<HiOutlineUsers className="h-6 w-6" />}
         />
         <QuickActionCard
-          href={`/(dashboard)/${params.id}/schedule`}
+          href={`/${params.id}/schedule`}
           title="Build Schedule"
           description="Add sessions and speakers"
-          icon={<Calendar className="h-6 w-6" />}
+          icon={<HiOutlineCalendar className="h-6 w-6" />}
         />
         <QuickActionCard
-          href={`/(dashboard)/${params.id}/communications`}
+          href={`/${params.id}/communications`}
           title="Send Email"
           description="Communicate with attendees"
-          icon={<Calendar className="h-6 w-6" />}
+          icon={<HiOutlineMail className="h-6 w-6" />}
         />
       </div>
     </div>

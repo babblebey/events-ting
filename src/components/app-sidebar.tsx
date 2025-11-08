@@ -7,7 +7,7 @@ import { HiViewBoards, HiMenu, HiX } from "react-icons/hi";
 import { FaCalendarAlt } from "react-icons/fa";
 import { RiMegaphoneFill, RiSettings3Fill } from "react-icons/ri";
 import { AiFillDashboard } from "react-icons/ai";
-import { GiPublicSpeaker } from "react-icons/gi";
+import { PiMicrophoneStageFill } from "react-icons/pi";
 import { HiTicket, HiChatBubbleLeftRight, HiUsers } from "react-icons/hi2";
 import {
   Sidebar as FlowbiteSidebar,
@@ -23,7 +23,7 @@ const iconMap: Record<string, FC<SVGProps<SVGSVGElement>>> = {
   HiUsers,
   HiTicket,
   FaCalendarAlt,
-  GiPublicSpeaker,
+  PiMicrophoneStageFill,
   RiMegaphoneFill,
   HiChatBubbleLeftRight,
   RiSettings3Fill,

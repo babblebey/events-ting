@@ -50,7 +50,7 @@ async function DashboardLayout({ children, params }: EventDashboardLayoutProps) 
     {
       href: `/${params.id}/speakers`,
       label: "Speakers",
-      icon: "GiPublicSpeaker",
+      icon: "PiMicrophoneStageFill",
       count: event._count?.speakers,
     },
     {
