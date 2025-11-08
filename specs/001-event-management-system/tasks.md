@@ -159,13 +159,13 @@
 - [X] T064 [P] [US4] Create CfpSubmissionForm component in `src/components/cfp/cfp-submission-form.tsx` for public proposal submission
 - [X] T065 [P] [US4] Create SubmissionCard component in `src/components/cfp/submission-card.tsx` for review dashboard
 - [X] T066 [P] [US4] Create ReviewPanel component in `src/components/cfp/review-panel.tsx` with score input and notes textarea
-- [ ] T067 [US4] Create CFP management page in `src/app/(dashboard)/[id]/cfp/page.tsx` with submission list and review UI
-- [ ] T068 [US4] Create public CFP submission page in `src/app/events/[slug]/cfp/page.tsx` with guidelines and form
-- [ ] T069 [US4] Implement deadline enforcement in cfp.submitProposal procedure (Research Section 7)
-- [ ] T070 [US4] Create cron job endpoint in `src/app/api/cron/close-expired-cfps/route.ts` for auto-closing CFPs
-- [ ] T071 [US4] Implement speaker auto-creation in cfp.acceptProposal procedure (FR-034)
-- [ ] T072 [US4] Add email notifications for accepted/rejected proposals using email service
-- [ ] T073 [US4] Add vercel.json configuration for CFP cron job (if using Vercel deployment)
+- [X] T067 [US4] Create CFP management page in `src/app/(dashboard)/[id]/cfp/page.tsx` with submission list and review UI
+- [X] T068 [US4] Create public CFP submission page in `src/app/events/[slug]/cfp/page.tsx` with guidelines and form
+- [X] T069 [US4] Implement deadline enforcement in cfp.submitProposal procedure (Research Section 7)
+- [X] T070 [US4] Create cron job endpoint in `src/app/api/cron/close-expired-cfps/route.ts` for auto-closing CFPs
+- [X] T071 [US4] Implement speaker auto-creation in cfp.acceptProposal procedure (FR-034)
+- [X] T072 [US4] Add email notifications for accepted/rejected proposals using email service
+- [X] T073 [US4] Add vercel.json configuration for CFP cron job (if using Vercel deployment)
 
 **Checkpoint**: User Story 4 complete - CFP workflow functional, integrates with speakers (US5)
 

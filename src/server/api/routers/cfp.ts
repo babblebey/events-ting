@@ -23,6 +23,10 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
+import { sendEmail } from "@/server/services/email";
+import { CfpSubmissionReceived } from "../../../../emails/cfp-submission-received";
+import { CfpAccepted } from "../../../../emails/cfp-accepted";
+import { CfpRejected } from "../../../../emails/cfp-rejected";
 
 // ============================================================================
 // INPUT SCHEMAS
@@ -331,8 +335,26 @@ export const cfpRouter = createTRPCRouter({
         },
       });
 
-      // TODO: Send confirmation email to speaker (T060)
-      // await sendCfpSubmissionReceivedEmail({ ... });
+      // Send confirmation email to speaker (T060, T072)
+      const eventUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/events/${cfp.eventId}`;
+      
+      await sendEmail({
+        to: input.speakerEmail,
+        subject: `Proposal Received: ${input.title}`,
+        react: CfpSubmissionReceived({
+          speakerName: input.speakerName,
+          eventName: cfp.event.name,
+          proposalTitle: input.title,
+          eventUrl,
+        }),
+        tags: [
+          { name: "type", value: "cfp-submission" },
+          { name: "eventId", value: cfp.eventId },
+        ],
+      }).catch((error) => {
+        // Log error but don't fail the submission
+        console.error("[CFP] Failed to send confirmation email:", error);
+      });
 
       return submission;
     }),
@@ -548,8 +570,28 @@ export const cfpRouter = createTRPCRouter({
         },
       });
 
-      // TODO: Send acceptance email to speaker (T061)
-      // await sendCfpAcceptedEmail({ ... });
+      // Send acceptance email to speaker (T061, T072)
+      const eventUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/events/${submission.eventId}`;
+      
+      await sendEmail({
+        to: updatedSubmission.speakerEmail,
+        subject: `Proposal Accepted: ${updatedSubmission.title} - ${submission.cfp.event.name}`,
+        react: CfpAccepted({
+          speakerName: updatedSubmission.speakerName,
+          eventName: submission.cfp.event.name,
+          proposalTitle: updatedSubmission.title,
+          sessionFormat: updatedSubmission.sessionFormat,
+          duration: updatedSubmission.duration,
+          eventUrl,
+        }),
+        tags: [
+          { name: "type", value: "cfp-accepted" },
+          { name: "eventId", value: submission.eventId },
+        ],
+      }).catch((error) => {
+        // Log error but don't fail the acceptance
+        console.error("[CFP] Failed to send acceptance email:", error);
+      });
 
       return updatedSubmission;
     }),
@@ -609,8 +651,27 @@ export const cfpRouter = createTRPCRouter({
         },
       });
 
-      // TODO: Send rejection email to speaker (T062)
-      // await sendCfpRejectedEmail({ ... });
+      // Send rejection email to speaker (T062, T072)
+      const eventUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/events/${submission.eventId}`;
+      
+      await sendEmail({
+        to: updatedSubmission.speakerEmail,
+        subject: `Proposal Update: ${updatedSubmission.title} - ${submission.cfp.event.name}`,
+        react: CfpRejected({
+          speakerName: updatedSubmission.speakerName,
+          eventName: submission.cfp.event.name,
+          proposalTitle: updatedSubmission.title,
+          reviewNotes: input.reviewNotes,
+          eventUrl,
+        }),
+        tags: [
+          { name: "type", value: "cfp-rejected" },
+          { name: "eventId", value: submission.eventId },
+        ],
+      }).catch((error) => {
+        // Log error but don't fail the rejection
+        console.error("[CFP] Failed to send rejection email:", error);
+      });
 
       return updatedSubmission;
     }),
