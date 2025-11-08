@@ -35,7 +35,6 @@ export default async function CfpPage({ params }: CfpPageProps) {
 
   // Fetch CFP if it exists
   const cfp = null;
-  const submissions = null;
 
   // TODO: Implement getCfp procedure to fetch CFP directly
   // For now, we'll handle both states in the client component
@@ -59,7 +58,6 @@ export default async function CfpPage({ params }: CfpPageProps) {
         eventName={event.name}
         eventSlug={event.slug}
         initialCfp={cfp}
-        initialSubmissions={submissions ?? []}
       />
     </div>
   );

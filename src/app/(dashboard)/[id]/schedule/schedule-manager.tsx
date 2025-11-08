@@ -12,27 +12,9 @@ import { ScheduleEntryForm } from "@/components/schedule/schedule-entry-form";
 import { api } from "@/trpc/react";
 import { HiPlus } from "react-icons/hi";
 import { extractDateString, extractTimeString } from "@/lib/utils/date";
+import type { RouterOutputs } from "@/trpc/react";
 
-interface ScheduleEntry {
-  id: string;
-  title: string;
-  description: string;
-  startTime: Date;
-  endTime: Date;
-  location?: string | null;
-  track?: string | null;
-  trackColor?: string | null;
-  sessionType?: string | null;
-  updatedAt: Date;
-  speakerSessions?: Array<{
-    speaker: {
-      id: string;
-      name: string;
-      photo?: string | null;
-    };
-    role?: string | null;
-  }>;
-}
+type ScheduleEntry = RouterOutputs["schedule"]["list"][number];
 
 interface Track {
   name: string;
@@ -168,7 +150,7 @@ export function ScheduleManager({
                     track: editingEntry.track ?? undefined,
                     trackColor: editingEntry.trackColor ?? undefined,
                     sessionType: editingEntry.sessionType ?? undefined,
-                    speakerIds: editingEntry.speakerSessions?.map((ss) => ss.speaker.id),
+                    speakerIds: editingEntry.speakerSessions.map((ss) => ss.speaker.id),
                     updatedAt: editingEntry.updatedAt,
                   }
                 : undefined

@@ -15,15 +15,17 @@ import { api } from "@/trpc/react";
 import { CfpForm } from "@/components/cfp/cfp-form";
 import { SubmissionCard } from "@/components/cfp/submission-card";
 import { ReviewPanel } from "@/components/cfp/review-panel";
-import type { CallForPapers, CfpSubmission, Speaker } from "generated/prisma";
+import type { CallForPapers } from "generated/prisma";
+import type { RouterOutputs } from "@/trpc/react";
 import { HiPlus, HiLockClosed, HiLockOpen } from "react-icons/hi";
+
+type CfpSubmission = RouterOutputs["cfp"]["listSubmissions"]["submissions"][number];
 
 interface CfpManagerProps {
   eventId: string;
   eventName: string;
   eventSlug: string;
   initialCfp?: CallForPapers | null;
-  initialSubmissions?: (CfpSubmission & { speaker?: Speaker | null })[];
 }
 
 export function CfpManager({
@@ -31,12 +33,9 @@ export function CfpManager({
   eventName,
   eventSlug,
   initialCfp,
-  initialSubmissions = [],
 }: CfpManagerProps) {
   const [showCfpForm, setShowCfpForm] = useState(false);
-  const [selectedSubmission, setSelectedSubmission] = useState<
-    (CfpSubmission & { speaker?: Speaker | null }) | null
-  >(null);
+  const [selectedSubmission, setSelectedSubmission] = useState<CfpSubmission | null>(null);
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "accepted" | "rejected">("all");
 
   const utils = api.useUtils();
@@ -55,12 +54,6 @@ export function CfpManager({
     },
     {
       enabled: !!initialCfp,
-      initialData: initialCfp
-        ? {
-            pages: [{ submissions: initialSubmissions, nextCursor: undefined }],
-            pageParams: [undefined],
-          }
-        : undefined,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     }
   );
@@ -86,7 +79,7 @@ export function CfpManager({
 
   const submissions = cfpData?.pages.flatMap((page) => page.submissions) ?? [];
   const allSubmissions =
-    allCfpData?.pages.flatMap((page) => page.submissions) ?? initialSubmissions;
+    allCfpData?.pages.flatMap((page) => page.submissions) ?? [];
   const totalCount = allSubmissions.length;
   const pendingCount = allSubmissions.filter((s) => s.status === "pending").length;
   const acceptedCount = allSubmissions.filter((s) => s.status === "accepted").length;
@@ -101,7 +94,6 @@ export function CfpManager({
 
   const cfpUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/events/${eventSlug}/cfp`;
   const isOpen = initialCfp?.status === "open";
-  const isClosed = initialCfp?.status === "closed";
   const deadlinePassed = initialCfp ? new Date(initialCfp.deadline) < new Date() : false;
 
   // No CFP exists yet

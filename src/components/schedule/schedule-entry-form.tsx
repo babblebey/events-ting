@@ -29,7 +29,7 @@ interface ScheduleEntryFormProps {
     trackColor?: string;
     sessionType?: string;
     speakerIds?: string[];
-    updatedAt?: Date;
+    updatedAt: Date;
   };
   onSuccess?: () => void;
   onCancel?: () => void;
@@ -174,7 +174,7 @@ export function ScheduleEntryForm({
     setErrors({});
 
     try {
-      if (isEditing && initialData?.id) {
+      if (isEditing && initialData?.id && initialData?.updatedAt) {
         await updateMutation.mutateAsync({
           id: initialData.id,
           updatedAt: initialData.updatedAt,
