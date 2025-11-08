@@ -97,14 +97,14 @@
 
 ### Implementation for User Story 2
 
-- [ ] T031 [P] [US2] Create ticket tRPC router in `src/server/api/routers/ticket.ts` with procedures: create, list, getById, update, delete, getStats
-- [ ] T032 [P] [US2] Create registration tRPC router in `src/server/api/routers/registration.ts` with procedures: create, list, getById, addManually, cancel, export, resendConfirmation, updateEmailStatus
-- [ ] T033 [US2] Add ticket and registration routers to root router in `src/server/api/root.ts`
-- [ ] T034 [P] [US2] Create React Email template for registration confirmation in `emails/registration-confirmation.tsx`
-- [ ] T035 [P] [US2] Create TicketTypeForm component in `src/components/tickets/ticket-type-form.tsx` for creating/editing ticket types
-- [ ] T036 [P] [US2] Create TicketTypeCard component in `src/components/tickets/ticket-type-card.tsx` showing availability and sold count
-- [ ] T037 [P] [US2] Create RegistrationForm component in `src/components/registration/registration-form.tsx` for public registration
-- [ ] T038 [P] [US2] Create AttendeeTable component in `src/components/registration/attendee-table.tsx` with filters and search
+- [X] T031 [P] [US2] Create ticket tRPC router in `src/server/api/routers/ticket.ts` with procedures: create, list, getById, update, delete, getStats
+- [X] T032 [P] [US2] Create registration tRPC router in `src/server/api/routers/registration.ts` with procedures: create, list, getById, addManually, cancel, export, resendConfirmation, updateEmailStatus
+- [X] T033 [US2] Add ticket and registration routers to root router in `src/server/api/root.ts`
+- [X] T034 [P] [US2] Create React Email template for registration confirmation in `emails/registration-confirmation.tsx`
+- [X] T035 [P] [US2] Create TicketTypeForm component in `src/components/tickets/ticket-type-form.tsx` for creating/editing ticket types
+- [X] T036 [P] [US2] Create TicketTypeCard component in `src/components/tickets/ticket-type-card.tsx` showing availability and sold count
+- [X] T037 [P] [US2] Create RegistrationForm component in `src/components/registration/registration-form.tsx` for public registration
+- [X] T038 [P] [US2] Create AttendeeTable component in `src/components/registration/attendee-table.tsx` with filters and search
 - [ ] T039 [US2] Create tickets management page in `src/app/(dashboard)/[id]/tickets/page.tsx` for organizers
 - [ ] T040 [US2] Create attendees management page in `src/app/(dashboard)/[id]/attendees/page.tsx` with table, filters, and export
 - [ ] T041 [US2] Create public registration page in `src/app/events/[slug]/register/page.tsx` showing available tickets

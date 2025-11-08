@@ -11,7 +11,7 @@ interface FormFieldProps extends Omit<TextInputProps, "type"> {
   error?: string;
   helpText?: string;
   required?: boolean;
-  type?: "text" | "email" | "password" | "url" | "number" | "date" | "time" | "textarea";
+  type?: "text" | "email" | "password" | "url" | "number" | "date" | "time" | "datetime-local" | "textarea";
   rows?: number;
 }
 

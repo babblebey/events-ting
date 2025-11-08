@@ -55,9 +55,12 @@ export interface EmailResult {
 export async function sendEmail(options: EmailOptions): Promise<EmailResult> {
   try {
     // Render React component to HTML if provided
-    const html = options.react ? render(options.react) : options.html;
-
-    if (!html) {
+    let html: string;
+    if (options.react) {
+      html = await render(options.react);
+    } else if (options.html) {
+      html = options.html;
+    } else {
       throw new Error("Either html or react component must be provided");
     }
 
@@ -116,9 +119,12 @@ export async function sendBatchEmails(
 ): Promise<EmailResult[]> {
   try {
     // Render React component to HTML if provided
-    const html = options.react ? render(options.react) : options.html;
-
-    if (!html) {
+    let html: string;
+    if (options.react) {
+      html = await render(options.react);
+    } else if (options.html) {
+      html = options.html;
+    } else {
       throw new Error("Either html or react component must be provided");
     }
 
@@ -210,9 +216,12 @@ export async function sendBatchEmailsWithRetry(
   maxRetries = 3
 ): Promise<EmailResult[]> {
   try {
-    const html = options.react ? render(options.react) : options.html;
-
-    if (!html) {
+    let html: string;
+    if (options.react) {
+      html = await render(options.react);
+    } else if (options.html) {
+      html = options.html;
+    } else {
       throw new Error("Either html or react component must be provided");
     }
 
