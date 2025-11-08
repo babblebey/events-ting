@@ -83,70 +83,96 @@ export const registrationRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       // Get ticket type with event details and lock for update
       const result = await ctx.db.$transaction(async (tx) => {
-        // Lock the ticket type row to prevent race conditions
-        const ticket = await tx.ticketType.findUnique({
-          where: { id: input.ticketTypeId },
-          include: {
-            event: {
-              select: {
-                id: true,
-                name: true,
-                slug: true,
-                startDate: true,
-                endDate: true,
-                locationType: true,
-                locationAddress: true,
-                locationUrl: true,
-                timezone: true,
-              },
-            },
-            _count: {
-              select: { registrations: true },
-            },
-          },
-        });
+        // Lock the ticket type row to prevent race conditions using SELECT FOR UPDATE
+        // This ensures atomicity when checking availability and prevents overselling
+        const ticketTypeRows = await tx.$queryRaw<
+          Array<{
+            id: string;
+            name: string;
+            quantity: number;
+            saleStart: Date | null;
+            saleEnd: Date | null;
+            soldCount: bigint;
+          }>
+        >`
+          SELECT 
+            tt.id,
+            tt.name,
+            tt.quantity,
+            tt."saleStart",
+            tt."saleEnd",
+            COUNT(r.id)::bigint as "soldCount"
+          FROM "TicketType" tt
+          LEFT JOIN "Registration" r ON r."ticketTypeId" = tt.id
+          WHERE tt.id = ${input.ticketTypeId}
+          GROUP BY tt.id, tt.name, tt.quantity, tt."saleStart", tt."saleEnd"
+          FOR UPDATE OF tt
+        `;
 
-        if (!ticket) {
+        const ticketType = ticketTypeRows[0];
+
+        if (!ticketType) {
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Ticket type not found",
           });
         }
 
-        // Check availability
-        const soldCount = ticket._count.registrations;
-        const available = ticket.quantity - soldCount;
+        // Convert BigInt to number for availability check
+        const soldCount = Number(ticketType.soldCount);
+        const available = ticketType.quantity - soldCount;
 
         if (available <= 0) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "This ticket type is sold out",
+            message: "This ticket type is sold out. Please try another ticket type.",
           });
         }
 
         // Check sale period
         const now = new Date();
-        if (ticket.saleStart && ticket.saleStart > now) {
+        if (ticketType.saleStart && ticketType.saleStart > now) {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Ticket sales have not started yet",
           });
         }
 
-        if (ticket.saleEnd && ticket.saleEnd < now) {
+        if (ticketType.saleEnd && ticketType.saleEnd < now) {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Ticket sales have ended",
           });
         }
 
-        // Create registration
+        // Get event details for confirmation email
+        const event = await tx.event.findUnique({
+          where: { id: (await tx.ticketType.findUnique({
+            where: { id: input.ticketTypeId },
+            select: { eventId: true },
+          }))?.eventId },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            startDate: true,
+          },
+        });
+
+        if (!event) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Event not found",
+          });
+        }
+
+        // Create registration (atomic with lock)
         const registrationCode = generateRegistrationCode();
         const userId = ctx.session?.user?.id;
 
         const registration = await tx.registration.create({
           data: {
-            eventId: ticket.event.id,
+            eventId: event.id,
             ticketTypeId: input.ticketTypeId,
             email: input.email,
             name: input.name,
@@ -164,11 +190,11 @@ export const registrationRouter = createTRPCRouter({
         return {
           registrationId: registration.id,
           registrationCode,
-          eventName: ticket.event.name,
-          eventSlug: ticket.event.slug,
-          eventStartDate: ticket.event.startDate,
-          eventId: ticket.event.id,
-          ticketTypeName: ticket.name,
+          eventName: event.name,
+          eventSlug: event.slug,
+          eventStartDate: event.startDate,
+          eventId: event.id,
+          ticketTypeName: ticketType.name,
           attendeeEmail: input.email,
           attendeeName: input.name,
         };

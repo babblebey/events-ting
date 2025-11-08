@@ -108,10 +108,10 @@
 - [ ] T039 [US2] Create tickets management page in `src/app/(dashboard)/[id]/tickets/page.tsx` for organizers
 - [ ] T040 [US2] Create attendees management page in `src/app/(dashboard)/[id]/attendees/page.tsx` with table, filters, and export
 - [ ] T041 [US2] Create public registration page in `src/app/events/[slug]/register/page.tsx` showing available tickets
-- [ ] T042 [US2] Implement transaction with row locking in registration.create procedure to prevent overselling (Research Section 6)
-- [ ] T043 [US2] Add sold-out badge and low-stock warning to TicketTypeCard component
-- [ ] T044 [US2] Implement CSV export functionality in registration.export procedure using streaming for large datasets
-- [ ] T045 [US2] Add confirmation email sending after successful registration using email service
+- [X] T042 [US2] Implement transaction with row locking in registration.create procedure to prevent overselling (Research Section 6)
+- [X] T043 [US2] Add sold-out badge and low-stock warning to TicketTypeCard component
+- [X] T044 [US2] Implement CSV export functionality in registration.export procedure using streaming for large datasets
+- [X] T045 [US2] Add confirmation email sending after successful registration using email service
 
 **Checkpoint**: User Story 2 complete - tickets and registrations work independently, integrates with US1 events
 
