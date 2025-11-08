@@ -150,15 +150,15 @@
 
 ### Implementation for User Story 4
 
-- [ ] T058 [P] [US4] Create cfp tRPC router in `src/server/api/routers/cfp.ts` with procedures: open, close, update, submitProposal, listSubmissions, reviewSubmission, acceptProposal, rejectProposal
-- [ ] T059 [US4] Add cfp router to root router in `src/server/api/root.ts`
-- [ ] T060 [P] [US4] Create React Email template for CFP submission received in `emails/cfp-submission-received.tsx`
-- [ ] T061 [P] [US4] Create React Email template for CFP accepted in `emails/cfp-accepted.tsx`
-- [ ] T062 [P] [US4] Create React Email template for CFP rejected in `emails/cfp-rejected.tsx`
-- [ ] T063 [P] [US4] Create CfpForm component in `src/components/cfp/cfp-form.tsx` for opening/editing CFP with deadline picker
-- [ ] T064 [P] [US4] Create CfpSubmissionForm component in `src/components/cfp/cfp-submission-form.tsx` for public proposal submission
-- [ ] T065 [P] [US4] Create SubmissionCard component in `src/components/cfp/submission-card.tsx` for review dashboard
-- [ ] T066 [P] [US4] Create ReviewPanel component in `src/components/cfp/review-panel.tsx` with score input and notes textarea
+- [X] T058 [P] [US4] Create cfp tRPC router in `src/server/api/routers/cfp.ts` with procedures: open, close, update, submitProposal, listSubmissions, reviewSubmission, acceptProposal, rejectProposal
+- [X] T059 [US4] Add cfp router to root router in `src/server/api/root.ts`
+- [X] T060 [P] [US4] Create React Email template for CFP submission received in `emails/cfp-submission-received.tsx`
+- [X] T061 [P] [US4] Create React Email template for CFP accepted in `emails/cfp-accepted.tsx`
+- [X] T062 [P] [US4] Create React Email template for CFP rejected in `emails/cfp-rejected.tsx`
+- [X] T063 [P] [US4] Create CfpForm component in `src/components/cfp/cfp-form.tsx` for opening/editing CFP with deadline picker
+- [X] T064 [P] [US4] Create CfpSubmissionForm component in `src/components/cfp/cfp-submission-form.tsx` for public proposal submission
+- [X] T065 [P] [US4] Create SubmissionCard component in `src/components/cfp/submission-card.tsx` for review dashboard
+- [X] T066 [P] [US4] Create ReviewPanel component in `src/components/cfp/review-panel.tsx` with score input and notes textarea
 - [ ] T067 [US4] Create CFP management page in `src/app/(dashboard)/[id]/cfp/page.tsx` with submission list and review UI
 - [ ] T068 [US4] Create public CFP submission page in `src/app/events/[slug]/cfp/page.tsx` with guidelines and form
 - [ ] T069 [US4] Implement deadline enforcement in cfp.submitProposal procedure (Research Section 7)
