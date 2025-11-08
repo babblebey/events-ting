@@ -10,7 +10,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Badge, Tabs, Modal } from "flowbite-react";
+import { Button, Badge, Modal, ModalHeader, ModalBody } from "flowbite-react";
 import { api } from "@/trpc/react";
 import { CfpForm } from "@/components/cfp/cfp-form";
 import { SubmissionCard } from "@/components/cfp/submission-card";
@@ -54,6 +54,18 @@ export function CfpManager({
     }
   );
 
+  // Query all submissions for counts
+  const { data: allCfpData } = api.cfp.listSubmissions.useQuery(
+    {
+      cfpId: initialCfp?.id ?? "",
+      status: "all",
+      limit: 100,
+    },
+    {
+      enabled: !!initialCfp,
+    }
+  );
+
   const closeCfpMutation = api.cfp.close.useMutation({
     onSuccess: () => {
       void utils.cfp.listSubmissions.invalidate();
@@ -61,9 +73,11 @@ export function CfpManager({
   });
 
   const submissions = cfpData?.submissions ?? [];
-  const pendingCount = submissions.filter((s) => s.status === "pending").length;
-  const acceptedCount = submissions.filter((s) => s.status === "accepted").length;
-  const rejectedCount = submissions.filter((s) => s.status === "rejected").length;
+  const allSubmissions = allCfpData?.submissions ?? initialSubmissions;
+  const totalCount = allSubmissions.length;
+  const pendingCount = allSubmissions.filter((s) => s.status === "pending").length;
+  const acceptedCount = allSubmissions.filter((s) => s.status === "accepted").length;
+  const rejectedCount = allSubmissions.filter((s) => s.status === "rejected").length;
 
   const handleCloseCfp = () => {
     if (!initialCfp) return;
@@ -96,8 +110,8 @@ export function CfpManager({
 
         {/* CFP Creation Modal */}
         <Modal show={showCfpForm} onClose={() => setShowCfpForm(false)} size="3xl">
-          <Modal.Header>Open Call for Papers</Modal.Header>
-          <Modal.Body>
+          <ModalHeader>Open Call for Papers</ModalHeader>
+          <ModalBody>
             <CfpForm
               eventId={eventId}
               onSuccess={() => {
@@ -106,7 +120,7 @@ export function CfpManager({
               }}
               onCancel={() => setShowCfpForm(false)}
             />
-          </Modal.Body>
+          </ModalBody>
         </Modal>
       </div>
     );
@@ -154,7 +168,7 @@ export function CfpManager({
             {/* Submission Stats */}
             <div className="mt-4 flex gap-6">
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{submissions.length}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalCount}</p>
                 <p className="text-xs text-gray-500">Total Submissions</p>
               </div>
               <div>
@@ -194,28 +208,36 @@ export function CfpManager({
       {/* Submissions List */}
       <div className="rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
         <div className="border-b border-gray-200 p-4 dark:border-gray-700">
-          <Tabs.Group style="underline">
-            <Tabs.Item
-              active={statusFilter === "all"}
-              title={`All (${submissions.length})`}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              color={statusFilter === "all" ? "blue" : "gray"}
+              size="sm"
               onClick={() => setStatusFilter("all")}
-            />
-            <Tabs.Item
-              active={statusFilter === "pending"}
-              title={`Pending (${pendingCount})`}
+            >
+              All ({totalCount})
+            </Button>
+            <Button
+              color={statusFilter === "pending" ? "blue" : "gray"}
+              size="sm"
               onClick={() => setStatusFilter("pending")}
-            />
-            <Tabs.Item
-              active={statusFilter === "accepted"}
-              title={`Accepted (${acceptedCount})`}
+            >
+              Pending ({pendingCount})
+            </Button>
+            <Button
+              color={statusFilter === "accepted" ? "blue" : "gray"}
+              size="sm"
               onClick={() => setStatusFilter("accepted")}
-            />
-            <Tabs.Item
-              active={statusFilter === "rejected"}
-              title={`Rejected (${rejectedCount})`}
+            >
+              Accepted ({acceptedCount})
+            </Button>
+            <Button
+              color={statusFilter === "rejected" ? "blue" : "gray"}
+              size="sm"
               onClick={() => setStatusFilter("rejected")}
-            />
-          </Tabs.Group>
+            >
+              Rejected ({rejectedCount})
+            </Button>
+          </div>
         </div>
 
         <div className="p-6">
@@ -244,8 +266,8 @@ export function CfpManager({
 
       {/* Edit CFP Modal */}
       <Modal show={showCfpForm} onClose={() => setShowCfpForm(false)} size="3xl">
-        <Modal.Header>Edit Call for Papers</Modal.Header>
-        <Modal.Body>
+        <ModalHeader>Edit Call for Papers</ModalHeader>
+        <ModalBody>
           <CfpForm
             eventId={eventId}
             existingCfp={initialCfp}
@@ -255,7 +277,7 @@ export function CfpManager({
             }}
             onCancel={() => setShowCfpForm(false)}
           />
-        </Modal.Body>
+        </ModalBody>
       </Modal>
 
       {/* Review Submission Modal */}
@@ -264,8 +286,8 @@ export function CfpManager({
         onClose={() => setSelectedSubmission(null)}
         size="4xl"
       >
-        <Modal.Header>Review Submission</Modal.Header>
-        <Modal.Body>
+        <ModalHeader>Review Submission</ModalHeader>
+        <ModalBody>
           {selectedSubmission && (
             <ReviewPanel
               submission={selectedSubmission}
@@ -275,7 +297,7 @@ export function CfpManager({
               }}
             />
           )}
-        </Modal.Body>
+        </ModalBody>
       </Modal>
     </div>
   );

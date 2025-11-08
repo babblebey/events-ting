@@ -5,7 +5,7 @@
  * Confirmation modal for archiving events with impact summary
  */
 
-import { Modal, Button } from "flowbite-react";
+import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from "flowbite-react";
 import { Archive, AlertTriangle } from "lucide-react";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
@@ -52,13 +52,13 @@ export function ArchiveModal({
 
   return (
     <Modal show={isOpen} onClose={onClose} size="md">
-      <Modal.Header>
+      <ModalHeader>
         <div className="flex items-center gap-2">
           <Archive className="h-5 w-5 text-warning-600" />
           <span>Archive Event</span>
         </div>
-      </Modal.Header>
-      <Modal.Body>
+      </ModalHeader>
+      <ModalBody>
         <div className="space-y-4">
           {error && (
             <div className="rounded-lg bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900 dark:text-red-200">
@@ -110,8 +110,8 @@ export function ArchiveModal({
             </p>
           </div>
         </div>
-      </Modal.Body>
-      <Modal.Footer>
+      </ModalBody>
+      <ModalFooter>
         <div className="flex w-full gap-2">
           <Button
             color="warning"
@@ -129,7 +129,7 @@ export function ArchiveModal({
             Cancel
           </Button>
         </div>
-      </Modal.Footer>
+      </ModalFooter>
     </Modal>
   );
 }

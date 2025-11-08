@@ -6,7 +6,7 @@
  */
 
 import { useState } from "react";
-import { Button, Modal } from "flowbite-react";
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "flowbite-react";
 import { ScheduleTimeline } from "@/components/schedule/schedule-timeline";
 import { ScheduleEntryForm } from "@/components/schedule/schedule-entry-form";
 import { api } from "@/trpc/react";
@@ -148,10 +148,10 @@ export function ScheduleManager({
 
       {/* Add/Edit Modal */}
       <Modal show={showForm} onClose={handleFormCancel} size="3xl">
-        <Modal.Header>
+        <ModalHeader>
           {editingEntry ? "Edit Schedule Entry" : "Add Schedule Entry"}
-        </Modal.Header>
-        <Modal.Body>
+        </ModalHeader>
+        <ModalBody>
           <ScheduleEntryForm
             eventId={eventId}
             eventTimezone={eventTimezone}
@@ -176,7 +176,7 @@ export function ScheduleManager({
             onSuccess={handleFormSuccess}
             onCancel={handleFormCancel}
           />
-        </Modal.Body>
+        </ModalBody>
       </Modal>
 
       {/* Delete Confirmation Modal */}
@@ -185,14 +185,14 @@ export function ScheduleManager({
         onClose={() => setShowDeleteConfirm(false)}
         size="md"
       >
-        <Modal.Header>Confirm Deletion</Modal.Header>
-        <Modal.Body>
+        <ModalHeader>Confirm Deletion</ModalHeader>
+        <ModalBody>
           <p className="text-gray-700 dark:text-gray-300">
             Are you sure you want to delete this schedule entry? This action cannot be
             undone.
           </p>
-        </Modal.Body>
-        <Modal.Footer>
+        </ModalBody>
+        <ModalFooter>
           <Button
             color="failure"
             onClick={confirmDelete}
@@ -203,7 +203,7 @@ export function ScheduleManager({
           <Button color="gray" onClick={() => setShowDeleteConfirm(false)}>
             Cancel
           </Button>
-        </Modal.Footer>
+        </ModalFooter>
       </Modal>
     </div>
   );

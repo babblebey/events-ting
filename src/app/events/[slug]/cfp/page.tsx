@@ -6,9 +6,6 @@
 
 import { redirect } from "next/navigation";
 import { api } from "@/trpc/server";
-import { CfpSubmissionForm } from "@/components/cfp/cfp-submission-form";
-import { Badge } from "flowbite-react";
-import { HiCalendar, HiClock } from "react-icons/hi";
 
 interface CfpPageProps {
   params: Promise<{ slug: string }>;
@@ -50,17 +47,18 @@ export default async function CfpPage({ params }: CfpPageProps) {
         <h2 className="text-xl text-gray-600 dark:text-gray-400">
           {event.name}
         </h2>
-        <div className="mt-4 flex flex-wrap justify-center gap-3">
-          <Badge color="gray" icon={HiCalendar}>
+        <div className="mt-4 flex flex-wrap justify-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+          <span className="rounded-lg bg-gray-100 px-3 py-1 dark:bg-gray-800">
+            📅{" "}
             {new Date(event.startDate).toLocaleDateString("en-US", {
               month: "long",
               day: "numeric",
               year: "numeric",
             })}
-          </Badge>
-          <Badge color="gray" icon={HiClock}>
-            {event.timezone}
-          </Badge>
+          </span>
+          <span className="rounded-lg bg-gray-100 px-3 py-1 dark:bg-gray-800">
+            🕒 {event.timezone}
+          </span>
         </div>
       </div>
 
@@ -74,4 +72,4 @@ export default async function CfpPage({ params }: CfpPageProps) {
  * Client component to handle CFP data fetching and display
  * This is needed because we need to call tRPC from client side
  */
-import { CfpPublicContent } from "./cfp-public-content";
+import { CfpPublicContent } from "./cfp-public-content.tsx";
