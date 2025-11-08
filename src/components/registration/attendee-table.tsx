@@ -2,13 +2,14 @@
 
 /**
  * AttendeeTable Component
- * Table for displaying and managing event attendees
+ * Table for displaying and managing event attendees with debounced search
  */
 
 import { useState } from "react";
 import { Badge, Button, Table, TextInput } from "flowbite-react";
 import { HiSearch, HiDownload, HiMail, HiTrash } from "react-icons/hi";
 import { api } from "@/trpc/react";
+import { useDebounce } from "@/hooks/use-debounce";
 
 interface AttendeeTableProps {
   eventId: string;
@@ -24,16 +25,8 @@ export function AttendeeTable({
   const [search, setSearch] = useState("");
   const [selectedTicketType, setSelectedTicketType] = useState<string | undefined>(undefined);
 
-  // Debounce search input
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-    // Simple debounce
-    const timeoutId = setTimeout(() => {
-      setDebouncedSearch(value);
-    }, 500);
-    return () => clearTimeout(timeoutId);
-  };
+  // Debounce search input to reduce API calls
+  const debouncedSearch = useDebounce(search, 500);
 
   // Fetch registrations with filters
   const { data, isLoading, fetchNextPage, hasNextPage, refetch } =
@@ -123,7 +116,7 @@ export function AttendeeTable({
             icon={HiSearch}
             placeholder="Search by name or email..."
             value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             className="flex-1"
           />
 

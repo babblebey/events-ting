@@ -41,21 +41,32 @@ export function CfpManager({
 
   const utils = api.useUtils();
 
-  // Query CFP data
-  const { data: cfpData } = api.cfp.listSubmissions.useQuery(
+  // Query CFP data with infinite scroll
+  const {
+    data: cfpData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = api.cfp.listSubmissions.useInfiniteQuery(
     {
       cfpId: initialCfp?.id ?? "",
       status: statusFilter,
-      limit: 100,
+      limit: 12,
     },
     {
       enabled: !!initialCfp,
-      initialData: initialCfp ? { submissions: initialSubmissions, nextCursor: undefined } : undefined,
+      initialData: initialCfp
+        ? {
+            pages: [{ submissions: initialSubmissions, nextCursor: undefined }],
+            pageParams: [undefined],
+          }
+        : undefined,
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
     }
   );
 
-  // Query all submissions for counts
-  const { data: allCfpData } = api.cfp.listSubmissions.useQuery(
+  // Query all submissions for counts (no pagination needed for stats)
+  const { data: allCfpData } = api.cfp.listSubmissions.useInfiniteQuery(
     {
       cfpId: initialCfp?.id ?? "",
       status: "all",
@@ -63,6 +74,7 @@ export function CfpManager({
     },
     {
       enabled: !!initialCfp,
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
     }
   );
 
@@ -72,8 +84,9 @@ export function CfpManager({
     },
   });
 
-  const submissions = cfpData?.submissions ?? [];
-  const allSubmissions = allCfpData?.submissions ?? initialSubmissions;
+  const submissions = cfpData?.pages.flatMap((page) => page.submissions) ?? [];
+  const allSubmissions =
+    allCfpData?.pages.flatMap((page) => page.submissions) ?? initialSubmissions;
   const totalCount = allSubmissions.length;
   const pendingCount = allSubmissions.filter((s) => s.status === "pending").length;
   const acceptedCount = allSubmissions.filter((s) => s.status === "accepted").length;
@@ -251,14 +264,28 @@ export function CfpManager({
               </p>
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {submissions.map((submission) => (
-                <SubmissionCard
-                  key={submission.id}
-                  submission={submission}
-                  onClick={() => setSelectedSubmission(submission)}
-                />
-              ))}
+            <div className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {submissions.map((submission) => (
+                  <SubmissionCard
+                    key={submission.id}
+                    submission={submission}
+                    onClick={() => setSelectedSubmission(submission)}
+                  />
+                ))}
+              </div>
+
+              {hasNextPage && (
+                <div className="flex justify-center pt-4">
+                  <Button
+                    color="light"
+                    onClick={() => void fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                  >
+                    {isFetchingNextPage ? "Loading..." : "Load More Submissions"}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -120,6 +120,8 @@ model Event {
     @@index([organizerId])
     @@index([slug])
     @@index([status, isArchived])
+    @@index([startDate]) // For sorting events by date
+    @@index([organizerId, status]) // For filtering organizer's events by status
 }
 
 model TicketType {
@@ -146,6 +148,7 @@ model TicketType {
     updatedAt   DateTime @updatedAt
     
     @@index([eventId])
+    @@index([eventId, saleStart, saleEnd]) // For filtering active tickets
 }
 
 model Registration {
@@ -180,6 +183,9 @@ model Registration {
     @@index([ticketTypeId])
     @@index([email])
     @@index([userId])
+    @@index([eventId, ticketTypeId]) // For filtering by event and ticket type
+    @@index([eventId, emailStatus]) // For filtering active recipients
+    @@index([registeredAt]) // For sorting by registration date
 }
 
 model ScheduleEntry {
@@ -210,6 +216,8 @@ model ScheduleEntry {
     
     @@index([eventId])
     @@index([startTime])
+    @@index([eventId, startTime]) // For sorting schedule by time
+    @@index([eventId, track]) // For filtering by track
 }
 
 model SpeakerSession {
@@ -290,6 +298,8 @@ model CfpSubmission {
     @@index([cfpId])
     @@index([status])
     @@index([speakerEmail])
+    @@index([cfpId, status]) // For filtering submissions by CFP and status
+    @@index([submittedAt]) // For sorting by submission date
 }
 
 model Speaker {
@@ -351,4 +361,6 @@ model EmailCampaign {
     
     @@index([eventId])
     @@index([status, scheduledFor])
+    @@index([status]) // For filtering by status
+    @@index([createdAt]) // For sorting by creation date
 }

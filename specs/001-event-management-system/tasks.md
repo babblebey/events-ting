@@ -231,10 +231,10 @@
 - [X] T101 [P] Add loading skeletons using Flowbite Skeleton components to all dashboard pages for better perceived performance
 - [X] T102 [P] Add error boundaries to all main routes using Next.js error.tsx convention
 - [X] T103 [P] Implement toast notifications for success/error feedback across all forms using Flowbite Toast
-- [ ] T104 Add pagination to all list views (events, attendees, submissions, campaigns) with cursor-based pagination
-- [ ] T105 Optimize database queries with Prisma indexes based on common queries (add @@index directives)
-- [ ] T106 Add input debouncing to search fields in AttendeeTable and other searchable components
-- [ ] T107 Implement image optimization for speaker photos and event images using Next.js Image component
+- [X] T104 Add pagination to all list views (events, attendees, submissions, campaigns) with cursor-based pagination
+- [X] T105 Optimize database queries with Prisma indexes based on common queries (add @@index directives)
+- [X] T106 Add input debouncing to search fields in AttendeeTable and other searchable components
+- [X] T107 Implement image optimization for speaker photos and event images using Next.js Image component
 - [ ] T108 Add meta tags and Open Graph data to public pages (events, schedule, speakers) for SEO and social sharing
 - [ ] T109 Run ESLint and Prettier across entire codebase with `pnpm run check`
 - [ ] T110 Verify TypeScript strict mode compliance with `pnpm run typecheck`
@@ -243,7 +243,7 @@
 - [ ] T113 Test responsive design on mobile, tablet, and desktop viewports
 - [ ] T114 Run Lighthouse audit on public pages to verify <2s load time target (NFR-001)
 - [ ] T115 Add rate limiting to public endpoints (registration, CFP submission) to prevent abuse
-- [ ] T116 Document all environment variables needed in .env.example file
+- [X] T116 Document all environment variables needed in .env.example file
 
 ---
 

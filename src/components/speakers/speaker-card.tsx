@@ -8,6 +8,7 @@
 import { Card, Badge } from "flowbite-react";
 import { Mail, Twitter, Github, Linkedin, Globe } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface SpeakerCardProps {
   speaker: {
@@ -52,9 +53,11 @@ export function SpeakerCard({
         {/* Profile Photo */}
         <div className="relative">
           {speaker.photo ? (
-            <img
+            <Image
               src={speaker.photo}
               alt={speaker.name}
+              width={96}
+              height={96}
               className="h-24 w-24 rounded-full object-cover"
             />
           ) : (
