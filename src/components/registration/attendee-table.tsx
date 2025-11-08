@@ -6,7 +6,7 @@
  */
 
 import { useState } from "react";
-import { Badge, Button, Table, TextInput } from "flowbite-react";
+import { Badge, Button, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, TextInput } from "flowbite-react";
 import { HiSearch, HiDownload, HiMail, HiTrash } from "react-icons/hi";
 import { api } from "@/trpc/react";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -61,8 +61,8 @@ export function AttendeeTable({
       
       // Download the CSV
       const link = document.createElement("a");
-      link.href = data.url;
-      link.download = data.filename;
+      link["href"] = data.url;
+      link["download"] = data.filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -156,51 +156,51 @@ export function AttendeeTable({
       {/* Table */}
       <div className="overflow-x-auto">
         <Table hoverable>
-          <Table.Head>
-            <Table.HeadCell>Name</Table.HeadCell>
-            <Table.HeadCell>Email</Table.HeadCell>
-            <Table.HeadCell>Ticket Type</Table.HeadCell>
-            <Table.HeadCell>Payment</Table.HeadCell>
-            <Table.HeadCell>Email Status</Table.HeadCell>
-            <Table.HeadCell>Registered</Table.HeadCell>
-            <Table.HeadCell>Actions</Table.HeadCell>
-          </Table.Head>
-          <Table.Body className="divide-y">
+          <TableHead>
+            <TableHeadCell>Name</TableHeadCell>
+            <TableHeadCell>Email</TableHeadCell>
+            <TableHeadCell>Ticket Type</TableHeadCell>
+            <TableHeadCell>Payment</TableHeadCell>
+            <TableHeadCell>Email Status</TableHeadCell>
+            <TableHeadCell>Registered</TableHeadCell>
+            <TableHeadCell>Actions</TableHeadCell>
+          </TableHead>
+          <TableBody className="divide-y">
             {isLoading ? (
-              <Table.Row>
-                <Table.Cell colSpan={7} className="text-center">
+              <TableRow>
+                <TableCell colSpan={7} className="text-center">
                   Loading attendees...
-                </Table.Cell>
-              </Table.Row>
+                </TableCell>
+              </TableRow>
             ) : allRegistrations.length === 0 ? (
-              <Table.Row>
-                <Table.Cell colSpan={7} className="text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan={7} className="text-center text-gray-500">
                   No attendees found
-                </Table.Cell>
-              </Table.Row>
+                </TableCell>
+              </TableRow>
             ) : (
               allRegistrations.map((registration) => (
-                <Table.Row key={registration.id} className="bg-white">
-                  <Table.Cell className="font-medium text-gray-900">
+                <TableRow key={registration.id} className="bg-white">
+                  <TableCell className="font-medium text-gray-900">
                     {registration.name}
-                  </Table.Cell>
-                  <Table.Cell>{registration.email}</Table.Cell>
-                  <Table.Cell>
+                  </TableCell>
+                  <TableCell>{registration.email}</TableCell>
+                  <TableCell>
                     <Badge color="purple">{registration.ticketType.name}</Badge>
-                  </Table.Cell>
-                  <Table.Cell>
+                  </TableCell>
+                  <TableCell>
                     {getPaymentStatusBadge(registration.paymentStatus)}
-                  </Table.Cell>
-                  <Table.Cell>
+                  </TableCell>
+                  <TableCell>
                     {getEmailStatusBadge(registration.emailStatus)}
-                  </Table.Cell>
-                  <Table.Cell>
+                  </TableCell>
+                  <TableCell>
                     {new Intl.DateTimeFormat("en-US", {
                       dateStyle: "medium",
                       timeStyle: "short",
                     }).format(new Date(registration.registeredAt))}
-                  </Table.Cell>
-                  <Table.Cell>
+                  </TableCell>
+                  <TableCell>
                     <div className="flex gap-2">
                       {onResendConfirmation && (
                         <Button
@@ -223,11 +223,11 @@ export function AttendeeTable({
                         </Button>
                       )}
                     </div>
-                  </Table.Cell>
-                </Table.Row>
+                  </TableCell>
+                </TableRow>
               ))
             )}
-          </Table.Body>
+          </TableBody>
         </Table>
       </div>
 
