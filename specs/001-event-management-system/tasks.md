@@ -125,18 +125,18 @@
 
 ### Implementation for User Story 3
 
-- [ ] T046 [P] [US3] Create schedule tRPC router in `src/server/api/routers/schedule.ts` with procedures: create, list, getById, update, delete, reorder, checkOverlap, getByDate
-- [ ] T047 [US3] Add schedule router to root router in `src/server/api/root.ts`
-- [ ] T048 [P] [US3] Create ScheduleEntryForm component in `src/components/schedule/schedule-entry-form.tsx` with time pickers and track selection
-- [ ] T049 [P] [US3] Create ScheduleTimeline component in `src/components/schedule/schedule-timeline.tsx` for chronological display with track colors
-- [ ] T050 [P] [US3] Create ScheduleCard component in `src/components/schedule/schedule-card.tsx` for individual session display
-- [ ] T051 [US3] Create schedule management page in `src/app/(dashboard)/[id]/schedule/page.tsx` with timeline view and drag-to-reorder
-- [ ] T052 [US3] Create public schedule page in `src/app/events/[slug]/schedule/page.tsx` organized by date and track
-- [ ] T053 [US3] Implement overlap detection logic in schedule.checkOverlap procedure (warning only, FR-021)
-- [ ] T054 [US3] Add visual overlap warning indicator in ScheduleEntryForm component
-- [ ] T055 [US3] Implement timezone conversion using date utility functions for display
-- [ ] T056 [US3] Add optimistic concurrency control with updatedAt versioning in schedule.update procedure (Research Section 5)
-- [ ] T057 [US3] Implement track filtering and color coding in ScheduleTimeline component (FR-025)
+- [X] T046 [P] [US3] Create schedule tRPC router in `src/server/api/routers/schedule.ts` with procedures: create, list, getById, update, delete, reorder, checkOverlap, getByDate
+- [X] T047 [US3] Add schedule router to root router in `src/server/api/root.ts`
+- [X] T048 [P] [US3] Create ScheduleEntryForm component in `src/components/schedule/schedule-entry-form.tsx` with time pickers and track selection
+- [X] T049 [P] [US3] Create ScheduleTimeline component in `src/components/schedule/schedule-timeline.tsx` for chronological display with track colors
+- [X] T050 [P] [US3] Create ScheduleCard component in `src/components/schedule/schedule-card.tsx` for individual session display
+- [X] T051 [US3] Create schedule management page in `src/app/(dashboard)/[id]/schedule/page.tsx` with timeline view and drag-to-reorder
+- [X] T052 [US3] Create public schedule page in `src/app/events/[slug]/schedule/page.tsx` organized by date and track
+- [X] T053 [US3] Implement overlap detection logic in schedule.checkOverlap procedure (warning only, FR-021)
+- [X] T054 [US3] Add visual overlap warning indicator in ScheduleEntryForm component
+- [X] T055 [US3] Implement timezone conversion using date utility functions for display
+- [X] T056 [US3] Add optimistic concurrency control with updatedAt versioning in schedule.update procedure (Research Section 5)
+- [X] T057 [US3] Implement track filtering and color coding in ScheduleTimeline component (FR-025)
 
 **Checkpoint**: User Story 3 complete - schedules work independently, displays on event pages
 
