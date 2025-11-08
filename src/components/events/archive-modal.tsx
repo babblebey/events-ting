@@ -71,7 +71,7 @@ export function ArchiveModal({
               <AlertTriangle className="h-5 w-5 flex-shrink-0 text-yellow-600 dark:text-yellow-400" />
               <div className="flex-1">
                 <h4 className="font-medium text-yellow-800 dark:text-yellow-400">
-                  Are you sure you want to archive "{eventName}"?
+                  Are you sure you want to archive &quot;{eventName}&quot;?
                 </h4>
                 <p className="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
                   Archiving this event will hide it from public view. You can

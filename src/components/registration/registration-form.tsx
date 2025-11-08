@@ -101,7 +101,7 @@ export function RegistrationForm({
         </h2>
         
         <p className="mb-4 text-gray-600">
-          You're all set for <strong>{eventName}</strong>
+          You&apos;re all set for <strong>{eventName}</strong>
         </p>
 
         <div className="mx-auto mb-6 max-w-md rounded-lg bg-white p-4 shadow-sm">

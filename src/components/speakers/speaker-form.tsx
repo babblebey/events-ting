@@ -217,12 +217,12 @@ export function SpeakerForm({ eventId, initialData, onSuccess, onCancel }: Speak
 
     const submitData = {
       ...formData,
-      photo: photoUrl || undefined,
+      photo: photoUrl ?? undefined,
       // Clean up optional fields (remove if empty string)
-      twitter: formData.twitter?.trim() || undefined,
-      github: formData.github?.trim() || undefined,
-      linkedin: formData.linkedin?.trim() || undefined,
-      website: formData.website?.trim() || undefined,
+      twitter: formData.twitter?.trim() ?? undefined,
+      github: formData.github?.trim() ?? undefined,
+      linkedin: formData.linkedin?.trim() ?? undefined,
+      website: formData.website?.trim() ?? undefined,
     };
 
     if (isEditing && initialData?.id) {
@@ -289,7 +289,7 @@ export function SpeakerForm({ eventId, initialData, onSuccess, onCancel }: Speak
             <Label htmlFor="bio">Biography<span className="ml-1 text-red-500">*</span></Label>
           </div>
           <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-            Tell us about the speaker's background and expertise
+            Tell us about the speaker&apos;s background and expertise
           </p>
           {errors.bio && (
             <p className="mb-2 text-sm text-red-600 dark:text-red-500">{errors.bio}</p>

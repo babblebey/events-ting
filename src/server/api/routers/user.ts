@@ -94,7 +94,7 @@ export const userRouter = createTRPCRouter({
         select: { password: true },
       });
 
-      if (!user || !user.password) {
+      if (!user?.password) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Cannot change password for OAuth-only accounts",

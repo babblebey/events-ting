@@ -72,7 +72,7 @@ export function ScheduleEntryForm({
     location: initialData?.location ?? "",
     track: initialData?.track ?? "",
     trackColor: initialData?.trackColor ?? "#3B82F6",
-    sessionType: (initialData?.sessionType ?? "talk") as any,
+    sessionType: (initialData?.sessionType ?? "talk") as "keynote" | "talk" | "workshop" | "break" | "networking",
     speakerIds: initialData?.speakerIds ?? [],
   });
 
@@ -98,7 +98,7 @@ export function ScheduleEntryForm({
       endTime: formData.date && formData.endTime
         ? new Date(`${formData.date}T${formData.endTime}:00Z`)
         : new Date(),
-      location: formData.location || undefined,
+      location: formData.location ?? undefined,
       excludeId: initialData?.id,
     },
     {
@@ -149,7 +149,7 @@ export function ScheduleEntryForm({
     },
   });
 
-  const handleChange = (field: keyof CreateScheduleEntryInput, value: any) => {
+  const handleChange = (field: keyof CreateScheduleEntryInput, value: string | string[]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error for this field
     if (errors[field]) {
@@ -177,13 +177,22 @@ export function ScheduleEntryForm({
       if (isEditing && initialData?.id) {
         await updateMutation.mutateAsync({
           id: initialData.id,
-          updatedAt: initialData.updatedAt!,
-          ...formData,
-        } as any);
+          updatedAt: initialData.updatedAt,
+          title: formData.title,
+          description: formData.description,
+          date: formData.date,
+          startTime: formData.startTime,
+          endTime: formData.endTime,
+          location: formData.location,
+          track: formData.track,
+          trackColor: formData.trackColor,
+          sessionType: formData.sessionType,
+          speakerIds: formData.speakerIds,
+        });
       } else {
         await createMutation.mutateAsync(formData as CreateScheduleEntryInput);
       }
-    } catch (error) {
+    } catch {
       // Error handled in mutation callbacks
     }
   };

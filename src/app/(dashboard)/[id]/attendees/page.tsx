@@ -1,4 +1,3 @@
-import { use } from "react";
 import { api } from "@/trpc/server";
 import { AttendeeTable } from "@/components/registration/attendee-table";
 

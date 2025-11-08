@@ -80,8 +80,8 @@ export function ScheduleManager({
   // Delete mutation
   const deleteMutation = api.schedule.delete.useMutation({
     onSuccess: () => {
-      utils.schedule.list.invalidate({ eventId });
-      utils.schedule.getTracks.invalidate({ id: eventId });
+      void utils.schedule.list.invalidate({ eventId });
+      void utils.schedule.getTracks.invalidate({ id: eventId });
       setShowDeleteConfirm(false);
       setDeletingEntryId(null);
     },
@@ -114,8 +114,8 @@ export function ScheduleManager({
   const handleFormSuccess = () => {
     setShowForm(false);
     setEditingEntry(null);
-    utils.schedule.list.invalidate({ eventId });
-    utils.schedule.getTracks.invalidate({ id: eventId });
+    void utils.schedule.list.invalidate({ eventId });
+    void utils.schedule.getTracks.invalidate({ id: eventId });
   };
 
   const handleFormCancel = () => {

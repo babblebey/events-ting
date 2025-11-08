@@ -34,27 +34,11 @@ export default async function CfpPage({ params }: CfpPageProps) {
   }
 
   // Fetch CFP if it exists
-  let cfp = null;
-  let submissions = null;
+  const cfp = null;
+  const submissions = null;
 
-  try {
-    // Try to get existing CFP by checking submissions (indirect lookup)
-    const allSubmissions = await api.cfp.listSubmissions({ 
-      cfpId: id, // This will fail if no CFP exists, which is expected
-      status: "all",
-      limit: 100
-    }).catch(() => null);
-
-    if (allSubmissions) {
-      submissions = allSubmissions.submissions;
-      // Get CFP details through the first submission
-      if (submissions && submissions.length > 0) {
-        cfp = submissions[0]?.cfp;
-      }
-    }
-  } catch {
-    // No CFP exists yet, which is fine
-  }
+  // TODO: Implement getCfp procedure to fetch CFP directly
+  // For now, we'll handle both states in the client component
 
   // Alternative: fetch CFP directly (needs a getCfp procedure)
   // For now, we'll handle both states in the client component

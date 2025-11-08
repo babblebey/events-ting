@@ -9,6 +9,7 @@ import { Card } from "flowbite-react";
 import { HiOutlineUsers } from "react-icons/hi2";
 import { PiMicrophoneStage } from "react-icons/pi";
 import { HiOutlineTicket, HiOutlineMail, HiOutlineTrendingUp, HiOutlineCalendar } from "react-icons/hi";
+import { TrendingUp } from "lucide-react";
 
 interface Metric {
   label: string;

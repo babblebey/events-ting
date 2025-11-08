@@ -235,9 +235,9 @@
 - [X] T105 Optimize database queries with Prisma indexes based on common queries (add @@index directives)
 - [X] T106 Add input debouncing to search fields in AttendeeTable and other searchable components
 - [X] T107 Implement image optimization for speaker photos and event images using Next.js Image component
-- [ ] T108 Add meta tags and Open Graph data to public pages (events, schedule, speakers) for SEO and social sharing
-- [ ] T109 Run ESLint and Prettier across entire codebase with `pnpm run check`
-- [ ] T110 Verify TypeScript strict mode compliance with `pnpm run typecheck`
+- [X] T108 Add meta tags and Open Graph data to public pages (events, schedule, speakers) for SEO and social sharing
+- [X] T109 Run ESLint and Prettier across entire codebase with `pnpm run check`
+- [X] T110 Verify TypeScript strict mode compliance with `pnpm run typecheck`
 - [ ] T111 Test all user journeys in browser (create event → tickets → registration → schedule → CFP → speakers → communications)
 - [ ] T112 Add ARIA labels and keyboard navigation to all interactive components for accessibility (WCAG AA compliance)
 - [ ] T113 Test responsive design on mobile, tablet, and desktop viewports
