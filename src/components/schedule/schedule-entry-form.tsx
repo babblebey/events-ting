@@ -82,12 +82,11 @@ export function ScheduleEntryForm({
     entries: Array<{ title: string; startTime: Date; endTime: Date }>;
   } | null>(null);
 
-  // Fetch speakers for the event (will be implemented in US5)
-  // const { data: speakers } = api.speaker.getByEvent.useQuery(
-  //   { eventId },
-  //   { enabled: !!eventId }
-  // );
-  const speakers: Array<{ id: string; name: string; email: string; photo?: string | null }> = [];
+  // Fetch speakers for the event
+  const { data: speakers } = api.speaker.list.useQuery(
+    { eventId },
+    { enabled: !!eventId }
+  );
 
   // Check for overlaps when time/location changes
   const checkOverlapQuery = api.schedule.checkOverlap.useQuery(

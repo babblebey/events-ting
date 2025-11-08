@@ -7,7 +7,7 @@
 
 import { redirect } from "next/navigation";
 import { api } from "@/trpc/server";
-import { getServerAuthSession } from "@/server/auth";
+import { auth } from "@/server/auth";
 import { ScheduleManager } from "./schedule-manager";
 
 interface SchedulePageProps {
@@ -16,7 +16,7 @@ interface SchedulePageProps {
 
 export default async function SchedulePage({ params }: SchedulePageProps) {
   const { id } = await params;
-  const session = await getServerAuthSession();
+  const session = await auth();
 
   if (!session) {
     redirect("/auth/signin");

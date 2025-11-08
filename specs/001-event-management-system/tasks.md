@@ -179,16 +179,16 @@
 
 ### Implementation for User Story 5
 
-- [ ] T074 [P] [US5] Create speaker tRPC router in `src/server/api/routers/speaker.ts` with procedures: create, list, getById, update, delete, assignToSession, unassignFromSession, getByEvent
-- [ ] T075 [US5] Add speaker router to root router in `src/server/api/root.ts`
-- [ ] T076 [P] [US5] Create SpeakerForm component in `src/components/speakers/speaker-form.tsx` with photo upload and social links
-- [ ] T077 [P] [US5] Create SpeakerCard component in `src/components/speakers/speaker-card.tsx` for grid display with photo and bio
-- [ ] T078 [P] [US5] Create SpeakerProfile component in `src/components/speakers/speaker-profile.tsx` showing full bio and session list
-- [ ] T079 [US5] Create speakers management page in `src/app/(dashboard)/[id]/speakers/page.tsx` with speaker grid and add button
-- [ ] T080 [US5] Create public speakers directory page in `src/app/events/[slug]/speakers/page.tsx` with filterable grid
-- [ ] T081 [US5] Implement speaker-to-session assignment using SpeakerSession junction table in speaker.assignToSession procedure
-- [ ] T082 [US5] Add speaker avatars and names to ScheduleCard component (integration with US3)
-- [ ] T083 [US5] Update ScheduleEntryForm to include speaker multi-select dropdown (integration with US3)
+- [X] T074 [P] [US5] Create speaker tRPC router in `src/server/api/routers/speaker.ts` with procedures: create, list, getById, update, delete, assignToSession, unassignFromSession, getByEvent
+- [X] T075 [US5] Add speaker router to root router in `src/server/api/root.ts`
+- [X] T076 [P] [US5] Create SpeakerForm component in `src/components/speakers/speaker-form.tsx` with photo upload and social links
+- [X] T077 [P] [US5] Create SpeakerCard component in `src/components/speakers/speaker-card.tsx` for grid display with photo and bio
+- [X] T078 [P] [US5] Create SpeakerProfile component in `src/components/speakers/speaker-profile.tsx` showing full bio and session list
+- [X] T079 [US5] Create speakers management page in `src/app/(dashboard)/[id]/speakers/page.tsx` with speaker grid and add button
+- [X] T080 [US5] Create public speakers directory page in `src/app/events/[slug]/speakers/page.tsx` with filterable grid
+- [X] T081 [US5] Implement speaker-to-session assignment using SpeakerSession junction table in speaker.assignToSession procedure
+- [X] T082 [US5] Add speaker avatars and names to ScheduleCard component (integration with US3)
+- [X] T083 [US5] Update ScheduleEntryForm to include speaker multi-select dropdown (integration with US3)
 
 **Checkpoint**: User Story 5 complete - speaker management functional, integrates with schedule (US3) and CFP (US4)
 
