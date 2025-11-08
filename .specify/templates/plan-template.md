@@ -31,7 +31,17 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Verify compliance with **events-ting Constitution v1.0.0**:
+
+- [ ] **TypeScript Type Safety**: Strict mode enabled, no `any` types, type imports consistent
+- [ ] **Code Quality**: ESLint + Prettier configured, zero violations policy
+- [ ] **Testing Standards**: Test strategy defined (integration > contract > unit), independence verified
+- [ ] **Next.js App Router**: Server Components first, proper route structure, metadata API usage
+- [ ] **tRPC Standards**: All API communication via tRPC, Zod validation, proper error handling
+- [ ] **UX Consistency**: Flowbite + Tailwind, accessibility requirements, loading states, mobile-first
+- [ ] **Performance**: Core Web Vitals targets defined, optimization strategy documented
+- [ ] **Tech Stack Compliance**: No unapproved dependencies, Prisma conventions followed
+- [ ] **Complexity Justification**: If violating any principle, document rationale in Complexity Tracking table
 
 ## Project Structure
 

@@ -12,6 +12,15 @@ description: "Task list template for feature implementation"
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
+**Constitution Compliance**: All tasks must adhere to the events-ting Constitution v1.0.0 principles:
+- TypeScript strict mode, no `any` types
+- ESLint/Prettier passing before commit
+- Tests for all features (integration > contract > unit)
+- Next.js App Router patterns (Server Components first)
+- tRPC for all API communication with Zod validation
+- Mobile-first responsive design, accessibility requirements
+- Performance budgets (Core Web Vitals targets)
+
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
