@@ -202,13 +202,13 @@
 
 ### Implementation for User Story 6
 
-- [ ] T084 [P] [US6] Create communication tRPC router in `src/server/api/routers/communication.ts` with procedures: createCampaign, listCampaigns, getCampaign, updateCampaign, sendCampaign, scheduleCampaign, getCampaignStats
-- [ ] T085 [US6] Add communication router to root router in `src/server/api/root.ts`
-- [ ] T086 [P] [US6] Create React Email template for event reminder in `emails/event-reminder.tsx`
-- [ ] T087 [P] [US6] Create CampaignEditor component in `src/components/communications/campaign-editor.tsx` with rich text editor and recipient selector
-- [ ] T088 [P] [US6] Create CampaignCard component in `src/components/communications/campaign-card.tsx` showing status and stats
-- [ ] T089 [P] [US6] Create RecipientSelector component in `src/components/communications/recipient-selector.tsx` for filtering by ticket type, role, or custom lists
-- [ ] T090 [US6] Create communications page in `src/app/(dashboard)/[id]/communications/page.tsx` with campaign list and editor
+- [X] T084 [P] [US6] Create communication tRPC router in `src/server/api/routers/communication.ts` with procedures: createCampaign, listCampaigns, getCampaign, updateCampaign, sendCampaign, scheduleCampaign, getCampaignStats
+- [X] T085 [US6] Add communication router to root router in `src/server/api/root.ts`
+- [X] T086 [P] [US6] Create React Email template for event reminder in `emails/event-reminder.tsx`
+- [X] T087 [P] [US6] Create CampaignEditor component in `src/components/communications/campaign-editor.tsx` with rich text editor and recipient selector
+- [X] T088 [P] [US6] Create CampaignCard component in `src/components/communications/campaign-card.tsx` showing status and stats
+- [X] T089 [P] [US6] Create RecipientSelector component in `src/components/communications/recipient-selector.tsx` for filtering by ticket type, role, or custom lists
+- [X] T090 [US6] Create communications page in `src/app/(dashboard)/[id]/communications/page.tsx` with campaign list and editor
 - [ ] T091 [US6] Implement batch email sending with Resend in communication.sendCampaign procedure (Research Section 1)
 - [ ] T092 [US6] Add retry logic with exponential backoff for failed emails in email service (FR-056, NFR-011)
 - [ ] T093 [US6] Implement recipient filtering logic (all attendees, ticket types, speakers, custom) in communication procedures
