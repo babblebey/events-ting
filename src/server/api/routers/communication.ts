@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
+import { sendBatchEmailsWithRetry } from "@/server/services/email";
+import type { db } from "@/server/db";
 
 /**
  * Communication Router
@@ -271,7 +273,7 @@ export const communicationRouter = createTRPCRouter({
       // Send emails asynchronously (in production, use a queue)
       // For now, we'll send synchronously but this should be moved to a background job
       try {
-        await sendBulkEmails(campaign, recipients);
+        const { successCount, failureCount } = await sendBulkEmails(campaign, recipients);
 
         // Update campaign status to sent
         await ctx.db.emailCampaign.update({
@@ -279,10 +281,17 @@ export const communicationRouter = createTRPCRouter({
           data: {
             status: "sent",
             sentAt: new Date(),
+            delivered: successCount,
+            // Note: Actual delivery tracking happens via webhooks
           },
         });
 
-        return { success: true, recipientCount: recipients.length };
+        return { 
+          success: true, 
+          recipientCount: recipients.length,
+          successCount,
+          failureCount,
+        };
       } catch (error) {
         // Update campaign status to failed
         await ctx.db.emailCampaign.update({
@@ -407,8 +416,12 @@ export const communicationRouter = createTRPCRouter({
  * FR-044: Select recipients (all attendees, specific ticket types, speakers, or custom lists)
  */
 async function getRecipients(
-  ctx: { db: any },
-  campaign: { eventId: string; recipientType: string; recipientFilter: any }
+  ctx: { db: typeof db },
+  campaign: { 
+    eventId: string; 
+    recipientType: string; 
+    recipientFilter: unknown;
+  }
 ): Promise<Array<{ email: string; name: string }>> {
   switch (campaign.recipientType) {
     case "all_attendees": {
@@ -428,7 +441,15 @@ async function getRecipients(
 
     case "ticket_type": {
       // Get registrations for specific ticket type
-      const ticketTypeId = campaign.recipientFilter?.ticketTypeId;
+      const filter = campaign.recipientFilter;
+      let ticketTypeId: string | undefined;
+
+      if (filter && typeof filter === "object" && "ticketTypeId" in filter) {
+        ticketTypeId = (filter as Record<string, unknown>).ticketTypeId as
+          | string
+          | undefined;
+      }
+
       if (!ticketTypeId) {
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -466,7 +487,17 @@ async function getRecipients(
 
     case "custom": {
       // Custom recipient list from filter
-      const emails = campaign.recipientFilter?.emails as Array<{ email: string; name: string }>;
+      const filter = campaign.recipientFilter;
+      let emails: Array<{ email: string; name: string }> | undefined;
+
+      if (filter && typeof filter === "object" && "emails" in filter) {
+  const maybe = (filter as Record<string, unknown>).emails;
+        if (Array.isArray(maybe)) {
+          // Narrow array items to expected shape
+          emails = maybe as Array<{ email: string; name: string }>;
+        }
+      }
+
       if (!emails || !Array.isArray(emails)) {
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -491,22 +522,23 @@ async function getRecipients(
 async function sendBulkEmails(
   campaign: { id: string; subject: string; body: string },
   recipients: Array<{ email: string; name: string }>
-): Promise<void> {
-  // This is a placeholder implementation
-  // In production, this should use the email service from src/server/services/email.ts
-  // with proper batching (100 recipients per batch) and retry logic
-  
-  // TODO: Import and use sendBulkEmails from email service
-  // const { sendBulkEmails } = await import('~/server/services/email');
-  // await sendBulkEmails(recipients.map(r => r.email), campaign.id, campaign.body);
-  
-  console.log(`[EMAIL] Sending campaign ${campaign.id} to ${recipients.length} recipients`);
-  
-  // Simulate batch sending
-  const batchSize = 100;
-  for (let i = 0; i < recipients.length; i += batchSize) {
-    const batch = recipients.slice(i, i + batchSize);
-    console.log(`[EMAIL] Sending batch ${i / batchSize + 1} of ${Math.ceil(recipients.length / batchSize)}`);
-    // In production: await emailService.sendBatch(batch, campaign)
-  }
+): Promise<{ successCount: number; failureCount: number }> {
+  // Send emails using the email service with retry logic
+  const results = await sendBatchEmailsWithRetry({
+    recipients: recipients.map(r => r.email),
+    subject: campaign.subject,
+    html: campaign.body,
+    tags: [
+      { name: 'campaign_id', value: campaign.id },
+      { name: 'type', value: 'campaign' }
+    ],
+  });
+
+  // Count successes and failures
+  const successCount = results.filter(r => r.success).length;
+  const failureCount = results.filter(r => !r.success).length;
+
+  console.log(`[CAMPAIGN] Campaign ${campaign.id} sent: ${successCount} successful, ${failureCount} failed`);
+
+  return { successCount, failureCount };
 }

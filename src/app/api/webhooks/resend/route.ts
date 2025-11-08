@@ -3,8 +3,9 @@
  * Handles email delivery events (bounces, opens, clicks)
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { db } from "~/server/db";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { db } from "@/server/db";
 
 /**
  * Resend webhook event types

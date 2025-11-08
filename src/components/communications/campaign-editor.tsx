@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button, Label, TextInput, Textarea, Select } from "flowbite-react";
 import { api } from "@/trpc/react";
 
@@ -8,6 +8,11 @@ interface CampaignEditorProps {
   eventId: string;
   campaignId?: string;
   onSuccess?: () => void;
+}
+
+interface TicketType {
+  id: string;
+  name: string;
 }
 
 export function CampaignEditor({
@@ -20,20 +25,20 @@ export function CampaignEditor({
   const [recipientType, setRecipientType] = useState<
     "all_attendees" | "ticket_type" | "speakers" | "custom"
   >("all_attendees");
-  const [selectedTicketTypeId, setSelectedTicketTypeId] = useState("");
+  const [selectedTicketType, setSelectedTicketType] = useState("");
 
   const utils = api.useUtils();
 
-  // Fetch existing campaign if editing
+  // Fetch existing campaign data if editing
   const { data: existingCampaign } = api.communication.getCampaign.useQuery(
     { id: campaignId! },
     { enabled: !!campaignId }
   );
 
-  // Fetch ticket types for recipient selection
+  // Fetch ticket types for the event
   const { data: ticketTypes } = api.ticket.list.useQuery({ eventId });
 
-  // Create or update mutation
+  // Create campaign mutation
   const createMutation = api.communication.createCampaign.useMutation({
     onSuccess: () => {
       void utils.communication.listCampaigns.invalidate();
@@ -41,6 +46,7 @@ export function CampaignEditor({
     },
   });
 
+  // Update campaign mutation
   const updateMutation = api.communication.updateCampaign.useMutation({
     onSuccess: () => {
       void utils.communication.listCampaigns.invalidate();
@@ -50,7 +56,7 @@ export function CampaignEditor({
   });
 
   // Load existing campaign data
-  useState(() => {
+  useEffect(() => {
     if (existingCampaign) {
       setSubject(existingCampaign.subject);
       setBody(existingCampaign.body);
@@ -58,19 +64,19 @@ export function CampaignEditor({
       if (existingCampaign.recipientFilter &&
           typeof existingCampaign.recipientFilter === 'object' &&
           'ticketTypeId' in existingCampaign.recipientFilter) {
-        setSelectedTicketTypeId(
+        setSelectedTicketType(
           existingCampaign.recipientFilter.ticketTypeId as string
         );
       }
     }
-  });
+  }, [existingCampaign]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     const recipientFilter =
       recipientType === "ticket_type"
-        ? { ticketTypeId: selectedTicketTypeId }
+        ? { ticketTypeId: selectedTicketType }
         : undefined;
 
     if (campaignId) {
@@ -92,7 +98,7 @@ export function CampaignEditor({
     }
   };
 
-  const isLoading = createMutation.isPending || updateMutation.isPending;
+  const isLoading = createMutation.isPending ?? updateMutation.isPending;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -138,13 +144,13 @@ export function CampaignEditor({
           <Label htmlFor="ticketType">Select Ticket Type</Label>
           <Select
             id="ticketType"
-            value={selectedTicketTypeId}
-            onChange={(e) => setSelectedTicketTypeId(e.target.value)}
+            value={selectedTicketType}
+            onChange={(e) => setSelectedTicketType(e.target.value)}
             required
-            disabled={isLoading || !ticketTypes}
+            disabled={isLoading ?? !ticketTypes}
           >
             <option value="">Choose a ticket type...</option>
-            {ticketTypes?.items.map((ticket) => (
+            {ticketTypes?.items.map((ticket: TicketType) => (
               <option key={ticket.id} value={ticket.id}>
                 {ticket.name}
               </option>
@@ -180,11 +186,11 @@ export function CampaignEditor({
       </div>
 
       {/* Error Display */}
-      {(createMutation.error || updateMutation.error) && (
+      {(createMutation.error ?? updateMutation.error) && (
         <div className="rounded-lg bg-red-50 p-4 text-sm text-red-800">
           <p className="font-semibold">Error</p>
           <p className="mt-1">
-            {createMutation.error?.message || updateMutation.error?.message}
+            {createMutation.error?.message ?? updateMutation.error?.message}
           </p>
         </div>
       )}

@@ -209,13 +209,13 @@
 - [X] T088 [P] [US6] Create CampaignCard component in `src/components/communications/campaign-card.tsx` showing status and stats
 - [X] T089 [P] [US6] Create RecipientSelector component in `src/components/communications/recipient-selector.tsx` for filtering by ticket type, role, or custom lists
 - [X] T090 [US6] Create communications page in `src/app/(dashboard)/[id]/communications/page.tsx` with campaign list and editor
-- [ ] T091 [US6] Implement batch email sending with Resend in communication.sendCampaign procedure (Research Section 1)
-- [ ] T092 [US6] Add retry logic with exponential backoff for failed emails in email service (FR-056, NFR-011)
-- [ ] T093 [US6] Implement recipient filtering logic (all attendees, ticket types, speakers, custom) in communication procedures
-- [ ] T094 [US6] Add scheduled campaign support in communication.scheduleCampaign procedure (FR-047)
-- [ ] T095 [US6] Create cron job endpoint in `src/app/api/cron/send-scheduled-campaigns/route.ts` for scheduled email delivery
-- [ ] T096 [US6] Update Resend webhook handler to track delivery stats (opens, clicks, bounces) and update EmailCampaign records
-- [ ] T097 [US6] Add vercel.json configuration for scheduled campaigns cron job (if using Vercel deployment)
+- [X] T091 [US6] Implement batch email sending with Resend in communication.sendCampaign procedure (Research Section 1)
+- [X] T092 [US6] Add retry logic with exponential backoff for failed emails in email service (FR-056, NFR-011)
+- [X] T093 [US6] Implement recipient filtering logic (all attendees, ticket types, speakers, custom) in communication procedures
+- [X] T094 [US6] Add scheduled campaign support in communication.scheduleCampaign procedure (FR-047)
+- [X] T095 [US6] Create cron job endpoint in `src/app/api/cron/send-scheduled-campaigns/route.ts` for scheduled email delivery
+- [X] T096 [US6] Update Resend webhook handler to track delivery stats (opens, clicks, bounces) and update EmailCampaign records
+- [X] T097 [US6] Add vercel.json configuration for scheduled campaigns cron job (if using Vercel deployment)
 
 **Checkpoint**: User Story 6 complete - email campaigns functional, all user stories now implemented
 

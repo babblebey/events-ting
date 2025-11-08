@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Label, Select, Card, Badge, Button } from "flowbite-react";
+import { Label, Select, Card, Badge } from "flowbite-react";
 import { api } from "@/trpc/react";
 
 interface RecipientSelectorProps {
@@ -46,7 +46,7 @@ export function RecipientSelector({
         recipientFilter: { ticketTypeId: selectedTicketTypeId },
       });
     }
-  }, [selectedTicketTypeId, value.recipientType]);
+  }, [selectedTicketTypeId, value.recipientType, onChange]);
 
   // Calculate estimated recipients based on selection
   useEffect(() => {
@@ -55,15 +55,15 @@ export function RecipientSelector({
         case "all_attendees": {
           // Get total active registrations
           const count = registrations?.items.filter(
-            (r) => r.emailStatus === "active"
-          ).length || 0;
+            (r: { emailStatus?: string }) => r.emailStatus === "active"
+          ).length ?? 0;
           setEstimatedRecipients(count);
           break;
         }
         case "ticket_type": {
           if (selectedTicketTypeId && registrations) {
             const count = registrations.items.filter(
-              (r) =>
+              (r: { ticketType: { id: string }; emailStatus?: string }) =>
                 r.ticketType.id === selectedTicketTypeId &&
                 r.emailStatus === "active"
             ).length;
@@ -74,7 +74,7 @@ export function RecipientSelector({
           break;
         }
         case "speakers": {
-          setEstimatedRecipients(speakers?.length || 0);
+          setEstimatedRecipients(speakers?.length ?? 0);
           break;
         }
         case "custom": {
@@ -128,11 +128,11 @@ export function RecipientSelector({
             id="ticketType"
             value={selectedTicketTypeId}
             onChange={(e) => setSelectedTicketTypeId(e.target.value)}
-            disabled={disabled || !ticketTypes}
+            disabled={disabled ?? !ticketTypes}
             required
           >
             <option value="">Choose a ticket type...</option>
-            {ticketTypes?.items.map((ticket) => (
+            {ticketTypes?.items.map((ticket: { id: string; name: string }) => (
               <option key={ticket.id} value={ticket.id}>
                 {ticket.name}
               </option>
@@ -148,7 +148,7 @@ export function RecipientSelector({
             <h4 className="font-semibold text-gray-900">Custom Recipient List</h4>
             <p className="text-sm text-gray-600">
               Custom lists allow you to send emails to specific individuals outside
-              of your standard attendee or speaker groups. You'll need to provide
+              of your standard attendee or speaker groups. You will need to provide
               the list of email addresses when sending the campaign.
             </p>
             <div className="rounded-lg bg-yellow-50 p-3 text-sm text-yellow-800">
@@ -206,7 +206,7 @@ export function RecipientSelector({
           <div>
             <p className="font-medium text-gray-900">🎤 All Speakers</p>
             <p className="text-gray-600">
-              Sends to all speakers who are part of your event's lineup
+              Sends to all speakers who are part of your event lineup
             </p>
           </div>
           
