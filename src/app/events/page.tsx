@@ -28,7 +28,7 @@ export default async function EventsPage() {
             Browse upcoming conferences, meetups, and workshops
           </p>
         </div>
-        <Link href="/auth/signin">
+        <Link href="/create-event">
           <Button>
             <HiOutlinePlusCircle className="mr-2 h-4 w-4" />
             Create Event
