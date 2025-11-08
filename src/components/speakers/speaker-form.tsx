@@ -132,7 +132,7 @@ export function SpeakerForm({ eventId, initialData, onSuccess, onCancel }: Speak
     try {
       const formDataUpload = new FormData();
       formDataUpload.append("file", photoFile);
-      formDataUpload.append("type", "speaker-photo");
+      formDataUpload.append("type", "image");
 
       const response = await fetch("/api/upload", {
         method: "POST",
@@ -140,13 +140,15 @@ export function SpeakerForm({ eventId, initialData, onSuccess, onCancel }: Speak
       });
 
       if (!response.ok) {
-        throw new Error("Failed to upload photo");
+        const errorData = await response.json() as { error?: string };
+        throw new Error(errorData.error ?? "Failed to upload photo");
       }
 
       const data = await response.json() as { url: string };
       return data.url;
-    } catch {
-      setErrors({ photo: "Failed to upload photo. Please try again." });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to upload photo. Please try again.";
+      setErrors({ photo: message });
       return undefined;
     } finally {
       setIsUploading(false);
@@ -215,12 +217,12 @@ export function SpeakerForm({ eventId, initialData, onSuccess, onCancel }: Speak
 
     const submitData = {
       ...formData,
-      photo: photoUrl,
+      photo: photoUrl || undefined,
       // Clean up optional fields (remove if empty string)
-      twitter: formData.twitter ?? undefined,
-      github: formData.github ?? undefined,
-      linkedin: formData.linkedin ?? undefined,
-      website: formData.website ?? undefined,
+      twitter: formData.twitter?.trim() || undefined,
+      github: formData.github?.trim() || undefined,
+      linkedin: formData.linkedin?.trim() || undefined,
+      website: formData.website?.trim() || undefined,
     };
 
     if (isEditing && initialData?.id) {
