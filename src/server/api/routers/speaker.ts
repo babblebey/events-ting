@@ -19,7 +19,7 @@ const createSpeakerSchema = z.object({
   name: z.string().min(2).max(200),
   bio: z.string().min(10).max(5000),
   email: z.string().email(),
-  photo: z.string().url().optional(),
+  photo: z.string().min(1).optional(), // Allow both URLs and relative paths
   twitter: z.string().optional(),
   github: z.string().optional(),
   linkedin: z.string().optional(),
@@ -31,7 +31,7 @@ const updateSpeakerSchema = z.object({
   name: z.string().min(2).max(200).optional(),
   bio: z.string().min(10).max(5000).optional(),
   email: z.string().email().optional(),
-  photo: z.string().url().optional(),
+  photo: z.string().min(1).optional(), // Allow both URLs and relative paths
   twitter: z.string().optional(),
   github: z.string().optional(),
   linkedin: z.string().optional(),
