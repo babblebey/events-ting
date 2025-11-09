@@ -48,29 +48,27 @@ export function AttendeeTable({
     includeUnavailable: true,
   });
 
-  // Export handler
-  const [isExporting, setIsExporting] = useState(false);
-
-  const handleExport = async () => {
-    setIsExporting(true);
-    try {
-      const data = await api.registration.export.query({
-        eventId,
-        format: "csv",
-      });
-      
+  // Export mutation
+  const exportMutation = api.registration.export.useMutation({
+    onSuccess: (data) => {
       // Download the CSV
       const link = document.createElement("a");
-      link["href"] = data.url;
-      link["download"] = data.filename;
+      link.href = data.url;
+      link.download = data.filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error("Export failed:", error);
-    } finally {
-      setIsExporting(false);
-    }
+    },
+  });
+
+  const handleExport = () => {
+    exportMutation.mutate({
+      eventId,
+      format: "csv",
+    });
   };
 
   const allRegistrations = data?.pages.flatMap((page) => page.items) ?? [];
@@ -141,10 +139,10 @@ export function AttendeeTable({
         <Button
           color="gray"
           onClick={handleExport}
-          disabled={isExporting}
+          disabled={exportMutation.isPending}
         >
           <HiDownload className="mr-2 h-5 w-5" />
-          {isExporting ? "Exporting..." : "Export CSV"}
+          {exportMutation.isPending ? "Exporting..." : "Export CSV"}
         </Button>
       </div>
 

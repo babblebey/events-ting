@@ -543,7 +543,7 @@ export const registrationRouter = createTRPCRouter({
    */
   export: protectedProcedure
     .input(exportRegistrationsSchema)
-    .query(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       // Verify user is event organizer
       const event = await ctx.db.event.findUnique({
         where: { id: input.eventId },
