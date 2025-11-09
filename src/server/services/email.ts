@@ -166,7 +166,7 @@ export async function sendBatchEmails(
         // Mark all emails in batch as successful
         results.push(
           ...batch.map((to, index) => ({
-            id: batchResult.data?.[index]?.id ?? "",
+            id: (batchResult.data as unknown as Array<{ id: string }>)?.[index]?.id ?? "",
             success: true,
           }))
         );
@@ -253,7 +253,7 @@ export async function sendBatchEmailsWithRetry(
           // Success
           results.push(
             ...batch.map((to, index) => ({
-              id: batchResult.data?.[index]?.id ?? "",
+              id: (batchResult.data as unknown as Array<{ id: string }>)?.[index]?.id ?? "",
               success: true,
             }))
           );

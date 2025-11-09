@@ -72,4 +72,4 @@ export default async function CfpPage({ params }: CfpPageProps) {
  * Client component to handle CFP data fetching and display
  * This is needed because we need to call tRPC from client side
  */
-import { CfpPublicContent } from "./cfp-public-content.tsx";
+import { CfpPublicContent } from "./cfp-public-content";
