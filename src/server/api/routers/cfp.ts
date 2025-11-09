@@ -91,11 +91,105 @@ const rejectProposalSchema = z.object({
   reviewNotes: z.string().max(2000).optional(),
 });
 
+const getCfpByEventIdSchema = z.object({
+  eventId: z.string().cuid("Invalid event ID"),
+});
+
+const getPublicCfpSchema = z.union([
+  z.object({ eventId: z.string().cuid("Invalid event ID") }),
+  z.object({ eventSlug: z.string().min(1, "Event slug is required") }),
+]);
+
 // ============================================================================
 // ROUTER DEFINITION
 // ============================================================================
 
 export const cfpRouter = createTRPCRouter({
+  /**
+   * Get CFP by event ID (organizer only)
+   * @protected Requires authentication and organizer permission
+   */
+  getCfpByEventId: protectedProcedure
+    .input(getCfpByEventIdSchema)
+    .query(async ({ ctx, input }) => {
+      // Verify organizer permission
+      const event = await ctx.db.event.findUnique({
+        where: { id: input.eventId },
+        select: { organizerId: true },
+      });
+
+      if (!event) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Event not found",
+        });
+      }
+
+      if (event.organizerId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only the event organizer can view CFP details",
+        });
+      }
+
+      // Fetch CFP
+      const cfp = await ctx.db.callForPapers.findUnique({
+        where: { eventId: input.eventId },
+        include: {
+          event: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+        },
+      });
+
+      return cfp;
+    }),
+
+  /**
+   * Get public CFP data for submission page
+   * @public No authentication required
+   */
+  getPublicCfp: publicProcedure
+    .input(getPublicCfpSchema)
+    .query(async ({ ctx, input }) => {
+      // Get event by ID or slug
+      const event = "eventId" in input
+        ? await ctx.db.event.findUnique({
+            where: { id: input.eventId },
+            select: { id: true, name: true, slug: true },
+          })
+        : await ctx.db.event.findUnique({
+            where: { slug: input.eventSlug },
+            select: { id: true, name: true, slug: true },
+          });
+
+      if (!event) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Event not found",
+        });
+      }
+
+      // Fetch CFP (only public-safe fields)
+      const cfp = await ctx.db.callForPapers.findUnique({
+        where: { eventId: event.id },
+        select: {
+          id: true,
+          guidelines: true,
+          deadline: true,
+          status: true,
+          requiredFields: true,
+          eventId: true,
+        },
+      });
+
+      return cfp;
+    }),
+
   /**
    * Open a new Call for Papers for an event
    * @protected Requires authentication and organizer permission

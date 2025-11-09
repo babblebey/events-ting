@@ -6,6 +6,7 @@
 
 import { redirect } from "next/navigation";
 import { api } from "@/trpc/server";
+import { CfpPublicContent } from "./cfp-public-content";
 
 interface CfpPageProps {
   params: Promise<{ slug: string }>;
@@ -21,21 +22,8 @@ export default async function CfpPage({ params }: CfpPageProps) {
     redirect("/events");
   }
 
-  // Check if event has a CFP - we need to add a procedure for this
-  // For now, we'll try to get submissions which will fail if no CFP exists
-  let cfp = null;
-  let cfpId = null;
-
-  try {
-    // This is a workaround since we don't have a getCfp procedure
-    // We'll need to add that procedure or pass CFP data differently
-    // For now, we'll handle this in the component
-  } catch {
-    // No CFP exists
-  }
-
-  // Since we don't have a direct getCfp procedure, we'll need to handle this differently
-  // Let's create a simple page that shows appropriate messaging
+  // Fetch CFP data for the event
+  const cfp = await api.cfp.getPublicCfp({ eventSlug: slug });
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 py-12">
@@ -62,14 +50,12 @@ export default async function CfpPage({ params }: CfpPageProps) {
         </div>
       </div>
 
-      {/* CFP Content - This will be handled by a client component that fetches CFP data */}
-      <CfpPublicContent eventId={event.id} eventName={event.name} />
+      {/* CFP Content */}
+      <CfpPublicContent 
+        cfp={cfp}
+        eventId={event.id} 
+        eventName={event.name} 
+      />
     </div>
   );
 }
-
-/**
- * Client component to handle CFP data fetching and display
- * This is needed because we need to call tRPC from client side
- */
-import { CfpPublicContent } from "./cfp-public-content";

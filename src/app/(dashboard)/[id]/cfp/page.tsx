@@ -34,13 +34,7 @@ export default async function CfpPage({ params }: CfpPageProps) {
   }
 
   // Fetch CFP if it exists
-  const cfp = null;
-
-  // TODO: Implement getCfp procedure to fetch CFP directly
-  // For now, we'll handle both states in the client component
-
-  // Alternative: fetch CFP directly (needs a getCfp procedure)
-  // For now, we'll handle both states in the client component
+  const cfp = await api.cfp.getCfpByEventId({ eventId: id });
 
   return (
     <div className="space-y-6">
