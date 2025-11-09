@@ -9,7 +9,6 @@ import { Card } from "flowbite-react";
 import { HiOutlineUsers } from "react-icons/hi2";
 import { PiMicrophoneStage } from "react-icons/pi";
 import { HiOutlineTicket, HiOutlineMail, HiOutlineTrendingUp, HiOutlineCalendar } from "react-icons/hi";
-import { TrendingUp } from "lucide-react";
 
 interface Metric {
   label: string;
@@ -151,7 +150,7 @@ function MetricCard({ metric }: { metric: Metric }) {
                   : "text-red-600 dark:text-red-400"
               }`}
             >
-              <TrendingUp
+              <HiOutlineTrendingUp
                 className={`h-4 w-4 ${!metric.trend.isPositive && "rotate-180"}`}
               />
               <span>{Math.abs(metric.trend.value)}%</span>

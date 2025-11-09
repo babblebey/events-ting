@@ -6,7 +6,8 @@
  */
 
 import { Button } from "flowbite-react";
-import { AlertTriangle, Home } from "lucide-react";
+import { LuTriangleAlert } from "react-icons/lu";
+import { HiOutlineHome } from "react-icons/hi";
 import { useEffect } from "react";
 
 export default function GlobalError({
@@ -27,7 +28,7 @@ export default function GlobalError({
           <div className="w-full max-w-lg rounded-lg border border-gray-200 bg-white p-8 shadow-lg dark:border-gray-700 dark:bg-gray-800">
             <div className="flex flex-col items-center text-center">
               <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-                <AlertTriangle className="h-10 w-10 text-red-600 dark:text-red-400" />
+                <LuTriangleAlert className="h-10 w-10 text-red-600 dark:text-red-400" />
               </div>
               
               <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
@@ -59,7 +60,7 @@ export default function GlobalError({
                   color="gray"
                   onClick={() => window.location.href = '/'}
                 >
-                  <Home className="mr-2 h-4 w-4" />
+                  <HiOutlineHome className="mr-2 h-4 w-4" />
                   Go to Homepage
                 </Button>
                 <Button onClick={reset}>

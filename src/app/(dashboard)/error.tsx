@@ -6,7 +6,9 @@
  */
 
 import { Button, Card } from "flowbite-react";
-import { AlertTriangle, Home, RefreshCw } from "lucide-react";
+import { LuTriangleAlert } from "react-icons/lu";
+import { HiOutlineRefresh } from "react-icons/hi";
+import { HiOutlineHome } from "react-icons/hi";
 import { useEffect } from "react";
 
 export default function Error({
@@ -25,7 +27,7 @@ export default function Error({
       <Card className="w-full max-w-lg">
         <div className="flex flex-col items-center text-center">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/30">
-            <AlertTriangle className="h-8 w-8 text-orange-600 dark:text-orange-400" />
+            <LuTriangleAlert className="h-8 w-8 text-orange-600 dark:text-orange-400" />
           </div>
           
           <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
@@ -33,7 +35,7 @@ export default function Error({
           </h1>
           
           <p className="mb-6 text-gray-600 dark:text-gray-400">
-            There was a problem loading the dashboard. Please try refreshing the page or return to the home page.
+            There was a problem loading the dashboard. Please try refreshing the page or return to the HiOutlineHome page.
           </p>
 
           {process.env.NODE_ENV === 'development' && error.message && (
@@ -46,11 +48,11 @@ export default function Error({
 
           <div className="flex gap-3">
             <Button color="gray" href="/">
-              <Home className="mr-2 h-4 w-4" />
+              <HiOutlineHome className="mr-2 h-4 w-4" />
               Home
             </Button>
             <Button onClick={reset}>
-              <RefreshCw className="mr-2 h-4 w-4" />
+              <HiOutlineRefresh className="mr-2 h-4 w-4" />
               Retry
             </Button>
           </div>

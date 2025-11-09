@@ -6,7 +6,7 @@
 import { api } from "@/trpc/server";
 import { SpeakerCard } from "@/components/speakers/speaker-card";
 import { notFound } from "next/navigation";
-import { AlertCircle } from "lucide-react";
+import { LuCircleAlert } from "react-icons/lu";
 import { Alert } from "flowbite-react";
 
 interface SpeakersPageProps {
@@ -30,7 +30,7 @@ export default async function SpeakersPage({ params }: SpeakersPageProps) {
   } catch (error) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <Alert color="failure" icon={AlertCircle}>
+        <Alert color="failure" icon={LuCircleAlert}>
           <span className="font-medium">Error loading speakers</span>
         </Alert>
       </div>

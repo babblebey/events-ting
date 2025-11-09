@@ -6,7 +6,10 @@
  */
 
 import { Card, Badge } from "flowbite-react";
-import { Mail, Twitter, Github, Linkedin, Globe } from "lucide-react";
+import { FaXTwitter } from "react-icons/fa6";
+import { HiOutlineMail, HiOutlineGlobeAlt } from "react-icons/hi";
+import { AiOutlineLinkedin, AiOutlineGithub } from "react-icons/ai";
+
 import Link from "next/link";
 import Image from "next/image";
 
@@ -99,7 +102,7 @@ export function SpeakerCard({
               className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               aria-label="Email"
             >
-              <Mail className="h-5 w-5" />
+              <HiOutlineMail className="h-5 w-5" />
             </a>
           )}
           {speaker.twitter && (
@@ -110,7 +113,7 @@ export function SpeakerCard({
               className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               aria-label="Twitter"
             >
-              <Twitter className="h-5 w-5" />
+              <FaXTwitter className="h-5 w-5" />
             </a>
           )}
           {speaker.github && (
@@ -121,7 +124,7 @@ export function SpeakerCard({
               className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               aria-label="GitHub"
             >
-              <Github className="h-5 w-5" />
+              <AiOutlineGithub className="h-5 w-5" />
             </a>
           )}
           {speaker.linkedin && (
@@ -132,7 +135,7 @@ export function SpeakerCard({
               className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               aria-label="LinkedIn"
             >
-              <Linkedin className="h-5 w-5" />
+              <AiOutlineLinkedin className="h-5 w-5" />
             </a>
           )}
           {speaker.website && (
@@ -143,7 +146,7 @@ export function SpeakerCard({
               className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               aria-label="Website"
             >
-              <Globe className="h-5 w-5" />
+              <HiOutlineGlobeAlt className="h-5 w-5" />
             </a>
           )}
         </div>

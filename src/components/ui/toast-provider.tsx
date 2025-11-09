@@ -6,13 +6,10 @@
  */
 
 import { Toast } from "flowbite-react";
-import {
-  CheckCircle,
-  Info,
-  AlertTriangle,
-  XCircle,
-  X,
-} from "lucide-react";
+import { FiCheckCircle } from "react-icons/fi";
+import { LuTriangleAlert } from "react-icons/lu";
+import { AiOutlineCloseCircle, AiOutlineClose } from "react-icons/ai";
+import { HiOutlineInformationCircle } from "react-icons/hi";
 import React, { createContext, useContext, useState, useCallback } from "react";
 
 type ToastType = "success" | "error" | "warning" | "info";
@@ -140,13 +137,13 @@ function ToastItem({
   const getIcon = () => {
     switch (toast.type) {
       case "success":
-        return <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />;
+        return <FiCheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />;
       case "error":
-        return <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />;
+        return <AiOutlineCloseCircle className="h-5 w-5 text-red-600 dark:text-red-400" />;
       case "warning":
-        return <AlertTriangle className="h-5 w-5 text-orange-600 dark:text-orange-400" />;
+        return <LuTriangleAlert className="h-5 w-5 text-orange-600 dark:text-orange-400" />;
       case "info":
-        return <Info className="h-5 w-5 text-blue-600 dark:text-blue-400" />;
+        return <HiOutlineInformationCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />;
     }
   };
 
@@ -183,7 +180,7 @@ function ToastItem({
           className="ml-2 shrink-0 rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white"
           aria-label="Close"
         >
-          <X className="h-4 w-4" />
+          <AiOutlineClose className="h-4 w-4" />
         </button>
       </div>
     </Toast>

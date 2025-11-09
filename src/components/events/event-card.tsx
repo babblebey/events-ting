@@ -5,10 +5,12 @@
  * Displays event summary in a card format for list views
  */
 
-import { Badge, Button, Card } from "flowbite-react";
-import { Calendar, MapPin, Users, Video } from "lucide-react";
 import Link from "next/link";
+import { FiUsers } from "react-icons/fi";
 import { formatDate } from "@/lib/utils/date";
+import { HiOutlineMapPin } from "react-icons/hi2";
+import { Badge, Button, Card } from "flowbite-react";
+import { HiOutlineCalendar, HiOutlineVideoCamera } from "react-icons/hi";
 
 interface EventCardProps {
   event: {
@@ -86,7 +88,7 @@ export function EventCard({
         <div className="space-y-2">
           {/* Date */}
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <Calendar className="h-4 w-4" />
+            <HiOutlineCalendar className="h-4 w-4" />
             <span>
               {formatDate(event.startDate, event.timezone, "PPP")}
               {new Date(event.endDate).toDateString() !==
@@ -99,12 +101,12 @@ export function EventCard({
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             {event.locationType === "virtual" ? (
               <>
-                <Video className="h-4 w-4" />
+                <HiOutlineVideoCamera className="h-4 w-4" />
                 <span>Virtual Event</span>
               </>
             ) : event.locationType === "hybrid" ? (
               <>
-                <MapPin className="h-4 w-4" />
+                <HiOutlineMapPin className="h-4 w-4" />
                 <span>
                   Hybrid (In-person + Virtual)
                   {event.locationAddress && ` - ${event.locationAddress}`}
@@ -112,7 +114,7 @@ export function EventCard({
               </>
             ) : (
               <>
-                <MapPin className="h-4 w-4" />
+                <HiOutlineMapPin className="h-4 w-4" />
                 <span>{event.locationAddress ?? "Location TBA"}</span>
               </>
             )}
@@ -121,7 +123,7 @@ export function EventCard({
           {/* Attendee count */}
           {event._count && (
             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-              <Users className="h-4 w-4" />
+              <FiUsers className="h-4 w-4" />
               <span>
                 {event._count.registrations} registered
                 {event._count.ticketTypes > 0 &&
