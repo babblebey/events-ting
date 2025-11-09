@@ -216,87 +216,87 @@ Each module documentation includes:
 #### Tasks
 
 ##### Events Module (Foundation)
-- [ ] **T009** - Create `docs/modules/events/README.md`
+- [x] **T009** - Create `docs/modules/events/README.md` ✅
   - Overview: Core module for event management
   - Features: Create, edit, publish, archive events
   - User roles: Organizers (full control), Public (view published)
-- [ ] **T010** - Create `docs/modules/events/backend.md`
+- [x] **T010** - Create `docs/modules/events/backend.md` ✅
   - Router: `eventRouter` in `src/server/api/routers/event.ts`
   - Procedures: `create`, `update`, `delete`, `list`, `getById`, `getBySlug`, `publish`, `archive`
   - Validation schemas from `src/lib/validators.ts`
   - Authorization: Organizer ownership checks
-- [ ] **T011** - Create `docs/modules/events/frontend.md`
+- [x] **T011** - Create `docs/modules/events/frontend.md` ✅
   - Pages: `/(dashboard)/[id]/page.tsx`, `/events/[slug]/page.tsx`
-  - Components: `event-form.tsx`, `event-card.tsx`, `event-header.tsx`
+  - Components: `event-form.tsx`, `event-card.tsx`, `event-metrics.tsx`, `archive-modal.tsx`
   - Forms: Create/edit event forms with timezone handling
-- [ ] **T012** - Create `docs/modules/events/data-model.md`
+- [x] **T012** - Create `docs/modules/events/data-model.md` ✅
   - `Event` model schema
   - Fields: name, slug, description, location, dates, status
   - Relations: TicketType, Registration, Schedule, CFP, Speakers, Campaigns
-- [ ] **T013** - Create `docs/modules/events/workflows.md`
+- [x] **T013** - Create `docs/modules/events/workflows.md` ✅
   - Workflow 1: Create event → set details → add tickets → publish
   - Workflow 2: Archive event (soft delete)
   - Workflow 3: Public event discovery and viewing
 
 ##### Tickets Module
-- [ ] **T014** - Create `docs/modules/tickets/README.md`
-- [ ] **T015** - Create `docs/modules/tickets/backend.md`
+- [x] **T014** - Create `docs/modules/tickets/README.md` ✅
+- [x] **T015** - Create `docs/modules/tickets/backend.md` ✅
   - Router: `ticketRouter`
-  - Procedures: `create`, `update`, `delete`, `list`, `checkAvailability`
+  - Procedures: `create`, `update`, `delete`, `list`, `getStats`
   - Availability logic: quantity tracking, sale start/end dates
-- [ ] **T016** - Create `docs/modules/tickets/frontend.md`
-  - Components: `ticket-form.tsx`, `ticket-list.tsx`, `ticket-card.tsx`
-- [ ] **T017** - Create `docs/modules/tickets/data-model.md`
+- [x] **T016** - Create `docs/modules/tickets/frontend.md` ✅
+  - Components: `ticket-type-form.tsx`, `ticket-type-card.tsx`
+- [x] **T017** - Create `docs/modules/tickets/data-model.md` ✅
   - `TicketType` model
   - Fields: name, price, quantity, saleStart, saleEnd
-- [ ] **T018** - Create `docs/modules/tickets/workflows.md`
+- [x] **T018** - Create `docs/modules/tickets/workflows.md` ✅
   - Create ticket types with pricing (MVP: free only)
   - Set availability windows
 
 ##### Registration Module
-- [ ] **T019** - Create `docs/modules/registration/README.md`
-- [ ] **T020** - Create `docs/modules/registration/backend.md`
+- [x] **T019** - Create `docs/modules/registration/README.md` ✅
+- [x] **T020** - Create `docs/modules/registration/backend.md` ✅
   - Router: `registrationRouter`
   - Procedures: `create`, `list`, `getById`, `addManually`, `cancel`, `export`
   - Transaction handling for ticket availability
-- [ ] **T021** - Create `docs/modules/registration/frontend.md`
+- [x] **T021** - Create `docs/modules/registration/frontend.md` ✅
   - Public form: `/events/[slug]/register`
   - Dashboard: `/(dashboard)/[id]/registrations`
-  - Components: `registration-form.tsx`, `registration-list.tsx`
-- [ ] **T022** - Create `docs/modules/registration/data-model.md`
+  - Components: `registration-form.tsx`, `attendee-table.tsx`
+- [x] **T022** - Create `docs/modules/registration/data-model.md` ✅
   - `Registration` model
   - Fields: email, name, ticketType, paymentStatus, emailStatus
-- [ ] **T023** - Create `docs/modules/registration/workflows.md`
+- [x] **T023** - Create `docs/modules/registration/workflows.md` ✅
   - Public registration flow with email confirmation
   - Organizer manual registration
   - Cancellation and refund handling (future)
-- [ ] **T024** - Create `docs/modules/registration/exports.md`
+- [x] **T024** - Create `docs/modules/registration/exports.md` ✅
   - CSV export format
   - Excel export (future)
   - Data privacy considerations
 
 ##### Communications Module
-- [ ] **T025** - Create `docs/modules/communications/README.md`
-- [ ] **T026** - Create `docs/modules/communications/backend.md`
+- [x] **T025** - Create `docs/modules/communications/README.md` ✅
+- [x] **T026** - Create `docs/modules/communications/backend.md` ✅
   - Router: `communicationRouter`
   - Procedures: `createCampaign`, `sendCampaign`, `listCampaigns`, `getCampaignStats`
   - Recipient filtering: all attendees, specific ticket types, speakers
-- [ ] **T027** - Create `docs/modules/communications/frontend.md`
-  - Campaign builder UI
+- [x] **T027** - Create `docs/modules/communications/frontend.md` ✅
+  - Campaign builder UI: `campaign-editor.tsx`, `recipient-selector.tsx`, `campaign-card.tsx`
   - Email editor
   - Stats dashboard
-- [ ] **T028** - Create `docs/modules/communications/data-model.md`
+- [x] **T028** - Create `docs/modules/communications/data-model.md` ✅
   - `EmailCampaign` model
   - Delivery tracking fields
-- [ ] **T029** - Create `docs/modules/communications/workflows.md`
+- [x] **T029** - Create `docs/modules/communications/workflows.md` ✅
   - Create campaign → select recipients → schedule → send
   - Track delivery, opens, clicks
-- [ ] **T030** - Create `docs/modules/communications/email-integration.md`
+- [x] **T030** - Create `docs/modules/communications/email-integration.md` ✅
   - Resend API setup
   - React Email templates
   - Transactional vs bulk emails
 
-**Deliverables**: 4 core modules fully documented (22 files)  
+**Deliverables**: 4 core modules fully documented (22 files) ✅ **COMPLETED**  
 **Estimated Time**: 5-7 days  
 
 ---
@@ -513,10 +513,10 @@ Each module documentation includes:
 | Category | Files | Status |
 |----------|-------|--------|
 | Foundation (index, getting-started, architecture) | 9 | ⏳ Phase 1 |
-| Events Module | 5 | ⏳ Phase 2 |
-| Tickets Module | 5 | ⏳ Phase 2 |
-| Registration Module | 6 | ⏳ Phase 2 |
-| Communications Module | 6 | ⏳ Phase 2 |
+| Events Module | 5 | ✅ **Phase 2 Complete** |
+| Tickets Module | 5 | ✅ **Phase 2 Complete** |
+| Registration Module | 6 | ✅ **Phase 2 Complete** |
+| Communications Module | 6 | ✅ **Phase 2 Complete** |
 | Schedule Module | 5 | ⏳ Phase 3 |
 | Speakers Module | 5 | ⏳ Phase 3 |
 | CFP Module | 6 | ⏳ Phase 3 |
