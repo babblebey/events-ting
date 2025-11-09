@@ -9,8 +9,7 @@ import { Badge, Button, Card } from "flowbite-react";
 import { LuMicVocal } from "react-icons/lu";
 import { FiUsers } from "react-icons/fi";
 import { HiOutlineMapPin } from "react-icons/hi2";
-import { HiOutlineCalendar, HiOutlineExternalLink } from "react-icons/hi";
-import { HiVideoCamera } from "react-icons/hi";
+import { HiOutlineCalendar, HiOutlineExternalLink, HiOutlineVideoCamera } from "react-icons/hi";
 import { formatDate, formatDateRange } from "@/lib/utils/date";
 import type { Metadata } from "next";
 
@@ -99,7 +98,7 @@ export default async function EventPage({ params }: EventPageProps) {
               {/* Location */}
               <div className="flex items-start gap-3">
                 {event.locationType === "virtual" ? (
-                  <HiVideoCamera className="mt-1 h-5 w-5 text-gray-400" />
+                  <HiOutlineVideoCamera className="mt-1 h-5 w-5 text-gray-400" />
                 ) : (
                   <HiOutlineMapPin className="mt-1 h-5 w-5 text-gray-400" />
                 )}
