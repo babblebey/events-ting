@@ -67,7 +67,7 @@ export default async function EventSettingsPage({
               <div className="flex items-center justify-between rounded-lg border border-gray-200 p-4 dark:border-gray-700">
                 <div>
                   <h4 className="font-medium text-gray-900 dark:text-white">
-                    HiOutlineArchive Event
+                    Archive Event
                   </h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Hide this event from public view (can be restored later)
