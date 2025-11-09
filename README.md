@@ -203,9 +203,17 @@ See [.specify/memory/constitution.md](./.specify/memory/constitution.md) for ful
 
 ## 📖 Documentation
 
-- **[Quick Start Guide](./specs/001-event-management-system/quickstart.md)** - Setup and architecture overview
+### Developer Documentation
+- **[Documentation Home](./docs/index.md)** - Complete developer documentation
+- **[Getting Started](./docs/getting-started.md)** - Local setup guide
+- **[Architecture Overview](./docs/architecture/system-overview.md)** - System design and data flows
+- **[Tech Stack](./docs/architecture/tech-stack.md)** - Technology choices and versions
+- **[Data Model](./docs/architecture/data-model.md)** - Database schema with ERD
+- **[Authentication](./docs/architecture/authentication.md)** - Auth implementation details
+- **[File Structure](./docs/architecture/file-structure.md)** - Project organization guide
+
+### Specifications
 - **[Feature Specification](./specs/001-event-management-system/spec.md)** - Requirements and user stories
-- **[Data Model](./specs/001-event-management-system/data-model.md)** - Database schema
 - **[API Contracts](./specs/001-event-management-system/contracts/)** - tRPC router specifications
 - **[Task List](./specs/001-event-management-system/tasks.md)** - Implementation tasks
 
