@@ -6,7 +6,8 @@
 import { api } from "@/trpc/server";
 import { EventForm } from "@/components/events/event-form";
 import { Button, Card } from "flowbite-react";
-import { Trash2, Archive, RotateCcw } from "lucide-react";
+import { LuRotateCcw } from "react-icons/lu";
+import { HiOutlineTrash, HiOutlineArchive } from "react-icons/hi";
 import Link from "next/link";
 
 interface EventSettingsPageProps {
@@ -72,9 +73,9 @@ export default async function EventSettingsPage({
                     Hide this event from public view (can be restored later)
                   </p>
                 </div>
-                <Link href={`/(dashboard)/${params.id}/archive`}>
-                  <Button color="warning">
-                    <Archive className="mr-2 h-4 w-4" />
+                <Link href={`/${params.id}/archive`}>
+                  <Button color="yellow">
+                    <HiOutlineArchive className="mr-2 h-4 w-4" />
                     Archive
                   </Button>
                 </Link>
@@ -89,9 +90,9 @@ export default async function EventSettingsPage({
                     Make this event accessible again
                   </p>
                 </div>
-                <Link href={`/(dashboard)/${params.id}/restore`}>
-                  <Button color="success">
-                    <RotateCcw className="mr-2 h-4 w-4" />
+                <Link href={`/${params.id}/restore`}>
+                  <Button color="green">
+                    <LuRotateCcw className="mr-2 h-4 w-4" />
                     Restore
                   </Button>
                 </Link>
@@ -107,9 +108,9 @@ export default async function EventSettingsPage({
                   This action cannot be undone. All data will be lost.
                 </p>
               </div>
-              <Link href={`/(dashboard)/${params.id}/delete`}>
-                <Button color="failure">
-                  <Trash2 className="mr-2 h-4 w-4" />
+              <Link href={`/${params.id}/delete`}>
+                <Button color="red">
+                  <HiOutlineTrash className="mr-2 h-4 w-4" />
                   Delete
                 </Button>
               </Link>

@@ -2,13 +2,14 @@
 
 /**
  * AttendeeTable Component
- * Table for displaying and managing event attendees
+ * Table for displaying and managing event attendees with debounced search
  */
 
 import { useState } from "react";
-import { Badge, Button, Table, TextInput } from "flowbite-react";
+import { Badge, Button, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, TextInput } from "flowbite-react";
 import { HiSearch, HiDownload, HiMail, HiTrash } from "react-icons/hi";
 import { api } from "@/trpc/react";
+import { useDebounce } from "@/hooks/use-debounce";
 
 interface AttendeeTableProps {
   eventId: string;
@@ -24,16 +25,8 @@ export function AttendeeTable({
   const [search, setSearch] = useState("");
   const [selectedTicketType, setSelectedTicketType] = useState<string | undefined>(undefined);
 
-  // Debounce search input
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-    // Simple debounce
-    const timeoutId = setTimeout(() => {
-      setDebouncedSearch(value);
-    }, 500);
-    return () => clearTimeout(timeoutId);
-  };
+  // Debounce search input to reduce API calls
+  const debouncedSearch = useDebounce(search, 500);
 
   // Fetch registrations with filters
   const { data, isLoading, fetchNextPage, hasNextPage, refetch } =
@@ -55,17 +48,9 @@ export function AttendeeTable({
     includeUnavailable: true,
   });
 
-  // Export handler
-  const [isExporting, setIsExporting] = useState(false);
-
-  const handleExport = async () => {
-    setIsExporting(true);
-    try {
-      const data = await api.registration.export.query({
-        eventId,
-        format: "csv",
-      });
-      
+  // Export mutation
+  const exportMutation = api.registration.export.useMutation({
+    onSuccess: (data) => {
       // Download the CSV
       const link = document.createElement("a");
       link.href = data.url;
@@ -73,11 +58,17 @@ export function AttendeeTable({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error("Export failed:", error);
-    } finally {
-      setIsExporting(false);
-    }
+    },
+  });
+
+  const handleExport = () => {
+    exportMutation.mutate({
+      eventId,
+      format: "csv",
+    });
   };
 
   const allRegistrations = data?.pages.flatMap((page) => page.items) ?? [];
@@ -123,7 +114,7 @@ export function AttendeeTable({
             icon={HiSearch}
             placeholder="Search by name or email..."
             value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             className="flex-1"
           />
 
@@ -132,7 +123,7 @@ export function AttendeeTable({
             <select
               value={selectedTicketType ?? ""}
               onChange={(e) => setSelectedTicketType(e.target.value || undefined)}
-              className="rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 text-sm text-gray-900 dark:text-white focus:border-blue-500 focus:ring-blue-500"
             >
               <option value="">All Ticket Types</option>
               {ticketTypes.items.map((ticket) => (
@@ -148,10 +139,10 @@ export function AttendeeTable({
         <Button
           color="gray"
           onClick={handleExport}
-          disabled={isExporting}
+          disabled={exportMutation.isPending}
         >
           <HiDownload className="mr-2 h-5 w-5" />
-          {isExporting ? "Exporting..." : "Export CSV"}
+          {exportMutation.isPending ? "Exporting..." : "Export CSV"}
         </Button>
       </div>
 
@@ -163,51 +154,53 @@ export function AttendeeTable({
       {/* Table */}
       <div className="overflow-x-auto">
         <Table hoverable>
-          <Table.Head>
-            <Table.HeadCell>Name</Table.HeadCell>
-            <Table.HeadCell>Email</Table.HeadCell>
-            <Table.HeadCell>Ticket Type</Table.HeadCell>
-            <Table.HeadCell>Payment</Table.HeadCell>
-            <Table.HeadCell>Email Status</Table.HeadCell>
-            <Table.HeadCell>Registered</Table.HeadCell>
-            <Table.HeadCell>Actions</Table.HeadCell>
-          </Table.Head>
-          <Table.Body className="divide-y">
+          <TableHead>
+            <TableRow>
+              <TableHeadCell>Name</TableHeadCell>
+              <TableHeadCell>Email</TableHeadCell>
+              <TableHeadCell>Ticket Type</TableHeadCell>
+              <TableHeadCell>Payment</TableHeadCell>
+              <TableHeadCell>Email Status</TableHeadCell>
+              <TableHeadCell>Registered</TableHeadCell>
+              <TableHeadCell>Actions</TableHeadCell>
+            </TableRow>
+          </TableHead>
+          <TableBody className="divide-y">
             {isLoading ? (
-              <Table.Row>
-                <Table.Cell colSpan={7} className="text-center">
+              <TableRow className="bg-white dark:border-gray-700 dark:bg-gray-800">
+                <TableCell colSpan={7} className="text-center">
                   Loading attendees...
-                </Table.Cell>
-              </Table.Row>
+                </TableCell>
+              </TableRow>
             ) : allRegistrations.length === 0 ? (
-              <Table.Row>
-                <Table.Cell colSpan={7} className="text-center text-gray-500">
+              <TableRow>
+                <TableCell colSpan={7} className="text-center text-gray-500">
                   No attendees found
-                </Table.Cell>
-              </Table.Row>
+                </TableCell>
+              </TableRow>
             ) : (
               allRegistrations.map((registration) => (
-                <Table.Row key={registration.id} className="bg-white">
-                  <Table.Cell className="font-medium text-gray-900">
+                <TableRow key={registration.id} className="bg-white border-gray-200 dark:border-gray-700 dark:bg-gray-800">
+                  <TableCell className="font-medium text-gray-900 dark:text-white">
                     {registration.name}
-                  </Table.Cell>
-                  <Table.Cell>{registration.email}</Table.Cell>
-                  <Table.Cell>
+                  </TableCell>
+                  <TableCell>{registration.email}</TableCell>
+                  <TableCell>
                     <Badge color="purple">{registration.ticketType.name}</Badge>
-                  </Table.Cell>
-                  <Table.Cell>
+                  </TableCell>
+                  <TableCell>
                     {getPaymentStatusBadge(registration.paymentStatus)}
-                  </Table.Cell>
-                  <Table.Cell>
+                  </TableCell>
+                  <TableCell>
                     {getEmailStatusBadge(registration.emailStatus)}
-                  </Table.Cell>
-                  <Table.Cell>
+                  </TableCell>
+                  <TableCell>
                     {new Intl.DateTimeFormat("en-US", {
                       dateStyle: "medium",
                       timeStyle: "short",
                     }).format(new Date(registration.registeredAt))}
-                  </Table.Cell>
-                  <Table.Cell>
+                  </TableCell>
+                  <TableCell>
                     <div className="flex gap-2">
                       {onResendConfirmation && (
                         <Button
@@ -230,11 +223,11 @@ export function AttendeeTable({
                         </Button>
                       )}
                     </div>
-                  </Table.Cell>
-                </Table.Row>
+                  </TableCell>
+                </TableRow>
               ))
             )}
-          </Table.Body>
+          </TableBody>
         </Table>
       </div>
 

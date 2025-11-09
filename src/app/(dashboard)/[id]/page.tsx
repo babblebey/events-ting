@@ -3,15 +3,15 @@
  * Dashboard displaying metrics and quick actions for an event
  */
 
+import Link from "next/link";
 import { Suspense } from "react";
 import { api } from "@/trpc/server";
-import { EventMetrics, EventMetricsSkeleton } from "@/components/events/event-metrics";
 import { Button, Card } from "flowbite-react";
-import Link from "next/link";
-import { HiOutlineTicket, HiOutlineMail, HiOutlineExternalLink, HiOutlineCalendar } from "react-icons/hi";
 import { HiOutlineUsers } from "react-icons/hi2";
 import { IoSettingsOutline } from "react-icons/io5";
 import { formatDate, formatDateRange } from "@/lib/utils/date";
+import { EventMetrics, EventMetricsSkeleton } from "@/components/events/event-metrics";
+import { HiOutlineTicket, HiOutlineMail, HiOutlineExternalLink, HiOutlineCalendar } from "react-icons/hi";
 
 interface EventOverviewPageProps {
   params: { id: string };

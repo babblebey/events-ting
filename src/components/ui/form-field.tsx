@@ -2,7 +2,7 @@
  * Form field wrapper component with label and error message
  */
 
-import { Label, TextInput, Textarea, type TextInputProps } from "flowbite-react";
+import { Label, TextInput, Textarea, type TextInputProps, type TextareaProps } from "flowbite-react";
 import { type ReactNode } from "react";
 
 interface FormFieldProps extends Omit<TextInputProps, "type"> {
@@ -40,7 +40,7 @@ export function FormField({
           name={name}
           rows={rows}
           color={error ? "failure" : undefined}
-          {...(props as any)}
+          {...(props as unknown as TextareaProps)}
         />
       ) : (
         <TextInput

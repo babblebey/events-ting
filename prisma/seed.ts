@@ -551,7 +551,7 @@ We're excited to have you join us on June 15-16 at the Moscone Center in San Fra
 See you soon!
 The Next.js Conf Team`,
       recipientType: "all_attendees",
-      recipientFilter: null,
+      recipientFilter: undefined,
       status: "sent",
       scheduledFor: null,
       sentAt: new Date("2025-03-17T10:00:00Z"),

@@ -10,12 +10,12 @@
 "use client";
 
 import { Badge, Card } from "flowbite-react";
-import type { CfpSubmission, Speaker } from "generated/prisma";
+import type { RouterOutputs } from "@/trpc/react";
+
+type CfpSubmission = RouterOutputs["cfp"]["listSubmissions"]["submissions"][number];
 
 interface SubmissionCardProps {
-  submission: CfpSubmission & {
-    speaker?: Speaker | null;
-  };
+  submission: CfpSubmission;
   onClick?: () => void;
 }
 

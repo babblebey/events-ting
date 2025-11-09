@@ -6,7 +6,8 @@
  */
 
 import { Button, Card } from "flowbite-react";
-import { AlertCircle, ArrowLeft, Search } from "lucide-react";
+import { HiArrowLeft, HiOutlineSearch, HiOutlineRefresh } from "react-icons/hi";
+import { LuCircleAlert } from "react-icons/lu";
 import { useEffect } from "react";
 
 export default function Error({
@@ -28,9 +29,9 @@ export default function Error({
         <div className="flex flex-col items-center text-center">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
             {isNotFound ? (
-              <Search className="h-8 w-8 text-red-600 dark:text-red-400" />
+              <HiOutlineSearch className="h-8 w-8 text-red-600 dark:text-red-400" />
             ) : (
-              <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+              <LuCircleAlert className="h-8 w-8 text-red-600 dark:text-red-400" />
             )}
           </div>
           
@@ -46,12 +47,12 @@ export default function Error({
 
           <div className="flex gap-3">
             <Button color="gray" href="/events">
-              <ArrowLeft className="mr-2 h-4 w-4" />
+              <HiArrowLeft className="mr-2 h-4 w-4" />
               Browse Events
             </Button>
             {!isNotFound && (
               <Button onClick={reset}>
-                <Search className="mr-2 h-4 w-4" />
+                <HiOutlineRefresh className="mr-2 h-4 w-4" />
                 Try Again
               </Button>
             )}

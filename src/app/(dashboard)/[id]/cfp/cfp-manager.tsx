@@ -15,15 +15,17 @@ import { api } from "@/trpc/react";
 import { CfpForm } from "@/components/cfp/cfp-form";
 import { SubmissionCard } from "@/components/cfp/submission-card";
 import { ReviewPanel } from "@/components/cfp/review-panel";
-import type { CallForPapers, CfpSubmission, Speaker } from "generated/prisma";
+import type { CallForPapers } from "generated/prisma";
+import type { RouterOutputs } from "@/trpc/react";
 import { HiPlus, HiLockClosed, HiLockOpen } from "react-icons/hi";
+
+type CfpSubmission = RouterOutputs["cfp"]["listSubmissions"]["submissions"][number];
 
 interface CfpManagerProps {
   eventId: string;
   eventName: string;
   eventSlug: string;
   initialCfp?: CallForPapers | null;
-  initialSubmissions?: (CfpSubmission & { speaker?: Speaker | null })[];
 }
 
 export function CfpManager({
@@ -31,31 +33,33 @@ export function CfpManager({
   eventName,
   eventSlug,
   initialCfp,
-  initialSubmissions = [],
 }: CfpManagerProps) {
   const [showCfpForm, setShowCfpForm] = useState(false);
-  const [selectedSubmission, setSelectedSubmission] = useState<
-    (CfpSubmission & { speaker?: Speaker | null }) | null
-  >(null);
+  const [selectedSubmission, setSelectedSubmission] = useState<CfpSubmission | null>(null);
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "accepted" | "rejected">("all");
 
   const utils = api.useUtils();
 
-  // Query CFP data
-  const { data: cfpData } = api.cfp.listSubmissions.useQuery(
+  // Query CFP data with infinite scroll
+  const {
+    data: cfpData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = api.cfp.listSubmissions.useInfiniteQuery(
     {
       cfpId: initialCfp?.id ?? "",
       status: statusFilter,
-      limit: 100,
+      limit: 12,
     },
     {
       enabled: !!initialCfp,
-      initialData: initialCfp ? { submissions: initialSubmissions, nextCursor: undefined } : undefined,
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
     }
   );
 
-  // Query all submissions for counts
-  const { data: allCfpData } = api.cfp.listSubmissions.useQuery(
+  // Query all submissions for counts (no pagination needed for stats)
+  const { data: allCfpData } = api.cfp.listSubmissions.useInfiniteQuery(
     {
       cfpId: initialCfp?.id ?? "",
       status: "all",
@@ -63,6 +67,7 @@ export function CfpManager({
     },
     {
       enabled: !!initialCfp,
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
     }
   );
 
@@ -72,8 +77,9 @@ export function CfpManager({
     },
   });
 
-  const submissions = cfpData?.submissions ?? [];
-  const allSubmissions = allCfpData?.submissions ?? initialSubmissions;
+  const submissions = cfpData?.pages.flatMap((page) => page.submissions) ?? [];
+  const allSubmissions =
+    allCfpData?.pages.flatMap((page) => page.submissions) ?? [];
   const totalCount = allSubmissions.length;
   const pendingCount = allSubmissions.filter((s) => s.status === "pending").length;
   const acceptedCount = allSubmissions.filter((s) => s.status === "accepted").length;
@@ -88,7 +94,6 @@ export function CfpManager({
 
   const cfpUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/events/${eventSlug}/cfp`;
   const isOpen = initialCfp?.status === "open";
-  const isClosed = initialCfp?.status === "closed";
   const deadlinePassed = initialCfp ? new Date(initialCfp.deadline) < new Date() : false;
 
   // No CFP exists yet
@@ -251,14 +256,28 @@ export function CfpManager({
               </p>
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {submissions.map((submission) => (
-                <SubmissionCard
-                  key={submission.id}
-                  submission={submission}
-                  onClick={() => setSelectedSubmission(submission)}
-                />
-              ))}
+            <div className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {submissions.map((submission) => (
+                  <SubmissionCard
+                    key={submission.id}
+                    submission={submission}
+                    onClick={() => setSelectedSubmission(submission)}
+                  />
+                ))}
+              </div>
+
+              {hasNextPage && (
+                <div className="flex justify-center pt-4">
+                  <Button
+                    color="light"
+                    onClick={() => void fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                  >
+                    {isFetchingNextPage ? "Loading..." : "Load More Submissions"}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </div>

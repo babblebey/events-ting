@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       : FILE_UPLOAD_LIMITS.MAX_DOCUMENT_SIZE;
 
     // Validate file type
-    if (!validateFileType(file, allowedTypes)) {
+    if (!validateFileType(file, [...allowedTypes])) {
       return NextResponse.json(
         {
           error: `Invalid file type. Allowed types: ${allowedTypes.join(", ")}`,

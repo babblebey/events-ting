@@ -73,7 +73,7 @@ async function DashboardLayout({ children, params }: EventDashboardLayoutProps) 
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen">
       <AppSidebar menuItems={navItems} />
       <AppSidebarInset>{children}</AppSidebarInset>
     </div>

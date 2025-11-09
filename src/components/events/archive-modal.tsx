@@ -6,7 +6,8 @@
  */
 
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from "flowbite-react";
-import { Archive, AlertTriangle } from "lucide-react";
+import { LuTriangleAlert } from "react-icons/lu";
+import { HiOutlineArchive } from "react-icons/hi";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -54,7 +55,7 @@ export function ArchiveModal({
     <Modal show={isOpen} onClose={onClose} size="md">
       <ModalHeader>
         <div className="flex items-center gap-2">
-          <Archive className="h-5 w-5 text-warning-600" />
+          <HiOutlineArchive className="h-5 w-5 text-warning-600" />
           <span>Archive Event</span>
         </div>
       </ModalHeader>
@@ -68,10 +69,10 @@ export function ArchiveModal({
 
           <div className="rounded-lg bg-yellow-50 p-4 dark:bg-yellow-900/20">
             <div className="flex gap-3">
-              <AlertTriangle className="h-5 w-5 flex-shrink-0 text-yellow-600 dark:text-yellow-400" />
+              <LuTriangleAlert className="h-5 w-5 flex-shrink-0 text-yellow-600 dark:text-yellow-400" />
               <div className="flex-1">
                 <h4 className="font-medium text-yellow-800 dark:text-yellow-400">
-                  Are you sure you want to archive "{eventName}"?
+                  Are you sure you want to archive &quot;{eventName}&quot;?
                 </h4>
                 <p className="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
                   Archiving this event will hide it from public view. You can

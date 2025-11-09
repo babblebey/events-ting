@@ -12,12 +12,12 @@
 import { useState } from "react";
 import { Button, Label, Textarea } from "flowbite-react";
 import { api } from "@/trpc/react";
-import type { CfpSubmission, Speaker } from "generated/prisma";
+import type { RouterOutputs } from "@/trpc/react";
+
+type CfpSubmission = RouterOutputs["cfp"]["listSubmissions"]["submissions"][number];
 
 interface ReviewPanelProps {
-  submission: CfpSubmission & {
-    speaker?: Speaker | null;
-  };
+  submission: CfpSubmission;
   onSuccess?: () => void;
 }
 

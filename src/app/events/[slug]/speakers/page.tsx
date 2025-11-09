@@ -6,7 +6,7 @@
 import { api } from "@/trpc/server";
 import { SpeakerCard } from "@/components/speakers/speaker-card";
 import { notFound } from "next/navigation";
-import { AlertCircle } from "lucide-react";
+import { LuCircleAlert } from "react-icons/lu";
 import { Alert } from "flowbite-react";
 
 interface SpeakersPageProps {
@@ -30,7 +30,7 @@ export default async function SpeakersPage({ params }: SpeakersPageProps) {
   } catch (error) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <Alert color="failure" icon={AlertCircle}>
+        <Alert color="failure" icon={LuCircleAlert}>
           <span className="font-medium">Error loading speakers</span>
         </Alert>
       </div>
@@ -38,7 +38,7 @@ export default async function SpeakersPage({ params }: SpeakersPageProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container max-w-4xl mx-auto px-4 py-12">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -63,7 +63,7 @@ export default async function SpeakersPage({ params }: SpeakersPageProps) {
 
       {/* Speakers Grid */}
       {speakers.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {speakers.map((speaker) => (
             <SpeakerCard
               key={speaker.id}

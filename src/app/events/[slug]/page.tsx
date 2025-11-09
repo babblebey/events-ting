@@ -3,10 +3,13 @@
  * Server Component displaying event details for attendees
  */
 
+import Link from "next/link";
 import { api } from "@/trpc/server";
 import { Badge, Button, Card } from "flowbite-react";
-import Link from "next/link";
-import { Calendar, MapPin, Users, Video, ExternalLink } from "lucide-react";
+import { LuMicVocal } from "react-icons/lu";
+import { FiUsers } from "react-icons/fi";
+import { HiOutlineMapPin } from "react-icons/hi2";
+import { HiOutlineCalendar, HiOutlineExternalLink, HiOutlineVideoCamera } from "react-icons/hi";
 import { formatDate, formatDateRange } from "@/lib/utils/date";
 import type { Metadata } from "next";
 
@@ -81,7 +84,7 @@ export default async function EventPage({ params }: EventPageProps) {
             <div className="space-y-3">
               {/* Date */}
               <div className="flex items-start gap-3">
-                <Calendar className="mt-1 h-5 w-5 text-gray-400" />
+                <HiOutlineCalendar className="mt-1 h-5 w-5 text-gray-400" />
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">
                     {formatDateRange(event.startDate, event.endDate, event.timezone)}
@@ -95,9 +98,9 @@ export default async function EventPage({ params }: EventPageProps) {
               {/* Location */}
               <div className="flex items-start gap-3">
                 {event.locationType === "virtual" ? (
-                  <Video className="mt-1 h-5 w-5 text-gray-400" />
+                  <HiOutlineVideoCamera className="mt-1 h-5 w-5 text-gray-400" />
                 ) : (
-                  <MapPin className="mt-1 h-5 w-5 text-gray-400" />
+                  <HiOutlineMapPin className="mt-1 h-5 w-5 text-gray-400" />
                 )}
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">
@@ -120,7 +123,7 @@ export default async function EventPage({ params }: EventPageProps) {
                       className="mt-1 flex items-center gap-1 text-sm text-primary-600 hover:underline dark:text-primary-400"
                     >
                       Join virtually
-                      <ExternalLink className="h-3 w-3" />
+                      <HiOutlineExternalLink className="h-3 w-3" />
                     </a>
                   )}
                 </div>
@@ -129,7 +132,7 @@ export default async function EventPage({ params }: EventPageProps) {
               {/* Attendees */}
               {event._count && (
                 <div className="flex items-start gap-3">
-                  <Users className="mt-1 h-5 w-5 text-gray-400" />
+                  <FiUsers className="mt-1 h-5 w-5 text-gray-400" />
                   <div>
                     <p className="font-medium text-gray-900 dark:text-white">
                       {event._count.registrations} people registered
@@ -172,7 +175,7 @@ export default async function EventPage({ params }: EventPageProps) {
             <Link href={`/events/${eventSlug}/schedule`}>
               <Card className="cursor-pointer hover:shadow-lg transition-shadow">
                 <div className="text-center">
-                  <Calendar className="mx-auto h-8 w-8 text-primary-600 dark:text-primary-400" />
+                  <HiOutlineCalendar className="mx-auto h-8 w-8 text-primary-600 dark:text-primary-400" />
                   <h3 className="mt-3 font-semibold text-gray-900 dark:text-white">
                     View Schedule
                   </h3>
@@ -188,7 +191,7 @@ export default async function EventPage({ params }: EventPageProps) {
             <Link href={`/events/${eventSlug}/speakers`}>
               <Card className="cursor-pointer hover:shadow-lg transition-shadow">
                 <div className="text-center">
-                  <Users className="mx-auto h-8 w-8 text-primary-600 dark:text-primary-400" />
+                  <FiUsers className="mx-auto h-8 w-8 text-primary-600 dark:text-primary-400" />
                   <h3 className="mt-3 font-semibold text-gray-900 dark:text-white">
                     Meet Speakers
                   </h3>
@@ -203,7 +206,7 @@ export default async function EventPage({ params }: EventPageProps) {
           <Link href={`/events/${eventSlug}/cfp`}>
             <Card className="cursor-pointer hover:shadow-lg transition-shadow">
               <div className="text-center">
-                <Video className="mx-auto h-8 w-8 text-primary-600 dark:text-primary-400" />
+                <LuMicVocal className="mx-auto h-8 w-8 text-primary-600 dark:text-primary-400" />
                 <h3 className="mt-3 font-semibold text-gray-900 dark:text-white">
                   Submit Talk
                 </h3>

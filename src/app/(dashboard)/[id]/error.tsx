@@ -5,9 +5,11 @@
  * Catches and displays errors in a user-friendly way
  */
 
-import { Button, Card } from "flowbite-react";
-import { AlertCircle, Home, RefreshCw } from "lucide-react";
 import { useEffect } from "react";
+import { Button, Card } from "flowbite-react";
+import { LuCircleAlert } from "react-icons/lu";
+import { HiOutlineHome } from "react-icons/hi";
+import { HiOutlineRefresh } from "react-icons/hi";
 
 export default function Error({
   error,
@@ -26,7 +28,7 @@ export default function Error({
       <Card className="w-full max-w-lg">
         <div className="flex flex-col items-center text-center">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-            <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+            <LuCircleAlert className="h-8 w-8 text-red-600 dark:text-red-400" />
           </div>
           
           <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
@@ -52,11 +54,11 @@ export default function Error({
 
           <div className="flex gap-3">
             <Button color="gray" onClick={() => window.location.href = '/'}>
-              <Home className="mr-2 h-4 w-4" />
+              <HiOutlineHome className="mr-2 h-4 w-4" />
               Go Home
             </Button>
             <Button onClick={reset}>
-              <RefreshCw className="mr-2 h-4 w-4" />
+              <HiOutlineRefresh className="mr-2 h-4 w-4" />
               Try Again
             </Button>
           </div>

@@ -24,11 +24,24 @@ function CommunicationsPage({ params }: CommunicationsPageProps) {
 
   const { id: eventId } = use(params);
 
-  // Fetch campaigns
-  const { data: campaigns, isLoading } = api.communication.listCampaigns.useQuery({
-    eventId,
-    limit: 50,
-  });
+  // Fetch campaigns with infinite query for pagination
+  const {
+    data: campaignsData,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = api.communication.listCampaigns.useInfiniteQuery(
+    {
+      eventId,
+      limit: 10,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    }
+  );
+
+  const campaigns = campaignsData?.pages.flatMap((page) => page.items) ?? [];
 
   const utils = api.useUtils();
 
@@ -112,7 +125,7 @@ function CommunicationsPage({ params }: CommunicationsPageProps) {
         <div className="text-center text-gray-500">Loading campaigns...</div>
       )}
 
-      {!isLoading && campaigns?.items.length === 0 && (
+      {!isLoading && campaigns.length === 0 && (
         <div className="rounded-lg border border-gray-200 bg-white p-8 text-center dark:border-gray-700 dark:bg-gray-800">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
             <HiPlus className="h-8 w-8 text-blue-600 dark:text-blue-300" />
@@ -128,9 +141,9 @@ function CommunicationsPage({ params }: CommunicationsPageProps) {
         </div>
       )}
 
-      {!isLoading && (campaigns?.items.length ?? 0) > 0 && (
+      {!isLoading && campaigns.length > 0 && (
         <div className="space-y-4">
-          {campaigns?.items.map((campaign) => (
+          {campaigns.map((campaign) => (
             <CampaignCard
               key={campaign.id}
               campaign={campaign}
@@ -139,6 +152,18 @@ function CommunicationsPage({ params }: CommunicationsPageProps) {
               onSchedule={() => handleSchedule(campaign.id)}
             />
           ))}
+
+          {hasNextPage && (
+            <div className="flex justify-center pt-4">
+              <Button
+                color="light"
+                onClick={() => void fetchNextPage()}
+                disabled={isFetchingNextPage}
+              >
+                {isFetchingNextPage ? "Loading..." : "Load More Campaigns"}
+              </Button>
+            </div>
+          )}
         </div>
       )}
 

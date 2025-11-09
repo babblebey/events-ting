@@ -6,7 +6,10 @@
  */
 
 import { Card, Badge } from "flowbite-react";
-import { Mail, Twitter, Github, Linkedin, Globe, Calendar, MapPin, Clock } from "lucide-react";
+import { FaXTwitter } from "react-icons/fa6";
+import { AiOutlineLinkedin, AiOutlineGithub } from "react-icons/ai";
+import { HiOutlineMail, HiOutlineGlobeAlt, HiOutlineCalendar } from "react-icons/hi";
+import { HiOutlineMapPin, HiOutlineClock } from "react-icons/hi2";
 import Link from "next/link";
 import { formatDate, formatTimeRange } from "@/lib/utils/date";
 
@@ -114,7 +117,7 @@ export function SpeakerProfile({ speaker, eventSlug, showBackLink = true }: Spea
                   href={`mailto:${speaker.email}`}
                   className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                 >
-                  <Mail className="h-4 w-4" />
+                  <HiOutlineMail className="h-4 w-4" />
                   Email
                 </a>
               )}
@@ -125,7 +128,7 @@ export function SpeakerProfile({ speaker, eventSlug, showBackLink = true }: Spea
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                 >
-                  <Twitter className="h-4 w-4" />
+                  <FaXTwitter className="h-4 w-4" />
                   Twitter
                 </a>
               )}
@@ -136,7 +139,7 @@ export function SpeakerProfile({ speaker, eventSlug, showBackLink = true }: Spea
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                 >
-                  <Github className="h-4 w-4" />
+                  <AiOutlineGithub className="h-4 w-4" />
                   GitHub
                 </a>
               )}
@@ -147,7 +150,7 @@ export function SpeakerProfile({ speaker, eventSlug, showBackLink = true }: Spea
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                 >
-                  <Linkedin className="h-4 w-4" />
+                  <AiOutlineLinkedin className="h-4 w-4" />
                   LinkedIn
                 </a>
               )}
@@ -158,7 +161,7 @@ export function SpeakerProfile({ speaker, eventSlug, showBackLink = true }: Spea
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                 >
-                  <Globe className="h-4 w-4" />
+                  <HiOutlineGlobeAlt className="h-4 w-4" />
                   Website
                 </a>
               )}
@@ -279,16 +282,16 @@ function SessionCard({
 
           <div className="flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-400">
             <div className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
+              <HiOutlineCalendar className="h-4 w-4" />
               {formatDate(scheduleEntry.startTime, timezone, "PPP")}
             </div>
             <div className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
+              <HiOutlineClock className="h-4 w-4" />
               {formatTimeRange(scheduleEntry.startTime, scheduleEntry.endTime, timezone)}
             </div>
             {scheduleEntry.location && (
               <div className="flex items-center gap-1">
-                <MapPin className="h-4 w-4" />
+                <HiOutlineMapPin className="h-4 w-4" />
                 {scheduleEntry.location}
               </div>
             )}

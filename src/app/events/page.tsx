@@ -1,22 +1,19 @@
 /**
  * Events Listing Page (Public)
- * Shows all published events in a grid layout
+ * Shows all published events in a grid layout with pagination
  */
 
-import { Suspense } from "react";
 import Link from "next/link";
 import { Button } from "flowbite-react";
-import { HiOutlinePlusCircle } from "react-icons/hi";;
-import { api } from "@/trpc/server";
-import { EventCard } from "@/components/events/event-card";
-import { EmptyState } from "@/components/ui/empty-state";
+import { HiOutlinePlusCircle } from "react-icons/hi";
+import { EventsListClient } from "./events-list-client";
 
 export const metadata = {
   title: "Events | Events Ting",
   description: "Browse and discover upcoming events",
 };
 
-export default async function EventsPage() {
+export default function EventsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8 flex items-center justify-between">
@@ -36,41 +33,7 @@ export default async function EventsPage() {
         </Link>
       </div>
 
-      <Suspense fallback={<EventsListSkeleton />}>
-        <EventsList />
-      </Suspense>
-    </div>
-  );
-}
-
-async function EventsList() {
-  const { events } = await api.event.list({
-    limit: 20,
-    status: "published",
-  });
-
-  if (events.length === 0) {
-    return (
-      <EmptyState
-        title="No events found"
-        description="There are no public events available at the moment. Check back later!"
-        icon="calendar"
-      />
-    );
-  }
-
-  return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {events.map((event) => (
-        <EventCard
-          key={event.id}
-          event={{
-            ...event,
-            locationType: event.locationType as "in-person" | "virtual" | "hybrid",
-          }}
-          showOrganizer
-        />
-      ))}
+      <EventsListClient />
     </div>
   );
 }

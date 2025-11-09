@@ -150,7 +150,7 @@ function MetricCard({ metric }: { metric: Metric }) {
                   : "text-red-600 dark:text-red-400"
               }`}
             >
-              <TrendingUp
+              <HiOutlineTrendingUp
                 className={`h-4 w-4 ${!metric.trend.isPositive && "rotate-180"}`}
               />
               <span>{Math.abs(metric.trend.value)}%</span>
