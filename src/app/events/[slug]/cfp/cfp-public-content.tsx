@@ -9,6 +9,7 @@
 "use client";
 
 import { useState } from "react";
+import Markdown from "react-markdown";
 import { CfpSubmissionForm } from "@/components/cfp/cfp-submission-form";
 import { HiClock, HiCheckCircle, HiXCircle } from "react-icons/hi";
 import type { JsonValue } from "@prisma/client/runtime/library";
@@ -102,10 +103,10 @@ export function CfpPublicContent({ cfp, eventName }: CfpPublicContentProps) {
         <h3 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">
           Submission Guidelines
         </h3>
-        <div className="prose prose-gray max-w-none dark:prose-invert">
-          <p className="whitespace-pre-wrap text-gray-600 dark:text-gray-400">
+        <div className="prose max-w-none dark:prose-invert">
+          <Markdown>
             {cfp.guidelines}
-          </p>
+          </Markdown>
         </div>
       </div>
 
