@@ -212,7 +212,7 @@ function AppSidebarToggle({
 }
 
 function AppSidebarInset({ children }: { children: React.ReactNode }) {
-  return <main className="p-4 sm:ml-72 bg-gray-50 dark:bg-gray-900">{children}</main>;
+  return <main className="p-4 sm:ml-72">{children}</main>;
 }
 
 export { AppSidebar, AppSidebarToggle, AppSidebarInset };

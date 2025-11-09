@@ -125,7 +125,7 @@ export function AttendeeTable({
             <select
               value={selectedTicketType ?? ""}
               onChange={(e) => setSelectedTicketType(e.target.value || undefined)}
-              className="rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 text-sm text-gray-900 dark:text-white focus:border-blue-500 focus:ring-blue-500"
             >
               <option value="">All Ticket Types</option>
               {ticketTypes.items.map((ticket) => (
@@ -157,17 +157,19 @@ export function AttendeeTable({
       <div className="overflow-x-auto">
         <Table hoverable>
           <TableHead>
-            <TableHeadCell>Name</TableHeadCell>
-            <TableHeadCell>Email</TableHeadCell>
-            <TableHeadCell>Ticket Type</TableHeadCell>
-            <TableHeadCell>Payment</TableHeadCell>
-            <TableHeadCell>Email Status</TableHeadCell>
-            <TableHeadCell>Registered</TableHeadCell>
-            <TableHeadCell>Actions</TableHeadCell>
+            <TableRow>
+              <TableHeadCell>Name</TableHeadCell>
+              <TableHeadCell>Email</TableHeadCell>
+              <TableHeadCell>Ticket Type</TableHeadCell>
+              <TableHeadCell>Payment</TableHeadCell>
+              <TableHeadCell>Email Status</TableHeadCell>
+              <TableHeadCell>Registered</TableHeadCell>
+              <TableHeadCell>Actions</TableHeadCell>
+            </TableRow>
           </TableHead>
           <TableBody className="divide-y">
             {isLoading ? (
-              <TableRow>
+              <TableRow className="bg-white dark:border-gray-700 dark:bg-gray-800">
                 <TableCell colSpan={7} className="text-center">
                   Loading attendees...
                 </TableCell>
@@ -180,8 +182,8 @@ export function AttendeeTable({
               </TableRow>
             ) : (
               allRegistrations.map((registration) => (
-                <TableRow key={registration.id} className="bg-white">
-                  <TableCell className="font-medium text-gray-900">
+                <TableRow key={registration.id} className="bg-white border-gray-200 dark:border-gray-700 dark:bg-gray-800">
+                  <TableCell className="font-medium text-gray-900 dark:text-white">
                     {registration.name}
                   </TableCell>
                   <TableCell>{registration.email}</TableCell>
