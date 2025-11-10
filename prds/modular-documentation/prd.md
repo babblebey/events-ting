@@ -353,54 +353,54 @@ Each module documentation includes:
   - Session assignments with roles
   - Photo upload flow
 
-##### CFP Module ⏳
-- [ ] **T041** - Create `docs/modules/cfp/README.md`
-- [ ] **T042** - Create `docs/modules/cfp/backend.md`
+##### CFP Module ✅
+- [x] **T041** - Create `docs/modules/cfp/README.md` ✅
+- [x] **T042** - Create `docs/modules/cfp/backend.md` ✅
   - Router: `cfpRouter`
   - Procedures: `open`, `close`, `update`, `submitProposal`, `listSubmissions`, `reviewSubmission`, `acceptProposal`, `rejectProposal`
   - Deadline enforcement
   - Auto-speaker creation on acceptance
-- [ ] **T043** - Create `docs/modules/cfp/frontend.md`
+- [x] **T043** - Create `docs/modules/cfp/frontend.md` ✅
   - Public submission form: `/events/[slug]/cfp`
   - Organizer review dashboard: `/(dashboard)/[id]/cfp`
   - Components: `cfp-form.tsx`, `submission-card.tsx`, `review-panel.tsx`
-- [ ] **T044** - Create `docs/modules/cfp/data-model.md`
+- [x] **T044** - Create `docs/modules/cfp/data-model.md` ✅
   - `CallForPapers` model
   - `CfpSubmission` model
   - Review fields (status, score, notes)
-- [ ] **T045** - Create `docs/modules/cfp/workflows.md`
+- [x] **T045** - Create `docs/modules/cfp/workflows.md` ✅
   - Open CFP with guidelines and deadline
   - Public submission flow
   - Review and scoring
   - Accept: create speaker + send email
   - Reject: send feedback email
-- [ ] **T046** - Create `docs/modules/cfp/email-templates.md`
+- [x] **T046** - Create `docs/modules/cfp/email-templates.md` ✅
   - Submission received confirmation
   - Acceptance email
   - Rejection email with feedback
 
-##### Attendees Module ⏳
-- [ ] **T047** - Create `docs/modules/attendees/README.md`
-- [ ] **T048** - Create `docs/modules/attendees/backend.md`
+##### Attendees Module ✅
+- [x] **T047** - Create `docs/modules/attendees/README.md` ✅
+- [x] **T048** - Create `docs/modules/attendees/backend.md` ✅
   - Uses Registration router procedures
   - Additional filtering and search capabilities
-- [ ] **T049** - Create `docs/modules/attendees/frontend.md`
+- [x] **T049** - Create `docs/modules/attendees/frontend.md` ✅
   - Attendee table with filters
   - Search by name/email
   - Email status management
   - CSV export
-- [ ] **T050** - Create `docs/modules/attendees/data-model.md`
+- [x] **T050** - Create `docs/modules/attendees/data-model.md` ✅
   - Links to `Registration` model
   - Email status tracking
-- [ ] **T051** - Create `docs/modules/attendees/workflows.md`
+- [x] **T051** - Create `docs/modules/attendees/workflows.md` ✅
   - View attendee list
   - Filter by ticket type
   - Update email status (bounced, unsubscribed)
   - Manual check-in (future)
 
 **Deliverables**: 4 advanced modules documented (21 files)  
-**Status**: Schedule & Speakers complete (10/21 files) ✅  
-**Remaining**: CFP (6 files), Attendees (5 files) - Can be completed in Phase 4  
+**Status**: All 4 modules complete (21/21 files) ✅  
+**Completed**: Schedule (5 files), Speakers (5 files), CFP (6 files), Attendees (5 files) ✅  
 **Estimated Time**: 5-7 days  
 
 ---
@@ -530,15 +530,15 @@ Each module documentation includes:
 | Communications Module | 6 | ✅ **Phase 2 Complete** |
 | Schedule Module | 5 | ✅ **Phase 3 Complete** |
 | Speakers Module | 5 | ✅ **Phase 3 Complete** |
-| CFP Module | 6 | ⏳ Phase 3 (can move to Phase 4) |
-| Attendees Module | 5 | ⏳ Phase 3 (can move to Phase 4) |
+| CFP Module | 6 | ✅ **Phase 3 Complete** |
+| Attendees Module | 5 | ✅ **Phase 3 Complete** |
 | API Documentation | 4 | ⏳ Phase 4 |
 | Component Documentation | 4 | ⏳ Phase 4 |
 | Deployment Guides | 5 | ⏳ Phase 4 |
 | Development Guides | 4 | ⏳ Phase 4 |
 | Troubleshooting + Integration | 7 | ⏳ Phase 4 |
 | **TOTAL** | **76 files** | **4 phases** |
-| **COMPLETED** | **32 files** | **42% done** |
+| **COMPLETED** | **43 files** | **57% done** |
 
 ---
 
