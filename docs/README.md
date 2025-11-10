@@ -20,7 +20,7 @@ graph TB
     
     style NextJS fill:#0070f3
     style tRPC fill:#398ccb
-    style Prisma fill:#2d3748
+    style Prisma fill:#26ae1e
     style DB fill:#336791
 ```
 
