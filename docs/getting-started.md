@@ -540,4 +540,18 @@ pnpm run db:studio     # Open database GUI
 
 **Congratulations! 🎉** You now have Events-Ting running locally. Happy coding!
 
-**Last Updated**: November 9, 2025
+---
+
+## 📚 Next Steps
+
+- **[Architecture Overview](./architecture/system-overview.md)** - Understand the system design
+- **[Data Model](./architecture/data-model.md)** - Learn the database schema
+- **[API Documentation](./api/trpc-overview.md)** - Explore the tRPC API
+- **[Module Documentation](./modules/)** - Feature-specific guides
+- **[Troubleshooting](./troubleshooting.md)** - Common issues and solutions
+
+---
+
+[← Back to Documentation Index](./index.md) | [Architecture Overview →](./architecture/system-overview.md)
+
+**Last Updated**: November 10, 2025

@@ -562,6 +562,49 @@ graph LR
 - **CFP**: Depends on Events (creates Speakers on acceptance)
 - **Communications**: Depends on Events (sends to Registrations, Speakers)
 
+### Module Dependency Graph
+
+```mermaid
+graph TD
+    Events[Events Module<br/>Core]
+    Tickets[Tickets Module]
+    Registration[Registration Module]
+    Attendees[Attendees Module<br/>View Only]
+    Schedule[Schedule Module]
+    Speakers[Speakers Module]
+    CFP[CFP Module]
+    Communications[Communications Module]
+    
+    Events --> Tickets
+    Events --> Schedule
+    Events --> Speakers
+    Events --> CFP
+    Events --> Communications
+    
+    Tickets --> Registration
+    Events --> Registration
+    Registration --> Attendees
+    
+    CFP --> Speakers
+    Speakers --> Schedule
+    
+    Registration -.->|sends to| Communications
+    Speakers -.->|sends to| Communications
+    
+    style Events fill:#0070f3,stroke:#0050c3,color:#fff
+    style Tickets fill:#10b981,stroke:#059669,color:#fff
+    style Registration fill:#f59e0b,stroke:#d97706,color:#fff
+    style Attendees fill:#fbbf24,stroke:#f59e0b,color:#000
+    style Schedule fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    style Speakers fill:#ec4899,stroke:#db2777,color:#fff
+    style CFP fill:#ef4444,stroke:#dc2626,color:#fff
+    style Communications fill:#06b6d4,stroke:#0891b2,color:#fff
+```
+
+**Legend**:
+- Solid arrows: Direct dependencies
+- Dashed arrows: Communication/integration points
+
 ## 📚 Related Documentation
 
 - **[Tech Stack](./tech-stack.md)** - Detailed technology choices
@@ -571,5 +614,7 @@ graph LR
 
 ---
 
-**Last Updated**: November 9, 2025  
-**Next Review**: December 9, 2025
+[← Back to Documentation Index](../index.md) | [Tech Stack →](./tech-stack.md)
+
+**Last Updated**: November 10, 2025  
+**Next Review**: December 10, 2025

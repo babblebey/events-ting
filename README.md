@@ -204,13 +204,36 @@ See [.specify/memory/constitution.md](./.specify/memory/constitution.md) for ful
 ## 📖 Documentation
 
 ### Developer Documentation
-- **[Documentation Home](./docs/index.md)** - Complete developer documentation
-- **[Getting Started](./docs/getting-started.md)** - Local setup guide
+
+**📚 [Complete Documentation](./docs/)** - Comprehensive guides for developers
+
+#### Quick Links
+- **[Getting Started Guide](./docs/getting-started.md)** - Set up your local development environment
 - **[Architecture Overview](./docs/architecture/system-overview.md)** - System design and data flows
-- **[Tech Stack](./docs/architecture/tech-stack.md)** - Technology choices and versions
-- **[Data Model](./docs/architecture/data-model.md)** - Database schema with ERD
-- **[Authentication](./docs/architecture/authentication.md)** - Auth implementation details
+- **[Tech Stack Details](./docs/architecture/tech-stack.md)** - Technology choices and versions
+- **[Database Schema](./docs/architecture/data-model.md)** - Complete data model with relationships
+- **[Authentication Guide](./docs/architecture/authentication.md)** - Auth implementation details
 - **[File Structure](./docs/architecture/file-structure.md)** - Project organization guide
+- **[Troubleshooting](./docs/troubleshooting.md)** - Common issues and solutions
+
+#### Module Documentation
+- **[Events](./docs/modules/events/)** - Event creation and management
+- **[Tickets](./docs/modules/tickets/)** - Ticketing and registration
+- **[Schedule](./docs/modules/schedule/)** - Event schedules and sessions
+- **[Speakers](./docs/modules/speakers/)** - Speaker profiles and management
+- **[CFP](./docs/modules/cfp/)** - Call for Papers workflow
+- **[Communications](./docs/modules/communications/)** - Email campaigns
+- **[Attendees](./docs/modules/attendees/)** - Attendee management
+
+#### API & Components
+- **[tRPC API Reference](./docs/api/routers.md)** - Complete API documentation
+- **[Component Library](./docs/components/reusable-components.md)** - Reusable UI components
+- **[Forms Guide](./docs/components/forms.md)** - Form patterns and validation
+
+#### Deployment
+- **[Environment Variables](./docs/deployment/environment-variables.md)** - Required configuration
+- **[Database Setup](./docs/deployment/database-setup.md)** - PostgreSQL and migrations
+- **[Vercel Deployment](./docs/deployment/vercel-deployment.md)** - Production deployment guide
 
 ### Specifications
 - **[Feature Specification](./specs/001-event-management-system/spec.md)** - Requirements and user stories
