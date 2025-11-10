@@ -21,7 +21,7 @@ graph TB
     style NextJS fill:#0070f3
     style tRPC fill:#398ccb
     style Prisma fill:#26ae1e
-    style DB fill:#336791
+    style DB fill:#39df33
 ```
 
 ### Architecture Layers
