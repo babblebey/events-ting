@@ -289,7 +289,7 @@ Documentation lives alongside code. When making changes:
 |----------|--------|--------------|
 | Foundation | ✅ Complete | Nov 9, 2025 |
 | Architecture | ✅ Complete | Nov 10, 2025 |
-| Modules | ⏳ Planned | - |
+| Modules | 🚧 In Progress | Nov 10, 2025 |
 | API Reference | ✅ Complete | Nov 10, 2025 |
 | Components | ✅ Complete | Nov 10, 2025 |
 | Deployment | ✅ Complete | Nov 10, 2025 |
@@ -302,5 +302,5 @@ Documentation lives alongside code. When making changes:
 - 💬 Have questions? [Start a discussion](https://github.com/babblebey/events-ting/discussions)
 - 📧 Need support? Check [Troubleshooting](./troubleshooting.md)
 
-**Last Updated**: November 10, 2025  
+**Last Updated**: November 9, 2025  
 **Maintained by**: @babblebey
