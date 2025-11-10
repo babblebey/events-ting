@@ -102,14 +102,17 @@ graph LR
 ### Feature Modules
 Each module has comprehensive documentation covering backend, frontend, data models, and workflows:
 
-- **[Events](./modules/events/)** - Core event management
-- **[Tickets](./modules/tickets/)** - Ticket types and availability
-- **[Registration](./modules/registration/)** - Attendee registration and management
-- **[Schedule](./modules/schedule/)** - Event schedules and sessions
-- **[Speakers](./modules/speakers/)** - Speaker profiles and assignments
-- **[CFP](./modules/cfp/)** - Call for Papers submission and review
-- **[Communications](./modules/communications/)** - Email campaigns and notifications
-- **[Attendees](./modules/attendees/)** - Attendee list management
+#### Core Modules
+- **[Events](./modules/events/)** - Event creation, publishing, and management
+- **[Tickets](./modules/tickets/)** - Ticket types and availability management
+- **[Registration](./modules/registration/)** - Attendee registration and check-in
+
+#### Advanced Modules
+- **[Schedule](./modules/schedule/)** - Event schedules, sessions, and tracks
+- **[Speakers](./modules/speakers/)** - Speaker profiles and management
+- **[CFP (Call for Papers)](./modules/cfp/)** - Proposal submission and review workflow
+- **[Communications](./modules/communications/)** - Email campaigns and messaging
+- **[Attendees](./modules/attendees/)** - Attendee management and tracking
 
 ### API Reference
 - **[tRPC Overview](./api/trpc-overview.md)** - tRPC setup and patterns
