@@ -18,7 +18,7 @@ This document provides a comprehensive reference of all tRPC routers and their p
 | **registration** | `registration.ts` | 7 | Mixed | Registration & attendee management |
 | **schedule** | `schedule.ts` | 9 | Mixed | Schedule entries & timeline |
 | **speaker** | `speaker.ts` | 7 | Mixed | Speaker profiles & sessions |
-| **cfp** | `cfp.ts` | 8 | Mixed | CFP management & submissions |
+| **cfp** | `cfp.ts` | 9 | Mixed | CFP management & submissions |
 | **communication** | `communication.ts` | 4 | Protected | Email campaigns |
 | **user** | `user.ts` | 3 | Protected | User profile management |
 | **post** | `post.ts` | 4 | Mixed | Demo (T3 Stack example) |
@@ -368,8 +368,15 @@ This document provides a comprehensive reference of all tRPC routers and their p
 - **Type**: Mutation
 - **Auth**: Protected (Event owner only)
 - **Input**: `{ id: string }`
-- **Output**: Updated `CallForPapers` object (isClosed: true)
+- **Output**: Updated `CallForPapers` object (status: 'closed')
 - **Purpose**: Close CFP early
+
+#### `cfp.reopen`
+- **Type**: Mutation
+- **Auth**: Protected (Event owner only)
+- **Input**: `{ id: string }`
+- **Output**: Updated `CallForPapers` object (status: 'open')
+- **Purpose**: Reopen a closed CFP (only if deadline hasn't passed)
 
 #### `cfp.getByEvent`
 - **Type**: Query

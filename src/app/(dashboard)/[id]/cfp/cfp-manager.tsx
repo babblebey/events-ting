@@ -25,7 +25,7 @@ import { SubmissionCard } from "@/components/cfp/submission-card";
 import { ReviewPanel } from "@/components/cfp/review-panel";
 import type { CallForPapers } from "generated/prisma";
 import type { RouterOutputs } from "@/trpc/react";
-import { HiPlus, HiLockClosed, HiLockOpen } from "react-icons/hi";
+import { HiPlus, HiLockClosed, HiLockOpen, HiInformationCircle } from "react-icons/hi";
 import { LuCircleAlert } from "react-icons/lu";
 
 type CfpSubmission =
@@ -46,6 +46,7 @@ export function CfpManager({
 }: CfpManagerProps) {
   const [showCfpForm, setShowCfpForm] = useState(false);
   const [showCloseCfpModal, setShowCloseCfpModal] = useState(false);
+  const [showReopenCfpModal, setShowReopenCfpModal] = useState(false);
   const [selectedSubmission, setSelectedSubmission] =
     useState<CfpSubmission | null>(null);
   const [statusFilter, setStatusFilter] = useState<
@@ -53,6 +54,15 @@ export function CfpManager({
   >("all");
 
   const utils = api.useUtils();
+
+  // Query CFP data from the server
+  const { data: cfp } = api.cfp.getCfpByEventId.useQuery(
+    { eventId },
+    {
+      // Use server-rendered data to avoid loading state on initial render
+      placeholderData: initialCfp ? { ...initialCfp, event: { id: eventId, name: eventName, slug: eventSlug } } : undefined,
+    },
+  );
 
   // Query CFP data with infinite scroll
   const {
@@ -62,12 +72,12 @@ export function CfpManager({
     isFetchingNextPage,
   } = api.cfp.listSubmissions.useInfiniteQuery(
     {
-      cfpId: initialCfp?.id ?? "",
+      cfpId: cfp?.id ?? "",
       status: statusFilter,
       limit: 12,
     },
     {
-      enabled: !!initialCfp,
+      enabled: !!cfp,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
@@ -75,12 +85,12 @@ export function CfpManager({
   // Query all submissions for counts (no pagination needed for stats)
   const { data: allCfpData } = api.cfp.listSubmissions.useInfiniteQuery(
     {
-      cfpId: initialCfp?.id ?? "",
+      cfpId: cfp?.id ?? "",
       status: "all",
       limit: 100,
     },
     {
-      enabled: !!initialCfp,
+      enabled: !!cfp,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
@@ -88,6 +98,15 @@ export function CfpManager({
   const closeCfpMutation = api.cfp.close.useMutation({
     onSuccess: () => {
       setShowCloseCfpModal(false);
+      void utils.cfp.getCfpByEventId.invalidate({ eventId });
+      void utils.cfp.listSubmissions.invalidate();
+    },
+  });
+
+  const reopenCfpMutation = api.cfp.reopen.useMutation({
+    onSuccess: () => {
+      setShowReopenCfpModal(false);
+      void utils.cfp.getCfpByEventId.invalidate({ eventId });
       void utils.cfp.listSubmissions.invalidate();
     },
   });
@@ -107,18 +126,18 @@ export function CfpManager({
   ).length;
 
   const handleCloseCfp = () => {
-    if (!initialCfp) return;
-    closeCfpMutation.mutate({ cfpId: initialCfp.id });
+    if (!cfp) return;
+    closeCfpMutation.mutate({ cfpId: cfp.id });
   };
 
   const cfpUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/events/${eventSlug}/cfp`;
-  const isOpen = initialCfp?.status === "open";
-  const deadlinePassed = initialCfp
-    ? new Date(initialCfp.deadline) < new Date()
+  const isOpen = cfp?.status === "open";
+  const deadlinePassed = cfp
+    ? new Date(cfp.deadline) < new Date()
     : false;
 
   // No CFP exists yet
-  if (!initialCfp) {
+  if (!cfp) {
     return (
       <div className="rounded-lg border border-gray-200 bg-white p-8 text-center dark:border-gray-700 dark:bg-gray-800">
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
@@ -147,6 +166,7 @@ export function CfpManager({
               eventId={eventId}
               onSuccess={() => {
                 setShowCfpForm(false);
+                void utils.cfp.getCfpByEventId.invalidate({ eventId });
                 void utils.cfp.listSubmissions.invalidate();
               }}
               onCancel={() => setShowCfpForm(false)}
@@ -184,7 +204,7 @@ export function CfpManager({
             <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <p>
                 <span className="font-medium">Deadline:</span>{" "}
-                {new Date(initialCfp.deadline).toLocaleDateString("en-US", {
+                {new Date(cfp.deadline).toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
                   year: "numeric",
@@ -239,7 +259,7 @@ export function CfpManager({
             <Button color="gray" size="sm" onClick={() => setShowCfpForm(true)}>
               Edit Settings
             </Button>
-            {isOpen && (
+            {isOpen ? (
               <Button
                 color="red"
                 size="sm"
@@ -248,7 +268,16 @@ export function CfpManager({
               >
                 Close CFP
               </Button>
-            )}
+            ) : !deadlinePassed ? (
+              <Button
+                color="blue"
+                size="sm"
+                onClick={() => setShowReopenCfpModal(true)}
+                disabled={reopenCfpMutation.isPending}
+              >
+                Reopen CFP
+              </Button>
+            ) : null}
           </div>
         </div>
       </div>
@@ -338,9 +367,10 @@ export function CfpManager({
         <ModalBody>
           <CfpForm
             eventId={eventId}
-            existingCfp={initialCfp}
+            existingCfp={cfp}
             onSuccess={() => {
               setShowCfpForm(false);
+              void utils.cfp.getCfpByEventId.invalidate({ eventId });
               void utils.cfp.listSubmissions.invalidate();
             }}
             onCancel={() => setShowCfpForm(false)}
@@ -397,6 +427,51 @@ export function CfpManager({
             color="gray"
             onClick={() => setShowCloseCfpModal(false)}
             disabled={closeCfpMutation.isPending}
+          >
+            Cancel
+          </Button>
+        </ModalFooter>
+      </Modal>
+
+      {/* Reopen CFP Confirmation Modal */}
+      <Modal
+        show={showReopenCfpModal}
+        onClose={() => setShowReopenCfpModal(false)}
+      >
+        <ModalHeader>Reopen Call for Papers</ModalHeader>
+        <ModalBody>
+          <div className="space-y-4">
+            <Alert color="info" icon={HiInformationCircle}>
+              <span className="font-medium">Info:</span> Speakers will be able to
+              submit proposals again until the deadline on{" "}
+              {cfp && new Date(cfp.deadline).toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+              })}.
+            </Alert>
+            <p className="text-gray-600 dark:text-gray-300">
+              Are you sure you want to reopen the Call for Papers?
+            </p>
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            color="blue"
+            onClick={() => {
+              if (!cfp) return;
+              reopenCfpMutation.mutate({ cfpId: cfp.id });
+            }}
+            disabled={reopenCfpMutation.isPending}
+          >
+            {reopenCfpMutation.isPending ? "Reopening..." : "Reopen CFP"}
+          </Button>
+          <Button
+            color="gray"
+            onClick={() => setShowReopenCfpModal(false)}
+            disabled={reopenCfpMutation.isPending}
           >
             Cancel
           </Button>

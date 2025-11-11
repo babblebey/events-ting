@@ -6,6 +6,7 @@
  * Procedures:
  * - open: Create a new CFP for an event
  * - close: Close an existing CFP
+ * - reopen: Reopen a closed CFP (if deadline hasn't passed)
  * - update: Update CFP guidelines and settings
  * - submitProposal: Submit a session proposal (public)
  * - listSubmissions: List all submissions for organizer review
@@ -54,6 +55,10 @@ const updateCfpSchema = z.object({
 });
 
 const closeCfpSchema = z.object({
+  cfpId: z.string().cuid("Invalid CFP ID"),
+});
+
+const reopenCfpSchema = z.object({
   cfpId: z.string().cuid("Invalid CFP ID"),
 });
 
@@ -323,6 +328,65 @@ export const cfpRouter = createTRPCRouter({
         where: { id: input.cfpId },
         data: {
           status: "closed",
+        },
+      });
+
+      return updatedCfp;
+    }),
+
+  /**
+   * Reopen a closed CFP (allow submissions again)
+   * @protected Requires authentication and organizer permission
+   */
+  reopen: protectedProcedure
+    .input(reopenCfpSchema)
+    .mutation(async ({ ctx, input }) => {
+      // Get CFP with event for permission check
+      const cfp = await ctx.db.callForPapers.findUnique({
+        where: { id: input.cfpId },
+        include: {
+          event: {
+            select: {
+              organizerId: true,
+            },
+          },
+        },
+      });
+
+      if (!cfp) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "CFP not found",
+        });
+      }
+
+      if (cfp.event.organizerId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only the event organizer can reopen the CFP",
+        });
+      }
+
+      if (cfp.status === "open") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "CFP is already open",
+        });
+      }
+
+      // Business rule: Cannot reopen if deadline has passed
+      if (cfp.deadline < new Date()) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot reopen CFP after the deadline has passed. Please update the deadline first.",
+        });
+      }
+
+      // Reopen CFP
+      const updatedCfp = await ctx.db.callForPapers.update({
+        where: { id: input.cfpId },
+        data: {
+          status: "open",
         },
       });
 
