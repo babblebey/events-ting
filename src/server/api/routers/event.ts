@@ -503,7 +503,7 @@ export const eventRouter = createTRPCRouter({
         where: { organizerId: userId, status: "published" },
       }),
       ctx.db.event.count({
-        where: { organizerId: userId, status: "archived" },
+        where: { organizerId: userId, isArchived: true },
       }),
     ]);
 

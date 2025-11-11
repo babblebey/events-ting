@@ -90,7 +90,8 @@ export function EmptyState({
   const handleViewAllEvents = () => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete("status");
-    router.push(`/dashboard?${params.toString()}`, { scroll: false });
+    const queryString = params.toString();
+    router.push(`/dashboard${queryString ? "?" + queryString : ""}`, { scroll: false });
   };
 
   // No events created at all
