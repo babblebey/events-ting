@@ -25,7 +25,7 @@ import { SubmissionCard } from "@/components/cfp/submission-card";
 import { ReviewPanel } from "@/components/cfp/review-panel";
 import type { CallForPapers } from "generated/prisma";
 import type { RouterOutputs } from "@/trpc/react";
-import { HiPlus, HiLockClosed, HiLockOpen } from "react-icons/hi";
+import { HiPlus, HiLockClosed, HiLockOpen, HiInformationCircle } from "react-icons/hi";
 import { LuCircleAlert } from "react-icons/lu";
 
 type CfpSubmission =
@@ -46,6 +46,7 @@ export function CfpManager({
 }: CfpManagerProps) {
   const [showCfpForm, setShowCfpForm] = useState(false);
   const [showCloseCfpModal, setShowCloseCfpModal] = useState(false);
+  const [showReopenCfpModal, setShowReopenCfpModal] = useState(false);
   const [selectedSubmission, setSelectedSubmission] =
     useState<CfpSubmission | null>(null);
   const [statusFilter, setStatusFilter] = useState<
@@ -88,6 +89,13 @@ export function CfpManager({
   const closeCfpMutation = api.cfp.close.useMutation({
     onSuccess: () => {
       setShowCloseCfpModal(false);
+      void utils.cfp.listSubmissions.invalidate();
+    },
+  });
+
+  const reopenCfpMutation = api.cfp.reopen.useMutation({
+    onSuccess: () => {
+      setShowReopenCfpModal(false);
       void utils.cfp.listSubmissions.invalidate();
     },
   });
@@ -239,7 +247,7 @@ export function CfpManager({
             <Button color="gray" size="sm" onClick={() => setShowCfpForm(true)}>
               Edit Settings
             </Button>
-            {isOpen && (
+            {isOpen ? (
               <Button
                 color="red"
                 size="sm"
@@ -248,7 +256,16 @@ export function CfpManager({
               >
                 Close CFP
               </Button>
-            )}
+            ) : !deadlinePassed ? (
+              <Button
+                color="success"
+                size="sm"
+                onClick={() => setShowReopenCfpModal(true)}
+                disabled={reopenCfpMutation.isPending}
+              >
+                Reopen CFP
+              </Button>
+            ) : null}
           </div>
         </div>
       </div>
@@ -397,6 +414,51 @@ export function CfpManager({
             color="gray"
             onClick={() => setShowCloseCfpModal(false)}
             disabled={closeCfpMutation.isPending}
+          >
+            Cancel
+          </Button>
+        </ModalFooter>
+      </Modal>
+
+      {/* Reopen CFP Confirmation Modal */}
+      <Modal
+        show={showReopenCfpModal}
+        onClose={() => setShowReopenCfpModal(false)}
+      >
+        <ModalHeader>Reopen Call for Papers</ModalHeader>
+        <ModalBody>
+          <div className="space-y-4">
+            <Alert color="info" icon={HiInformationCircle}>
+              <span className="font-medium">Info:</span> Speakers will be able to
+              submit proposals again until the deadline on{" "}
+              {initialCfp && new Date(initialCfp.deadline).toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+              })}.
+            </Alert>
+            <p className="text-gray-600 dark:text-gray-300">
+              Are you sure you want to reopen the Call for Papers?
+            </p>
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            color="success"
+            onClick={() => {
+              if (!initialCfp) return;
+              reopenCfpMutation.mutate({ cfpId: initialCfp.id });
+            }}
+            disabled={reopenCfpMutation.isPending}
+          >
+            {reopenCfpMutation.isPending ? "Reopening..." : "Reopen CFP"}
+          </Button>
+          <Button
+            color="gray"
+            onClick={() => setShowReopenCfpModal(false)}
+            disabled={reopenCfpMutation.isPending}
           >
             Cancel
           </Button>
