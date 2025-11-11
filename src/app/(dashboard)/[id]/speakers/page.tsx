@@ -6,7 +6,15 @@
  */
 
 import { useState } from "react";
-import { Button, Alert, Spinner } from "flowbite-react";
+import {
+  Button,
+  Alert,
+  Spinner,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "flowbite-react";
 import { LuCircleAlert } from "react-icons/lu";
 import { HiPlus } from "react-icons/hi";
 import { api } from "@/trpc/react";
@@ -128,28 +136,30 @@ export default function SpeakersPage() {
       )}
 
       {/* Add Speaker Modal */}
-      {showAddModal && (
-        <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black">
-          <div className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
-            <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-white">
-              Add Speaker
-            </h2>
-            <SpeakerForm
-              eventId={eventId}
-              onSuccess={handleAddSuccess}
-              onCancel={() => setShowAddModal(false)}
-            />
-          </div>
-        </div>
-      )}
+      <Modal
+        show={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        size="3xl"
+      >
+        <ModalHeader>Add Speaker</ModalHeader>
+        <ModalBody>
+          <SpeakerForm
+            eventId={eventId}
+            onSuccess={handleAddSuccess}
+            onCancel={() => setShowAddModal(false)}
+          />
+        </ModalBody>
+      </Modal>
 
       {/* Edit Speaker Modal */}
-      {editingSpeaker && editingSpeakerData && (
-        <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black">
-          <div className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
-            <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-white">
-              Edit Speaker
-            </h2>
+      <Modal
+        show={!!editingSpeaker && !!editingSpeakerData}
+        onClose={() => setEditingSpeaker(null)}
+        size="3xl"
+      >
+        <ModalHeader>Edit Speaker</ModalHeader>
+        <ModalBody>
+          {editingSpeakerData && (
             <SpeakerForm
               eventId={eventId}
               initialData={{
@@ -166,46 +176,42 @@ export default function SpeakersPage() {
               onSuccess={handleEditSuccess}
               onCancel={() => setEditingSpeaker(null)}
             />
-          </div>
-        </div>
-      )}
+          )}
+        </ModalBody>
+      </Modal>
 
       {/* Delete Confirmation Modal */}
-      {deletingSpeaker && (
-        <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
-          <div className="relative w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
-            <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-white">
-              Delete Speaker
-            </h2>
-            <div className="space-y-4">
-              <Alert color="warning" icon={LuCircleAlert}>
-                <span className="font-medium">Warning:</span> This will also
-                remove the speaker from all assigned sessions. This action
-                cannot be undone.
-              </Alert>
-              <p className="text-gray-600 dark:text-gray-300">
-                Are you sure you want to delete this speaker?
-              </p>
-            </div>
-            <div className="mt-6 flex justify-end space-x-3">
-              <Button
-                color="gray"
-                onClick={() => setDeletingSpeaker(null)}
-                disabled={deleteMutation.isPending}
-              >
-                Cancel
-              </Button>
-              <Button
-                color="failure"
-                onClick={() => deletingSpeaker && handleDelete(deletingSpeaker)}
-                disabled={deleteMutation.isPending}
-              >
-                {deleteMutation.isPending ? "Deleting..." : "Delete Speaker"}
-              </Button>
-            </div>
+      <Modal show={!!deletingSpeaker} onClose={() => setDeletingSpeaker(null)}>
+        <ModalHeader>Delete Speaker</ModalHeader>
+        <ModalBody>
+          <div className="space-y-4">
+            <Alert color="warning" icon={LuCircleAlert}>
+              <span className="font-medium">Warning:</span> This will also
+              remove the speaker from all assigned sessions. This action cannot
+              be undone.
+            </Alert>
+            <p className="text-gray-600 dark:text-gray-300">
+              Are you sure you want to delete this speaker?
+            </p>
           </div>
-        </div>
-      )}
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            color="failure"
+            onClick={() => deletingSpeaker && handleDelete(deletingSpeaker)}
+            disabled={deleteMutation.isPending}
+          >
+            {deleteMutation.isPending ? "Deleting..." : "Delete Speaker"}
+          </Button>
+          <Button
+            color="gray"
+            onClick={() => setDeletingSpeaker(null)}
+            disabled={deleteMutation.isPending}
+          >
+            Cancel
+          </Button>
+        </ModalFooter>
+      </Modal>
     </div>
   );
 }
