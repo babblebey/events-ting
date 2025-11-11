@@ -126,7 +126,17 @@ src/
 ├── new/
 │   └── page.tsx              # Create new event
 ├── layout.tsx                # Dashboard auth wrapper
-└── page.tsx                  # Dashboard home (event list)
+└── page.tsx                  # User events dashboard (main dashboard)
+```
+
+**Dashboard Components** (`src/components/dashboard/`):
+```
+dashboard/
+├── events-dashboard.tsx      # Main dashboard client component
+├── event-card.tsx            # Event card with metadata
+├── status-filter.tsx         # Status filter tabs
+├── empty-state.tsx           # Empty state variants
+└── dashboard-header.tsx      # Dashboard header with actions
 ```
 
 **`events/`** - Public event pages

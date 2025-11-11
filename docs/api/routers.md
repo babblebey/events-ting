@@ -7,6 +7,8 @@ This document provides a comprehensive reference of all tRPC routers and their p
 **Total Routers**: 9  
 **Location**: `src/server/api/routers/`
 
+**Note**: The Dashboard module primarily uses the existing `event.list` procedure with organizer filtering. No separate dashboard router is needed for the MVP.
+
 ---
 
 ## Quick Reference Table

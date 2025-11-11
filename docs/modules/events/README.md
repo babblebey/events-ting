@@ -51,6 +51,15 @@ The Events module is the foundational module of the Events-Ting platform. It han
 - [Data Model](./data-model.md) - Prisma schema and relationships
 - [Workflows](./workflows.md) - Step-by-step event management flows
 
+## Primary Entry Point
+
+The primary entry point for event management is the **[Dashboard Module](../dashboard/)**, which displays all user events and provides navigation to individual event management dashboards. Users access event management through:
+
+1. Sign in → Redirected to `/dashboard` (main dashboard)
+2. View event cards with key metrics
+3. Click "Manage" → Navigate to `/[id]` (event-specific dashboard)
+4. Access all event management features from there
+
 ## Key Concepts
 
 ### Event Status

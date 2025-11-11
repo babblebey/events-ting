@@ -31,6 +31,7 @@ Understanding how everything fits together:
 Feature-specific documentation organized by domain:
 
 #### Core Modules
+- **[Dashboard](./modules/dashboard/)** - User events dashboard and portfolio management
 - **[Events](./modules/events/)** - Event creation, publishing, and management
 - **[Tickets](./modules/tickets/)** - Ticket types and availability management
 - **[Registration](./modules/registration/)** - Attendee registration and check-in
@@ -88,6 +89,18 @@ Contributing and development workflows:
 ## 🎯 Quick Reference
 
 ### Common Tasks
+
+**Viewing Your Events**:
+1. Sign in to Events-Ting
+2. Automatically redirected to `/dashboard`
+3. View all your events with status filters
+4. Click "Manage" to access event-specific dashboard
+
+**Creating a New Event**:
+1. Navigate to dashboard (after sign-in)
+2. Click "Create Event" button
+3. Fill in event details
+4. Submit and manage your new event
 
 **Creating a New Module**:
 1. Define Prisma schema in `prisma/schema.prisma`
