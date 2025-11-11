@@ -48,7 +48,10 @@ export function RegistrationForm({
     },
   });
 
-  const handleChange = (field: keyof CreateRegistrationInput, value: string) => {
+  const handleChange = (
+    field: keyof CreateRegistrationInput,
+    value: string,
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error for this field
     if (errors[field]) {
@@ -95,11 +98,11 @@ export function RegistrationForm({
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
           <HiCheckCircle className="h-10 w-10 text-green-600" />
         </div>
-        
+
         <h2 className="mb-2 text-2xl font-bold text-gray-900">
           Registration Confirmed! 🎉
         </h2>
-        
+
         <p className="mb-4 text-gray-600">
           You&apos;re all set for <strong>{eventName}</strong>
         </p>
@@ -108,15 +111,16 @@ export function RegistrationForm({
           <p className="mb-2 text-sm font-semibold text-gray-700">
             Your Registration Code:
           </p>
-          <p className="text-2xl font-mono font-bold text-blue-600 tracking-wider">
+          <p className="font-mono text-2xl font-bold tracking-wider text-blue-600">
             {registrationCode}
           </p>
         </div>
 
         <p className="text-sm text-gray-600">
-          A confirmation email has been sent to <strong>{formData.email}</strong>
+          A confirmation email has been sent to{" "}
+          <strong>{formData.email}</strong>
         </p>
-        
+
         <p className="mt-4 text-sm text-gray-500">
           Keep your registration code handy for event check-in.
         </p>
@@ -172,7 +176,9 @@ export function RegistrationForm({
           className="w-full sm:w-auto"
           size="lg"
         >
-          {createMutation.isPending ? "Registering..." : "Complete Registration"}
+          {createMutation.isPending
+            ? "Registering..."
+            : "Complete Registration"}
         </Button>
       </div>
     </form>

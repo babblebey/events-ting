@@ -88,9 +88,10 @@ export function CampaignCard({
   const deliveryRate = showStats
     ? Math.round((campaign.delivered / campaign.totalRecipients!) * 100)
     : 0;
-  const openRate = showStats && campaign.delivered > 0
-    ? Math.round((campaign.opens / campaign.delivered) * 100)
-    : 0;
+  const openRate =
+    showStats && campaign.delivered > 0
+      ? Math.round((campaign.opens / campaign.delivered) * 100)
+      : 0;
 
   return (
     <Card>
@@ -102,7 +103,7 @@ export function CampaignCard({
             </h3>
             {getStatusBadge()}
           </div>
-          
+
           <div className="mt-2 flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
             <span>📧 {getRecipientTypeLabel()}</span>
             {campaign.totalRecipients !== null && (
@@ -120,7 +121,10 @@ export function CampaignCard({
 
           {campaign.sentAt && (
             <div className="mt-2 text-sm text-gray-500">
-              Sent {formatDistanceToNow(new Date(campaign.sentAt), { addSuffix: true })}
+              Sent{" "}
+              {formatDistanceToNow(new Date(campaign.sentAt), {
+                addSuffix: true,
+              })}
             </div>
           )}
         </div>
@@ -136,22 +140,20 @@ export function CampaignCard({
             </p>
             <p className="text-xs text-gray-500">{deliveryRate}% rate</p>
           </div>
-          
+
           <div>
             <p className="text-sm text-gray-600">Opens</p>
-            <p className="text-2xl font-bold text-blue-600">
-              {campaign.opens}
-            </p>
+            <p className="text-2xl font-bold text-blue-600">{campaign.opens}</p>
             <p className="text-xs text-gray-500">{openRate}% rate</p>
           </div>
-          
+
           <div>
             <p className="text-sm text-gray-600">Clicks</p>
             <p className="text-2xl font-bold text-green-600">
               {campaign.clicks}
             </p>
           </div>
-          
+
           <div>
             <p className="text-sm text-gray-600">Bounces</p>
             <p className="text-2xl font-bold text-red-600">
@@ -168,19 +170,19 @@ export function CampaignCard({
             View Details
           </Button>
         )}
-        
+
         {campaign.status === "draft" && onEdit && (
           <Button size="sm" color="light" onClick={onEdit}>
             Edit
           </Button>
         )}
-        
+
         {campaign.status === "draft" && onSend && (
           <Button size="sm" onClick={onSend}>
             Send Now
           </Button>
         )}
-        
+
         {campaign.status === "draft" && onSchedule && (
           <Button size="sm" color="info" onClick={onSchedule}>
             Schedule

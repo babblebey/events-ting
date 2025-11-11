@@ -150,7 +150,9 @@ export function TicketTypeForm({
             type="number"
             required
             value={formData.quantity ?? ""}
-            onChange={(e) => handleChange("quantity", parseInt(e.target.value, 10))}
+            onChange={(e) =>
+              handleChange("quantity", parseInt(e.target.value, 10))
+            }
             error={errors.quantity}
             placeholder="100"
             helpText="Total number of tickets available"
@@ -167,7 +169,9 @@ export function TicketTypeForm({
                 id="price"
                 name="price"
                 value={formData.price ?? 0}
-                onChange={(e) => handleChange("price", parseFloat(e.target.value))}
+                onChange={(e) =>
+                  handleChange("price", parseFloat(e.target.value))
+                }
                 className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
                 placeholder="0.00"
                 step="0.01"
@@ -192,7 +196,7 @@ export function TicketTypeForm({
       </FormSection>
 
       <FormSection title="Sale Period (Optional)">
-        <p className="text-sm text-gray-500 mb-4">
+        <p className="mb-4 text-sm text-gray-500">
           Limit when tickets can be purchased. Leave empty for no restrictions.
         </p>
 
@@ -207,7 +211,10 @@ export function TicketTypeForm({
                 : ""
             }
             onChange={(e) =>
-              handleChange("saleStart", e.target.value ? new Date(e.target.value) : undefined)
+              handleChange(
+                "saleStart",
+                e.target.value ? new Date(e.target.value) : undefined,
+              )
             }
             error={errors.saleStart}
             helpText="When tickets become available"
@@ -223,7 +230,10 @@ export function TicketTypeForm({
                 : ""
             }
             onChange={(e) =>
-              handleChange("saleEnd", e.target.value ? new Date(e.target.value) : undefined)
+              handleChange(
+                "saleEnd",
+                e.target.value ? new Date(e.target.value) : undefined,
+              )
             }
             error={errors.saleEnd}
             helpText="When ticket sales close"
@@ -233,12 +243,21 @@ export function TicketTypeForm({
 
       <div className="flex items-center justify-end gap-3 border-t pt-6">
         {onCancel && (
-          <Button color="gray" onClick={onCancel} type="button" disabled={isLoading}>
+          <Button
+            color="gray"
+            onClick={onCancel}
+            type="button"
+            disabled={isLoading}
+          >
             Cancel
           </Button>
         )}
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : isEditing ? "Update Ticket Type" : "Create Ticket Type"}
+          {isLoading
+            ? "Saving..."
+            : isEditing
+              ? "Update Ticket Type"
+              : "Create Ticket Type"}
         </Button>
       </div>
     </form>

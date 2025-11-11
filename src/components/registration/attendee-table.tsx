@@ -6,7 +6,17 @@
  */
 
 import { useState } from "react";
-import { Badge, Button, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, TextInput } from "flowbite-react";
+import {
+  Badge,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeadCell,
+  TableRow,
+  TextInput,
+} from "flowbite-react";
 import { HiSearch, HiDownload, HiMail, HiTrash } from "react-icons/hi";
 import { api } from "@/trpc/react";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -23,7 +33,9 @@ export function AttendeeTable({
   onCancelRegistration,
 }: AttendeeTableProps) {
   const [search, setSearch] = useState("");
-  const [selectedTicketType, setSelectedTicketType] = useState<string | undefined>(undefined);
+  const [selectedTicketType, setSelectedTicketType] = useState<
+    string | undefined
+  >(undefined);
 
   // Debounce search input to reduce API calls
   const debouncedSearch = useDebounce(search, 500);
@@ -39,7 +51,7 @@ export function AttendeeTable({
       },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
-      }
+      },
     );
 
   // Fetch ticket types for filter
@@ -122,8 +134,10 @@ export function AttendeeTable({
           {ticketTypes && ticketTypes.items.length > 0 && (
             <select
               value={selectedTicketType ?? ""}
-              onChange={(e) => setSelectedTicketType(e.target.value || undefined)}
-              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2.5 text-sm text-gray-900 dark:text-white focus:border-blue-500 focus:ring-blue-500"
+              onChange={(e) =>
+                setSelectedTicketType(e.target.value || undefined)
+              }
+              className="rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             >
               <option value="">All Ticket Types</option>
               {ticketTypes.items.map((ticket) => (
@@ -180,7 +194,10 @@ export function AttendeeTable({
               </TableRow>
             ) : (
               allRegistrations.map((registration) => (
-                <TableRow key={registration.id} className="bg-white border-gray-200 dark:border-gray-700 dark:bg-gray-800">
+                <TableRow
+                  key={registration.id}
+                  className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+                >
                   <TableCell className="font-medium text-gray-900 dark:text-white">
                     {registration.name}
                   </TableCell>

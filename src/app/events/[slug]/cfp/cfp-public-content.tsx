@@ -1,8 +1,8 @@
 /**
  * CfpPublicContent Component
- * 
+ *
  * Displays CFP information and handles the submission form.
- * 
+ *
  * @module app/events/[slug]/cfp/cfp-public-content
  */
 
@@ -42,14 +42,16 @@ export function CfpPublicContent({ cfp, eventName }: CfpPublicContentProps) {
         <p className="text-gray-600 dark:text-gray-400">
           The Call for Papers for {eventName} is currently being prepared.
           <br />
-          Please check back soon or contact the event organizers for more information.
+          Please check back soon or contact the event organizers for more
+          information.
         </p>
       </div>
     );
   }
 
   // CFP is closed or deadline has passed
-  const isClosed = cfp.status === "closed" || new Date(cfp.deadline) < new Date();
+  const isClosed =
+    cfp.status === "closed" || new Date(cfp.deadline) < new Date();
 
   if (isClosed) {
     return (
@@ -63,14 +65,15 @@ export function CfpPublicContent({ cfp, eventName }: CfpPublicContentProps) {
         <p className="text-red-800 dark:text-red-200">
           The Call for Papers for {eventName} has closed.
           <br />
-          {cfp.status === "closed" 
+          {cfp.status === "closed"
             ? "Thank you for your interest!"
-            : `The submission deadline was ${new Date(cfp.deadline).toLocaleDateString("en-US", {
+            : `The submission deadline was ${new Date(
+                cfp.deadline,
+              ).toLocaleDateString("en-US", {
                 month: "long",
                 day: "numeric",
                 year: "numeric",
-              })}.`
-          }
+              })}.`}
         </p>
       </div>
     );
@@ -89,7 +92,8 @@ export function CfpPublicContent({ cfp, eventName }: CfpPublicContentProps) {
         <p className="text-green-800 dark:text-green-200">
           Thank you for submitting your proposal to {eventName}.
           <br />
-          We&apos;ll review your submission and notify you via email with our decision.
+          We&apos;ll review your submission and notify you via email with our
+          decision.
         </p>
       </div>
     );
@@ -103,10 +107,8 @@ export function CfpPublicContent({ cfp, eventName }: CfpPublicContentProps) {
         <h3 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">
           Submission Guidelines
         </h3>
-        <div className="prose max-w-none dark:prose-invert">
-          <Markdown>
-            {cfp.guidelines}
-          </Markdown>
+        <div className="prose dark:prose-invert max-w-none">
+          <Markdown>{cfp.guidelines}</Markdown>
         </div>
       </div>
 
@@ -131,16 +133,19 @@ export function CfpPublicContent({ cfp, eventName }: CfpPublicContentProps) {
       {Array.isArray(cfp.requiredFields) && cfp.requiredFields.length > 0 && (
         <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-900">
           <p className="text-sm font-medium text-yellow-900 dark:text-yellow-100">
-            📝 Required information: {cfp.requiredFields.map((field: unknown) => {
-              const fieldStr = String(field);
-              const fieldLabels: Record<string, string> = {
-                bio: "Speaker Bio",
-                sessionFormat: "Session Format",
-                duration: "Session Duration",
-                photo: "Speaker Photo"
-              };
-              return fieldLabels[fieldStr] ?? fieldStr;
-            }).join(", ")}
+            📝 Required information:{" "}
+            {cfp.requiredFields
+              .map((field: unknown) => {
+                const fieldStr = String(field);
+                const fieldLabels: Record<string, string> = {
+                  bio: "Speaker Bio",
+                  sessionFormat: "Session Format",
+                  duration: "Session Duration",
+                  photo: "Speaker Photo",
+                };
+                return fieldLabels[fieldStr] ?? fieldStr;
+              })
+              .join(", ")}
           </p>
         </div>
       )}
@@ -150,10 +155,16 @@ export function CfpPublicContent({ cfp, eventName }: CfpPublicContentProps) {
         <h3 className="mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
           Submit Your Proposal
         </h3>
-        
+
         <CfpSubmissionForm
           cfpId={cfp.id}
-          requiredFields={Array.isArray(cfp.requiredFields) ? cfp.requiredFields as Array<"bio" | "sessionFormat" | "duration" | "photo"> : []}
+          requiredFields={
+            Array.isArray(cfp.requiredFields)
+              ? (cfp.requiredFields as Array<
+                  "bio" | "sessionFormat" | "duration" | "photo"
+                >)
+              : []
+          }
           onSuccess={() => setIsSubmitted(true)}
         />
       </div>

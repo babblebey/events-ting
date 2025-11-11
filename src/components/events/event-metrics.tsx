@@ -8,7 +8,12 @@
 import { Card } from "flowbite-react";
 import { HiOutlineUsers } from "react-icons/hi2";
 import { PiMicrophoneStage } from "react-icons/pi";
-import { HiOutlineTicket, HiOutlineMail, HiOutlineTrendingUp, HiOutlineCalendar } from "react-icons/hi";
+import {
+  HiOutlineTicket,
+  HiOutlineMail,
+  HiOutlineTrendingUp,
+  HiOutlineCalendar,
+} from "react-icons/hi";
 
 interface Metric {
   label: string;
@@ -128,7 +133,7 @@ export function EventMetrics({
 
 function MetricCard({ metric }: { metric: Metric }) {
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="transition-shadow hover:shadow-md">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -157,7 +162,7 @@ function MetricCard({ metric }: { metric: Metric }) {
             </div>
           )}
         </div>
-        <div className="rounded-lg bg-primary-100 p-3 text-primary-600 dark:bg-primary-900 dark:text-primary-300">
+        <div className="bg-primary-100 text-primary-600 dark:bg-primary-900 dark:text-primary-300 rounded-lg p-3">
           {metric.icon}
         </div>
       </div>

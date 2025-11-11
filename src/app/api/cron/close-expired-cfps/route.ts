@@ -1,12 +1,12 @@
 /**
  * Cron Job: Close Expired CFPs
- * 
+ *
  * Automatically closes Call for Papers that have passed their deadline.
  * This endpoint should be called periodically (e.g., every hour) by a cron service.
- * 
+ *
  * FR-030: Automatic CFP closure
  * Research Section 7: Scheduled deadline enforcement
- * 
+ *
  * @module app/api/cron/close-expired-cfps
  */
 
@@ -15,11 +15,11 @@ import { db } from "@/server/db";
 
 /**
  * GET /api/cron/close-expired-cfps
- * 
+ *
  * Closes all CFPs where:
  * - status is "open"
  * - deadline has passed
- * 
+ *
  * Authentication: Uses Vercel Cron Secret or custom auth header
  */
 export async function GET(request: NextRequest) {
@@ -28,10 +28,7 @@ export async function GET(request: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
 
   if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
@@ -70,7 +67,7 @@ export async function GET(request: NextRequest) {
     // Log results
     console.log(
       `[CRON] Closed ${closedCfpIds.length} expired CFPs:`,
-      closedCfpIds
+      closedCfpIds,
     );
 
     return NextResponse.json({
@@ -86,7 +83,7 @@ export async function GET(request: NextRequest) {
         error: "Internal server error",
         message: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

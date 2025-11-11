@@ -1,4 +1,7 @@
-import { CardListSkeleton, PageHeaderSkeleton } from "@/components/ui/skeletons";
+import {
+  CardListSkeleton,
+  PageHeaderSkeleton,
+} from "@/components/ui/skeletons";
 
 /**
  * Loading state for communications page
@@ -7,7 +10,7 @@ export default function Loading() {
   return (
     <div className="space-y-6">
       <PageHeaderSkeleton />
-      
+
       {/* Campaign stats skeleton */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (

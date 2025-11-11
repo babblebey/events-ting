@@ -9,7 +9,8 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 
 export const metadata: Metadata = {
   title: "Events-Ting | All-in-One Event Management",
-  description: "Create, manage, and scale your events with ease. Ticketing, registration, schedules, CFP, and more.",
+  description:
+    "Create, manage, and scale your events with ease. Ticketing, registration, schedules, CFP, and more.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
@@ -26,9 +27,7 @@ export default function RootLayout({
       <body className="bg-white dark:bg-gray-900">
         <TRPCReactProvider>
           <ThemeProvider>
-            <ToastProvider>
-              {children}
-            </ToastProvider>
+            <ToastProvider>{children}</ToastProvider>
           </ThemeProvider>
         </TRPCReactProvider>
       </body>

@@ -39,7 +39,8 @@ export const ticketRouter = createTRPCRouter({
       if (event.organizerId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "You do not have permission to create tickets for this event",
+          message:
+            "You do not have permission to create tickets for this event",
         });
       }
 
@@ -52,7 +53,11 @@ export const ticketRouter = createTRPCRouter({
       }
 
       // Validate sale period
-      if (input.saleStart && input.saleEnd && input.saleStart >= input.saleEnd) {
+      if (
+        input.saleStart &&
+        input.saleEnd &&
+        input.saleStart >= input.saleEnd
+      ) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Sale start must be before sale end",
@@ -72,7 +77,7 @@ export const ticketRouter = createTRPCRouter({
       z.object({
         eventId: z.string().cuid(),
         includeUnavailable: z.boolean().default(false),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const now = new Date();
@@ -178,14 +183,14 @@ export const ticketRouter = createTRPCRouter({
           acc[date] = (acc[date] ?? 0) + 1;
           return acc;
         },
-        {} as Record<string, number>
+        {} as Record<string, number>,
       );
 
       const registrationsByDayArray = Object.entries(registrationsByDay).map(
         ([date, count]) => ({
           date,
           count,
-        })
+        }),
       );
 
       return {
@@ -245,7 +250,11 @@ export const ticketRouter = createTRPCRouter({
       }
 
       // Cannot change price after tickets sold
-      if (data.price !== undefined && soldCount > 0 && data.price !== ticketType.price.toNumber()) {
+      if (
+        data.price !== undefined &&
+        soldCount > 0 &&
+        data.price !== ticketType.price.toNumber()
+      ) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Cannot change price after tickets have been sold",

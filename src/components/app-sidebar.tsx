@@ -113,13 +113,13 @@ function AppSidebar({
         <FlowbiteSidebar
           id="app-sidebar"
           aria-label="Application sidebar"
-          className={`fixed top-0 left-0 z-40 h-screen w-72 transition-transform border-r border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 ${
+          className={`fixed top-0 left-0 z-40 h-screen w-72 border-r border-gray-200 bg-white transition-transform dark:border-gray-700 dark:bg-gray-800 ${
             isOpen ? "translate-x-0" : "-translate-x-full"
           } sm:translate-x-0`}
         >
           {
-          // WIP - DEFFERED
-          /* <div className="border-b">
+            // WIP - DEFFERED
+            /* <div className="border-b">
             <h5 id="drawer-navigation-label" className="text-base font-semibold text-gray-500 uppercase dark:text-gray-400">Menu</h5>
             <button 
               type="button" 
@@ -131,11 +131,14 @@ function AppSidebar({
               <svg aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>
               <span className="sr-only">Close menu</span>
             </button>
-          </div> */}
+          </div> */
+          }
           <SidebarItems className="flex h-full flex-col">
             <SidebarItemGroup>
               {menuItems?.map((item) => {
-                const IconComponent = item.icon ? iconMap[item.icon] : undefined;
+                const IconComponent = item.icon
+                  ? iconMap[item.icon]
+                  : undefined;
                 return item.children ? (
                   <SidebarCollapse
                     key={item.href}
@@ -149,7 +152,12 @@ function AppSidebar({
                     ))}
                   </SidebarCollapse>
                 ) : (
-                  <SidebarItem key={item.href} href={item.href} icon={IconComponent} className="flex justify-between">
+                  <SidebarItem
+                    key={item.href}
+                    href={item.href}
+                    icon={IconComponent}
+                    className="flex justify-between"
+                  >
                     <span>{item.label}</span>
                     {/* {item.count !== undefined && (
                       <span className="inline-flex items-center justify-center w-3 h-3 p-3 text-sm font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300">
@@ -163,9 +171,15 @@ function AppSidebar({
             {footerItems && footerItems.length > 0 && (
               <SidebarItemGroup className="mt-auto">
                 {footerItems.map((item) => {
-                  const IconComponent = item.icon ? iconMap[item.icon] : undefined;
+                  const IconComponent = item.icon
+                    ? iconMap[item.icon]
+                    : undefined;
                   return (
-                    <SidebarItem key={`footer-${item.label}`} href={item.href} icon={IconComponent}>
+                    <SidebarItem
+                      key={`footer-${item.label}`}
+                      href={item.href}
+                      icon={IconComponent}
+                    >
                       {item.label}
                     </SidebarItem>
                   );

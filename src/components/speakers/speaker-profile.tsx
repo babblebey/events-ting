@@ -8,7 +8,11 @@
 import { Card, Badge } from "flowbite-react";
 import { FaXTwitter } from "react-icons/fa6";
 import { AiOutlineLinkedin, AiOutlineGithub } from "react-icons/ai";
-import { HiOutlineMail, HiOutlineGlobeAlt, HiOutlineCalendar } from "react-icons/hi";
+import {
+  HiOutlineMail,
+  HiOutlineGlobeAlt,
+  HiOutlineCalendar,
+} from "react-icons/hi";
 import { HiOutlineMapPin, HiOutlineClock } from "react-icons/hi2";
 import Link from "next/link";
 import { formatDate, formatTimeRange } from "@/lib/utils/date";
@@ -55,13 +59,17 @@ interface SpeakerProfileProps {
   showBackLink?: boolean;
 }
 
-export function SpeakerProfile({ speaker, eventSlug, showBackLink = true }: SpeakerProfileProps) {
+export function SpeakerProfile({
+  speaker,
+  eventSlug,
+  showBackLink = true,
+}: SpeakerProfileProps) {
   const sessions = speaker.speakerSessions ?? [];
   const upcomingSessions = sessions.filter(
-    (s) => new Date(s.scheduleEntry.startTime) > new Date()
+    (s) => new Date(s.scheduleEntry.startTime) > new Date(),
   );
   const pastSessions = sessions.filter(
-    (s) => new Date(s.scheduleEntry.startTime) <= new Date()
+    (s) => new Date(s.scheduleEntry.startTime) <= new Date(),
   );
 
   return (
@@ -78,7 +86,7 @@ export function SpeakerProfile({ speaker, eventSlug, showBackLink = true }: Spea
 
       {/* Profile Header */}
       <Card>
-        <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex flex-col gap-6 md:flex-row">
           {/* Profile Photo */}
           <div className="shrink-0">
             {speaker.photo ? (
@@ -88,7 +96,7 @@ export function SpeakerProfile({ speaker, eventSlug, showBackLink = true }: Spea
                 className="h-32 w-32 rounded-full object-cover"
               />
             ) : (
-              <div className="h-32 w-32 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+              <div className="flex h-32 w-32 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700">
                 <span className="text-4xl font-bold text-gray-500 dark:text-gray-400">
                   {speaker.name
                     .split(" ")
@@ -111,11 +119,11 @@ export function SpeakerProfile({ speaker, eventSlug, showBackLink = true }: Spea
             </p>
 
             {/* Social Links */}
-            <div className="flex gap-3 mt-4">
+            <div className="mt-4 flex gap-3">
               {speaker.email && (
                 <a
                   href={`mailto:${speaker.email}`}
-                  className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                  className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                 >
                   <HiOutlineMail className="h-4 w-4" />
                   Email
@@ -126,7 +134,7 @@ export function SpeakerProfile({ speaker, eventSlug, showBackLink = true }: Spea
                   href={`https://twitter.com/${speaker.twitter.replace(/^@/, "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                  className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                 >
                   <FaXTwitter className="h-4 w-4" />
                   Twitter
@@ -137,7 +145,7 @@ export function SpeakerProfile({ speaker, eventSlug, showBackLink = true }: Spea
                   href={`https://github.com/${speaker.github}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                  className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                 >
                   <AiOutlineGithub className="h-4 w-4" />
                   GitHub
@@ -148,7 +156,7 @@ export function SpeakerProfile({ speaker, eventSlug, showBackLink = true }: Spea
                   href={speaker.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                  className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                 >
                   <AiOutlineLinkedin className="h-4 w-4" />
                   LinkedIn
@@ -159,7 +167,7 @@ export function SpeakerProfile({ speaker, eventSlug, showBackLink = true }: Spea
                   href={speaker.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                  className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                 >
                   <HiOutlineGlobeAlt className="h-4 w-4" />
                   Website
@@ -171,10 +179,10 @@ export function SpeakerProfile({ speaker, eventSlug, showBackLink = true }: Spea
 
         {/* Biography */}
         <div className="mt-6 border-t pt-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+          <h2 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
             About
           </h2>
-          <p className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap">
+          <p className="whitespace-pre-wrap text-gray-600 dark:text-gray-300">
             {speaker.bio}
           </p>
         </div>
@@ -183,13 +191,13 @@ export function SpeakerProfile({ speaker, eventSlug, showBackLink = true }: Spea
       {/* Sessions */}
       {sessions.length > 0 && (
         <Card>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-white">
             Sessions
           </h2>
 
           {upcomingSessions.length > 0 && (
             <div className="mb-6">
-              <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-3">
+              <h3 className="mb-3 text-sm font-semibold text-gray-500 uppercase dark:text-gray-400">
                 Upcoming
               </h3>
               <div className="space-y-4">
@@ -206,7 +214,7 @@ export function SpeakerProfile({ speaker, eventSlug, showBackLink = true }: Spea
 
           {pastSessions.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-3">
+              <h3 className="mb-3 text-sm font-semibold text-gray-500 uppercase dark:text-gray-400">
                 Past Sessions
               </h3>
               <div className="space-y-4">
@@ -226,7 +234,7 @@ export function SpeakerProfile({ speaker, eventSlug, showBackLink = true }: Spea
       {/* No Sessions Message */}
       {sessions.length === 0 && (
         <Card>
-          <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+          <p className="py-8 text-center text-gray-500 dark:text-gray-400">
             This speaker has no scheduled sessions yet.
           </p>
         </Card>
@@ -262,10 +270,10 @@ function SessionCard({
   const { scheduleEntry, role } = session;
 
   return (
-    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
+    <div className="rounded-lg border border-gray-200 p-4 transition-shadow hover:shadow-md dark:border-gray-700">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="mb-2 flex items-center gap-2">
             <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
               {scheduleEntry.title}
             </h4>
@@ -276,7 +284,7 @@ function SessionCard({
             )}
           </div>
 
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+          <p className="mb-3 text-sm text-gray-600 dark:text-gray-300">
             {scheduleEntry.description}
           </p>
 
@@ -287,7 +295,11 @@ function SessionCard({
             </div>
             <div className="flex items-center gap-1">
               <HiOutlineClock className="h-4 w-4" />
-              {formatTimeRange(scheduleEntry.startTime, scheduleEntry.endTime, timezone)}
+              {formatTimeRange(
+                scheduleEntry.startTime,
+                scheduleEntry.endTime,
+                timezone,
+              )}
             </div>
             {scheduleEntry.location && (
               <div className="flex items-center gap-1">

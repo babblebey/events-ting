@@ -6,21 +6,16 @@ import { EventCard } from "@/components/events/event-card";
 import { EmptyState } from "@/components/ui/empty-state";
 
 export function EventsListClient() {
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-  } = api.event.list.useInfiniteQuery(
-    {
-      limit: 12,
-      status: "published",
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    }
-  );
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    api.event.list.useInfiniteQuery(
+      {
+        limit: 12,
+        status: "published",
+      },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      },
+    );
 
   if (isLoading) {
     return <EventsListSkeleton />;
@@ -46,7 +41,10 @@ export function EventsListClient() {
             key={event.id}
             event={{
               ...event,
-              locationType: event.locationType as "in-person" | "virtual" | "hybrid",
+              locationType: event.locationType as
+                | "in-person"
+                | "virtual"
+                | "hybrid",
             }}
             showOrganizer
           />

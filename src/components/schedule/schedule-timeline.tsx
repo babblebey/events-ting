@@ -148,7 +148,9 @@ export function ScheduleTimeline({
             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
           />
         </svg>
-        <p className="mt-2 text-gray-500 dark:text-gray-400">No schedule entries yet</p>
+        <p className="mt-2 text-gray-500 dark:text-gray-400">
+          No schedule entries yet
+        </p>
         <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">
           Add your first session to get started
         </p>
@@ -230,7 +232,12 @@ export function ScheduleTimeline({
           <p className="text-gray-500 dark:text-gray-400">
             No entries match the selected filters
           </p>
-          <Button size="sm" color="light" className="mt-3" onClick={clearFilters}>
+          <Button
+            size="sm"
+            color="light"
+            className="mt-3"
+            onClick={clearFilters}
+          >
             Clear Filters
           </Button>
         </div>
@@ -240,10 +247,15 @@ export function ScheduleTimeline({
             {/* Date Header */}
             <div className="sticky top-0 z-10 border-b border-gray-200 bg-white/80 pb-2 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/80">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {formatDate(new Date(date + "T00:00:00Z"), timezone, "EEEE, MMMM d, yyyy")}
+                {formatDate(
+                  new Date(date + "T00:00:00Z"),
+                  timezone,
+                  "EEEE, MMMM d, yyyy",
+                )}
               </h2>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {dateEntries.length} session{dateEntries.length !== 1 ? "s" : ""}
+                {dateEntries.length} session
+                {dateEntries.length !== 1 ? "s" : ""}
               </p>
             </div>
 

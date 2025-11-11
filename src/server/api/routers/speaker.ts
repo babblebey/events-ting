@@ -108,35 +108,33 @@ export const speakerRouter = createTRPCRouter({
    * List all speakers for an event
    * Public access for displaying speaker directory
    */
-  list: publicProcedure
-    .input(eventIdSchema)
-    .query(async ({ ctx, input }) => {
-      return ctx.db.speaker.findMany({
-        where: { eventId: input.eventId },
-        orderBy: { name: "asc" },
-        include: {
-          speakerSessions: {
-            include: {
-              scheduleEntry: {
-                select: {
-                  id: true,
-                  title: true,
-                  startTime: true,
-                  endTime: true,
-                  location: true,
-                  track: true,
-                },
-              },
-            },
-            orderBy: {
-              scheduleEntry: {
-                startTime: "asc",
+  list: publicProcedure.input(eventIdSchema).query(async ({ ctx, input }) => {
+    return ctx.db.speaker.findMany({
+      where: { eventId: input.eventId },
+      orderBy: { name: "asc" },
+      include: {
+        speakerSessions: {
+          include: {
+            scheduleEntry: {
+              select: {
+                id: true,
+                title: true,
+                startTime: true,
+                endTime: true,
+                location: true,
+                track: true,
               },
             },
           },
+          orderBy: {
+            scheduleEntry: {
+              startTime: "asc",
+            },
+          },
         },
-      });
-    }),
+      },
+    });
+  }),
 
   /**
    * Get a single speaker by ID with all session details
@@ -336,7 +334,8 @@ export const speakerRouter = createTRPCRouter({
       if (speaker.event.organizerId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "You do not have permission to assign speakers for this event",
+          message:
+            "You do not have permission to assign speakers for this event",
         });
       }
 
@@ -408,7 +407,8 @@ export const speakerRouter = createTRPCRouter({
       if (speaker.event.organizerId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "You do not have permission to unassign speakers for this event",
+          message:
+            "You do not have permission to unassign speakers for this event",
         });
       }
 

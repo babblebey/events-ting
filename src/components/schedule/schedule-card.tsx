@@ -59,14 +59,15 @@ export function ScheduleCard({
     networking: "yellow",
   };
 
-  const sessionTypeColor = sessionTypeColors[entry.sessionType ?? "talk"] ?? "blue";
+  const sessionTypeColor =
+    sessionTypeColors[entry.sessionType ?? "talk"] ?? "blue";
 
   return (
     <Card className="relative overflow-visible">
       {/* Track Indicator Bar */}
       {entry.track && (
         <div
-          className="absolute left-0 top-0 h-full w-1 rounded-l-lg"
+          className="absolute top-0 left-0 h-full w-1 rounded-l-lg"
           style={{ backgroundColor: entry.trackColor ?? "#6B7280" }}
           title={`Track: ${entry.track}`}
         />
@@ -157,7 +158,7 @@ export function ScheduleCard({
         <p className="text-gray-600 dark:text-gray-400">{entry.description}</p>
 
         {/* Metadata Grid */}
-        <div className="grid grid-cols-1 gap-3 border-t border-gray-200 pt-3 dark:border-gray-700 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 border-t border-gray-200 pt-3 sm:grid-cols-3 dark:border-gray-700">
           {/* Time */}
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <HiClock className="h-5 w-5 shrink-0" />

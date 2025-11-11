@@ -7,7 +7,7 @@ import type { db } from "@/server/db";
 /**
  * Communication Router
  * Handles email campaign management and bulk sending
- * 
+ *
  * FR Coverage: FR-043 through FR-050, FR-056, FR-057
  */
 export const communicationRouter = createTRPCRouter({
@@ -28,7 +28,7 @@ export const communicationRouter = createTRPCRouter({
           "custom",
         ]),
         recipientFilter: z.record(z.any()).optional(), // JSON filter criteria
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Verify organizer owns this event
@@ -47,7 +47,8 @@ export const communicationRouter = createTRPCRouter({
       if (event.organizerId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "You do not have permission to create campaigns for this event",
+          message:
+            "You do not have permission to create campaigns for this event",
         });
       }
 
@@ -74,7 +75,7 @@ export const communicationRouter = createTRPCRouter({
         eventId: z.string().cuid(),
         limit: z.number().min(1).max(100).default(20),
         cursor: z.string().cuid().optional(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       // Verify organizer owns this event
@@ -93,7 +94,8 @@ export const communicationRouter = createTRPCRouter({
       if (event.organizerId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "You do not have permission to view campaigns for this event",
+          message:
+            "You do not have permission to view campaigns for this event",
         });
       }
 
@@ -104,7 +106,8 @@ export const communicationRouter = createTRPCRouter({
         orderBy: { createdAt: "desc" },
       });
 
-      const nextCursor = campaigns.length > input.limit ? campaigns[input.limit]?.id : undefined;
+      const nextCursor =
+        campaigns.length > input.limit ? campaigns[input.limit]?.id : undefined;
 
       return {
         items: campaigns.slice(0, input.limit),
@@ -158,14 +161,11 @@ export const communicationRouter = createTRPCRouter({
         id: z.string().cuid(),
         subject: z.string().min(1).max(200).optional(),
         body: z.string().min(10).optional(),
-        recipientType: z.enum([
-          "all_attendees",
-          "ticket_type",
-          "speakers",
-          "custom",
-        ]).optional(),
+        recipientType: z
+          .enum(["all_attendees", "ticket_type", "speakers", "custom"])
+          .optional(),
         recipientFilter: z.record(z.any()).optional(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const campaign = await ctx.db.emailCampaign.findUnique({
@@ -273,7 +273,10 @@ export const communicationRouter = createTRPCRouter({
       // Send emails asynchronously (in production, use a queue)
       // For now, we'll send synchronously but this should be moved to a background job
       try {
-        const { successCount, failureCount } = await sendBulkEmails(campaign, recipients);
+        const { successCount, failureCount } = await sendBulkEmails(
+          campaign,
+          recipients,
+        );
 
         // Update campaign status to sent
         await ctx.db.emailCampaign.update({
@@ -286,8 +289,8 @@ export const communicationRouter = createTRPCRouter({
           },
         });
 
-        return { 
-          success: true, 
+        return {
+          success: true,
           recipientCount: recipients.length,
           successCount,
           failureCount,
@@ -318,7 +321,7 @@ export const communicationRouter = createTRPCRouter({
       z.object({
         id: z.string().cuid(),
         scheduledFor: z.coerce.date(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const campaign = await ctx.db.emailCampaign.findUnique({
@@ -394,7 +397,8 @@ export const communicationRouter = createTRPCRouter({
       if (campaign.event.organizerId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "You do not have permission to view this campaign's statistics",
+          message:
+            "You do not have permission to view this campaign's statistics",
         });
       }
 
@@ -417,11 +421,11 @@ export const communicationRouter = createTRPCRouter({
  */
 async function getRecipients(
   ctx: { db: typeof db },
-  campaign: { 
-    eventId: string; 
-    recipientType: string; 
+  campaign: {
+    eventId: string;
+    recipientType: string;
     recipientFilter: unknown;
-  }
+  },
 ): Promise<Array<{ email: string; name: string }>> {
   switch (campaign.recipientType) {
     case "all_attendees": {
@@ -491,7 +495,7 @@ async function getRecipients(
       let emails: Array<{ email: string; name: string }> | undefined;
 
       if (filter && typeof filter === "object" && "emails" in filter) {
-  const maybe = (filter as Record<string, unknown>).emails;
+        const maybe = (filter as Record<string, unknown>).emails;
         if (Array.isArray(maybe)) {
           // Narrow array items to expected shape
           emails = maybe as Array<{ email: string; name: string }>;
@@ -521,24 +525,26 @@ async function getRecipients(
  */
 async function sendBulkEmails(
   campaign: { id: string; subject: string; body: string },
-  recipients: Array<{ email: string; name: string }>
+  recipients: Array<{ email: string; name: string }>,
 ): Promise<{ successCount: number; failureCount: number }> {
   // Send emails using the email service with retry logic
   const results = await sendBatchEmailsWithRetry({
-    recipients: recipients.map(r => r.email),
+    recipients: recipients.map((r) => r.email),
     subject: campaign.subject,
     html: campaign.body,
     tags: [
-      { name: 'campaign_id', value: campaign.id },
-      { name: 'type', value: 'campaign' }
+      { name: "campaign_id", value: campaign.id },
+      { name: "type", value: "campaign" },
     ],
   });
 
   // Count successes and failures
-  const successCount = results.filter(r => r.success).length;
-  const failureCount = results.filter(r => !r.success).length;
+  const successCount = results.filter((r) => r.success).length;
+  const failureCount = results.filter((r) => !r.success).length;
 
-  console.log(`[CAMPAIGN] Campaign ${campaign.id} sent: ${successCount} successful, ${failureCount} failed`);
+  console.log(
+    `[CAMPAIGN] Campaign ${campaign.id} sent: ${successCount} successful, ${failureCount} failed`,
+  );
 
   return { successCount, failureCount };
 }

@@ -35,12 +35,13 @@ export const CfpRejected = ({
         <Container style={container}>
           <Section style={box}>
             <Heading style={heading}>Proposal Update</Heading>
-            
+
             <Text style={paragraph}>Hi {speakerName},</Text>
-            
+
             <Text style={paragraph}>
-              Thank you for submitting your proposal to <strong>{eventName}</strong>. 
-              We appreciate the time and effort you put into your submission.
+              Thank you for submitting your proposal to{" "}
+              <strong>{eventName}</strong>. We appreciate the time and effort
+              you put into your submission.
             </Text>
 
             <Section style={infoBox}>
@@ -49,9 +50,9 @@ export const CfpRejected = ({
             </Section>
 
             <Text style={paragraph}>
-              After careful consideration, we&apos;ve decided not to move forward 
-              with your proposal for this event. This was a difficult decision as 
-              we received many high-quality submissions.
+              After careful consideration, we&apos;ve decided not to move
+              forward with your proposal for this event. This was a difficult
+              decision as we received many high-quality submissions.
             </Text>
 
             {reviewNotes && (
@@ -61,19 +62,13 @@ export const CfpRejected = ({
               </Section>
             )}
 
-            <Text style={paragraph}>
-              We encourage you to:
-            </Text>
+            <Text style={paragraph}>We encourage you to:</Text>
 
-            <Text style={listItem}>
-              • Consider submitting to future events
-            </Text>
+            <Text style={listItem}>• Consider submitting to future events</Text>
             <Text style={listItem}>
               • Use any feedback to refine your proposal
             </Text>
-            <Text style={listItem}>
-              • Stay connected with our community
-            </Text>
+            <Text style={listItem}>• Stay connected with our community</Text>
 
             <Section style={buttonContainer}>
               <Link style={button} href={eventUrl}>
@@ -84,12 +79,13 @@ export const CfpRejected = ({
             <Hr style={hr} />
 
             <Text style={footer}>
-              Thank you again for your interest in {eventName}. We hope to see 
+              Thank you again for your interest in {eventName}. We hope to see
               your submissions at future events!
             </Text>
 
             <Text style={footer}>
-              Best regards,<br />
+              Best regards,
+              <br />
               The {eventName} Team
             </Text>
           </Section>

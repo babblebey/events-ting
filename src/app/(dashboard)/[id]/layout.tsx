@@ -13,7 +13,10 @@ interface EventDashboardLayoutProps {
   params: Promise<{ id: string }>;
 }
 
-async function DashboardLayout({ children, params }: EventDashboardLayoutProps) {
+async function DashboardLayout({
+  children,
+  params,
+}: EventDashboardLayoutProps) {
   const { id: eventId } = await params;
   const session = await auth();
 

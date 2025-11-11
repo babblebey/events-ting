@@ -79,7 +79,7 @@ export function EventForm({ initialData, onSuccess }: EventFormProps) {
 
   const handleChange = (
     field: keyof CreateEventInput,
-    value: string | Date
+    value: string | Date,
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error for this field
@@ -219,7 +219,7 @@ export function EventForm({ initialData, onSuccess }: EventFormProps) {
             onChange={(e) =>
               handleChange(
                 "locationType",
-                e.target.value as "in-person" | "virtual" | "hybrid"
+                e.target.value as "in-person" | "virtual" | "hybrid",
               )
             }
             required
@@ -301,7 +301,9 @@ export function EventForm({ initialData, onSuccess }: EventFormProps) {
                 ? new Date(formData.startDate).toISOString().split("T")[0]
                 : ""
             }
-            onChange={(e) => handleChange("startDate", new Date(e.target.value))}
+            onChange={(e) =>
+              handleChange("startDate", new Date(e.target.value))
+            }
             error={errors.startDate}
           />
 
@@ -321,7 +323,10 @@ export function EventForm({ initialData, onSuccess }: EventFormProps) {
         </div>
       </FormSection>
 
-      <FormSection title="Visibility" description="Control who can see your event">
+      <FormSection
+        title="Visibility"
+        description="Control who can see your event"
+      >
         <div className="mb-4">
           <div className="mb-2 block">
             <Label htmlFor="status">Publication Status</Label>
@@ -332,7 +337,7 @@ export function EventForm({ initialData, onSuccess }: EventFormProps) {
             onChange={(e) =>
               handleChange(
                 "status",
-                e.target.value as "draft" | "published" | "archived"
+                e.target.value as "draft" | "published" | "archived",
               )
             }
           >

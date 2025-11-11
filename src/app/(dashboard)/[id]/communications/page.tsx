@@ -1,7 +1,13 @@
 "use client";
 
 import { use, useState } from "react";
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "flowbite-react";
+import {
+  Button,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "flowbite-react";
 import { HiPlus } from "react-icons/hi";
 import { api } from "@/trpc/react";
 import { CampaignCard } from "@/components/communications/campaign-card";
@@ -17,9 +23,13 @@ interface CommunicationsPageProps {
 
 function CommunicationsPage({ params }: CommunicationsPageProps) {
   const [showEditor, setShowEditor] = useState(false);
-  const [editingCampaignId, setEditingCampaignId] = useState<string | undefined>();
+  const [editingCampaignId, setEditingCampaignId] = useState<
+    string | undefined
+  >();
   const [showScheduleModal, setShowScheduleModal] = useState(false);
-  const [schedulingCampaignId, setSchedulingCampaignId] = useState<string | undefined>();
+  const [schedulingCampaignId, setSchedulingCampaignId] = useState<
+    string | undefined
+  >();
   const [scheduledDate, setScheduledDate] = useState("");
 
   const { id: eventId } = use(params);
@@ -38,7 +48,7 @@ function CommunicationsPage({ params }: CommunicationsPageProps) {
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-    }
+    },
   );
 
   const campaigns = campaignsData?.pages.flatMap((page) => page.items) ?? [];
@@ -81,7 +91,11 @@ function CommunicationsPage({ params }: CommunicationsPageProps) {
   };
 
   const handleSend = (campaignId: string) => {
-    if (confirm("Are you sure you want to send this campaign? This action cannot be undone.")) {
+    if (
+      confirm(
+        "Are you sure you want to send this campaign? This action cannot be undone.",
+      )
+    ) {
       sendMutation.mutate({ id: campaignId });
     }
   };
@@ -109,9 +123,12 @@ function CommunicationsPage({ params }: CommunicationsPageProps) {
     <div className="space-y-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Email Campaigns</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Email Campaigns
+          </h1>
           <p className="mt-2 text-gray-600">
-            Send email communications to your attendees, speakers, or specific groups
+            Send email communications to your attendees, speakers, or specific
+            groups
           </p>
         </div>
         <Button onClick={handleCreateNew}>
@@ -130,8 +147,10 @@ function CommunicationsPage({ params }: CommunicationsPageProps) {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
             <HiPlus className="h-8 w-8 text-blue-600 dark:text-blue-300" />
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">No campaigns yet</h3>
-          <p className="mb-6 mt-2 text-gray-600">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+            No campaigns yet
+          </h3>
+          <p className="mt-2 mb-6 text-gray-600">
             Create your first email campaign to communicate with your attendees
           </p>
           <Button className="m-auto" onClick={handleCreateNew}>
@@ -182,7 +201,10 @@ function CommunicationsPage({ params }: CommunicationsPageProps) {
       </Modal>
 
       {/* Schedule Modal */}
-      <Modal show={showScheduleModal} onClose={() => setShowScheduleModal(false)}>
+      <Modal
+        show={showScheduleModal}
+        onClose={() => setShowScheduleModal(false)}
+      >
         <ModalHeader>Schedule Campaign</ModalHeader>
         <ModalBody>
           <div className="space-y-4">
@@ -205,7 +227,9 @@ function CommunicationsPage({ params }: CommunicationsPageProps) {
             <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-800">
               <p className="font-semibold">📅 Scheduling Notes</p>
               <ul className="mt-2 list-inside list-disc space-y-1">
-                <li>Campaign will be sent automatically at the scheduled time</li>
+                <li>
+                  Campaign will be sent automatically at the scheduled time
+                </li>
                 <li>Make sure the date/time is in your local timezone</li>
                 <li>You can cancel scheduled campaigns before they are sent</li>
               </ul>

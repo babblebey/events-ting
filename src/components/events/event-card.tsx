@@ -48,18 +48,20 @@ export function EventCard({
   const isPast = new Date(event.endDate) < new Date();
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card className="transition-shadow hover:shadow-lg">
       <div className="flex flex-col gap-4">
         {/* Header with badges */}
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <Link
               href={
-                showActions ? `/(dashboard)/${event.id}` : `/events/${event.slug}`
+                showActions
+                  ? `/(dashboard)/${event.id}`
+                  : `/events/${event.slug}`
               }
               className="hover:text-primary-600"
             >
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white line-clamp-2">
+              <h3 className="line-clamp-2 text-xl font-bold text-gray-900 dark:text-white">
                 {event.name}
               </h3>
             </Link>
@@ -80,7 +82,7 @@ export function EventCard({
         </div>
 
         {/* Description */}
-        <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-3">
+        <p className="line-clamp-3 text-sm text-gray-600 dark:text-gray-300">
           {event.description}
         </p>
 

@@ -1,9 +1,9 @@
 /**
  * ReviewPanel Component
- * 
+ *
  * Panel for organizers to review CFP submissions.
  * Includes score input, review notes textarea, and accept/reject actions.
- * 
+ *
  * @module components/cfp/review-panel
  */
 
@@ -14,7 +14,8 @@ import { Button, Label, Textarea } from "flowbite-react";
 import { api } from "@/trpc/react";
 import type { RouterOutputs } from "@/trpc/react";
 
-type CfpSubmission = RouterOutputs["cfp"]["listSubmissions"]["submissions"][number];
+type CfpSubmission =
+  RouterOutputs["cfp"]["listSubmissions"]["submissions"][number];
 
 interface ReviewPanelProps {
   submission: CfpSubmission;
@@ -23,7 +24,7 @@ interface ReviewPanelProps {
 
 export function ReviewPanel({ submission, onSuccess }: ReviewPanelProps) {
   const [reviewScore, setReviewScore] = useState<number | null>(
-    submission.reviewScore ?? null
+    submission.reviewScore ?? null,
   );
   const [reviewNotes, setReviewNotes] = useState(submission.reviewNotes ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -94,13 +95,15 @@ export function ReviewPanel({ submission, onSuccess }: ReviewPanelProps) {
         <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
           {submission.title}
         </h2>
-        
+
         <div className="mb-4 flex flex-wrap gap-3">
           <div className="rounded-lg bg-gray-100 px-3 py-1 text-sm dark:bg-gray-800">
-            <span className="font-semibold">Format:</span> {submission.sessionFormat}
+            <span className="font-semibold">Format:</span>{" "}
+            {submission.sessionFormat}
           </div>
           <div className="rounded-lg bg-gray-100 px-3 py-1 text-sm dark:bg-gray-800">
-            <span className="font-semibold">Duration:</span> {submission.duration} min
+            <span className="font-semibold">Duration:</span>{" "}
+            {submission.duration} min
           </div>
           <div className="rounded-lg bg-gray-100 px-3 py-1 text-sm dark:bg-gray-800">
             <span className="font-semibold">Status:</span> {submission.status}
@@ -135,9 +138,7 @@ export function ReviewPanel({ submission, onSuccess }: ReviewPanelProps) {
 
         {/* Score Selection */}
         <div className="mb-4">
-          <Label className="mb-2 block">
-            Score (1-5)
-          </Label>
+          <Label className="mb-2 block">Score (1-5)</Label>
           <div className="flex gap-2">
             {[1, 2, 3, 4, 5].map((score) => (
               <button

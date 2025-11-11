@@ -1,9 +1,9 @@
 /**
  * CfpManager Component
- * 
+ *
  * Client component for managing Call for Papers.
  * Handles CFP creation, submission list, and review workflow.
- * 
+ *
  * @module app/(dashboard)/[id]/cfp/cfp-manager
  */
 
@@ -19,7 +19,8 @@ import type { CallForPapers } from "generated/prisma";
 import type { RouterOutputs } from "@/trpc/react";
 import { HiPlus, HiLockClosed, HiLockOpen } from "react-icons/hi";
 
-type CfpSubmission = RouterOutputs["cfp"]["listSubmissions"]["submissions"][number];
+type CfpSubmission =
+  RouterOutputs["cfp"]["listSubmissions"]["submissions"][number];
 
 interface CfpManagerProps {
   eventId: string;
@@ -35,8 +36,11 @@ export function CfpManager({
   initialCfp,
 }: CfpManagerProps) {
   const [showCfpForm, setShowCfpForm] = useState(false);
-  const [selectedSubmission, setSelectedSubmission] = useState<CfpSubmission | null>(null);
-  const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "accepted" | "rejected">("all");
+  const [selectedSubmission, setSelectedSubmission] =
+    useState<CfpSubmission | null>(null);
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "pending" | "accepted" | "rejected"
+  >("all");
 
   const utils = api.useUtils();
 
@@ -55,7 +59,7 @@ export function CfpManager({
     {
       enabled: !!initialCfp,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-    }
+    },
   );
 
   // Query all submissions for counts (no pagination needed for stats)
@@ -68,7 +72,7 @@ export function CfpManager({
     {
       enabled: !!initialCfp,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-    }
+    },
   );
 
   const closeCfpMutation = api.cfp.close.useMutation({
@@ -81,20 +85,32 @@ export function CfpManager({
   const allSubmissions =
     allCfpData?.pages.flatMap((page) => page.submissions) ?? [];
   const totalCount = allSubmissions.length;
-  const pendingCount = allSubmissions.filter((s) => s.status === "pending").length;
-  const acceptedCount = allSubmissions.filter((s) => s.status === "accepted").length;
-  const rejectedCount = allSubmissions.filter((s) => s.status === "rejected").length;
+  const pendingCount = allSubmissions.filter(
+    (s) => s.status === "pending",
+  ).length;
+  const acceptedCount = allSubmissions.filter(
+    (s) => s.status === "accepted",
+  ).length;
+  const rejectedCount = allSubmissions.filter(
+    (s) => s.status === "rejected",
+  ).length;
 
   const handleCloseCfp = () => {
     if (!initialCfp) return;
-    if (confirm("Are you sure you want to close the Call for Papers? Speakers will no longer be able to submit proposals.")) {
+    if (
+      confirm(
+        "Are you sure you want to close the Call for Papers? Speakers will no longer be able to submit proposals.",
+      )
+    ) {
       closeCfpMutation.mutate({ cfpId: initialCfp.id });
     }
   };
 
   const cfpUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/events/${eventSlug}/cfp`;
   const isOpen = initialCfp?.status === "open";
-  const deadlinePassed = initialCfp ? new Date(initialCfp.deadline) < new Date() : false;
+  const deadlinePassed = initialCfp
+    ? new Date(initialCfp.deadline) < new Date()
+    : false;
 
   // No CFP exists yet
   if (!initialCfp) {
@@ -107,14 +123,19 @@ export function CfpManager({
           No Call for Papers Yet
         </h3>
         <p className="mb-6 text-gray-600 dark:text-gray-400">
-          Open a Call for Papers to invite speakers to submit session proposals for {eventName}.
+          Open a Call for Papers to invite speakers to submit session proposals
+          for {eventName}.
         </p>
         <Button onClick={() => setShowCfpForm(true)} className="m-auto">
           Open Call for Papers
         </Button>
 
         {/* CFP Creation Modal */}
-        <Modal show={showCfpForm} onClose={() => setShowCfpForm(false)} size="3xl">
+        <Modal
+          show={showCfpForm}
+          onClose={() => setShowCfpForm(false)}
+          size="3xl"
+        >
           <ModalHeader>Open Call for Papers</ModalHeader>
           <ModalBody>
             <CfpForm
@@ -141,7 +162,11 @@ export function CfpManager({
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                 Call for Papers
               </h2>
-              <Badge color={isOpen ? "success" : "gray"} size="sm" icon={isOpen ? HiLockOpen : HiLockClosed}>
+              <Badge
+                color={isOpen ? "success" : "gray"}
+                size="sm"
+                icon={isOpen ? HiLockOpen : HiLockClosed}
+              >
                 {isOpen ? "Open" : "Closed"}
               </Badge>
               {deadlinePassed && isOpen && (
@@ -164,7 +189,12 @@ export function CfpManager({
               </p>
               <p>
                 <span className="font-medium">Public Submission Page:</span>{" "}
-                <a href={cfpUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                <a
+                  href={cfpUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
                   {cfpUrl}
                 </a>
               </p>
@@ -173,19 +203,27 @@ export function CfpManager({
             {/* Submission Stats */}
             <div className="mt-4 flex gap-6">
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalCount}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {totalCount}
+                </p>
                 <p className="text-xs text-gray-500">Total Submissions</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-yellow-600">{pendingCount}</p>
+                <p className="text-2xl font-bold text-yellow-600">
+                  {pendingCount}
+                </p>
                 <p className="text-xs text-gray-500">Pending Review</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-green-600">{acceptedCount}</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {acceptedCount}
+                </p>
                 <p className="text-xs text-gray-500">Accepted</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-red-600">{rejectedCount}</p>
+                <p className="text-2xl font-bold text-red-600">
+                  {rejectedCount}
+                </p>
                 <p className="text-xs text-gray-500">Rejected</p>
               </div>
             </div>
@@ -274,7 +312,9 @@ export function CfpManager({
                     onClick={() => void fetchNextPage()}
                     disabled={isFetchingNextPage}
                   >
-                    {isFetchingNextPage ? "Loading..." : "Load More Submissions"}
+                    {isFetchingNextPage
+                      ? "Loading..."
+                      : "Load More Submissions"}
                   </Button>
                 </div>
               )}
@@ -284,7 +324,11 @@ export function CfpManager({
       </div>
 
       {/* Edit CFP Modal */}
-      <Modal show={showCfpForm} onClose={() => setShowCfpForm(false)} size="3xl">
+      <Modal
+        show={showCfpForm}
+        onClose={() => setShowCfpForm(false)}
+        size="3xl"
+      >
         <ModalHeader>Edit Call for Papers</ModalHeader>
         <ModalBody>
           <CfpForm

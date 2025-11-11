@@ -102,7 +102,7 @@ export class PaymentError extends Error {
   constructor(
     message: string,
     public readonly code: string,
-    public readonly processorError?: unknown
+    public readonly processorError?: unknown,
   ) {
     super(message);
     this.name = "PaymentError";

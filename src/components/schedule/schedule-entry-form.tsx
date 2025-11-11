@@ -72,7 +72,12 @@ export function ScheduleEntryForm({
     location: initialData?.location ?? "",
     track: initialData?.track ?? "",
     trackColor: initialData?.trackColor ?? "#3B82F6",
-    sessionType: (initialData?.sessionType ?? "talk") as "keynote" | "talk" | "workshop" | "break" | "networking",
+    sessionType: (initialData?.sessionType ?? "talk") as
+      | "keynote"
+      | "talk"
+      | "workshop"
+      | "break"
+      | "networking",
     speakerIds: initialData?.speakerIds ?? [],
   });
 
@@ -85,25 +90,27 @@ export function ScheduleEntryForm({
   // Fetch speakers for the event
   const { data: speakers } = api.speaker.list.useQuery(
     { eventId },
-    { enabled: !!eventId }
+    { enabled: !!eventId },
   );
 
   // Check for overlaps when time/location changes
   const checkOverlapQuery = api.schedule.checkOverlap.useQuery(
     {
       eventId,
-      startTime: formData.date && formData.startTime
-        ? new Date(`${formData.date}T${formData.startTime}:00Z`)
-        : new Date(),
-      endTime: formData.date && formData.endTime
-        ? new Date(`${formData.date}T${formData.endTime}:00Z`)
-        : new Date(),
+      startTime:
+        formData.date && formData.startTime
+          ? new Date(`${formData.date}T${formData.startTime}:00Z`)
+          : new Date(),
+      endTime:
+        formData.date && formData.endTime
+          ? new Date(`${formData.date}T${formData.endTime}:00Z`)
+          : new Date(),
       location: formData.location ?? undefined,
       excludeId: initialData?.id,
     },
     {
       enabled: !!(formData.date && formData.startTime && formData.endTime),
-    }
+    },
   );
 
   // Update overlap warning when query completes
@@ -149,7 +156,10 @@ export function ScheduleEntryForm({
     },
   });
 
-  const handleChange = (field: keyof CreateScheduleEntryInput, value: string | string[]) => {
+  const handleChange = (
+    field: keyof CreateScheduleEntryInput,
+    value: string | string[],
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error for this field
     if (errors[field]) {
@@ -208,8 +218,8 @@ export function ScheduleEntryForm({
         <Alert color="warning" icon={HiExclamation}>
           <span className="font-medium">Schedule Overlap Detected!</span>
           <div className="mt-2 text-sm">
-            This entry overlaps with {overlapWarning.count} other session(s) in the same
-            location:
+            This entry overlaps with {overlapWarning.count} other session(s) in
+            the same location:
             <ul className="mt-2 list-inside list-disc space-y-1">
               {overlapWarning.entries.map((entry, idx) => (
                 <li key={idx}>{entry.title}</li>
@@ -395,7 +405,8 @@ export function ScheduleEntryForm({
         ) : (
           <Alert color="info" icon={HiInformationCircle}>
             <span>
-              No speakers available. Add speakers first to assign them to sessions.
+              No speakers available. Add speakers first to assign them to
+              sessions.
             </span>
           </Alert>
         )}
@@ -403,7 +414,11 @@ export function ScheduleEntryForm({
 
       <div className="flex gap-3">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : isEditing ? "Update Entry" : "Create Entry"}
+          {isSubmitting
+            ? "Saving..."
+            : isEditing
+              ? "Update Entry"
+              : "Create Entry"}
         </Button>
 
         {onCancel && (

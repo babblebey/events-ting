@@ -1,9 +1,9 @@
 /**
  * CfpForm Component
- * 
+ *
  * Form for opening and editing Call for Papers (CFP) settings.
  * Used by event organizers to configure CFP guidelines, deadline, and required fields.
- * 
+ *
  * @module components/cfp/cfp-form
  */
 
@@ -28,19 +28,24 @@ const REQUIRED_FIELD_OPTIONS = [
   { value: "photo", label: "Speaker Photo" },
 ] as const;
 
-export function CfpForm({ eventId, existingCfp, onSuccess, onCancel }: CfpFormProps) {
+export function CfpForm({
+  eventId,
+  existingCfp,
+  onSuccess,
+  onCancel,
+}: CfpFormProps) {
   const [guidelines, setGuidelines] = useState(existingCfp?.guidelines ?? "");
   const [deadline, setDeadline] = useState(
-    existingCfp?.deadline 
-      ? new Date(existingCfp.deadline).toISOString().slice(0, 16) 
-      : ""
+    existingCfp?.deadline
+      ? new Date(existingCfp.deadline).toISOString().slice(0, 16)
+      : "",
   );
   const [requiredFields, setRequiredFields] = useState<string[]>(
-    existingCfp?.requiredFields 
-      ? (Array.isArray(existingCfp.requiredFields) 
-          ? existingCfp.requiredFields as string[]
-          : [])
-      : ["bio", "sessionFormat", "duration"]
+    existingCfp?.requiredFields
+      ? Array.isArray(existingCfp.requiredFields)
+        ? (existingCfp.requiredFields as string[])
+        : []
+      : ["bio", "sessionFormat", "duration"],
   );
   const [error, setError] = useState<string | null>(null);
 
@@ -87,23 +92,31 @@ export function CfpForm({ eventId, existingCfp, onSuccess, onCancel }: CfpFormPr
         cfpId: existingCfp.id,
         guidelines,
         deadline: deadlineDate,
-        requiredFields: requiredFields as ("bio" | "sessionFormat" | "duration" | "photo")[],
+        requiredFields: requiredFields as (
+          | "bio"
+          | "sessionFormat"
+          | "duration"
+          | "photo"
+        )[],
       });
     } else {
       openCfpMutation.mutate({
         eventId,
         guidelines,
         deadline: deadlineDate,
-        requiredFields: requiredFields as ("bio" | "sessionFormat" | "duration" | "photo")[],
+        requiredFields: requiredFields as (
+          | "bio"
+          | "sessionFormat"
+          | "duration"
+          | "photo"
+        )[],
       });
     }
   };
 
   const toggleRequiredField = (field: string) => {
     setRequiredFields((prev) =>
-      prev.includes(field)
-        ? prev.filter((f) => f !== field)
-        : [...prev, field]
+      prev.includes(field) ? prev.filter((f) => f !== field) : [...prev, field],
     );
   };
 
@@ -152,9 +165,7 @@ export function CfpForm({ eventId, existingCfp, onSuccess, onCancel }: CfpFormPr
 
       {/* Required Fields */}
       <div>
-        <Label className="mb-3 block">
-          Required Submission Fields
-        </Label>
+        <Label className="mb-3 block">Required Submission Fields</Label>
         <div className="space-y-2">
           {REQUIRED_FIELD_OPTIONS.map((option) => (
             <div key={option.value} className="flex items-center">
@@ -194,10 +205,7 @@ export function CfpForm({ eventId, existingCfp, onSuccess, onCancel }: CfpFormPr
             Cancel
           </Button>
         )}
-        <Button
-          type="submit"
-          disabled={isLoading}
-        >
+        <Button type="submit" disabled={isLoading}>
           {existingCfp ? "Update CFP" : "Open Call for Papers"}
         </Button>
       </div>

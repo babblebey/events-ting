@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Toast notification system using Flowbite React Toast
@@ -27,7 +27,7 @@ interface ToastContextValue {
     type: ToastType,
     title: string,
     message?: string,
-    duration?: number
+    duration?: number,
   ) => void;
   success: (title: string, message?: string, duration?: number) => void;
   error: (title: string, message?: string, duration?: number) => void;
@@ -53,12 +53,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const showToast = useCallback(
-    (
-      type: ToastType,
-      title: string,
-      message?: string,
-      duration = 5000
-    ) => {
+    (type: ToastType, title: string, message?: string, duration = 5000) => {
       const id = `toast-${Date.now()}-${Math.random()}`;
       const newToast: ToastMessage = { id, type, title, message, duration };
 
@@ -70,35 +65,35 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         }, duration);
       }
     },
-    [removeToast]
+    [removeToast],
   );
 
   const success = useCallback(
     (title: string, message?: string, duration?: number) => {
       showToast("success", title, message, duration);
     },
-    [showToast]
+    [showToast],
   );
 
   const error = useCallback(
     (title: string, message?: string, duration?: number) => {
       showToast("error", title, message, duration);
     },
-    [showToast]
+    [showToast],
   );
 
   const warning = useCallback(
     (title: string, message?: string, duration?: number) => {
       showToast("warning", title, message, duration);
     },
-    [showToast]
+    [showToast],
   );
 
   const info = useCallback(
     (title: string, message?: string, duration?: number) => {
       showToast("info", title, message, duration);
     },
-    [showToast]
+    [showToast],
   );
 
   return (
@@ -119,7 +114,7 @@ function ToastContainer({
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+    <div className="fixed right-4 bottom-4 z-50 flex flex-col gap-2">
       {toasts.map((toast) => (
         <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
       ))}
@@ -137,13 +132,21 @@ function ToastItem({
   const getIcon = () => {
     switch (toast.type) {
       case "success":
-        return <FiCheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />;
+        return (
+          <FiCheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+        );
       case "error":
-        return <AiOutlineCloseCircle className="h-5 w-5 text-red-600 dark:text-red-400" />;
+        return (
+          <AiOutlineCloseCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+        );
       case "warning":
-        return <LuTriangleAlert className="h-5 w-5 text-orange-600 dark:text-orange-400" />;
+        return (
+          <LuTriangleAlert className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+        );
       case "info":
-        return <HiOutlineInformationCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />;
+        return (
+          <HiOutlineInformationCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+        );
     }
   };
 

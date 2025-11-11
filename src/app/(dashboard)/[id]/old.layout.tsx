@@ -118,7 +118,7 @@ export default async function EventDashboardLayout({
                       <span className="text-sm font-medium">{item.label}</span>
                     </div>
                     {item.count !== undefined && (
-                      <span className="rounded-full bg-primary-100 px-2 py-0.5 text-xs font-medium text-primary-800 dark:bg-primary-900 dark:text-primary-200">
+                      <span className="bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-200 rounded-full px-2 py-0.5 text-xs font-medium">
                         {item.count}
                       </span>
                     )}

@@ -54,9 +54,10 @@ export function RecipientSelector({
       switch (value.recipientType) {
         case "all_attendees": {
           // Get total active registrations
-          const count = registrations?.items.filter(
-            (r: { emailStatus?: string }) => r.emailStatus === "active"
-          ).length ?? 0;
+          const count =
+            registrations?.items.filter(
+              (r: { emailStatus?: string }) => r.emailStatus === "active",
+            ).length ?? 0;
           setEstimatedRecipients(count);
           break;
         }
@@ -65,7 +66,7 @@ export function RecipientSelector({
             const count = registrations.items.filter(
               (r: { ticketType: { id: string }; emailStatus?: string }) =>
                 r.ticketType.id === selectedTicketTypeId &&
-                r.emailStatus === "active"
+                r.emailStatus === "active",
             ).length;
             setEstimatedRecipients(count);
           } else {
@@ -107,7 +108,7 @@ export function RecipientSelector({
           value={value.recipientType}
           onChange={(e) =>
             handleRecipientTypeChange(
-              e.target.value as typeof value.recipientType
+              e.target.value as typeof value.recipientType,
             )
           }
           disabled={disabled}
@@ -145,11 +146,13 @@ export function RecipientSelector({
       {value.recipientType === "custom" && (
         <Card>
           <div className="space-y-2">
-            <h4 className="font-semibold text-gray-900">Custom Recipient List</h4>
+            <h4 className="font-semibold text-gray-900">
+              Custom Recipient List
+            </h4>
             <p className="text-sm text-gray-600">
-              Custom lists allow you to send emails to specific individuals outside
-              of your standard attendee or speaker groups. You will need to provide
-              the list of email addresses when sending the campaign.
+              Custom lists allow you to send emails to specific individuals
+              outside of your standard attendee or speaker groups. You will need
+              to provide the list of email addresses when sending the campaign.
             </p>
             <div className="rounded-lg bg-yellow-50 p-3 text-sm text-yellow-800">
               ⚠️ This feature is currently in development. For now, please use
@@ -163,21 +166,23 @@ export function RecipientSelector({
       <Card>
         <div className="flex items-center justify-between">
           <div>
-            <h4 className="font-semibold text-gray-900">Estimated Recipients</h4>
+            <h4 className="font-semibold text-gray-900">
+              Estimated Recipients
+            </h4>
             <p className="text-sm text-gray-600">
-              Based on current {value.recipientType.replace("_", " ")} with active
-              email status
+              Based on current {value.recipientType.replace("_", " ")} with
+              active email status
             </p>
           </div>
           <Badge size="xl" color="info">
             <span className="text-2xl font-bold">{estimatedRecipients}</span>
           </Badge>
         </div>
-        
+
         {estimatedRecipients === 0 && value.recipientType !== "custom" && (
           <div className="mt-3 rounded-lg bg-orange-50 p-3 text-sm text-orange-800">
-            ⚠️ No recipients found matching this criteria. Make sure your event has
-            registered attendees or speakers before sending a campaign.
+            ⚠️ No recipients found matching this criteria. Make sure your event
+            has registered attendees or speakers before sending a campaign.
           </div>
         )}
       </Card>
@@ -185,16 +190,18 @@ export function RecipientSelector({
       {/* Recipient Type Descriptions */}
       <Card>
         <div className="space-y-3 text-sm">
-          <h4 className="font-semibold text-gray-900">About Recipient Groups</h4>
-          
+          <h4 className="font-semibold text-gray-900">
+            About Recipient Groups
+          </h4>
+
           <div>
             <p className="font-medium text-gray-900">📧 All Attendees</p>
             <p className="text-gray-600">
-              Sends to everyone who has registered for your event (excludes bounced
-              emails)
+              Sends to everyone who has registered for your event (excludes
+              bounced emails)
             </p>
           </div>
-          
+
           <div>
             <p className="font-medium text-gray-900">🎫 Specific Ticket Type</p>
             <p className="text-gray-600">
@@ -202,19 +209,19 @@ export function RecipientSelector({
               Early Bird)
             </p>
           </div>
-          
+
           <div>
             <p className="font-medium text-gray-900">🎤 All Speakers</p>
             <p className="text-gray-600">
               Sends to all speakers who are part of your event lineup
             </p>
           </div>
-          
+
           <div>
             <p className="font-medium text-gray-900">✏️ Custom List</p>
             <p className="text-gray-600">
-              Manually specify email addresses (useful for sponsors, volunteers, or
-              specific groups)
+              Manually specify email addresses (useful for sponsors, volunteers,
+              or specific groups)
             </p>
           </div>
         </div>

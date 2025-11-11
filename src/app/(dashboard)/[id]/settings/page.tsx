@@ -39,7 +39,10 @@ export default async function EventSettingsPage({
             name: event.name,
             description: event.description,
             slug: event.slug,
-            locationType: event.locationType as "in-person" | "virtual" | "hybrid",
+            locationType: event.locationType as
+              | "in-person"
+              | "virtual"
+              | "hybrid",
             locationAddress: event.locationAddress ?? undefined,
             locationUrl: event.locationUrl ?? undefined,
             timezone: event.timezone,

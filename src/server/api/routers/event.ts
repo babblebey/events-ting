@@ -32,7 +32,8 @@ export const eventRouter = createTRPCRouter({
       if (existing) {
         throw new TRPCError({
           code: "CONFLICT",
-          message: "An event with this slug already exists. Please choose a different slug.",
+          message:
+            "An event with this slug already exists. Please choose a different slug.",
         });
       }
 
@@ -125,7 +126,10 @@ export const eventRouter = createTRPCRouter({
               // Only show tickets within sale period
               OR: [
                 { saleStart: null, saleEnd: null },
-                { saleStart: { lte: new Date() }, saleEnd: { gte: new Date() } },
+                {
+                  saleStart: { lte: new Date() },
+                  saleEnd: { gte: new Date() },
+                },
                 { saleStart: { lte: new Date() }, saleEnd: null },
                 { saleStart: null, saleEnd: { gte: new Date() } },
               ],

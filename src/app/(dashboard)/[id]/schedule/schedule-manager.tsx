@@ -6,7 +6,13 @@
  */
 
 import { useState } from "react";
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "flowbite-react";
+import {
+  Button,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "flowbite-react";
 import { ScheduleTimeline } from "@/components/schedule/schedule-timeline";
 import { ScheduleEntryForm } from "@/components/schedule/schedule-entry-form";
 import { api } from "@/trpc/react";
@@ -47,7 +53,7 @@ export function ScheduleManager({
     {
       initialData: initialEntries,
       refetchOnMount: false,
-    }
+    },
   );
 
   // Query for tracks
@@ -56,7 +62,7 @@ export function ScheduleManager({
     {
       initialData: initialTracks,
       refetchOnMount: false,
-    }
+    },
   );
 
   // Delete mutation
@@ -143,14 +149,25 @@ export function ScheduleManager({
                     id: editingEntry.id,
                     title: editingEntry.title,
                     description: editingEntry.description,
-                    date: extractDateString(editingEntry.startTime, eventTimezone),
-                    startTime: extractTimeString(editingEntry.startTime, eventTimezone),
-                    endTime: extractTimeString(editingEntry.endTime, eventTimezone),
+                    date: extractDateString(
+                      editingEntry.startTime,
+                      eventTimezone,
+                    ),
+                    startTime: extractTimeString(
+                      editingEntry.startTime,
+                      eventTimezone,
+                    ),
+                    endTime: extractTimeString(
+                      editingEntry.endTime,
+                      eventTimezone,
+                    ),
                     location: editingEntry.location ?? undefined,
                     track: editingEntry.track ?? undefined,
                     trackColor: editingEntry.trackColor ?? undefined,
                     sessionType: editingEntry.sessionType ?? undefined,
-                    speakerIds: editingEntry.speakerSessions.map((ss) => ss.speaker.id),
+                    speakerIds: editingEntry.speakerSessions.map(
+                      (ss) => ss.speaker.id,
+                    ),
                     updatedAt: editingEntry.updatedAt,
                   }
                 : undefined
@@ -170,8 +187,8 @@ export function ScheduleManager({
         <ModalHeader>Confirm Deletion</ModalHeader>
         <ModalBody>
           <p className="text-gray-700 dark:text-gray-300">
-            Are you sure you want to delete this schedule entry? This action cannot be
-            undone.
+            Are you sure you want to delete this schedule entry? This action
+            cannot be undone.
           </p>
         </ModalBody>
         <ModalFooter>

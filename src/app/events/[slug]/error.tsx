@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Error boundary for public event pages
@@ -18,10 +18,11 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error('Event page error:', error);
+    console.error("Event page error:", error);
   }, [error]);
 
-  const isNotFound = error.message.includes('not found') || error.message.includes('404');
+  const isNotFound =
+    error.message.includes("not found") || error.message.includes("404");
 
   return (
     <div className="flex min-h-[70vh] items-center justify-center p-4">
@@ -34,11 +35,11 @@ export default function Error({
               <LuCircleAlert className="h-8 w-8 text-red-600 dark:text-red-400" />
             )}
           </div>
-          
+
           <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
-            {isNotFound ? 'Event Not Found' : 'Unable to Load Event'}
+            {isNotFound ? "Event Not Found" : "Unable to Load Event"}
           </h1>
-          
+
           <p className="mb-6 text-gray-600 dark:text-gray-400">
             {isNotFound
               ? "The event you're looking for doesn't exist or may have been removed."
