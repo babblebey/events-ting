@@ -10,7 +10,15 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Badge, Modal, ModalHeader, ModalBody } from "flowbite-react";
+import {
+  Button,
+  Badge,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Alert,
+} from "flowbite-react";
 import { api } from "@/trpc/react";
 import { CfpForm } from "@/components/cfp/cfp-form";
 import { SubmissionCard } from "@/components/cfp/submission-card";
@@ -18,6 +26,7 @@ import { ReviewPanel } from "@/components/cfp/review-panel";
 import type { CallForPapers } from "generated/prisma";
 import type { RouterOutputs } from "@/trpc/react";
 import { HiPlus, HiLockClosed, HiLockOpen } from "react-icons/hi";
+import { LuCircleAlert } from "react-icons/lu";
 
 type CfpSubmission =
   RouterOutputs["cfp"]["listSubmissions"]["submissions"][number];
@@ -36,6 +45,7 @@ export function CfpManager({
   initialCfp,
 }: CfpManagerProps) {
   const [showCfpForm, setShowCfpForm] = useState(false);
+  const [showCloseCfpModal, setShowCloseCfpModal] = useState(false);
   const [selectedSubmission, setSelectedSubmission] =
     useState<CfpSubmission | null>(null);
   const [statusFilter, setStatusFilter] = useState<
@@ -77,6 +87,7 @@ export function CfpManager({
 
   const closeCfpMutation = api.cfp.close.useMutation({
     onSuccess: () => {
+      setShowCloseCfpModal(false);
       void utils.cfp.listSubmissions.invalidate();
     },
   });
@@ -97,13 +108,7 @@ export function CfpManager({
 
   const handleCloseCfp = () => {
     if (!initialCfp) return;
-    if (
-      confirm(
-        "Are you sure you want to close the Call for Papers? Speakers will no longer be able to submit proposals.",
-      )
-    ) {
-      closeCfpMutation.mutate({ cfpId: initialCfp.id });
-    }
+    closeCfpMutation.mutate({ cfpId: initialCfp.id });
   };
 
   const cfpUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/events/${eventSlug}/cfp`;
@@ -238,7 +243,7 @@ export function CfpManager({
               <Button
                 color="red"
                 size="sm"
-                onClick={handleCloseCfp}
+                onClick={() => setShowCloseCfpModal(true)}
                 disabled={closeCfpMutation.isPending}
               >
                 Close CFP
@@ -361,6 +366,41 @@ export function CfpManager({
             />
           )}
         </ModalBody>
+      </Modal>
+
+      {/* Close CFP Confirmation Modal */}
+      <Modal
+        show={showCloseCfpModal}
+        onClose={() => setShowCloseCfpModal(false)}
+      >
+        <ModalHeader>Close Call for Papers</ModalHeader>
+        <ModalBody>
+          <div className="space-y-4">
+            <Alert color="warning" icon={LuCircleAlert}>
+              <span className="font-medium">Warning:</span> Speakers will no
+              longer be able to submit proposals. This action cannot be undone.
+            </Alert>
+            <p className="text-gray-600 dark:text-gray-300">
+              Are you sure you want to close the Call for Papers?
+            </p>
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            color="red"
+            onClick={handleCloseCfp}
+            disabled={closeCfpMutation.isPending}
+          >
+            {closeCfpMutation.isPending ? "Closing..." : "Close CFP"}
+          </Button>
+          <Button
+            color="gray"
+            onClick={() => setShowCloseCfpModal(false)}
+            disabled={closeCfpMutation.isPending}
+          >
+            Cancel
+          </Button>
+        </ModalFooter>
       </Modal>
     </div>
   );
