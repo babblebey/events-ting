@@ -678,16 +678,16 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Phase 4: Status Filtering (Day 2-3, 4-5 hours)
 
-- [ ] Create `src/components/dashboard/status-filter.tsx`
-- [ ] Implement filter tabs: All, Draft, Published, Archived
-- [ ] Add count badges to each tab
-- [ ] Create `getStatusCounts` tRPC procedure
-- [ ] Update filter state on tab click
-- [ ] Update URL query params on filter change
-- [ ] Re-fetch events based on active filter
-- [ ] Show appropriate empty state when no events match
-- [ ] Add loading indicator during filter switch
-- [ ] Test filter persistence (refresh page maintains filter)
+- [X] Create `src/components/dashboard/status-filter.tsx`
+- [X] Implement filter tabs: All, Draft, Published, Archived
+- [X] Add count badges to each tab
+- [X] Create `getStatusCounts` tRPC procedure
+- [X] Update filter state on tab click
+- [X] Update URL query params on filter change
+- [X] Re-fetch events based on active filter
+- [X] Show appropriate empty state when no events match
+- [X] Add loading indicator during filter switch
+- [X] Test filter persistence (refresh page maintains filter)
 
 **Deliverable**: Functional status filtering with counts
 

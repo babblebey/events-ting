@@ -465,4 +465,34 @@ export const eventRouter = createTRPCRouter({
         recentRegistrations,
       };
     }),
+
+  /**
+   * Get status counts for user's events (for dashboard filters)
+   */
+  getStatusCounts: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+
+    // Get counts for all statuses in parallel
+    const [all, draft, published, archived] = await Promise.all([
+      ctx.db.event.count({
+        where: { organizerId: userId },
+      }),
+      ctx.db.event.count({
+        where: { organizerId: userId, status: "draft" },
+      }),
+      ctx.db.event.count({
+        where: { organizerId: userId, status: "published" },
+      }),
+      ctx.db.event.count({
+        where: { organizerId: userId, status: "archived" },
+      }),
+    ]);
+
+    return {
+      all,
+      draft,
+      published,
+      archived,
+    };
+  }),
 });

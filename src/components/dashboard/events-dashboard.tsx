@@ -4,16 +4,21 @@
  * Phase 1: Basic layout and event display
  * Phase 2: Event card integration with full metadata
  * Phase 3: Events grid & list management with sorting and loading states
+ * Phase 4: Status filtering with counts
  */
 
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Button, Alert } from "flowbite-react";
 import { HiRefresh } from "react-icons/hi";
 import { EventCard, EventCardSkeleton } from "./event-card";
+import { StatusFilter } from "./status-filter";
+import { EmptyState } from "./empty-state";
 import { isPast } from "@/lib/utils/date";
+import { api } from "@/trpc/react";
 
 interface Event {
   id: string;
@@ -82,9 +87,19 @@ function sortEventsByDate(events: Event[]): Event[] {
 export function EventsDashboard({ initialEvents }: EventsDashboardProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const activeFilter = searchParams.get("status") ?? undefined;
+
+  // Fetch status counts for filter badges
+  const { data: statusCounts, isLoading: isLoadingCounts } =
+    api.event.getStatusCounts.useQuery();
 
   // Sort events on initial render
   const sortedEvents = sortEventsByDate(initialEvents.events);
+
+  // Determine if we should show "no events" or "no match" empty state
+  const hasNoEvents = statusCounts?.all === 0;
+  const hasNoMatchingEvents = sortedEvents.length === 0 && !hasNoEvents;
 
   /**
    * Handle retry when there's an error
@@ -115,6 +130,12 @@ export function EventsDashboard({ initialEvents }: EventsDashboardProps) {
         </Link>
       </div>
 
+      {/* Status Filter */}
+      <StatusFilter
+        statusCounts={statusCounts}
+        isLoading={isLoadingCounts}
+      />
+
       {/* Error State */}
       {error && (
         <Alert color="failure" className="mb-6">
@@ -137,23 +158,12 @@ export function EventsDashboard({ initialEvents }: EventsDashboardProps) {
             <EventCardSkeleton key={index} />
           ))}
         </div>
-      ) : sortedEvents.length === 0 ? (
-        /* Empty State - No Events */
-        <div className="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 py-16 text-center dark:border-gray-700 dark:bg-gray-800">
-          <div className="mb-4 text-6xl">📅</div>
-          <h2 className="mb-3 text-2xl font-bold text-gray-900 dark:text-white">
-            Create Your First Event
-          </h2>
-          <p className="mx-auto mb-8 max-w-md text-gray-600 dark:text-gray-400">
-            Start managing amazing events with Events Ting. It takes just a few
-            minutes to get started.
-          </p>
-          <Link href="/create-event">
-            <Button color="blue" size="lg">
-              Create Your First Event
-            </Button>
-          </Link>
-        </div>
+      ) : hasNoEvents ? (
+        /* Empty State - No Events Created */
+        <EmptyState type="no-events" />
+      ) : hasNoMatchingEvents ? (
+        /* Empty State - No Events Match Filter */
+        <EmptyState type="no-match" activeFilter={activeFilter} />
       ) : (
         /* Events Grid */
         <>
