@@ -9,6 +9,7 @@ import { Button, Card } from "flowbite-react";
 import { LuRotateCcw } from "react-icons/lu";
 import { HiOutlineTrash, HiOutlineArchive } from "react-icons/hi";
 import Link from "next/link";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 interface EventSettingsPageProps {
   params: { id: string };
@@ -21,6 +22,14 @@ export default async function EventSettingsPage({
 
   return (
     <div className="space-y-8">
+      {/* Breadcrumbs */}
+      <Breadcrumbs
+        items={[
+          { label: event.name, href: `/${params.id}` },
+          { label: "Settings" },
+        ]}
+      />
+
       {/* Page Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">

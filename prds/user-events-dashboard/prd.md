@@ -738,12 +738,12 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Phase 8: Navigation & Integration (Day 4, 2-3 hours)
 
-- [ ] Update sign-in page redirect to `/dashboard` (already in auth config)
-- [ ] Update app navigation to include dashboard link
-- [ ] Add breadcrumbs to event dashboard pages (back to dashboard)
-- [ ] Test navigation flow: Sign in → Dashboard → Event → Back to Dashboard
-- [ ] Update landing page CTA for authenticated users (show "Go to Dashboard")
-- [ ] Ensure event creation redirects back to dashboard after completion
+- [X] Update sign-in page redirect to `/dashboard` (already in auth config)
+- [X] Update app navigation to include dashboard link
+- [X] Add breadcrumbs to event dashboard pages (back to dashboard)
+- [X] Test navigation flow: Sign in → Dashboard → Event → Back to Dashboard
+- [X] Update landing page CTA for authenticated users (show "Go to Dashboard")
+- [X] Ensure event creation redirects back to dashboard after completion
 
 **Deliverable**: Seamless navigation throughout app
 

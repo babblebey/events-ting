@@ -28,6 +28,12 @@ async function DashboardLayout({
   const event = await api.event.getById({ id: eventId });
 
   const navItems = [
+    // TODO: Link back to main dashboard... Maybe in the footer menu?
+    // {
+    //   href: `/dashboard`,
+    //   label: "← Back to Dashboard",
+    //   icon: "HiViewBoards",
+    // },
     {
       href: `/${eventId}`,
       label: "Overview",
