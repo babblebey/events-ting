@@ -236,7 +236,7 @@ export function CfpManager({
             </Button>
             {isOpen && (
               <Button
-                color="failure"
+                color="red"
                 size="sm"
                 onClick={handleCloseCfp}
                 disabled={closeCfpMutation.isPending}

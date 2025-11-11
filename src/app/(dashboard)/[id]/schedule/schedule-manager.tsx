@@ -193,7 +193,7 @@ export function ScheduleManager({
         </ModalBody>
         <ModalFooter>
           <Button
-            color="failure"
+            color="red"
             onClick={confirmDelete}
             disabled={deleteMutation.isPending}
           >

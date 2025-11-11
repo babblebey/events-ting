@@ -210,7 +210,7 @@ export function ReviewPanel({ submission, onSuccess }: ReviewPanelProps) {
             </Button>
             <Button
               onClick={handleReject}
-              color="failure"
+              color="red"
               className="flex-1"
               disabled={acceptMutation.isPending || rejectMutation.isPending}
             >
