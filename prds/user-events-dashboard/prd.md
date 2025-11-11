@@ -644,17 +644,17 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Phase 2: Event Card Component (Day 1-2, 5-6 hours)
 
-- [ ] Create `src/app/components/dashboard/event-card.tsx`
-- [ ] Implement event card layout with image, title, metadata
-- [ ] Add status badge component with color variants
-- [ ] Format dates with timezone awareness (using `date-fns` or similar)
-- [ ] Add location type icon mapping (virtual, in-person, hybrid)
-- [ ] Display registration count with icon
-- [ ] Implement action buttons (Manage, Edit, View Event)
-- [ ] Add hover states and transitions
-- [ ] Make card clickable (navigate on click)
-- [ ] Responsive design (card stacking on mobile)
-- [ ] Add loading skeleton variant
+- [X] Create `src/app/components/dashboard/event-card.tsx`
+- [X] Implement event card layout with image, title, metadata
+- [X] Add status badge component with color variants
+- [X] Format dates with timezone awareness (using `date-fns` or similar)
+- [X] Add location type icon mapping (virtual, in-person, hybrid)
+- [X] Display registration count with icon
+- [X] Implement action buttons (Manage, Edit, View Event)
+- [X] Add hover states and transitions
+- [X] Make card clickable (navigate on click)
+- [X] Responsive design (card stacking on mobile)
+- [X] Add loading skeleton variant
 
 **Deliverable**: Reusable event card component with all metadata
 
