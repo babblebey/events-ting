@@ -157,7 +157,47 @@ The CFP backend is implemented as a tRPC router (`cfpRouter`) that handles all C
 
 ---
 
-### 5. `update` (Protected)
+### 5. `reopen` (Protected)
+
+**Purpose**: Reopen a closed CFP (allow submissions again)  
+**Type**: Mutation  
+**Authentication**: Required (organizer only)
+
+**Input Schema**:
+```typescript
+{
+  cfpId: string (cuid)
+}
+```
+
+**Output**:
+```typescript
+{
+  id: string,
+  status: 'open',
+  // ... other CFP fields
+}
+```
+
+**Authorization**:
+- Verifies user owns the event associated with CFP
+
+**Business Logic**:
+1. Validates CFP is currently in `closed` state
+2. Validates deadline has not passed (`deadline > now()`)
+3. Updates status to `open`
+
+**Error Cases**:
+- `NOT_FOUND`: CFP does not exist
+- `FORBIDDEN`: User is not the event organizer
+- `BAD_REQUEST`: CFP is already open
+- `BAD_REQUEST`: Deadline has passed (suggests updating deadline first via `update` mutation)
+
+**Feature Requirements**: FR-028 (Enhancement)
+
+---
+
+### 6. `update` (Protected)
 
 **Purpose**: Update CFP guidelines and settings  
 **Type**: Mutation  
@@ -188,7 +228,7 @@ The CFP backend is implemented as a tRPC router (`cfpRouter`) that handles all C
 
 ---
 
-### 6. `submitProposal` (Public)
+### 7. `submitProposal` (Public)
 
 **Purpose**: Submit a session proposal (public endpoint)  
 **Type**: Mutation  
@@ -240,7 +280,7 @@ The CFP backend is implemented as a tRPC router (`cfpRouter`) that handles all C
 
 ---
 
-### 7. `listSubmissions` (Protected)
+### 8. `listSubmissions` (Protected)
 
 **Purpose**: List all submissions for organizer review  
 **Type**: Query (Infinite)  
@@ -304,7 +344,7 @@ The CFP backend is implemented as a tRPC router (`cfpRouter`) that handles all C
 
 ---
 
-### 8. `reviewSubmission` (Protected)
+### 9. `reviewSubmission` (Protected)
 
 **Purpose**: Add review notes and score to a submission  
 **Type**: Mutation  
@@ -342,7 +382,7 @@ The CFP backend is implemented as a tRPC router (`cfpRouter`) that handles all C
 
 ---
 
-### 9. `acceptProposal` (Protected)
+### 10. `acceptProposal` (Protected)
 
 **Purpose**: Accept a proposal and create speaker profile  
 **Type**: Mutation  
@@ -393,7 +433,7 @@ The CFP backend is implemented as a tRPC router (`cfpRouter`) that handles all C
 
 ---
 
-### 10. `rejectProposal` (Protected)
+### 11. `rejectProposal` (Protected)
 
 **Purpose**: Reject a proposal with optional feedback  
 **Type**: Mutation  

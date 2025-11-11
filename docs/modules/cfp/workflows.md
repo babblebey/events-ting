@@ -545,7 +545,62 @@ This document describes the complete workflows for the Call for Papers module, f
 
 - **Public Submission**: Form hidden, submissions blocked
 - **Existing Submissions**: Can still be reviewed
-- **Reopening**: Would require updating status back to "open" (not in UI currently)
+- **Reopening**: Available via "Reopen CFP" if deadline hasn't passed (see Workflow 7)
+
+---
+
+## Workflow 7: Reopen Closed CFP
+
+**Actor**: Event Organizer  
+**Goal**: Allow submissions again after closing CFP early  
+**Prerequisites**: CFP must be closed and deadline must not have passed
+
+### Steps
+
+1. **Navigate to CFP Dashboard**
+   - Go to event CFP page: `/(dashboard)/[eventId]/cfp`
+   - CFP status badge shows "Closed"
+   - "Reopen CFP" button visible in actions (only if deadline hasn't passed)
+
+2. **Initiate Reopening**
+   - Click "Reopen CFP" button (green)
+   - Confirmation modal opens with info message
+
+3. **Review Deadline**
+   - Modal displays deadline: "Speakers will be able to submit proposals again until the deadline on [date]"
+   - Verify deadline is still appropriate
+   - If deadline needs updating, cancel and use "Edit Settings" first
+
+4. **Confirm Reopening**
+   - Click "Reopen CFP" button in modal
+   - tRPC mutation: `cfp.reopen`
+   - Validation checks:
+     - ✓ User owns the event
+     - ✓ CFP is currently closed
+     - ✓ Deadline has not passed
+
+5. **System Actions**
+   - Updates CFP status to `open`
+   - Public submission form becomes visible again
+   - Existing submissions remain intact
+
+6. **Post-Reopening**
+   - Status badge changes to "Open"
+   - "Reopen CFP" button replaced with "Close CFP" button
+   - Speakers can submit new proposals until deadline
+
+### Business Rules
+
+- **Deadline Check**: Cannot reopen if deadline has passed
+- **Error Handling**: If deadline passed, error suggests updating deadline first
+- **Existing Submissions**: All previous submissions retained (pending/accepted/rejected)
+- **No Notification**: Previously rejected speakers are not automatically notified (future enhancement)
+
+### Error Cases
+
+- **Deadline Passed**: "Cannot reopen CFP after the deadline has passed. Please update the deadline first."
+- **Already Open**: "CFP is already open"
+- **Permission Denied**: "Only the event organizer can reopen the CFP"
 
 ---
 
@@ -553,7 +608,7 @@ This document describes the complete workflows for the Call for Papers module, f
 
 ```
 CFP Status:
-  [none] → [open] → [closed]
+  [none] → [open] ⇄ [closed]
 
 Submission Status:
   [pending] → [accepted] → (final state)
@@ -561,11 +616,11 @@ Submission Status:
 ```
 
 **Valid Transitions**:
-- CFP: none → open, open → closed
+- CFP: none → open, open → closed, closed → open (if deadline hasn't passed)
 - Submission: pending → accepted, pending → rejected
 
 **Invalid Transitions**:
-- CFP: closed → open (not supported in current UI)
+- CFP: closed → open (if deadline has passed)
 - Submission: accepted → pending, rejected → pending (business logic prevents)
 
 ---
