@@ -111,14 +111,14 @@ The platform needs a dedicated landing page that serves as the primary hub for a
 **So that** I can perform event-specific tasks efficiently
 
 **Acceptance Criteria**:
-- Clicking event card navigates to `/{eventId}` (event dashboard)
-- "Manage" button navigates to `/{eventId}` (event dashboard)
-- "Edit" button navigates to `/{eventId}/settings` (event settings page)
-- "View Event" button opens public event page at `/events/{slug}` in new tab
+- Clicking event card navigates to `/[id]` (event dashboard)
+- "Manage" button navigates to `/[id]` (event dashboard)
+- "Edit" button navigates to `/[id]/settings` (event settings page)
+- "View Event" button opens public event page at `/events/[slug]` in new tab
 - Hover state provides visual feedback
 - Navigation preserves scroll position when returning to dashboard
 
-**Note**: Current implementation uses `/{eventId}` for event routes. Future refactoring may move to `/dashboard/{eventId}` or `/dashboard/{slug}` for better semantics.
+**Note**: Current implementation uses `/[id]` for event routes. Future refactoring may move to `/dashboard/[id]` or `/dashboard/[slug]` for better semantics.
 
 ---
 
@@ -177,10 +177,10 @@ The platform needs a dedicated landing page that serves as the primary hub for a
 
 **Rationale**:
 - Clear, semantic URL for user's event portfolio
-- Separates user dashboard from individual event dashboards (currently at `/{eventId}`)
+- Separates user dashboard from individual event dashboards (currently at `/[id]`)
 - Aligns with existing route structure (`/create-event`)
 
-**Note**: Current implementation uses `/{eventId}` for event-specific routes (e.g., `/{eventId}`, `/{eventId}/settings`). Future refactoring may consolidate routes under `/dashboard/{eventId}` or use slugs (`/dashboard/{slug}`) for better URL semantics.
+**Note**: Current implementation uses `/[id]` for event-specific routes (e.g., `/[id]`, `/[id]/settings`). Future refactoring may consolidate routes under `/dashboard/[id]` or use slugs (`/dashboard/[slug]`) for better URL semantics.
 
 #### Authentication Flow
 **Post-Sign-In Redirect**: 
@@ -297,7 +297,7 @@ const totalCount = await db.event.count({
 import { auth } from "@/server/auth";
 import { redirect } from "next/navigation";
 import { api } from "@/trpc/server";
-import { EventsDashboard } from "./_components/events-dashboard";
+import { EventsDashboard } from "@/components/dashboard/events-dashboard";
 
 export const metadata = {
   title: "My Events | Events Ting",
@@ -582,9 +582,9 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 - **Archived Event**: Gray scale, "View Archive" CTA
 
 **Action Buttons**:
-- **Manage**: Primary action, navigates to `/{eventId}` (event dashboard)
-- **Edit**: Secondary action, navigates to `/{eventId}/settings` (event settings)
-- **View Event**: Opens public event page at `/events/{slug}` in new tab
+- **Manage**: Primary action, navigates to `/[id]` (event dashboard)
+- **Edit**: Secondary action, navigates to `/[id]/settings` (event settings)
+- **View Event**: Opens public event page at `/events/[slug]` in new tab
 
 #### Empty States
 
@@ -629,7 +629,7 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Phase 1: Core Dashboard Page (Day 1, 4-5 hours)
 
-- [ ] Create `src/app/(dashboard)/page.tsx` (Server Component)
+- [ ] Create `src/app/dashboard/page.tsx` (Server Component)
 - [ ] Implement authentication check and redirect logic
 - [ ] Fetch initial events using `api.event.list` with `organizerId` filter
 - [ ] Add `searchParams` handling for status filter from URL
@@ -644,7 +644,7 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Phase 2: Event Card Component (Day 1-2, 5-6 hours)
 
-- [ ] Create `src/app/(dashboard)/_components/event-card.tsx`
+- [ ] Create `src/app/components/dashboard/event-card.tsx`
 - [ ] Implement event card layout with image, title, metadata
 - [ ] Add status badge component with color variants
 - [ ] Format dates with timezone awareness (using `date-fns` or similar)
@@ -662,7 +662,7 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Phase 3: Events Grid & List Management (Day 2, 4-5 hours)
 
-- [ ] Create `src/app/(dashboard)/_components/events-dashboard.tsx` (Client Component)
+- [ ] Create `src/components/dashboard/events-dashboard.tsx` (Client Component)
 - [ ] Implement events grid layout (responsive grid)
 - [ ] Add grid/list view toggle (optional for MVP)
 - [ ] Handle empty events array
@@ -678,7 +678,7 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Phase 4: Status Filtering (Day 2-3, 4-5 hours)
 
-- [ ] Create `src/app/(dashboard)/_components/status-filter.tsx`
+- [ ] Create `src/components/dashboard/status-filter.tsx`
 - [ ] Implement filter tabs: All, Draft, Published, Archived
 - [ ] Add count badges to each tab
 - [ ] Create `getStatusCounts` tRPC procedure
@@ -695,9 +695,9 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Phase 5: Dashboard Header & Actions (Day 3, 3-4 hours)
 
-- [ ] Create `src/app/(dashboard)/_components/dashboard-header.tsx`
+- [ ] Create `src/components/dashboard/dashboard-header.tsx`
 - [ ] Add page title and description
-- [ ] Implement "Create Event" button (navigates to `/dashboard/create-event`)
+- [ ] Implement "Create Event" button (navigates to `/create-event`)
 - [ ] Add user profile dropdown (name, email, sign out)
 - [ ] Style header with consistent spacing
 - [ ] Make header sticky on scroll (optional)
@@ -709,7 +709,7 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Phase 6: Empty States (Day 3, 2-3 hours)
 
-- [ ] Create `src/app/(dashboard)/_components/empty-state.tsx`
+- [ ] Create `src/components/dashboard/empty-state.tsx`
 - [ ] Implement "No events" empty state with CTA
 - [ ] Implement "No events match filter" empty state
 - [ ] Add illustrations or icons
@@ -850,7 +850,7 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 4. Clicks "Create Your First Event" button
 5. Navigates to `/create-event`
 6. Fills out event form and submits
-7. Redirected to new event dashboard at `/{eventId}`
+7. Redirected to new event dashboard at `/[id]`
 8. Can click "Back to Dashboard" or use navigation to return to `/dashboard`
 
 ### Flow 2: Returning User with Events
@@ -860,7 +860,7 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 3. Sees grid of event cards (sorted by date: upcoming first, then past)
 4. Reviews event statuses and metrics at a glance
 5. Clicks "Manage" on an event needing attention
-6. Navigates to event-specific dashboard at `/{eventId}`
+6. Navigates to event-specific dashboard at `/[id]`
 7. Completes task
 8. Returns to main dashboard via navigation or back button
 
@@ -871,7 +871,7 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 3. Sees first 20 events (sorted: upcoming first, then past)
 4. Clicks "Draft" filter to see only draft events
 5. Reviews 5 draft events
-6. Opens one to complete setup (navigates to `/{eventId}`)
+6. Opens one to complete setup (navigates to `/[id]`)
 7. Returns to dashboard (filter persists - still showing "Draft")
 8. Clicks "Published" to review active events
 9. Scrolls down and clicks "Load More"
@@ -879,10 +879,10 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Flow 4: Protected Route Redirect
 
-1. User (logged out) tries to access `/{eventId}` (requires auth)
-2. Redirected to `/auth/signin?callbackUrl=/{eventId}`
+1. User (logged out) tries to access `/[id]` (requires auth)
+2. Redirected to `/auth/signin?callbackUrl=/[id]`
 3. User signs in
-4. Redirected back to `/{eventId}` (intended destination)
+4. Redirected back to `/[id]` (intended destination)
 5. Can navigate to `/dashboard` if needed to see all events
 
 ### Technical Risks
@@ -1175,11 +1175,11 @@ Since the project does not have automated testing infrastructure, all testing wi
 ### Open Questions
 1. ✅ **RESOLVED**: "All" filter shows all events including archived
 2. ✅ **RESOLVED**: Events sorted by upcoming (asc) then past (desc)
-3. ✅ **RESOLVED**: Using `/{eventId}` routes (current implementation)
+3. ✅ **RESOLVED**: Using `/[id]` routes (current implementation)
 4. ✅ **RESOLVED**: Cursor pagination + separate count query
 5. ✅ **RESOLVED**: Create button navigates to `/create-event`
 6. ✅ **RESOLVED**: "View All Events" clears active filter
-7. ✅ **RESOLVED**: Manage → `/{eventId}`, Edit → `/{eventId}/settings`, View → `/events/{slug}`
+7. ✅ **RESOLVED**: Manage → `/[id]`, Edit → `/[id]/settings`, View → `/events/[slug]`
 8. ✅ **RESOLVED**: Stacked filter buttons on mobile
 9. ✅ **RESOLVED**: Performance target is for initial 20 events load
 10. ✅ **RESOLVED**: callbackUrl handling with default to `/dashboard`
@@ -1198,7 +1198,7 @@ Since the project does not have automated testing infrastructure, all testing wi
 - Ensure mobile performance is optimized (lazy loading images)
 - Implement separate count query for accurate "Showing X of Y" display
 - Handle edge cases: events happening today, timezone boundaries
-- Future refactoring: consolidate routes under `/dashboard/{eventId}` or use `/dashboard/{slug}`
+- Future refactoring: consolidate routes under `/dashboard/[id]` or use `/dashboard/[slug]`
 
 ### Authentication Considerations
 - Implement `callbackUrl` handling for seamless auth flow
