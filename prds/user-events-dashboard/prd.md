@@ -662,15 +662,15 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Phase 3: Events Grid & List Management (Day 2, 4-5 hours)
 
-- [ ] Create `src/components/dashboard/events-dashboard.tsx` (Client Component)
-- [ ] Implement events grid layout (responsive grid)
-- [ ] Add grid/list view toggle (optional for MVP)
-- [ ] Handle empty events array
-- [ ] Sort events by date (upcoming first, then past)
-- [ ] Add visual distinction for past events
-- [ ] Implement loading states during data fetch
-- [ ] Error handling with retry option
-- [ ] Test with various event counts (0, 1, 5, 20+)
+- [X] Create `src/components/dashboard/events-dashboard.tsx` (Client Component)
+- [X] Implement events grid layout (responsive grid)
+- [X] Add grid/list view toggle (optional for MVP)
+- [X] Handle empty events array
+- [X] Sort events by date (upcoming first, then past)
+- [X] Add visual distinction for past events
+- [X] Implement loading states during data fetch
+- [X] Error handling with retry option
+- [X] Test with various event counts (0, 1, 5, 20+)
 
 **Deliverable**: Events grid displaying all user events
 
