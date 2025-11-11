@@ -7,3 +7,4 @@ export {
 export { StatusFilter } from "./status-filter";
 export { EmptyState } from "./empty-state";
 export { DashboardHeader } from "./dashboard-header";
+export { PaginationControls } from "./pagination-controls";

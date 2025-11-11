@@ -7,7 +7,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Card, Badge, Button } from "flowbite-react";
 import {
   HiOutlineCalendar,
@@ -17,27 +16,12 @@ import {
 import { HiOutlineMapPin } from "react-icons/hi2";
 import { FiUsers } from "react-icons/fi";
 import { formatDateRange, isPast } from "@/lib/utils/date";
+import type { RouterOutputs } from "@/trpc/react";
+
+type Event = RouterOutputs["event"]["list"]["events"][number];
 
 interface EventCardProps {
-  event: {
-    id: string;
-    slug: string;
-    name: string;
-    description: string | null;
-    startDate: Date;
-    endDate: Date;
-    timezone: string;
-    locationType: "in-person" | "virtual" | "hybrid";
-    locationAddress: string | null;
-    locationUrl: string | null;
-    status: "draft" | "published" | "archived";
-    isArchived: boolean;
-    bannerImageUrl?: string | null;
-    _count: {
-      registrations: number;
-      ticketTypes: number;
-    };
-  };
+  event: Event;
 }
 
 /**
@@ -113,28 +97,8 @@ export function EventCard({ event }: EventCardProps) {
   const statusColor = getStatusBadgeColor(event.status);
   const statusLabel = getStatusLabel(event.status);
 
-  // Determine if event has a banner image
-  const hasBannerImage = event.bannerImageUrl && event.bannerImageUrl.trim() !== "";
-
   return (
-    <Card
-      className="group transition-all duration-200 hover:shadow-xl"
-      renderImage={
-        hasBannerImage
-          ? () => (
-              <div className="relative h-48 w-full overflow-hidden rounded-t-lg">
-                <Image
-                  src={event.bannerImageUrl!}
-                  alt={event.name}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                />
-              </div>
-            )
-          : undefined
-      }
-    >
+    <Card className="group transition-all duration-200 hover:shadow-xl">
       <div className="flex flex-col gap-4">
         {/* Header with title and status badge */}
         <div className="flex items-start justify-between gap-3">

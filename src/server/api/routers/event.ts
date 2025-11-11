@@ -67,30 +67,48 @@ export const eventRouter = createTRPCRouter({
             isArchived: false,
           };
 
-      const events = await ctx.db.event.findMany({
-        where: baseWhere,
-        take: limit + 1,
-        ...(cursor && {
-          cursor: { id: cursor },
-          skip: 1,
+      // Execute both queries in parallel for performance
+      const [events, totalCount] = await Promise.all([
+        ctx.db.event.findMany({
+          where: baseWhere,
+          take: limit + 1,
+          ...(cursor && {
+            cursor: { id: cursor },
+            skip: 1,
+          }),
+          orderBy: { startDate: "desc" },
+          select: {
+            id: true,
+            slug: true,
+            name: true,
+            description: true,
+            startDate: true,
+            endDate: true,
+            timezone: true,
+            locationType: true,
+            locationAddress: true,
+            locationUrl: true,
+            status: true,
+            isArchived: true,
+            organizer: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
+            },
+            _count: {
+              select: {
+                registrations: true,
+                ticketTypes: true,
+              },
+            },
+          },
         }),
-        orderBy: { startDate: "desc" },
-        include: {
-          organizer: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-            },
-          },
-          _count: {
-            select: {
-              registrations: true,
-              ticketTypes: true,
-            },
-          },
-        },
-      });
+        ctx.db.event.count({
+          where: baseWhere,
+        }),
+      ]);
 
       let nextCursor: string | undefined = undefined;
       if (events.length > limit) {
@@ -101,6 +119,7 @@ export const eventRouter = createTRPCRouter({
       return {
         events,
         nextCursor,
+        totalCount,
       };
     }),
 
