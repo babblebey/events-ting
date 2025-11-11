@@ -214,11 +214,11 @@ export const createSpeakerSchema = z.object({
   name: z.string().min(2).max(100),
   bio: z.string().min(10).max(2000),
   email: z.string().email(),
-  photo: z.string().url().optional(),
+  photo: z.string().url().optional().or(z.literal("")).transform(val => val === "" ? undefined : val),
   twitter: z.string().optional(),
   github: z.string().optional(),
   linkedin: z.string().optional(),
-  website: z.string().url().optional(),
+  website: z.string().url().optional().or(z.literal("")).transform(val => val === "" ? undefined : val),
 });
 
 export const updateSpeakerSchema = createSpeakerSchema.partial().extend({

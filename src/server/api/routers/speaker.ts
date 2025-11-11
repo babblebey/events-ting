@@ -19,11 +19,11 @@ const createSpeakerSchema = z.object({
   name: z.string().min(2).max(200),
   bio: z.string().min(10).max(5000),
   email: z.string().email(),
-  photo: z.string().min(1).optional(), // Allow both URLs and relative paths
-  twitter: z.string().optional(),
-  github: z.string().optional(),
-  linkedin: z.string().optional(),
-  website: z.string().url().optional(),
+  photo: z.string().min(1).nullable().optional().or(z.literal("")).transform(val => val === "" ? null : val), // Allow both URLs and relative paths
+  twitter: z.string().nullable().optional(),
+  github: z.string().nullable().optional(),
+  linkedin: z.string().nullable().optional(),
+  website: z.string().url().nullable().optional().or(z.literal("")).transform(val => val === "" ? null : val),
 });
 
 const updateSpeakerSchema = z.object({
@@ -31,11 +31,11 @@ const updateSpeakerSchema = z.object({
   name: z.string().min(2).max(200).optional(),
   bio: z.string().min(10).max(5000).optional(),
   email: z.string().email().optional(),
-  photo: z.string().min(1).optional(), // Allow both URLs and relative paths
-  twitter: z.string().optional(),
-  github: z.string().optional(),
-  linkedin: z.string().optional(),
-  website: z.string().url().optional(),
+  photo: z.string().min(1).nullable().optional().or(z.literal("")).transform(val => val === "" ? null : val), // Allow both URLs and relative paths
+  twitter: z.string().nullable().optional(),
+  github: z.string().nullable().optional(),
+  linkedin: z.string().nullable().optional(),
+  website: z.string().url().nullable().optional().or(z.literal("")).transform(val => val === "" ? null : val),
 });
 
 const speakerIdSchema = z.object({

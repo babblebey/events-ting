@@ -226,11 +226,11 @@ export function SpeakerForm({
     const submitData = {
       ...formData,
       photo: photoUrl ?? undefined,
-      // Clean up optional fields (remove if empty string)
-      twitter: formData.twitter?.trim() ?? undefined,
-      github: formData.github?.trim() ?? undefined,
-      linkedin: formData.linkedin?.trim() ?? undefined,
-      website: formData.website?.trim() ?? undefined,
+      // Clean up optional fields (use null for updates to clear values, undefined for creates)
+      twitter: formData.twitter?.trim() ?? (isEditing ? null : undefined),
+      github: formData.github?.trim() ?? (isEditing ? null : undefined),
+      linkedin: formData.linkedin?.trim() ?? (isEditing ? null : undefined),
+      website: formData.website?.trim() ?? (isEditing ? null : undefined),
     };
 
     if (isEditing && initialData?.id) {
@@ -338,7 +338,7 @@ export function SpeakerForm({
             </p>
           )}
           <div className="space-y-4">
-            {photoPreview && (
+            {photoPreview ? (
               <div className="flex items-center space-x-4">
                 <img
                   src={photoPreview}
@@ -357,29 +357,30 @@ export function SpeakerForm({
                   Remove
                 </Button>
               </div>
+            ) : (
+              <Label
+                htmlFor="photo-upload"
+                className="flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600"
+              >
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <HiUpload className="mb-3 h-10 w-10 text-gray-400" />
+                  <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                    <span className="font-semibold">Click to upload</span> or drag
+                    and drop
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    PNG, JPG (MAX. 5MB)
+                  </p>
+                </div>
+                <input
+                  id="photo-upload"
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handlePhotoChange}
+                />
+              </Label>
             )}
-            <Label
-              htmlFor="photo-upload"
-              className="flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600"
-            >
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <HiUpload className="mb-3 h-10 w-10 text-gray-400" />
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                  <span className="font-semibold">Click to upload</span> or drag
-                  and drop
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  PNG, JPG (MAX. 5MB)
-                </p>
-              </div>
-              <input
-                id="photo-upload"
-                type="file"
-                className="hidden"
-                accept="image/*"
-                onChange={handlePhotoChange}
-              />
-            </Label>
           </div>
         </div>
       </FormSection>

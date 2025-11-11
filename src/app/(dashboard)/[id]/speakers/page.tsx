@@ -197,7 +197,7 @@ export default function SpeakersPage() {
         </ModalBody>
         <ModalFooter>
           <Button
-            color="failure"
+            color="red"
             onClick={() => deletingSpeaker && handleDelete(deletingSpeaker)}
             disabled={deleteMutation.isPending}
           >
