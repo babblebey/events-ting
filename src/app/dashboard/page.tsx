@@ -40,5 +40,5 @@ export default async function DashboardPage({
     limit: 20,
   });
 
-  return <EventsDashboard initialEvents={initialEvents} />;
+  return <EventsDashboard initialEvents={initialEvents} user={session.user} />;
 }

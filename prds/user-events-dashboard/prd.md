@@ -695,13 +695,13 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Phase 5: Dashboard Header & Actions (Day 3, 3-4 hours)
 
-- [ ] Create `src/components/dashboard/dashboard-header.tsx`
-- [ ] Add page title and description
-- [ ] Implement "Create Event" button (navigates to `/create-event`)
-- [ ] Add user profile dropdown (name, email, sign out)
-- [ ] Style header with consistent spacing
-- [ ] Make header sticky on scroll (optional)
-- [ ] Responsive header (collapse on mobile)
+- [X] Create `src/components/dashboard/dashboard-header.tsx`
+- [X] Add page title and description
+- [X] Implement "Create Event" button (navigates to `/create-event`)
+- [X] Add user profile dropdown (name, email, sign out)
+- [X] Style header with consistent spacing
+- [X] Make header sticky on scroll (optional)
+- [X] Responsive header (collapse on mobile)
 
 **Deliverable**: Dashboard header with creation CTA
 

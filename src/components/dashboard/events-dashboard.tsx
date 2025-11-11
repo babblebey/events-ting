@@ -10,13 +10,13 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Button, Alert } from "flowbite-react";
 import { HiRefresh } from "react-icons/hi";
 import { EventCard, EventCardSkeleton } from "./event-card";
 import { StatusFilter } from "./status-filter";
 import { EmptyState } from "./empty-state";
+import { DashboardHeader } from "./dashboard-header";
 import { isPast } from "@/lib/utils/date";
 import { api } from "@/trpc/react";
 
@@ -49,6 +49,12 @@ interface EventsDashboardProps {
   initialEvents: {
     events: Event[];
     nextCursor?: string;
+  };
+  user: {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
   };
 }
 
@@ -84,7 +90,7 @@ function sortEventsByDate(events: Event[]): Event[] {
   return [...upcomingEvents, ...pastEvents];
 }
 
-export function EventsDashboard({ initialEvents }: EventsDashboardProps) {
+export function EventsDashboard({ initialEvents, user }: EventsDashboardProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
@@ -112,75 +118,64 @@ export function EventsDashboard({ initialEvents }: EventsDashboardProps) {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Dashboard Header */}
-      <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            My Events
-          </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
-            Manage all your events in one place
-          </p>
-        </div>
-        <Link href="/create-event">
-          <Button color="blue" size="lg">
-            + Create Event
-          </Button>
-        </Link>
-      </div>
+      <DashboardHeader user={user} />
 
-      {/* Status Filter */}
-      <StatusFilter
-        statusCounts={statusCounts}
-        isLoading={isLoadingCounts}
-      />
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
+        {/* Status Filter */}
+        <StatusFilter
+          statusCounts={statusCounts}
+          isLoading={isLoadingCounts}
+        />
 
-      {/* Error State */}
-      {error && (
-        <Alert color="failure" className="mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="font-medium">Error loading events:</span> {error}
+        {/* Error State */}
+        {error && (
+          <Alert color="failure" className="mb-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="font-medium">Error loading events:</span> {error}
+              </div>
+              <Button color="failure" size="sm" onClick={handleRetry}>
+                <HiRefresh className="mr-2 h-4 w-4" />
+                Retry
+              </Button>
             </div>
-            <Button color="failure" size="sm" onClick={handleRetry}>
-              <HiRefresh className="mr-2 h-4 w-4" />
-              Retry
-            </Button>
-          </div>
-        </Alert>
-      )}
+          </Alert>
+        )}
 
-      {/* Loading State */}
-      {isLoading ? (
-        <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <EventCardSkeleton key={index} />
-          ))}
-        </div>
-      ) : hasNoEvents ? (
-        /* Empty State - No Events Created */
-        <EmptyState type="no-events" />
-      ) : hasNoMatchingEvents ? (
-        /* Empty State - No Events Match Filter */
-        <EmptyState type="no-match" activeFilter={activeFilter} />
-      ) : (
-        /* Events Grid */
-        <>
-          {/* Event Count Info */}
-          <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-            Showing {sortedEvents.length}{" "}
-            {sortedEvents.length === 1 ? "event" : "events"}
-          </div>
-
-          {/* Responsive Grid Layout */}
+        {/* Loading State */}
+        {isLoading ? (
           <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {sortedEvents.map((event) => (
-              <EventCard key={event.id} event={event} />
+            {Array.from({ length: 6 }).map((_, index) => (
+              <EventCardSkeleton key={index} />
             ))}
           </div>
-        </>
-      )}
+        ) : hasNoEvents ? (
+          /* Empty State - No Events Created */
+          <EmptyState type="no-events" />
+        ) : hasNoMatchingEvents ? (
+          /* Empty State - No Events Match Filter */
+          <EmptyState type="no-match" activeFilter={activeFilter} />
+        ) : (
+          /* Events Grid */
+          <>
+            {/* Event Count Info */}
+            <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+              Showing {sortedEvents.length}{" "}
+              {sortedEvents.length === 1 ? "event" : "events"}
+            </div>
+
+            {/* Responsive Grid Layout */}
+            <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              {sortedEvents.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

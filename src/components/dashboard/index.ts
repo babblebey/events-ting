@@ -6,3 +6,4 @@ export {
 } from "./event-card";
 export { StatusFilter } from "./status-filter";
 export { EmptyState } from "./empty-state";
+export { DashboardHeader } from "./dashboard-header";
