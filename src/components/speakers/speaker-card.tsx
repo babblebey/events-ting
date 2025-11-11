@@ -51,7 +51,7 @@ export function SpeakerCard({
   const sessionCount = speaker.speakerSessions?.length ?? 0;
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card className="transition-shadow hover:shadow-lg">
       <div className="flex flex-col items-center gap-4">
         {/* Profile Photo */}
         <div className="relative">
@@ -64,7 +64,7 @@ export function SpeakerCard({
               className="h-24 w-24 rounded-full object-cover"
             />
           ) : (
-            <div className="h-24 w-24 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700">
               <span className="text-3xl font-bold text-gray-500 dark:text-gray-400">
                 {speaker.name
                   .split(" ")
@@ -90,12 +90,12 @@ export function SpeakerCard({
         </div>
 
         {/* Bio */}
-        <p className="text-sm text-gray-600 dark:text-gray-300 text-center line-clamp-3">
+        <p className="line-clamp-3 text-center text-sm text-gray-600 dark:text-gray-300">
           {speaker.bio}
         </p>
 
         {/* Social Links */}
-        <div className="flex gap-3 items-center justify-center">
+        <div className="flex items-center justify-center gap-3">
           {speaker.email && (
             <a
               href={`mailto:${speaker.email}`}
@@ -152,40 +152,42 @@ export function SpeakerCard({
         </div>
 
         {/* Sessions (if showing) */}
-        {showSessions && speaker.speakerSessions && speaker.speakerSessions.length > 0 && (
-          <div className="w-full border-t pt-3 mt-2">
-            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">
-              Speaking Sessions
-            </p>
-            <div className="space-y-2">
-              {speaker.speakerSessions.slice(0, 2).map((session) => (
-                <div
-                  key={session.id}
-                  className="text-sm text-gray-600 dark:text-gray-300"
-                >
-                  <p className="font-medium line-clamp-1">
-                    {session.scheduleEntry.title}
+        {showSessions &&
+          speaker.speakerSessions &&
+          speaker.speakerSessions.length > 0 && (
+            <div className="mt-2 w-full border-t pt-3">
+              <p className="mb-2 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">
+                Speaking Sessions
+              </p>
+              <div className="space-y-2">
+                {speaker.speakerSessions.slice(0, 2).map((session) => (
+                  <div
+                    key={session.id}
+                    className="text-sm text-gray-600 dark:text-gray-300"
+                  >
+                    <p className="line-clamp-1 font-medium">
+                      {session.scheduleEntry.title}
+                    </p>
+                    {session.scheduleEntry.track && (
+                      <Badge color="gray" size="xs" className="mt-1">
+                        {session.scheduleEntry.track}
+                      </Badge>
+                    )}
+                  </div>
+                ))}
+                {speaker.speakerSessions.length > 2 && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    +{speaker.speakerSessions.length - 2} more session
+                    {speaker.speakerSessions.length - 2 !== 1 ? "s" : ""}
                   </p>
-                  {session.scheduleEntry.track && (
-                    <Badge color="gray" size="xs" className="mt-1">
-                      {session.scheduleEntry.track}
-                    </Badge>
-                  )}
-                </div>
-              ))}
-              {speaker.speakerSessions.length > 2 && (
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  +{speaker.speakerSessions.length - 2} more session
-                  {speaker.speakerSessions.length - 2 !== 1 ? "s" : ""}
-                </p>
-              )}
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Action Buttons (for organizer view) */}
         {(onEdit ?? onDelete) && (
-          <div className="flex gap-2 w-full pt-2 border-t">
+          <div className="flex w-full gap-2 border-t pt-2">
             {onEdit && (
               <button
                 onClick={onEdit}

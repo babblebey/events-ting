@@ -51,11 +51,7 @@ export default async function CfpPage({ params }: CfpPageProps) {
       </div>
 
       {/* CFP Content */}
-      <CfpPublicContent 
-        cfp={cfp}
-        eventId={event.id} 
-        eventName={event.name} 
-      />
+      <CfpPublicContent cfp={cfp} eventId={event.id} eventName={event.name} />
     </div>
   );
 }

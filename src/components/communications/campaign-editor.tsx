@@ -32,7 +32,7 @@ export function CampaignEditor({
   // Fetch existing campaign data if editing
   const { data: existingCampaign } = api.communication.getCampaign.useQuery(
     { id: campaignId! },
-    { enabled: !!campaignId }
+    { enabled: !!campaignId },
   );
 
   // Fetch ticket types for the event
@@ -61,11 +61,13 @@ export function CampaignEditor({
       setSubject(existingCampaign.subject);
       setBody(existingCampaign.body);
       setRecipientType(existingCampaign.recipientType as typeof recipientType);
-      if (existingCampaign.recipientFilter &&
-          typeof existingCampaign.recipientFilter === 'object' &&
-          'ticketTypeId' in existingCampaign.recipientFilter) {
+      if (
+        existingCampaign.recipientFilter &&
+        typeof existingCampaign.recipientFilter === "object" &&
+        "ticketTypeId" in existingCampaign.recipientFilter
+      ) {
         setSelectedTicketType(
-          existingCampaign.recipientFilter.ticketTypeId as string
+          existingCampaign.recipientFilter.ticketTypeId as string,
         );
       }
     }
@@ -124,9 +126,7 @@ export function CampaignEditor({
           id="recipientType"
           value={recipientType}
           onChange={(e) =>
-            setRecipientType(
-              e.target.value as typeof recipientType
-            )
+            setRecipientType(e.target.value as typeof recipientType)
           }
           required
           disabled={isLoading}
@@ -172,7 +172,8 @@ export function CampaignEditor({
           disabled={isLoading}
         />
         <p className="mt-1 text-sm text-gray-500">
-          You can use HTML tags for formatting. The email will be wrapped in a professional template.
+          You can use HTML tags for formatting. The email will be wrapped in a
+          professional template.
         </p>
       </div>
 

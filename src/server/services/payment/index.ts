@@ -12,7 +12,7 @@ import { FreeTicketProcessor } from "./free";
  * @returns Configured payment processor
  */
 export function getPaymentProcessor(
-  config: PaymentProcessorConfig
+  config: PaymentProcessorConfig,
 ): PaymentProcessor {
   switch (config.type) {
     case "free":

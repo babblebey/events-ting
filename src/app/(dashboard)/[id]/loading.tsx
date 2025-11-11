@@ -1,4 +1,7 @@
-import { MetricsRowSkeleton, PageHeaderSkeleton } from "@/components/ui/skeletons";
+import {
+  MetricsRowSkeleton,
+  PageHeaderSkeleton,
+} from "@/components/ui/skeletons";
 
 /**
  * Loading state for event dashboard overview page
@@ -9,7 +12,7 @@ export default function Loading() {
     <div className="space-y-6">
       <PageHeaderSkeleton />
       <MetricsRowSkeleton count={4} />
-      
+
       {/* Recent activity section skeleton */}
       <div className="mt-8">
         <div className="mb-4">

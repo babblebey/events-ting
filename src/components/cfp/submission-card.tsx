@@ -1,9 +1,9 @@
 /**
  * SubmissionCard Component
- * 
+ *
  * Displays a CFP submission in the organizer's review dashboard.
  * Shows proposal details, speaker info, and review status.
- * 
+ *
  * @module components/cfp/submission-card
  */
 
@@ -12,7 +12,8 @@
 import { Badge, Card } from "flowbite-react";
 import type { RouterOutputs } from "@/trpc/react";
 
-type CfpSubmission = RouterOutputs["cfp"]["listSubmissions"]["submissions"][number];
+type CfpSubmission =
+  RouterOutputs["cfp"]["listSubmissions"]["submissions"][number];
 
 interface SubmissionCardProps {
   submission: CfpSubmission;
@@ -39,11 +40,14 @@ const SESSION_FORMAT_LABELS = {
 } as const;
 
 export function SubmissionCard({ submission, onClick }: SubmissionCardProps) {
-  const submittedDate = new Date(submission.submittedAt).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  const submittedDate = new Date(submission.submittedAt).toLocaleDateString(
+    "en-US",
+    {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    },
+  );
 
   return (
     <Card
@@ -57,11 +61,19 @@ export function SubmissionCard({ submission, onClick }: SubmissionCardProps) {
             {submission.title}
           </h3>
           <div className="flex flex-wrap gap-2">
-            <Badge color={STATUS_COLORS[submission.status as keyof typeof STATUS_COLORS]}>
+            <Badge
+              color={
+                STATUS_COLORS[submission.status as keyof typeof STATUS_COLORS]
+              }
+            >
               {STATUS_LABELS[submission.status as keyof typeof STATUS_LABELS]}
             </Badge>
             <Badge color="gray">
-              {SESSION_FORMAT_LABELS[submission.sessionFormat as keyof typeof SESSION_FORMAT_LABELS]}
+              {
+                SESSION_FORMAT_LABELS[
+                  submission.sessionFormat as keyof typeof SESSION_FORMAT_LABELS
+                ]
+              }
             </Badge>
             <Badge color="gray">{submission.duration} min</Badge>
           </div>
@@ -103,9 +115,12 @@ export function SubmissionCard({ submission, onClick }: SubmissionCardProps) {
             <p className="text-xs text-gray-500">{submission.speakerEmail}</p>
           </div>
         </div>
-        
+
         {/* Social Links */}
-        {(submission.speakerTwitter ?? submission.speakerGithub ?? submission.speakerLinkedin ?? submission.speakerWebsite) && (
+        {(submission.speakerTwitter ??
+          submission.speakerGithub ??
+          submission.speakerLinkedin ??
+          submission.speakerWebsite) && (
           <div className="mt-2 flex flex-wrap gap-2 text-xs">
             {submission.speakerTwitter && (
               <a

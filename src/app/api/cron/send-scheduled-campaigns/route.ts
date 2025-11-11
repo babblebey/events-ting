@@ -6,10 +6,10 @@ import { sendBatchEmailsWithRetry } from "@/server/services/email";
 /**
  * Cron job endpoint to send scheduled email campaigns
  * FR-047: Scheduled campaign delivery
- * 
+ *
  * This endpoint should be called periodically (e.g., every 5-10 minutes) by a cron service
  * to check for and send any campaigns that are scheduled for delivery.
- * 
+ *
  * Security: Verify cron secret to prevent unauthorized access
  */
 export async function GET(req: NextRequest) {
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
       console.error("[CRON] CRON_SECRET not configured");
       return NextResponse.json(
         { error: "Cron jobs not configured" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
     }
 
     console.log(
-      `[CRON] Found ${scheduledCampaigns.length} scheduled campaigns to send`
+      `[CRON] Found ${scheduledCampaigns.length} scheduled campaigns to send`,
     );
 
     const results = await Promise.allSettled(
@@ -86,7 +86,11 @@ export async function GET(req: NextRequest) {
             });
 
             console.warn(`[CRON] Campaign ${campaign.id} has no recipients`);
-            return { campaignId: campaign.id, success: false, reason: "No recipients" };
+            return {
+              campaignId: campaign.id,
+              success: false,
+              reason: "No recipients",
+            };
           }
 
           // Send emails
@@ -115,7 +119,7 @@ export async function GET(req: NextRequest) {
           });
 
           console.log(
-            `[CRON] Campaign ${campaign.id} sent successfully: ${successCount}/${recipients.length} delivered`
+            `[CRON] Campaign ${campaign.id} sent successfully: ${successCount}/${recipients.length} delivered`,
           );
 
           return { campaignId: campaign.id, success: true, sent: successCount };
@@ -134,22 +138,24 @@ export async function GET(req: NextRequest) {
             error: error instanceof Error ? error.message : "Unknown error",
           };
         }
-      })
+      }),
     );
 
     const successCount = results.filter(
-      (r) => r.status === "fulfilled" && r.value.success
+      (r) => r.status === "fulfilled" && r.value.success,
     ).length;
 
     console.log(
-      `[CRON] Scheduled campaign batch complete: ${successCount}/${scheduledCampaigns.length} sent successfully`
+      `[CRON] Scheduled campaign batch complete: ${successCount}/${scheduledCampaigns.length} sent successfully`,
     );
 
     return NextResponse.json({
       success: true,
       sent: successCount,
       failed: scheduledCampaigns.length - successCount,
-      details: results.map((r) => (r.status === "fulfilled" ? r.value : { error: "Promise rejected" })),
+      details: results.map((r) =>
+        r.status === "fulfilled" ? r.value : { error: "Promise rejected" },
+      ),
     });
   } catch (error) {
     console.error("[CRON] Unexpected error in scheduled campaign cron", error);
@@ -159,7 +165,7 @@ export async function GET(req: NextRequest) {
         error: "Internal server error",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -194,7 +200,9 @@ async function getRecipientsForCampaign(campaign: {
       const ticketTypeId = filter?.ticketTypeId as string | undefined;
 
       if (!ticketTypeId) {
-        throw new Error("Ticket type ID required for ticket_type recipient filter");
+        throw new Error(
+          "Ticket type ID required for ticket_type recipient filter",
+        );
       }
 
       const registrations = await db.registration.findMany({
@@ -226,10 +234,14 @@ async function getRecipientsForCampaign(campaign: {
 
     case "custom": {
       const filter = campaign.recipientFilter as Record<string, unknown> | null;
-      const emails = filter?.emails as Array<{ email: string; name: string }> | undefined;
+      const emails = filter?.emails as
+        | Array<{ email: string; name: string }>
+        | undefined;
 
       if (!emails || !Array.isArray(emails)) {
-        throw new Error("Custom recipient list required for custom recipient type");
+        throw new Error(
+          "Custom recipient list required for custom recipient type",
+        );
       }
 
       return emails;

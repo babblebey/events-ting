@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Global error boundary for the entire application
@@ -18,7 +18,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error('Global error:', error);
+    console.error("Global error:", error);
   }, [error]);
 
   return (
@@ -30,16 +30,17 @@ export default function GlobalError({
               <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
                 <LuTriangleAlert className="h-10 w-10 text-red-600 dark:text-red-400" />
               </div>
-              
+
               <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
                 Something Went Wrong
               </h1>
-              
+
               <p className="mb-6 text-lg text-gray-600 dark:text-gray-400">
-                We&apos;re sorry, but something unexpected happened. Our team has been notified.
+                We&apos;re sorry, but something unexpected happened. Our team
+                has been notified.
               </p>
 
-              {process.env.NODE_ENV === 'development' && (
+              {process.env.NODE_ENV === "development" && (
                 <div className="mb-6 w-full rounded-lg bg-gray-100 p-4 text-left dark:bg-gray-800">
                   <p className="mb-1 font-mono text-xs font-semibold text-gray-700 dark:text-gray-300">
                     Development Error Details:
@@ -58,14 +59,12 @@ export default function GlobalError({
               <div className="flex gap-3">
                 <Button
                   color="gray"
-                  onClick={() => window.location.href = '/'}
+                  onClick={() => (window.location.href = "/")}
                 >
                   <HiOutlineHome className="mr-2 h-4 w-4" />
                   Go to Homepage
                 </Button>
-                <Button onClick={reset}>
-                  Try Again
-                </Button>
+                <Button onClick={reset}>Try Again</Button>
               </div>
             </div>
           </div>

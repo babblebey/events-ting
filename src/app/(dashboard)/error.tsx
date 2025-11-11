@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Error boundary for dashboard root
@@ -19,7 +19,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error('Dashboard layout error:', error);
+    console.error("Dashboard layout error:", error);
   }, [error]);
 
   return (
@@ -29,16 +29,17 @@ export default function Error({
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/30">
             <LuTriangleAlert className="h-8 w-8 text-orange-600 dark:text-orange-400" />
           </div>
-          
+
           <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
             Dashboard Error
           </h1>
-          
+
           <p className="mb-6 text-gray-600 dark:text-gray-400">
-            There was a problem loading the dashboard. Please try refreshing the page or return to the HiOutlineHome page.
+            There was a problem loading the dashboard. Please try refreshing the
+            page or return to the HiOutlineHome page.
           </p>
 
-          {process.env.NODE_ENV === 'development' && error.message && (
+          {process.env.NODE_ENV === "development" && error.message && (
             <div className="mb-6 w-full rounded-lg bg-gray-100 p-4 text-left dark:bg-gray-800">
               <p className="font-mono text-xs text-gray-700 dark:text-gray-300">
                 {error.message}

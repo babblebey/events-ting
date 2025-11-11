@@ -6,7 +6,11 @@
 
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
 import {
   createScheduleEntrySchema,
   updateScheduleEntrySchema,
@@ -277,9 +281,13 @@ export const scheduleRouter = createTRPCRouter({
         updateData.startTime = combineDateTime(
           date,
           startTime,
-          existingEntry.event.timezone
+          existingEntry.event.timezone,
         );
-        updateData.endTime = combineDateTime(date, endTime, existingEntry.event.timezone);
+        updateData.endTime = combineDateTime(
+          date,
+          endTime,
+          existingEntry.event.timezone,
+        );
       }
 
       // Update schedule entry
@@ -387,7 +395,7 @@ export const scheduleRouter = createTRPCRouter({
       z.object({
         eventId: z.string().cuid(),
         entryIds: z.array(z.string().cuid()),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Verify event exists and user is organizer
@@ -429,7 +437,7 @@ export const scheduleRouter = createTRPCRouter({
         endTime: z.coerce.date(),
         location: z.string().optional(),
         excludeId: z.string().cuid().optional(), // Exclude this entry (for updates)
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const { eventId, startTime, endTime, location, excludeId } = input;
@@ -465,7 +473,7 @@ export const scheduleRouter = createTRPCRouter({
 
       // Filter to actual overlaps using precise time range logic
       const overlappingEntries = entries.filter((entry) =>
-        doTimeRangesOverlap(startTime, endTime, entry.startTime, entry.endTime)
+        doTimeRangesOverlap(startTime, endTime, entry.startTime, entry.endTime),
       );
 
       return {
@@ -484,7 +492,7 @@ export const scheduleRouter = createTRPCRouter({
       z.object({
         eventId: z.string().cuid(),
         date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const { eventId, date } = input;
@@ -546,27 +554,29 @@ export const scheduleRouter = createTRPCRouter({
    * Get all unique tracks for an event
    * FR-025: Track support with visual indicators
    */
-  getTracks: publicProcedure.input(eventIdSchema).query(async ({ ctx, input }) => {
-    const entries = await ctx.db.scheduleEntry.findMany({
-      where: {
-        eventId: input.id,
-        track: { not: null },
-      },
-      select: {
-        track: true,
-        trackColor: true,
-      },
-      distinct: ["track"],
-    });
+  getTracks: publicProcedure
+    .input(eventIdSchema)
+    .query(async ({ ctx, input }) => {
+      const entries = await ctx.db.scheduleEntry.findMany({
+        where: {
+          eventId: input.id,
+          track: { not: null },
+        },
+        select: {
+          track: true,
+          trackColor: true,
+        },
+        distinct: ["track"],
+      });
 
-    // Build unique track list with colors
-    const tracks = entries
-      .filter((e) => e.track)
-      .map((e) => ({
-        name: e.track!,
-        color: e.trackColor ?? "#6B7280", // Default gray if no color
-      }));
+      // Build unique track list with colors
+      const tracks = entries
+        .filter((e) => e.track)
+        .map((e) => ({
+          name: e.track!,
+          color: e.trackColor ?? "#6B7280", // Default gray if no color
+        }));
 
-    return tracks;
-  }),
+      return tracks;
+    }),
 });

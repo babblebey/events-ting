@@ -38,7 +38,7 @@ export default async function SpeakersPage({ params }: SpeakersPageProps) {
   }
 
   return (
-    <div className="container max-w-4xl mx-auto px-4 py-12">
+    <div className="container mx-auto max-w-4xl px-4 py-12">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -51,8 +51,8 @@ export default async function SpeakersPage({ params }: SpeakersPageProps) {
 
       {/* Empty State */}
       {speakers.length === 0 && (
-        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+        <div className="rounded-lg border border-gray-200 bg-white py-12 text-center dark:border-gray-700 dark:bg-gray-800">
+          <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
             No speakers announced yet
           </h3>
           <p className="text-gray-500 dark:text-gray-400">
@@ -63,7 +63,7 @@ export default async function SpeakersPage({ params }: SpeakersPageProps) {
 
       {/* Speakers Grid */}
       {speakers.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {speakers.map((speaker) => (
             <SpeakerCard
               key={speaker.id}
@@ -78,7 +78,7 @@ export default async function SpeakersPage({ params }: SpeakersPageProps) {
       {/* Stats */}
       {speakers.length > 0 && (
         <div className="mt-12 border-t pt-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+          <div className="grid grid-cols-1 gap-6 text-center md:grid-cols-3">
             <div>
               <p className="text-3xl font-bold text-gray-900 dark:text-white">
                 {speakers.length}
@@ -90,8 +90,9 @@ export default async function SpeakersPage({ params }: SpeakersPageProps) {
             <div>
               <p className="text-3xl font-bold text-gray-900 dark:text-white">
                 {speakers.reduce(
-                  (acc, speaker) => acc + (speaker.speakerSessions?.length ?? 0),
-                  0
+                  (acc, speaker) =>
+                    acc + (speaker.speakerSessions?.length ?? 0),
+                  0,
                 )}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -100,11 +101,16 @@ export default async function SpeakersPage({ params }: SpeakersPageProps) {
             </div>
             <div>
               <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                {new Set(
-                  speakers.flatMap((s) =>
-                    s.speakerSessions?.map((ss) => ss.scheduleEntry.track).filter(Boolean) ?? []
-                  )
-                ).size}
+                {
+                  new Set(
+                    speakers.flatMap(
+                      (s) =>
+                        s.speakerSessions
+                          ?.map((ss) => ss.scheduleEntry.track)
+                          .filter(Boolean) ?? [],
+                    ),
+                  ).size
+                }
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Different Tracks

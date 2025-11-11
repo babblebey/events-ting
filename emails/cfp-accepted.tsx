@@ -40,22 +40,25 @@ export const CfpAccepted = ({
   return (
     <Html>
       <Head />
-      <Preview>Congratulations! Your proposal for {eventName} has been accepted! 🎉</Preview>
+      <Preview>
+        Congratulations! Your proposal for {eventName} has been accepted! 🎉
+      </Preview>
       <Body style={main}>
         <Container style={container}>
           <Section style={box}>
             <Heading style={heading}>Proposal Accepted! 🎉</Heading>
-            
+
             <Text style={paragraph}>Hi {speakerName},</Text>
-            
+
             <Text style={paragraph}>
-              We&apos;re thrilled to let you know that your proposal for <strong>{eventName}</strong> has been accepted!
+              We&apos;re thrilled to let you know that your proposal for{" "}
+              <strong>{eventName}</strong> has been accepted!
             </Text>
 
             <Section style={acceptedBox}>
               <Text style={acceptedLabel}>✓ ACCEPTED</Text>
               <Text style={proposalTitleStyle}>{proposalTitle}</Text>
-              
+
               <Section style={detailsGrid}>
                 <Section>
                   <Text style={detailLabel}>Format:</Text>
@@ -83,7 +86,8 @@ export const CfpAccepted = ({
               • We&apos;ll be in touch with more details about your session
             </Text>
             <Text style={listItem}>
-              • You&apos;ll receive information about speaker preparation and logistics
+              • You&apos;ll receive information about speaker preparation and
+              logistics
             </Text>
             <Text style={listItem}>
               • Your speaker profile will be featured on the event website
@@ -99,14 +103,12 @@ export const CfpAccepted = ({
             <Hr style={hr} />
 
             <Text style={footer}>
-              We&apos;re excited to have you as a speaker at {eventName}! 
-              If you have any questions or need assistance, please don&apos;t 
-              hesitate to reach out to the organizing team.
+              We&apos;re excited to have you as a speaker at {eventName}! If you
+              have any questions or need assistance, please don&apos;t hesitate
+              to reach out to the organizing team.
             </Text>
 
-            <Text style={footer}>
-              See you at the event! 🚀
-            </Text>
+            <Text style={footer}>See you at the event! 🚀</Text>
           </Section>
         </Container>
       </Body>

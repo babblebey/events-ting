@@ -32,10 +32,7 @@ export async function POST(req: NextRequest) {
     const fileType = formData.get("type") as string | null; // 'image' | 'document'
 
     if (!file) {
-      return NextResponse.json(
-        { error: "No file provided" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
     // Determine file type and limits
@@ -56,7 +53,7 @@ export async function POST(req: NextRequest) {
         {
           error: `Invalid file type. Allowed types: ${allowedTypes.join(", ")}`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -67,7 +64,7 @@ export async function POST(req: NextRequest) {
         {
           error: `File too large. Maximum size: ${maxSizeMB}MB`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -75,9 +72,7 @@ export async function POST(req: NextRequest) {
     const filename = generateUniqueFilename(file.name);
 
     // Determine upload path based on type
-    const uploadPath = isImage
-      ? `images/${filename}`
-      : `documents/${filename}`;
+    const uploadPath = isImage ? `images/${filename}` : `documents/${filename}`;
 
     // Upload file
     const url = await storage.upload(file, uploadPath);
@@ -102,10 +97,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : "Failed to upload file",
+        error: error instanceof Error ? error.message : "Failed to upload file",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -128,10 +122,7 @@ export async function DELETE(req: NextRequest) {
     const url = searchParams.get("url");
 
     if (!url) {
-      return NextResponse.json(
-        { error: "No URL provided" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "No URL provided" }, { status: 400 });
     }
 
     // Delete file
@@ -149,10 +140,9 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : "Failed to delete file",
+        error: error instanceof Error ? error.message : "Failed to delete file",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -37,7 +37,7 @@ function generateCSV(
     ticketType: { name: string };
     registeredAt: Date;
     paymentStatus: string;
-  }>
+  }>,
 ): string {
   const headers = [
     "Name",
@@ -67,7 +67,7 @@ function generateCSV(
           }
           return cellStr;
         })
-        .join(",")
+        .join(","),
     ),
   ].join("\n");
 
@@ -125,7 +125,8 @@ export const registrationRouter = createTRPCRouter({
         if (available <= 0) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "This ticket type is sold out. Please try another ticket type.",
+            message:
+              "This ticket type is sold out. Please try another ticket type.",
           });
         }
 
@@ -147,10 +148,14 @@ export const registrationRouter = createTRPCRouter({
 
         // Get event details for confirmation email
         const event = await tx.event.findUnique({
-          where: { id: (await tx.ticketType.findUnique({
-            where: { id: input.ticketTypeId },
-            select: { eventId: true },
-          }))?.eventId },
+          where: {
+            id: (
+              await tx.ticketType.findUnique({
+                where: { id: input.ticketTypeId },
+                select: { eventId: true },
+              })
+            )?.eventId,
+          },
           select: {
             id: true,
             name: true,
@@ -217,7 +222,10 @@ export const registrationRouter = createTRPCRouter({
           { name: "eventId", value: result.eventId },
         ],
       }).catch((error) => {
-        console.error("[Registration] Failed to send confirmation email", error);
+        console.error(
+          "[Registration] Failed to send confirmation email",
+          error,
+        );
         // Don't throw - registration is already created
       });
 
@@ -260,7 +268,8 @@ export const registrationRouter = createTRPCRouter({
       if (event.organizerId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "You do not have permission to view registrations for this event",
+          message:
+            "You do not have permission to view registrations for this event",
         });
       }
 
@@ -361,7 +370,9 @@ export const registrationRouter = createTRPCRouter({
         paymentIntentId: registration.paymentIntentId,
         emailStatus: registration.emailStatus,
         customData: registration.customData as Record<string, unknown> | null,
-        registrationCode: (registration.customData as { registrationCode?: string })?.registrationCode ?? "",
+        registrationCode:
+          (registration.customData as { registrationCode?: string })
+            ?.registrationCode ?? "",
         registeredAt: registration.registeredAt,
       };
     }),
@@ -377,7 +388,7 @@ export const registrationRouter = createTRPCRouter({
         email: z.string().email(),
         name: z.string().min(2).max(100),
         sendConfirmation: z.boolean().default(true),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Verify user is event organizer
@@ -459,7 +470,10 @@ export const registrationRouter = createTRPCRouter({
             { name: "eventId", value: input.eventId },
           ],
         }).catch((error) => {
-          console.error("[Registration] Failed to send confirmation email", error);
+          console.error(
+            "[Registration] Failed to send confirmation email",
+            error,
+          );
         });
       }
 
@@ -475,7 +489,7 @@ export const registrationRouter = createTRPCRouter({
         id: z.string().cuid(),
         reason: z.string().optional(),
         sendNotification: z.boolean().default(true),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const registration = await ctx.db.registration.findUnique({
@@ -528,7 +542,10 @@ export const registrationRouter = createTRPCRouter({
             { name: "eventId", value: registration.eventId },
           ],
         }).catch((error) => {
-          console.error("[Registration] Failed to send cancellation email", error);
+          console.error(
+            "[Registration] Failed to send cancellation email",
+            error,
+          );
         });
       }
 
@@ -563,7 +580,8 @@ export const registrationRouter = createTRPCRouter({
       if (event.organizerId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "You do not have permission to export registrations for this event",
+          message:
+            "You do not have permission to export registrations for this event",
         });
       }
 
@@ -625,13 +643,14 @@ export const registrationRouter = createTRPCRouter({
       if (registration.event.organizerId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "You do not have permission to resend confirmation for this registration",
+          message:
+            "You do not have permission to resend confirmation for this registration",
         });
       }
 
       const registrationCode =
-        (registration.customData as { registrationCode?: string })?.registrationCode ??
-        "N/A";
+        (registration.customData as { registrationCode?: string })
+          ?.registrationCode ?? "N/A";
 
       // Send confirmation email
       await sendEmail({
@@ -665,7 +684,7 @@ export const registrationRouter = createTRPCRouter({
       z.object({
         email: z.string().email(),
         status: z.enum(["active", "bounced", "unsubscribed"]),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Update all registrations with matching email

@@ -10,8 +10,16 @@ import { Button, Card } from "flowbite-react";
 import { HiOutlineUsers } from "react-icons/hi2";
 import { IoSettingsOutline } from "react-icons/io5";
 import { formatDate, formatDateRange } from "@/lib/utils/date";
-import { EventMetrics, EventMetricsSkeleton } from "@/components/events/event-metrics";
-import { HiOutlineTicket, HiOutlineMail, HiOutlineExternalLink, HiOutlineCalendar } from "react-icons/hi";
+import {
+  EventMetrics,
+  EventMetricsSkeleton,
+} from "@/components/events/event-metrics";
+import {
+  HiOutlineTicket,
+  HiOutlineMail,
+  HiOutlineExternalLink,
+  HiOutlineCalendar,
+} from "react-icons/hi";
 
 interface EventOverviewPageProps {
   params: { id: string };
@@ -125,7 +133,12 @@ export default async function EventOverviewPage({
 async function EventMetricsSection({ eventId }: { eventId: string }) {
   const metrics = await api.event.getMetrics({ id: eventId });
 
-  return <EventMetrics metrics={metrics} recentRegistrations={metrics.recentRegistrations} />;
+  return (
+    <EventMetrics
+      metrics={metrics}
+      recentRegistrations={metrics.recentRegistrations}
+    />
+  );
 }
 
 function QuickActionCard({
@@ -141,9 +154,9 @@ function QuickActionCard({
 }) {
   return (
     <Link href={href}>
-      <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+      <Card className="cursor-pointer transition-shadow hover:shadow-lg">
         <div className="flex items-start gap-4">
-          <div className="rounded-lg bg-primary-100 p-3 text-primary-600 dark:bg-primary-900 dark:text-primary-300">
+          <div className="bg-primary-100 text-primary-600 dark:bg-primary-900 dark:text-primary-300 rounded-lg p-3">
             {icon}
           </div>
           <div className="flex-1">
@@ -159,4 +172,3 @@ function QuickActionCard({
     </Link>
   );
 }
-

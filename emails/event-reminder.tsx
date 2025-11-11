@@ -31,7 +31,7 @@ export const EventReminderEmail = ({
   eventUrl = "https://example.com/events/nextjs-conf-2025",
   daysUntilEvent = 7,
 }: EventReminderEmailProps) => {
-  const previewText = `${eventName} is ${daysUntilEvent} ${daysUntilEvent === 1 ? 'day' : 'days'} away!`;
+  const previewText = `${eventName} is ${daysUntilEvent} ${daysUntilEvent === 1 ? "day" : "days"} away!`;
 
   return (
     <Html>
@@ -40,31 +40,35 @@ export const EventReminderEmail = ({
       <Body style={main}>
         <Container style={container}>
           <Heading style={h1}>Event Reminder</Heading>
-          
+
           <Text style={text}>Hi {recipientName},</Text>
-          
+
           <Text style={text}>
-            This is a friendly reminder that <strong>{eventName}</strong> is coming up in{" "}
-            <strong>{daysUntilEvent} {daysUntilEvent === 1 ? 'day' : 'days'}</strong>!
+            This is a friendly reminder that <strong>{eventName}</strong> is
+            coming up in{" "}
+            <strong>
+              {daysUntilEvent} {daysUntilEvent === 1 ? "day" : "days"}
+            </strong>
+            !
           </Text>
 
           <Section style={eventDetailsContainer}>
             <Heading as="h2" style={h2}>
               Event Details
             </Heading>
-            
+
             <Text style={eventDetail}>
               <strong>Event:</strong> {eventName}
             </Text>
-            
+
             <Text style={eventDetail}>
               <strong>Date:</strong> {eventDate}
             </Text>
-            
+
             <Text style={eventDetail}>
               <strong>Time:</strong> {eventTime}
             </Text>
-            
+
             <Text style={eventDetail}>
               <strong>Location:</strong> {eventLocation}
             </Text>
@@ -79,13 +83,11 @@ export const EventReminderEmail = ({
           <Hr style={hr} />
 
           <Text style={footer}>
-            We're looking forward to seeing you there! If you have any questions,
-            please don't hesitate to reach out.
+            We're looking forward to seeing you there! If you have any
+            questions, please don't hesitate to reach out.
           </Text>
 
-          <Text style={footer}>
-            See you soon!
-          </Text>
+          <Text style={footer}>See you soon!</Text>
         </Container>
       </Body>
     </Html>

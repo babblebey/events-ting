@@ -41,10 +41,7 @@ export async function POST(req: NextRequest) {
 
     if (!signature && process.env.NODE_ENV === "production") {
       console.warn("[Webhook] Missing Resend signature");
-      return NextResponse.json(
-        { error: "Missing signature" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Missing signature" }, { status: 401 });
     }
 
     // TODO: Verify signature with Resend webhook secret
@@ -64,7 +61,7 @@ export async function POST(req: NextRequest) {
 
     // Extract campaign ID from tags if present
     const campaignId = event.data.tags?.find(
-      (tag) => tag.name === "campaign_id"
+      (tag) => tag.name === "campaign_id",
     )?.value;
 
     // Handle different event types
@@ -100,11 +97,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error:
-          error instanceof Error
-            ? error.message
-            : "Failed to process webhook",
+          error instanceof Error ? error.message : "Failed to process webhook",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -114,7 +109,7 @@ export async function POST(req: NextRequest) {
  */
 async function handleEmailDelivered(
   event: ResendWebhookEvent,
-  campaignId?: string
+  campaignId?: string,
 ) {
   if (!campaignId) return;
 
@@ -140,7 +135,7 @@ async function handleEmailDelivered(
  */
 async function handleEmailBounced(
   event: ResendWebhookEvent,
-  campaignId?: string
+  campaignId?: string,
 ) {
   const recipientEmail = event.data.to;
   const bounceType = event.data.bounce?.type ?? "hard";
@@ -178,7 +173,7 @@ async function handleEmailBounced(
  */
 async function handleEmailOpened(
   event: ResendWebhookEvent,
-  campaignId?: string
+  campaignId?: string,
 ) {
   if (!campaignId) return;
 
@@ -204,7 +199,7 @@ async function handleEmailOpened(
  */
 async function handleEmailClicked(
   event: ResendWebhookEvent,
-  campaignId?: string
+  campaignId?: string,
 ) {
   if (!campaignId) return;
 

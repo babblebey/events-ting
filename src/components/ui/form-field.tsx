@@ -2,7 +2,13 @@
  * Form field wrapper component with label and error message
  */
 
-import { Label, TextInput, Textarea, type TextInputProps, type TextareaProps } from "flowbite-react";
+import {
+  Label,
+  TextInput,
+  Textarea,
+  type TextInputProps,
+  type TextareaProps,
+} from "flowbite-react";
 import { type ReactNode } from "react";
 
 interface FormFieldProps extends Omit<TextInputProps, "type"> {
@@ -11,7 +17,16 @@ interface FormFieldProps extends Omit<TextInputProps, "type"> {
   error?: string;
   helpText?: string;
   required?: boolean;
-  type?: "text" | "email" | "password" | "url" | "number" | "date" | "time" | "datetime-local" | "textarea";
+  type?:
+    | "text"
+    | "email"
+    | "password"
+    | "url"
+    | "number"
+    | "date"
+    | "time"
+    | "datetime-local"
+    | "textarea";
   rows?: number;
 }
 
@@ -52,9 +67,11 @@ export function FormField({
           {...props}
         />
       )}
-      
+
       {(error ?? helpText) && (
-        <p className={`mt-2 text-sm ${error ? 'text-red-600 dark:text-red-500' : 'text-gray-500 dark:text-gray-400'}`}>
+        <p
+          className={`mt-2 text-sm ${error ? "text-red-600 dark:text-red-500" : "text-gray-500 dark:text-gray-400"}`}
+        >
           {error ?? helpText}
         </p>
       )}
@@ -96,7 +113,11 @@ interface FormSectionProps {
   children: ReactNode;
 }
 
-export function FormSection({ title, description, children }: FormSectionProps) {
+export function FormSection({
+  title,
+  description,
+  children,
+}: FormSectionProps) {
   return (
     <div className="mb-8">
       <div className="mb-4">

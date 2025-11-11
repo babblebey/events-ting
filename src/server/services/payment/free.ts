@@ -3,10 +3,7 @@
  * Handles free ticket registrations without actual payment processing
  */
 
-import type {
-  PaymentProcessor,
-  PaymentIntent,
-} from "./types";
+import type { PaymentProcessor, PaymentIntent } from "./types";
 
 /**
  * Free ticket processor implementation
@@ -26,7 +23,7 @@ export class FreeTicketProcessor implements PaymentProcessor {
     // Validate that amount is zero for free tickets
     if (params.amount !== 0) {
       throw new Error(
-        "FreeTicketProcessor only supports zero-amount transactions"
+        "FreeTicketProcessor only supports zero-amount transactions",
       );
     }
 
@@ -62,7 +59,7 @@ export class FreeTicketProcessor implements PaymentProcessor {
    */
   async refund(_intentId: string, _amount?: number): Promise<void> {
     console.log(
-      `[Payment] Free ticket refund requested for ${_intentId} (no-op)`
+      `[Payment] Free ticket refund requested for ${_intentId} (no-op)`,
     );
     // No actual refund needed for free tickets
   }

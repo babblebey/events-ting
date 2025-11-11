@@ -33,11 +33,12 @@ export const CfpSubmissionReceived = ({
         <Container style={container}>
           <Section style={box}>
             <Heading style={heading}>Proposal Received! 📝</Heading>
-            
+
             <Text style={paragraph}>Hi {speakerName},</Text>
-            
+
             <Text style={paragraph}>
-              Thank you for submitting your proposal to <strong>{eventName}</strong>!
+              Thank you for submitting your proposal to{" "}
+              <strong>{eventName}</strong>!
             </Text>
 
             <Section style={infoBox}>
@@ -46,16 +47,15 @@ export const CfpSubmissionReceived = ({
             </Section>
 
             <Text style={paragraph}>
-              We&apos;ll carefully evaluate your proposal and get back to you with a decision.
+              We&apos;ll carefully evaluate your proposal and get back to you
+              with a decision.
             </Text>
 
             <Text style={paragraph}>
               <strong>What happens next?</strong>
             </Text>
 
-            <Text style={listItem}>
-              • Our team will review all submissions
-            </Text>
+            <Text style={listItem}>• Our team will review all submissions</Text>
             <Text style={listItem}>
               • You&apos;ll receive an email notification about the decision
             </Text>
@@ -72,12 +72,12 @@ export const CfpSubmissionReceived = ({
             <Hr style={hr} />
 
             <Text style={footer}>
-              Thank you for your interest in speaking at {eventName}! 
-              We appreciate the time you took to submit your proposal.
+              Thank you for your interest in speaking at {eventName}! We
+              appreciate the time you took to submit your proposal.
             </Text>
 
             <Text style={footer}>
-              If you have any questions, please don&apos;t hesitate to reach out 
+              If you have any questions, please don&apos;t hesitate to reach out
               to the event organizer.
             </Text>
           </Section>

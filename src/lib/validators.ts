@@ -18,7 +18,10 @@ export const createEventSchema = z
       .max(5000),
     slug: z
       .string()
-      .regex(/^[a-z0-9-]+$/, "Slug must be lowercase letters, numbers, and hyphens only")
+      .regex(
+        /^[a-z0-9-]+$/,
+        "Slug must be lowercase letters, numbers, and hyphens only",
+      )
       .min(3)
       .max(100),
     locationType: z.enum(["in-person", "virtual", "hybrid"]),
@@ -47,7 +50,7 @@ export const createEventSchema = z
     {
       message: "Address required for in-person or hybrid events",
       path: ["locationAddress"],
-    }
+    },
   )
   .refine(
     (data) => {
@@ -59,14 +62,19 @@ export const createEventSchema = z
     {
       message: "URL required for virtual or hybrid events",
       path: ["locationUrl"],
-    }
+    },
   );
 
 export const updateEventSchema = z.object({
   id: z.string().cuid(),
   name: z.string().min(3).max(200).optional(),
   description: z.string().min(10).max(5000).optional(),
-  slug: z.string().regex(/^[a-z0-9-]+$/).min(3).max(100).optional(),
+  slug: z
+    .string()
+    .regex(/^[a-z0-9-]+$/)
+    .min(3)
+    .max(100)
+    .optional(),
   locationType: z.enum(["in-person", "virtual", "hybrid"]).optional(),
   locationAddress: z.string().optional(),
   locationUrl: z
@@ -103,11 +111,9 @@ export const createTicketTypeSchema = z.object({
   saleEnd: z.coerce.date().optional(),
 });
 
-export const updateTicketTypeSchema = createTicketTypeSchema
-  .partial()
-  .extend({
-    id: z.string().cuid(),
-  });
+export const updateTicketTypeSchema = createTicketTypeSchema.partial().extend({
+  id: z.string().cuid(),
+});
 
 // ============================================================================
 // REGISTRATION VALIDATION
@@ -139,7 +145,9 @@ export const createScheduleEntrySchema = z
     eventId: z.string().cuid(),
     title: z.string().min(3).max(200),
     description: z.string().max(2000),
-    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
+    date: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
     startTime: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:mm)"),
     endTime: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:mm)"),
     location: z.string().optional(),
@@ -164,7 +172,7 @@ export const createScheduleEntrySchema = z
     {
       message: "End time must be after start time",
       path: ["endTime"],
-    }
+    },
   );
 
 export const updateScheduleEntrySchema = z.object({
@@ -173,13 +181,27 @@ export const updateScheduleEntrySchema = z.object({
   eventId: z.string().cuid().optional(),
   title: z.string().min(3).max(200).optional(),
   description: z.string().max(2000).optional(),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-  startTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
-  endTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  startTime: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/)
+    .optional(),
+  endTime: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/)
+    .optional(),
   location: z.string().optional(),
   track: z.string().optional(),
-  trackColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
-  sessionType: z.enum(["keynote", "talk", "workshop", "break", "networking"]).optional(),
+  trackColor: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/)
+    .optional(),
+  sessionType: z
+    .enum(["keynote", "talk", "workshop", "break", "networking"])
+    .optional(),
   speakerIds: z.array(z.string().cuid()).optional(),
 });
 
@@ -192,11 +214,11 @@ export const createSpeakerSchema = z.object({
   name: z.string().min(2).max(100),
   bio: z.string().min(10).max(2000),
   email: z.string().email(),
-  photo: z.string().url().optional(),
+  photo: z.string().url().optional().or(z.literal("")).transform(val => val === "" ? undefined : val),
   twitter: z.string().optional(),
   github: z.string().optional(),
   linkedin: z.string().optional(),
-  website: z.string().url().optional(),
+  website: z.string().url().optional().or(z.literal("")).transform(val => val === "" ? undefined : val),
 });
 
 export const updateSpeakerSchema = createSpeakerSchema.partial().extend({
@@ -311,7 +333,10 @@ export const listRegistrationsSchema = paginationSchema.extend({
 
 export const listScheduleEntriesSchema = z.object({
   eventId: z.string().cuid(),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
   track: z.string().optional(),
 });
 
@@ -322,7 +347,9 @@ export const listCfpSubmissionsSchema = paginationSchema.extend({
 
 export const listCampaignsSchema = paginationSchema.extend({
   eventId: z.string().cuid(),
-  status: z.enum(["draft", "scheduled", "sending", "sent", "failed"]).optional(),
+  status: z
+    .enum(["draft", "scheduled", "sending", "sent", "failed"])
+    .optional(),
 });
 
 // ============================================================================
@@ -333,7 +360,9 @@ export type CreateEventInput = z.infer<typeof createEventSchema>;
 export type UpdateEventInput = z.infer<typeof updateEventSchema>;
 export type CreateTicketTypeInput = z.infer<typeof createTicketTypeSchema>;
 export type CreateRegistrationInput = z.infer<typeof createRegistrationSchema>;
-export type CreateScheduleEntryInput = z.infer<typeof createScheduleEntrySchema>;
+export type CreateScheduleEntryInput = z.infer<
+  typeof createScheduleEntrySchema
+>;
 export type CreateSpeakerInput = z.infer<typeof createSpeakerSchema>;
 export type SubmitCfpProposalInput = z.infer<typeof submitCfpProposalSchema>;
 export type CreateCampaignInput = z.infer<typeof createCampaignSchema>;

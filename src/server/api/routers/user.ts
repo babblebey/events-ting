@@ -104,7 +104,7 @@ export const userRouter = createTRPCRouter({
       // Verify current password
       const isValid = await bcrypt.compare(
         input.currentPassword,
-        user.password
+        user.password,
       );
 
       if (!isValid) {
@@ -135,7 +135,7 @@ export const userRouter = createTRPCRouter({
         confirmation: z
           .literal("DELETE")
           .describe("Must type 'DELETE' to confirm"),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       // Check if user has active events

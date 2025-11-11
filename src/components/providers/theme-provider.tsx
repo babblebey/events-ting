@@ -4,20 +4,21 @@
  */
 "use client";
 
-import { createTheme, ThemeProvider as FlowbiteThemeProvider } from "flowbite-react";
+import {
+  createTheme,
+  ThemeProvider as FlowbiteThemeProvider,
+} from "flowbite-react";
 
 const ourTheme = createTheme({
   badge: {
     root: {
-      base: "w-fit"
-    }
-  }
+      base: "w-fit",
+    },
+  },
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
-    <FlowbiteThemeProvider theme={ourTheme}>
-      {children}
-    </FlowbiteThemeProvider>
+    <FlowbiteThemeProvider theme={ourTheme}>{children}</FlowbiteThemeProvider>
   );
 }

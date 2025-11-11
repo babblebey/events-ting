@@ -1,8 +1,8 @@
 /**
  * CFP (Call for Papers) Router
- * 
+ *
  * Handles Call for Papers management and submission review for events.
- * 
+ *
  * Procedures:
  * - open: Create a new CFP for an event
  * - close: Close an existing CFP
@@ -12,7 +12,7 @@
  * - reviewSubmission: Add review notes and score to a submission
  * - acceptProposal: Accept a proposal and create speaker profile
  * - rejectProposal: Reject a proposal with feedback
- * 
+ *
  * @module server/api/routers/cfp
  */
 
@@ -34,16 +34,23 @@ import { CfpRejected } from "../../../../emails/cfp-rejected";
 
 const openCfpSchema = z.object({
   eventId: z.string().cuid("Invalid event ID"),
-  guidelines: z.string().min(50, "Guidelines must be at least 50 characters").max(5000),
+  guidelines: z
+    .string()
+    .min(50, "Guidelines must be at least 50 characters")
+    .max(5000),
   deadline: z.coerce.date(),
-  requiredFields: z.array(z.enum(["bio", "sessionFormat", "duration", "photo"])).optional(),
+  requiredFields: z
+    .array(z.enum(["bio", "sessionFormat", "duration", "photo"]))
+    .optional(),
 });
 
 const updateCfpSchema = z.object({
   cfpId: z.string().cuid("Invalid CFP ID"),
   guidelines: z.string().min(50).max(5000).optional(),
   deadline: z.coerce.date().optional(),
-  requiredFields: z.array(z.enum(["bio", "sessionFormat", "duration", "photo"])).optional(),
+  requiredFields: z
+    .array(z.enum(["bio", "sessionFormat", "duration", "photo"]))
+    .optional(),
 });
 
 const closeCfpSchema = z.object({
@@ -53,14 +60,24 @@ const closeCfpSchema = z.object({
 const submitProposalSchema = z.object({
   cfpId: z.string().cuid("Invalid CFP ID"),
   title: z.string().min(5, "Title must be at least 5 characters").max(200),
-  description: z.string().min(50, "Description must be at least 50 characters").max(2000),
+  description: z
+    .string()
+    .min(50, "Description must be at least 50 characters")
+    .max(2000),
   sessionFormat: z.enum(["talk", "workshop", "panel", "lightning"], {
     errorMap: () => ({ message: "Invalid session format" }),
   }),
-  duration: z.number().int().min(5).max(480, "Duration must be between 5 and 480 minutes"),
+  duration: z
+    .number()
+    .int()
+    .min(5)
+    .max(480, "Duration must be between 5 and 480 minutes"),
   speakerName: z.string().min(2).max(100),
   speakerEmail: z.string().email("Invalid email address"),
-  speakerBio: z.string().min(50, "Bio must be at least 50 characters").max(1000),
+  speakerBio: z
+    .string()
+    .min(50, "Bio must be at least 50 characters")
+    .max(1000),
   speakerPhoto: z.string().url("Invalid photo URL").optional(),
   speakerTwitter: z.string().max(100).optional(),
   speakerGithub: z.string().max(100).optional(),
@@ -157,15 +174,16 @@ export const cfpRouter = createTRPCRouter({
     .input(getPublicCfpSchema)
     .query(async ({ ctx, input }) => {
       // Get event by ID or slug
-      const event = "eventId" in input
-        ? await ctx.db.event.findUnique({
-            where: { id: input.eventId },
-            select: { id: true, name: true, slug: true },
-          })
-        : await ctx.db.event.findUnique({
-            where: { slug: input.eventSlug },
-            select: { id: true, name: true, slug: true },
-          });
+      const event =
+        "eventId" in input
+          ? await ctx.db.event.findUnique({
+              where: { id: input.eventId },
+              select: { id: true, name: true, slug: true },
+            })
+          : await ctx.db.event.findUnique({
+              where: { slug: input.eventSlug },
+              select: { id: true, name: true, slug: true },
+            });
 
       if (!event) {
         throw new TRPCError({
@@ -431,7 +449,7 @@ export const cfpRouter = createTRPCRouter({
 
       // Send confirmation email to speaker (T060, T072)
       const eventUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/events/${cfp.eventId}`;
-      
+
       await sendEmail({
         to: input.speakerEmail,
         subject: `Proposal Received: ${input.title}`,
@@ -576,8 +594,12 @@ export const cfpRouter = createTRPCRouter({
       const updatedSubmission = await ctx.db.cfpSubmission.update({
         where: { id: input.submissionId },
         data: {
-          ...(input.reviewNotes !== undefined && { reviewNotes: input.reviewNotes }),
-          ...(input.reviewScore !== undefined && { reviewScore: input.reviewScore }),
+          ...(input.reviewNotes !== undefined && {
+            reviewNotes: input.reviewNotes,
+          }),
+          ...(input.reviewScore !== undefined && {
+            reviewScore: input.reviewScore,
+          }),
           reviewedAt: new Date(),
         },
       });
@@ -633,7 +655,9 @@ export const cfpRouter = createTRPCRouter({
 
       // Create speaker profile if it doesn't exist (FR-034)
       let speaker = submission.speakerId
-        ? await ctx.db.speaker.findUnique({ where: { id: submission.speakerId } })
+        ? await ctx.db.speaker.findUnique({
+            where: { id: submission.speakerId },
+          })
         : null;
 
       speaker ??= await ctx.db.speaker.create({
@@ -666,7 +690,7 @@ export const cfpRouter = createTRPCRouter({
 
       // Send acceptance email to speaker (T061, T072)
       const eventUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/events/${submission.eventId}`;
-      
+
       await sendEmail({
         to: updatedSubmission.speakerEmail,
         subject: `Proposal Accepted: ${updatedSubmission.title} - ${submission.cfp.event.name}`,
@@ -747,7 +771,7 @@ export const cfpRouter = createTRPCRouter({
 
       // Send rejection email to speaker (T062, T072)
       const eventUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/events/${submission.eventId}`;
-      
+
       await sendEmail({
         to: updatedSubmission.speakerEmail,
         subject: `Proposal Update: ${updatedSubmission.title} - ${submission.cfp.event.name}`,

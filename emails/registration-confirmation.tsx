@@ -43,9 +43,9 @@ export const RegistrationConfirmation = ({
         <Container style={container}>
           <Section style={box}>
             <Heading style={heading}>Registration Confirmed! 🎉</Heading>
-            
+
             <Text style={paragraph}>Hi {attendeeName},</Text>
-            
+
             <Text style={paragraph}>
               Great news! You're all set for <strong>{eventName}</strong>.
             </Text>
@@ -53,19 +53,20 @@ export const RegistrationConfirmation = ({
             <Section style={infoBox}>
               <Text style={infoLabel}>Event:</Text>
               <Text style={infoValue}>{eventName}</Text>
-              
+
               <Text style={infoLabel}>Date:</Text>
               <Text style={infoValue}>{formattedDate}</Text>
-              
+
               <Text style={infoLabel}>Ticket Type:</Text>
               <Text style={infoValue}>{ticketType}</Text>
-              
+
               <Text style={infoLabel}>Registration Code:</Text>
               <Text style={codeValue}>{registrationCode}</Text>
             </Section>
 
             <Text style={paragraph}>
-              Keep this email handy! You may need your registration code for check-in.
+              Keep this email handy! You may need your registration code for
+              check-in.
             </Text>
 
             <Button style={button} href={eventUrl}>
@@ -75,12 +76,11 @@ export const RegistrationConfirmation = ({
             <Hr style={hr} />
 
             <Text style={footer}>
-              If you have any questions, please don't hesitate to reach out to the event organizer.
+              If you have any questions, please don't hesitate to reach out to
+              the event organizer.
             </Text>
 
-            <Text style={footer}>
-              See you at the event! 🚀
-            </Text>
+            <Text style={footer}>See you at the event! 🚀</Text>
           </Section>
         </Container>
       </Body>

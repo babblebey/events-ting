@@ -15,17 +15,17 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
-    
+
     // Email service (Resend)
     RESEND_API_KEY: z.string().optional(), // Optional for development
     EMAIL_FROM: z.string().email().optional().default("events@yourdomain.com"),
-    
+
     // OAuth providers (optional)
     AUTH_GITHUB_ID: z.string().optional(),
     AUTH_GITHUB_SECRET: z.string().optional(),
     AUTH_GOOGLE_ID: z.string().optional(),
     AUTH_GOOGLE_SECRET: z.string().optional(),
-    
+
     // Storage (optional, defaults to local)
     STORAGE_TYPE: z.enum(["local", "s3", "r2"]).optional().default("local"),
     AWS_REGION: z.string().optional(),
@@ -33,7 +33,7 @@ export const env = createEnv({
     CDN_DOMAIN: z.string().optional(),
     AWS_ACCESS_KEY_ID: z.string().optional(),
     AWS_SECRET_ACCESS_KEY: z.string().optional(),
-    
+
     // Webhooks and cron
     CRON_SECRET: z.string().optional(), // For Vercel Cron jobs
   },
@@ -55,17 +55,17 @@ export const env = createEnv({
     AUTH_SECRET: process.env.AUTH_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
-    
+
     // Email service
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,
-    
+
     // OAuth providers
     AUTH_GITHUB_ID: process.env.AUTH_GITHUB_ID,
     AUTH_GITHUB_SECRET: process.env.AUTH_GITHUB_SECRET,
     AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
     AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
-    
+
     // Storage
     STORAGE_TYPE: process.env.STORAGE_TYPE,
     AWS_REGION: process.env.AWS_REGION,
@@ -73,7 +73,7 @@ export const env = createEnv({
     CDN_DOMAIN: process.env.CDN_DOMAIN,
     AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
     AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
-    
+
     // Webhooks and cron
     CRON_SECRET: process.env.CRON_SECRET,
   },

@@ -5,7 +5,13 @@
  */
 
 import { formatInTimeZone, toZonedTime } from "date-fns-tz";
-import { format, parse, differenceInMinutes, addMinutes, toDate } from "date-fns";
+import {
+  format,
+  parse,
+  differenceInMinutes,
+  addMinutes,
+  toDate,
+} from "date-fns";
 
 /**
  * Format a UTC date in the specified timezone
@@ -17,7 +23,7 @@ import { format, parse, differenceInMinutes, addMinutes, toDate } from "date-fns
 export function formatEventTime(
   utcDate: Date,
   timezone: string,
-  formatString = "PPpp"
+  formatString = "PPpp",
 ): string {
   return formatInTimeZone(utcDate, timezone, formatString);
 }
@@ -28,7 +34,7 @@ export function formatEventTime(
 export function formatDate(
   utcDate: Date,
   timezone: string,
-  formatString = "PPpp"
+  formatString = "PPpp",
 ): string {
   return formatEventTime(utcDate, timezone, formatString);
 }
@@ -41,7 +47,7 @@ export function formatDate(
  */
 export function parseEventTime(
   localDateString: string,
-  eventTimezone: string
+  eventTimezone: string,
 ): Date {
   // Parse the local date string and treat it as being in the event's timezone
   const localDate = new Date(localDateString);
@@ -58,7 +64,7 @@ export function parseEventTime(
 export function combineDateTime(
   date: string,
   time: string,
-  eventTimezone: string
+  eventTimezone: string,
 ): Date {
   const localDateTime = `${date}T${time}:00`;
   return parseEventTime(localDateTime, eventTimezone);
@@ -70,7 +76,10 @@ export function combineDateTime(
  * @param eventTimezone - IANA timezone identifier
  * @returns Time string in HH:mm format
  */
-export function extractTimeString(utcDate: Date, eventTimezone: string): string {
+export function extractTimeString(
+  utcDate: Date,
+  eventTimezone: string,
+): string {
   return formatInTimeZone(utcDate, eventTimezone, "HH:mm");
 }
 
@@ -80,7 +89,10 @@ export function extractTimeString(utcDate: Date, eventTimezone: string): string 
  * @param eventTimezone - IANA timezone identifier
  * @returns ISO date string
  */
-export function extractDateString(utcDate: Date, eventTimezone: string): string {
+export function extractDateString(
+  utcDate: Date,
+  eventTimezone: string,
+): string {
   return formatInTimeZone(utcDate, eventTimezone, "yyyy-MM-dd");
 }
 
@@ -96,7 +108,7 @@ export function doTimeRangesOverlap(
   start1: Date,
   end1: Date,
   start2: Date,
-  end2: Date
+  end2: Date,
 ): boolean {
   return start1 < end2 && start2 < end1;
 }
@@ -131,19 +143,19 @@ export function addDuration(date: Date, minutes: number): Date {
 export function formatDateRange(
   startDate: Date,
   endDate: Date,
-  timezone: string
+  timezone: string,
 ): string {
   const startStr = formatInTimeZone(startDate, timezone, "MMM d");
   const endStr = formatInTimeZone(endDate, timezone, "d, yyyy");
-  
+
   // If same day, show once
   const startDay = formatInTimeZone(startDate, timezone, "yyyy-MM-dd");
   const endDay = formatInTimeZone(endDate, timezone, "yyyy-MM-dd");
-  
+
   if (startDay === endDay) {
     return formatInTimeZone(startDate, timezone, "MMM d, yyyy");
   }
-  
+
   return `${startStr}-${endStr}`;
 }
 
@@ -157,7 +169,7 @@ export function formatDateRange(
 export function formatTimeRange(
   startTime: Date,
   endTime: Date,
-  timezone: string
+  timezone: string,
 ): string {
   const start = formatInTimeZone(startTime, timezone, "h:mm a");
   const end = formatInTimeZone(endTime, timezone, "h:mm a");

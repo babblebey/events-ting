@@ -30,7 +30,12 @@ interface SpeakerFormProps {
   onCancel?: () => void;
 }
 
-export function SpeakerForm({ eventId, initialData, onSuccess, onCancel }: SpeakerFormProps) {
+export function SpeakerForm({
+  eventId,
+  initialData,
+  onSuccess,
+  onCancel,
+}: SpeakerFormProps) {
   const router = useRouter();
   const isEditing = !!initialData?.id;
 
@@ -47,7 +52,7 @@ export function SpeakerForm({ eventId, initialData, onSuccess, onCancel }: Speak
 
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(
-    initialData?.photo ?? null
+    initialData?.photo ?? null,
   );
   const [isUploading, setIsUploading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -107,7 +112,7 @@ export function SpeakerForm({ eventId, initialData, onSuccess, onCancel }: Speak
     }
 
     setPhotoFile(file);
-    
+
     // Create preview
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -140,14 +145,17 @@ export function SpeakerForm({ eventId, initialData, onSuccess, onCancel }: Speak
       });
 
       if (!response.ok) {
-        const errorData = await response.json() as { error?: string };
+        const errorData = (await response.json()) as { error?: string };
         throw new Error(errorData.error ?? "Failed to upload photo");
       }
 
-      const data = await response.json() as { url: string };
+      const data = (await response.json()) as { url: string };
       return data.url;
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to upload photo. Please try again.";
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to upload photo. Please try again.";
       setErrors({ photo: message });
       return undefined;
     } finally {
@@ -218,11 +226,11 @@ export function SpeakerForm({ eventId, initialData, onSuccess, onCancel }: Speak
     const submitData = {
       ...formData,
       photo: photoUrl ?? undefined,
-      // Clean up optional fields (remove if empty string)
-      twitter: formData.twitter?.trim() ?? undefined,
-      github: formData.github?.trim() ?? undefined,
-      linkedin: formData.linkedin?.trim() ?? undefined,
-      website: formData.website?.trim() ?? undefined,
+      // Clean up optional fields (use null for updates to clear values, undefined for creates)
+      twitter: formData.twitter?.trim() ?? (isEditing ? null : undefined),
+      github: formData.github?.trim() ?? (isEditing ? null : undefined),
+      linkedin: formData.linkedin?.trim() ?? (isEditing ? null : undefined),
+      website: formData.website?.trim() ?? (isEditing ? null : undefined),
     };
 
     if (isEditing && initialData?.id) {
@@ -238,7 +246,8 @@ export function SpeakerForm({ eventId, initialData, onSuccess, onCancel }: Speak
     }
   };
 
-  const isPending = createMutation.isPending || updateMutation.isPending || isUploading;
+  const isPending =
+    createMutation.isPending || updateMutation.isPending || isUploading;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -250,10 +259,14 @@ export function SpeakerForm({ eventId, initialData, onSuccess, onCancel }: Speak
       >
         <div className="mb-4">
           <div className="mb-2 block">
-            <Label htmlFor="name">Full Name<span className="ml-1 text-red-500">*</span></Label>
+            <Label htmlFor="name">
+              Full Name<span className="ml-1 text-red-500">*</span>
+            </Label>
           </div>
           {errors.name && (
-            <p className="mb-2 text-sm text-red-600 dark:text-red-500">{errors.name}</p>
+            <p className="mb-2 text-sm text-red-600 dark:text-red-500">
+              {errors.name}
+            </p>
           )}
           <input
             id="name"
@@ -268,10 +281,14 @@ export function SpeakerForm({ eventId, initialData, onSuccess, onCancel }: Speak
 
         <div className="mb-4">
           <div className="mb-2 block">
-            <Label htmlFor="email">Email Address<span className="ml-1 text-red-500">*</span></Label>
+            <Label htmlFor="email">
+              Email Address<span className="ml-1 text-red-500">*</span>
+            </Label>
           </div>
           {errors.email && (
-            <p className="mb-2 text-sm text-red-600 dark:text-red-500">{errors.email}</p>
+            <p className="mb-2 text-sm text-red-600 dark:text-red-500">
+              {errors.email}
+            </p>
           )}
           <input
             id="email"
@@ -286,13 +303,17 @@ export function SpeakerForm({ eventId, initialData, onSuccess, onCancel }: Speak
 
         <div className="mb-4">
           <div className="mb-2 block">
-            <Label htmlFor="bio">Biography<span className="ml-1 text-red-500">*</span></Label>
+            <Label htmlFor="bio">
+              Biography<span className="ml-1 text-red-500">*</span>
+            </Label>
           </div>
           <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
             Tell us about the speaker&apos;s background and expertise
           </p>
           {errors.bio && (
-            <p className="mb-2 text-sm text-red-600 dark:text-red-500">{errors.bio}</p>
+            <p className="mb-2 text-sm text-red-600 dark:text-red-500">
+              {errors.bio}
+            </p>
           )}
           <Textarea
             id="bio"
@@ -312,10 +333,12 @@ export function SpeakerForm({ eventId, initialData, onSuccess, onCancel }: Speak
             Upload a professional headshot (max 5MB, JPG/PNG)
           </p>
           {errors.photo && (
-            <p className="mb-2 text-sm text-red-600 dark:text-red-500">{errors.photo}</p>
+            <p className="mb-2 text-sm text-red-600 dark:text-red-500">
+              {errors.photo}
+            </p>
           )}
           <div className="space-y-4">
-            {photoPreview && (
+            {photoPreview ? (
               <div className="flex items-center space-x-4">
                 <img
                   src={photoPreview}
@@ -334,28 +357,30 @@ export function SpeakerForm({ eventId, initialData, onSuccess, onCancel }: Speak
                   Remove
                 </Button>
               </div>
+            ) : (
+              <Label
+                htmlFor="photo-upload"
+                className="flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600"
+              >
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <HiUpload className="mb-3 h-10 w-10 text-gray-400" />
+                  <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                    <span className="font-semibold">Click to upload</span> or drag
+                    and drop
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    PNG, JPG (MAX. 5MB)
+                  </p>
+                </div>
+                <input
+                  id="photo-upload"
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handlePhotoChange}
+                />
+              </Label>
             )}
-            <Label
-              htmlFor="photo-upload"
-              className="flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600"
-            >
-              <div className="flex flex-col items-center justify-center pb-6 pt-5">
-                <HiUpload className="mb-3 h-10 w-10 text-gray-400" />
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                  <span className="font-semibold">Click to upload</span> or drag and drop
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  PNG, JPG (MAX. 5MB)
-                </p>
-              </div>
-              <input
-                id="photo-upload"
-                type="file"
-                className="hidden"
-                accept="image/*"
-                onChange={handlePhotoChange}
-              />
-            </Label>
           </div>
         </div>
       </FormSection>
@@ -420,11 +445,14 @@ export function SpeakerForm({ eventId, initialData, onSuccess, onCancel }: Speak
             Cancel
           </Button>
         )}
-        <Button
-          type="submit"
-          disabled={isPending}
-        >
-          {isPending ? (isEditing ? "Updating..." : "Adding...") : (isEditing ? "Update Speaker" : "Add Speaker")}
+        <Button type="submit" disabled={isPending}>
+          {isPending
+            ? isEditing
+              ? "Updating..."
+              : "Adding..."
+            : isEditing
+              ? "Update Speaker"
+              : "Add Speaker"}
         </Button>
       </div>
     </form>

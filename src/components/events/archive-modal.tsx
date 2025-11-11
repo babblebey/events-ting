@@ -5,7 +5,13 @@
  * Confirmation modal for archiving events with impact summary
  */
 
-import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from "flowbite-react";
+import {
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+} from "flowbite-react";
 import { LuTriangleAlert } from "react-icons/lu";
 import { HiOutlineArchive } from "react-icons/hi";
 import { api } from "@/trpc/react";
@@ -55,7 +61,7 @@ export function ArchiveModal({
     <Modal show={isOpen} onClose={onClose} size="md">
       <ModalHeader>
         <div className="flex items-center gap-2">
-          <HiOutlineArchive className="h-5 w-5 text-warning-600" />
+          <HiOutlineArchive className="text-warning-600 h-5 w-5" />
           <span>Archive Event</span>
         </div>
       </ModalHeader>

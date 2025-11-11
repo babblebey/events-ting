@@ -1,9 +1,9 @@
 /**
  * CfpSubmissionForm Component
- * 
+ *
  * Public form for submitting session proposals to a Call for Papers.
  * Used by potential speakers to submit their talk/workshop proposals.
- * 
+ *
  * @module components/cfp/cfp-submission-form
  */
 
@@ -36,7 +36,11 @@ const DURATION_OPTIONS = [
   { value: 120, label: "120 minutes" },
 ];
 
-export function CfpSubmissionForm({ cfpId, requiredFields = [], onSuccess }: CfpSubmissionFormProps) {
+export function CfpSubmissionForm({
+  cfpId,
+  requiredFields = [],
+  onSuccess,
+}: CfpSubmissionFormProps) {
   // Proposal fields
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -48,7 +52,7 @@ export function CfpSubmissionForm({ cfpId, requiredFields = [], onSuccess }: Cfp
   const [speakerEmail, setSpeakerEmail] = useState("");
   const [speakerBio, setSpeakerBio] = useState("");
   const [speakerPhoto, setSpeakerPhoto] = useState("");
-  
+
   // Social links
   const [speakerTwitter, setSpeakerTwitter] = useState("");
   const [speakerGithub, setSpeakerGithub] = useState("");
@@ -93,7 +97,10 @@ export function CfpSubmissionForm({ cfpId, requiredFields = [], onSuccess }: Cfp
       return;
     }
 
-    if (requiredFields.includes("bio") && (!speakerBio.trim() || speakerBio.length < 50)) {
+    if (
+      requiredFields.includes("bio") &&
+      (!speakerBio.trim() || speakerBio.length < 50)
+    ) {
       setError("Speaker bio must be at least 50 characters");
       return;
     }
@@ -107,7 +114,11 @@ export function CfpSubmissionForm({ cfpId, requiredFields = [], onSuccess }: Cfp
       cfpId,
       title,
       description,
-      sessionFormat: sessionFormat as "talk" | "workshop" | "panel" | "lightning",
+      sessionFormat: sessionFormat as
+        | "talk"
+        | "workshop"
+        | "panel"
+        | "lightning",
       duration,
       speakerName,
       speakerEmail,
@@ -128,8 +139,8 @@ export function CfpSubmissionForm({ cfpId, requiredFields = [], onSuccess }: Cfp
           Proposal Submitted!
         </h3>
         <p className="text-green-800">
-          Thank you for your submission! We&apos;ll review your proposal and 
-          get back to you via email with our decision.
+          Thank you for your submission! We&apos;ll review your proposal and get
+          back to you via email with our decision.
         </p>
       </div>
     );
@@ -266,7 +277,8 @@ export function CfpSubmissionForm({ cfpId, requiredFields = [], onSuccess }: Cfp
             disabled={submitProposalMutation.isPending}
           />
           <p className="mt-1 text-sm text-gray-500">
-            We&apos;ll use this email to notify you about your submission status.
+            We&apos;ll use this email to notify you about your submission
+            status.
           </p>
         </div>
 
@@ -317,7 +329,8 @@ export function CfpSubmissionForm({ cfpId, requiredFields = [], onSuccess }: Cfp
       {/* Social Links Section */}
       <div className="space-y-6 border-t pt-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Social Links <span className="text-sm font-normal text-gray-500">(Optional)</span>
+          Social Links{" "}
+          <span className="text-sm font-normal text-gray-500">(Optional)</span>
         </h3>
 
         <div className="grid gap-6 md:grid-cols-2">

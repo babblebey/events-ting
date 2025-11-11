@@ -1,4 +1,7 @@
-import { PageHeaderSkeleton, SpeakerGridSkeleton } from "@/components/ui/skeletons";
+import {
+  PageHeaderSkeleton,
+  SpeakerGridSkeleton,
+} from "@/components/ui/skeletons";
 
 /**
  * Loading state for speakers management page

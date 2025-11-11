@@ -64,7 +64,7 @@ async function main() {
 
   // Create Events
   console.log("🎉 Creating events...");
-  
+
   // Event 1: Next.js Conference (Published, In-Person)
   const nextjsConf = await prisma.event.create({
     data: {
@@ -121,13 +121,14 @@ async function main() {
 
   // Create Ticket Types
   console.log("🎟️ Creating ticket types...");
-  
+
   // Next.js Conf Tickets
   const nextjsGeneralTicket = await prisma.ticketType.create({
     data: {
       eventId: nextjsConf.id,
       name: "General Admission",
-      description: "Access to all sessions, networking events, and conference materials",
+      description:
+        "Access to all sessions, networking events, and conference materials",
       price: 0,
       currency: "USD",
       quantity: 500,
@@ -180,7 +181,7 @@ async function main() {
 
   // Create Registrations
   console.log("📝 Creating registrations...");
-  
+
   await prisma.registration.createMany({
     data: [
       {
@@ -236,7 +237,7 @@ async function main() {
 
   // Create Speakers
   console.log("🎤 Creating speakers...");
-  
+
   const speaker1 = await prisma.speaker.create({
     data: {
       eventId: nextjsConf.id,
@@ -281,7 +282,7 @@ async function main() {
 
   // Create Schedule Entries
   console.log("📅 Creating schedule entries...");
-  
+
   // Next.js Conf - Day 1
   const keynote = await prisma.scheduleEntry.create({
     data: {
@@ -332,7 +333,8 @@ async function main() {
     data: {
       eventId: nextjsConf.id,
       title: "Lunch & Networking",
-      description: "Enjoy lunch and connect with fellow attendees and speakers.",
+      description:
+        "Enjoy lunch and connect with fellow attendees and speakers.",
       startTime: new Date("2025-06-15T12:00:00-07:00"),
       endTime: new Date("2025-06-15T13:30:00-07:00"),
       location: "Main Hall",
@@ -375,7 +377,7 @@ async function main() {
 
   // Create Speaker-Session Assignments
   console.log("🔗 Assigning speakers to sessions...");
-  
+
   await prisma.speakerSession.createMany({
     data: [
       {
@@ -408,7 +410,7 @@ async function main() {
 
   // Create Call for Papers
   console.log("📢 Creating Call for Papers...");
-  
+
   const nextjsCfp = await prisma.callForPapers.create({
     data: {
       eventId: nextjsConf.id,
@@ -451,7 +453,7 @@ Submit your proposal by the deadline. We'll review all submissions and notify yo
 
   // Create CFP Submissions
   console.log("📄 Creating CFP submissions...");
-  
+
   const submission1 = await prisma.cfpSubmission.create({
     data: {
       eventId: nextjsConf.id,
@@ -495,7 +497,8 @@ Submit your proposal by the deadline. We'll review all submissions and notify yo
       speakerWebsite: null,
       status: "accepted",
       reviewScore: 9,
-      reviewNotes: "Excellent real-world case study. Very relevant for our audience.",
+      reviewNotes:
+        "Excellent real-world case study. Very relevant for our audience.",
       reviewedAt: new Date("2025-03-25T14:30:00Z"),
       speakerId: speaker2.id, // Link to auto-created speaker
     },
@@ -512,7 +515,8 @@ Submit your proposal by the deadline. We'll review all submissions and notify yo
       duration: 120,
       speakerName: "Chris Johnson",
       speakerEmail: "chris@web3dev.com",
-      speakerBio: "Web3 enthusiast and educator. Creator of multiple blockchain tutorials.",
+      speakerBio:
+        "Web3 enthusiast and educator. Creator of multiple blockchain tutorials.",
       speakerPhoto: null,
       speakerTwitter: "@chrisjohnson",
       speakerGithub: null,
@@ -520,14 +524,15 @@ Submit your proposal by the deadline. We'll review all submissions and notify yo
       speakerWebsite: "https://web3dev.com",
       status: "rejected",
       reviewScore: 4,
-      reviewNotes: "Too niche for our audience. Focus should remain on Next.js core features.",
+      reviewNotes:
+        "Too niche for our audience. Focus should remain on Next.js core features.",
       reviewedAt: new Date("2025-03-26T09:15:00Z"),
     },
   });
 
   // Create Email Campaigns
   console.log("📧 Creating email campaigns...");
-  
+
   const welcomeCampaign = await prisma.emailCampaign.create({
     data: {
       eventId: nextjsConf.id,
@@ -648,7 +653,9 @@ The Next.js Conf Team`,
   console.log("✅ Database seed completed successfully!");
   console.log("\n📊 Summary:");
   console.log(`- Users: 4 (2 organizers, 2 attendees)`);
-  console.log(`- Events: 3 (1 published in-person, 1 published virtual, 1 draft hybrid)`);
+  console.log(
+    `- Events: 3 (1 published in-person, 1 published virtual, 1 draft hybrid)`,
+  );
   console.log(`- Ticket Types: 4 (across all events)`);
   console.log(`- Registrations: 5 (across Next.js Conf and React Workshop)`);
   console.log(`- Speakers: 3`);

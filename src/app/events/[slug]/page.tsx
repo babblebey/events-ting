@@ -9,7 +9,11 @@ import { Badge, Button, Card } from "flowbite-react";
 import { LuMicVocal } from "react-icons/lu";
 import { FiUsers } from "react-icons/fi";
 import { HiOutlineMapPin } from "react-icons/hi2";
-import { HiOutlineCalendar, HiOutlineExternalLink, HiOutlineVideoCamera } from "react-icons/hi";
+import {
+  HiOutlineCalendar,
+  HiOutlineExternalLink,
+  HiOutlineVideoCamera,
+} from "react-icons/hi";
 import { formatDate, formatDateRange } from "@/lib/utils/date";
 import type { Metadata } from "next";
 
@@ -59,7 +63,7 @@ export default async function EventPage({ params }: EventPageProps) {
           {/* Organizer Info */}
           {event.organizer && (
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 dark:bg-primary-900 dark:text-primary-300">
+              <div className="bg-primary-100 text-primary-600 dark:bg-primary-900 dark:text-primary-300 flex h-10 w-10 items-center justify-center rounded-full">
                 {event.organizer.name?.[0]?.toUpperCase() ?? "?"}
               </div>
               <div>
@@ -87,7 +91,11 @@ export default async function EventPage({ params }: EventPageProps) {
                 <HiOutlineCalendar className="mt-1 h-5 w-5 text-gray-400" />
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">
-                    {formatDateRange(event.startDate, event.endDate, event.timezone)}
+                    {formatDateRange(
+                      event.startDate,
+                      event.endDate,
+                      event.timezone,
+                    )}
                   </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     {event.timezone}
@@ -120,7 +128,7 @@ export default async function EventPage({ params }: EventPageProps) {
                       href={event.locationUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-1 flex items-center gap-1 text-sm text-primary-600 hover:underline dark:text-primary-400"
+                      className="text-primary-600 dark:text-primary-400 mt-1 flex items-center gap-1 text-sm hover:underline"
                     >
                       Join virtually
                       <HiOutlineExternalLink className="h-3 w-3" />
@@ -139,7 +147,8 @@ export default async function EventPage({ params }: EventPageProps) {
                     </p>
                     {event._count.speakers > 0 && (
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {event._count.speakers} speaker{event._count.speakers > 1 ? "s" : ""}
+                        {event._count.speakers} speaker
+                        {event._count.speakers > 1 ? "s" : ""}
                       </p>
                     )}
                   </div>
@@ -158,8 +167,8 @@ export default async function EventPage({ params }: EventPageProps) {
                   Ready to attend?
                 </h3>
                 <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                  {event.ticketTypes.length} ticket type{event.ticketTypes.length > 1 ? "s" : ""}{" "}
-                  available
+                  {event.ticketTypes.length} ticket type
+                  {event.ticketTypes.length > 1 ? "s" : ""} available
                 </p>
               </div>
               <Link href={`/events/${eventSlug}/register`}>
@@ -171,32 +180,35 @@ export default async function EventPage({ params }: EventPageProps) {
 
         {/* Quick Links */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {event._count?.scheduleEntries && event._count.scheduleEntries > 0 && (
-            <Link href={`/events/${eventSlug}/schedule`}>
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-                <div className="text-center">
-                  <HiOutlineCalendar className="mx-auto h-8 w-8 text-primary-600 dark:text-primary-400" />
-                  <h3 className="mt-3 font-semibold text-gray-900 dark:text-white">
-                    View Schedule
-                  </h3>
-                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    {event._count.scheduleEntries} session{event._count.scheduleEntries > 1 ? "s" : ""}
-                  </p>
-                </div>
-              </Card>
-            </Link>
-          )}
+          {event._count?.scheduleEntries &&
+            event._count.scheduleEntries > 0 && (
+              <Link href={`/events/${eventSlug}/schedule`}>
+                <Card className="cursor-pointer transition-shadow hover:shadow-lg">
+                  <div className="text-center">
+                    <HiOutlineCalendar className="text-primary-600 dark:text-primary-400 mx-auto h-8 w-8" />
+                    <h3 className="mt-3 font-semibold text-gray-900 dark:text-white">
+                      View Schedule
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                      {event._count.scheduleEntries} session
+                      {event._count.scheduleEntries > 1 ? "s" : ""}
+                    </p>
+                  </div>
+                </Card>
+              </Link>
+            )}
 
           {event._count?.speakers && event._count.speakers > 0 && (
             <Link href={`/events/${eventSlug}/speakers`}>
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+              <Card className="cursor-pointer transition-shadow hover:shadow-lg">
                 <div className="text-center">
-                  <FiUsers className="mx-auto h-8 w-8 text-primary-600 dark:text-primary-400" />
+                  <FiUsers className="text-primary-600 dark:text-primary-400 mx-auto h-8 w-8" />
                   <h3 className="mt-3 font-semibold text-gray-900 dark:text-white">
                     Meet Speakers
                   </h3>
                   <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    {event._count.speakers} speaker{event._count.speakers > 1 ? "s" : ""}
+                    {event._count.speakers} speaker
+                    {event._count.speakers > 1 ? "s" : ""}
                   </p>
                 </div>
               </Card>
@@ -204,9 +216,9 @@ export default async function EventPage({ params }: EventPageProps) {
           )}
 
           <Link href={`/events/${eventSlug}/cfp`}>
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+            <Card className="cursor-pointer transition-shadow hover:shadow-lg">
               <div className="text-center">
-                <LuMicVocal className="mx-auto h-8 w-8 text-primary-600 dark:text-primary-400" />
+                <LuMicVocal className="text-primary-600 dark:text-primary-400 mx-auto h-8 w-8" />
                 <h3 className="mt-3 font-semibold text-gray-900 dark:text-white">
                   Submit Talk
                 </h3>

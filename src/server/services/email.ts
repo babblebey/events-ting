@@ -115,7 +115,7 @@ export async function sendEmail(options: EmailOptions): Promise<EmailResult> {
  * @returns Array of email results
  */
 export async function sendBatchEmails(
-  options: BatchEmailOptions
+  options: BatchEmailOptions,
 ): Promise<EmailResult[]> {
   try {
     // Render React component to HTML if provided
@@ -143,7 +143,7 @@ export async function sendBatchEmails(
             subject: options.subject,
             html,
             tags: options.tags,
-          }))
+          })),
         );
 
         if (batchResult.error) {
@@ -158,7 +158,7 @@ export async function sendBatchEmails(
               id: "",
               success: false,
               error: batchResult.error?.message,
-            }))
+            })),
           );
           continue;
         }
@@ -166,9 +166,11 @@ export async function sendBatchEmails(
         // Mark all emails in batch as successful
         results.push(
           ...batch.map((to, index) => ({
-            id: (batchResult.data as unknown as Array<{ id: string }>)?.[index]?.id ?? "",
+            id:
+              (batchResult.data as unknown as Array<{ id: string }>)?.[index]
+                ?.id ?? "",
             success: true,
-          }))
+          })),
         );
 
         console.log("[Email] Batch sent successfully", {
@@ -183,7 +185,7 @@ export async function sendBatchEmails(
             id: "",
             success: false,
             error: error instanceof Error ? error.message : "Unknown error",
-          }))
+          })),
         );
       }
 
@@ -213,7 +215,7 @@ export async function sendBatchEmails(
  */
 export async function sendBatchEmailsWithRetry(
   options: BatchEmailOptions,
-  maxRetries = 3
+  maxRetries = 3,
 ): Promise<EmailResult[]> {
   try {
     let html: string;
@@ -243,7 +245,7 @@ export async function sendBatchEmailsWithRetry(
               subject: options.subject,
               html,
               tags: options.tags,
-            }))
+            })),
           );
 
           if (batchResult.error) {
@@ -253,9 +255,11 @@ export async function sendBatchEmailsWithRetry(
           // Success
           results.push(
             ...batch.map((to, index) => ({
-              id: (batchResult.data as unknown as Array<{ id: string }>)?.[index]?.id ?? "",
+              id:
+                (batchResult.data as unknown as Array<{ id: string }>)?.[index]
+                  ?.id ?? "",
               success: true,
-            }))
+            })),
           );
 
           success = true;
@@ -272,7 +276,7 @@ export async function sendBatchEmailsWithRetry(
             const delayMs = Math.pow(2, retries) * 1000;
             console.warn(
               `[Email] Batch send failed (attempt ${retries}/${maxRetries}), retrying in ${delayMs}ms`,
-              error
+              error,
             );
             await delay(delayMs);
           }
@@ -291,7 +295,7 @@ export async function sendBatchEmailsWithRetry(
             id: "",
             success: false,
             error: lastError,
-          }))
+          })),
         );
       }
 
@@ -376,7 +380,7 @@ export function generatePreviewText(text: string): string {
  */
 export function buildUnsubscribeLink(
   recipientEmail: string,
-  campaignId: string
+  campaignId: string,
 ): string {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   return `${baseUrl}/api/unsubscribe?email=${encodeURIComponent(recipientEmail)}&campaign=${campaignId}`;

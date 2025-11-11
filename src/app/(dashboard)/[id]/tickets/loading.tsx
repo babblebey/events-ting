@@ -1,4 +1,7 @@
-import { CardListSkeleton, PageHeaderSkeleton } from "@/components/ui/skeletons";
+import {
+  CardListSkeleton,
+  PageHeaderSkeleton,
+} from "@/components/ui/skeletons";
 
 /**
  * Loading state for tickets management page
