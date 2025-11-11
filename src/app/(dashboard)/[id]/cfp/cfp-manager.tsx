@@ -258,7 +258,7 @@ export function CfpManager({
               </Button>
             ) : !deadlinePassed ? (
               <Button
-                color="success"
+                color="blue"
                 size="sm"
                 onClick={() => setShowReopenCfpModal(true)}
                 disabled={reopenCfpMutation.isPending}
@@ -446,7 +446,7 @@ export function CfpManager({
         </ModalBody>
         <ModalFooter>
           <Button
-            color="success"
+            color="blue"
             onClick={() => {
               if (!initialCfp) return;
               reopenCfpMutation.mutate({ cfpId: initialCfp.id });
