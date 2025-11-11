@@ -36,7 +36,7 @@ export default function Error({
 
           <p className="mb-6 text-gray-600 dark:text-gray-400">
             There was a problem loading the dashboard. Please try refreshing the
-            page or return to the HiOutlineHome page.
+            page or return to the Home page.
           </p>
 
           {process.env.NODE_ENV === "development" && error.message && (

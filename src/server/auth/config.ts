@@ -99,6 +99,20 @@ export const authConfig = {
         id: token.id as string,
       },
     }),
+    redirect: async ({ url, baseUrl }) => {
+      // If a callbackUrl is provided, use it (user was redirected to sign-in from a protected page)
+      if (url.startsWith("/")) {
+        return `${baseUrl}${url}`;
+      }
+      
+      // Allow callback URLs on the same origin
+      if (new URL(url).origin === baseUrl) {
+        return url;
+      }
+      
+      // Default redirect to dashboard after successful sign-in
+      return `${baseUrl}/dashboard`;
+    },
   },
   pages: {
     signIn: "/auth/signin",

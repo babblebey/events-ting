@@ -54,7 +54,8 @@ export default function RegisterPage() {
         );
         setIsLoading(false);
       } else {
-        router.push("/");
+        // Redirect to dashboard after successful registration and sign-in
+        router.push("/dashboard");
         router.refresh();
       }
     } catch (err) {

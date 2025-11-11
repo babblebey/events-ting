@@ -288,7 +288,7 @@ const totalCount = await db.event.count({
 
 #### Page Structure
 
-**File**: `src/app/(dashboard)/page.tsx`  
+**File**: `src/app/dashboard/page.tsx`  
 **Route**: `/dashboard`  
 **Type**: Server Component with Client Component for interactions
 
@@ -629,14 +629,14 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Phase 1: Core Dashboard Page (Day 1, 4-5 hours)
 
-- [ ] Create `src/app/dashboard/page.tsx` (Server Component)
-- [ ] Implement authentication check and redirect logic
-- [ ] Fetch initial events using `api.event.list` with `organizerId` filter
-- [ ] Add `searchParams` handling for status filter from URL
-- [ ] Pass initial data to client component
-- [ ] Add page metadata (title, description)
-- [ ] Test authentication flow (redirect when not logged in)
-- [ ] Update `src/server/auth.ts` redirect callback to `/dashboard`
+- [X] Create `src/app/dashboard/page.tsx` (Server Component)
+- [X] Implement authentication check and redirect logic
+- [X] Fetch initial events using `api.event.list` with `organizerId` filter
+- [X] Add `searchParams` handling for status filter from URL
+- [X] Pass initial data to client component
+- [X] Add page metadata (title, description)
+- [X] Test authentication flow (redirect when not logged in)
+- [X] Update `src/server/auth.ts` redirect callback to `/dashboard`
 
 **Deliverable**: Authenticated dashboard route that fetches user events
 
