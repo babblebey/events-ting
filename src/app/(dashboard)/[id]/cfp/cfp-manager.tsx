@@ -55,6 +55,15 @@ export function CfpManager({
 
   const utils = api.useUtils();
 
+  // Query CFP data from the server
+  const { data: cfp } = api.cfp.getCfpByEventId.useQuery(
+    { eventId },
+    {
+      // Use server-rendered data to avoid loading state on initial render
+      placeholderData: initialCfp ? { ...initialCfp, event: { id: eventId, name: eventName, slug: eventSlug } } : undefined,
+    },
+  );
+
   // Query CFP data with infinite scroll
   const {
     data: cfpData,
@@ -63,12 +72,12 @@ export function CfpManager({
     isFetchingNextPage,
   } = api.cfp.listSubmissions.useInfiniteQuery(
     {
-      cfpId: initialCfp?.id ?? "",
+      cfpId: cfp?.id ?? "",
       status: statusFilter,
       limit: 12,
     },
     {
-      enabled: !!initialCfp,
+      enabled: !!cfp,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
@@ -76,12 +85,12 @@ export function CfpManager({
   // Query all submissions for counts (no pagination needed for stats)
   const { data: allCfpData } = api.cfp.listSubmissions.useInfiniteQuery(
     {
-      cfpId: initialCfp?.id ?? "",
+      cfpId: cfp?.id ?? "",
       status: "all",
       limit: 100,
     },
     {
-      enabled: !!initialCfp,
+      enabled: !!cfp,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
@@ -89,6 +98,7 @@ export function CfpManager({
   const closeCfpMutation = api.cfp.close.useMutation({
     onSuccess: () => {
       setShowCloseCfpModal(false);
+      void utils.cfp.getCfpByEventId.invalidate({ eventId });
       void utils.cfp.listSubmissions.invalidate();
     },
   });
@@ -96,6 +106,7 @@ export function CfpManager({
   const reopenCfpMutation = api.cfp.reopen.useMutation({
     onSuccess: () => {
       setShowReopenCfpModal(false);
+      void utils.cfp.getCfpByEventId.invalidate({ eventId });
       void utils.cfp.listSubmissions.invalidate();
     },
   });
@@ -115,18 +126,18 @@ export function CfpManager({
   ).length;
 
   const handleCloseCfp = () => {
-    if (!initialCfp) return;
-    closeCfpMutation.mutate({ cfpId: initialCfp.id });
+    if (!cfp) return;
+    closeCfpMutation.mutate({ cfpId: cfp.id });
   };
 
   const cfpUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/events/${eventSlug}/cfp`;
-  const isOpen = initialCfp?.status === "open";
-  const deadlinePassed = initialCfp
-    ? new Date(initialCfp.deadline) < new Date()
+  const isOpen = cfp?.status === "open";
+  const deadlinePassed = cfp
+    ? new Date(cfp.deadline) < new Date()
     : false;
 
   // No CFP exists yet
-  if (!initialCfp) {
+  if (!cfp) {
     return (
       <div className="rounded-lg border border-gray-200 bg-white p-8 text-center dark:border-gray-700 dark:bg-gray-800">
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
@@ -155,6 +166,7 @@ export function CfpManager({
               eventId={eventId}
               onSuccess={() => {
                 setShowCfpForm(false);
+                void utils.cfp.getCfpByEventId.invalidate({ eventId });
                 void utils.cfp.listSubmissions.invalidate();
               }}
               onCancel={() => setShowCfpForm(false)}
@@ -192,7 +204,7 @@ export function CfpManager({
             <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <p>
                 <span className="font-medium">Deadline:</span>{" "}
-                {new Date(initialCfp.deadline).toLocaleDateString("en-US", {
+                {new Date(cfp.deadline).toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
                   year: "numeric",
@@ -355,9 +367,10 @@ export function CfpManager({
         <ModalBody>
           <CfpForm
             eventId={eventId}
-            existingCfp={initialCfp}
+            existingCfp={cfp}
             onSuccess={() => {
               setShowCfpForm(false);
+              void utils.cfp.getCfpByEventId.invalidate({ eventId });
               void utils.cfp.listSubmissions.invalidate();
             }}
             onCancel={() => setShowCfpForm(false)}
@@ -431,7 +444,7 @@ export function CfpManager({
             <Alert color="info" icon={HiInformationCircle}>
               <span className="font-medium">Info:</span> Speakers will be able to
               submit proposals again until the deadline on{" "}
-              {initialCfp && new Date(initialCfp.deadline).toLocaleDateString("en-US", {
+              {cfp && new Date(cfp.deadline).toLocaleDateString("en-US", {
                 month: "long",
                 day: "numeric",
                 year: "numeric",
@@ -448,8 +461,8 @@ export function CfpManager({
           <Button
             color="blue"
             onClick={() => {
-              if (!initialCfp) return;
-              reopenCfpMutation.mutate({ cfpId: initialCfp.id });
+              if (!cfp) return;
+              reopenCfpMutation.mutate({ cfpId: cfp.id });
             }}
             disabled={reopenCfpMutation.isPending}
           >
