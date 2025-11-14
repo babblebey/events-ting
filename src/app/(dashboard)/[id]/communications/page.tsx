@@ -10,6 +10,7 @@ import {
 } from "flowbite-react";
 import { HiPlus } from "react-icons/hi";
 import { api } from "@/trpc/react";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { CampaignCard } from "@/components/communications/campaign-card";
 import { CampaignEditor } from "@/components/communications/campaign-editor";
 import type { TRPCClientErrorLike } from "@trpc/client";
@@ -33,6 +34,9 @@ function CommunicationsPage({ params }: CommunicationsPageProps) {
   const [scheduledDate, setScheduledDate] = useState("");
 
   const { id: eventId } = use(params);
+
+  // Fetch event data for breadcrumbs
+  const { data: event } = api.event.getById.useQuery({ id: eventId });
 
   // Fetch campaigns with infinite query for pagination
   const {
@@ -121,6 +125,15 @@ function CommunicationsPage({ params }: CommunicationsPageProps) {
 
   return (
     <div className="space-y-6">
+      {event && (
+        <Breadcrumbs
+          items={[
+            { label: event.name, href: `/${eventId}` },
+            { label: "Communications" },
+          ]}
+        />
+      )}
+
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
