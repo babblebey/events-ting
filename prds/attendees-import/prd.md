@@ -394,15 +394,15 @@ const result = await api.attendees.parseCSV({
 ## Implementation Plan
 
 ### Phase 1: File Upload & Parsing (Day 1, 4-5 hours)
-- [ ] Create new `attendeesRouter` in `src/server/api/routers/attendees.ts`
-- [ ] Create tRPC procedure `attendees.parseCSV`
-- [ ] Implement CSV parsing using `papaparse`
-- [ ] Extract column headers and preview data (first 10 rows)
-- [ ] Implement smart field mapping suggestions (fuzzy column name matching)
-- [ ] Add dual file validation: 10MB **AND** 10,000 rows limit
-- [ ] Add format validation (CSV only, UTF-8 encoding, BOM stripping)
-- [ ] Create error handling for malformed CSV
-- [ ] Create static CSV template file in `/public/templates/attendees-import-template.csv`
+- [x] Create new `attendeesRouter` in `src/server/api/routers/attendees.ts`
+- [x] Create tRPC procedure `attendees.parseCSV`
+- [x] Implement CSV parsing using `papaparse`
+- [x] Extract column headers and preview data (first 10 rows)
+- [x] Implement smart field mapping suggestions (fuzzy column name matching)
+- [x] Add dual file validation: 10MB **AND** 10,000 rows limit
+- [x] Add format validation (CSV only, UTF-8 encoding, BOM stripping)
+- [x] Create error handling for malformed CSV
+- [x] Create static CSV template file in `/public/templates/attendees-import-template.csv`
 
 **Deliverable**: API endpoint that parses CSV and returns preview + CSV template file
 
