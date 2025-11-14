@@ -20,6 +20,7 @@ import {
   HiOutlineExternalLink,
   HiOutlineCalendar,
 } from "react-icons/hi";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 interface EventOverviewPageProps {
   params: { id: string };
@@ -32,6 +33,14 @@ export default async function EventOverviewPage({
 
   return (
     <div className="space-y-8">
+      {/* Breadcrumbs */}
+      <Breadcrumbs
+        items={[
+          { label: event.name, href: `/${params.id}` },
+          { label: "Overview" },
+        ]}
+      />
+
       {/* Page Header */}
       <div className="flex items-start justify-between">
         <div>

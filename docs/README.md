@@ -54,7 +54,9 @@ graph TB
 
 ```mermaid
 graph LR
-    Events[Events Module] --> Tickets[Tickets Module]
+    Dashboard[Dashboard Module] --> Events[Events Module]
+    
+    Events --> Tickets[Tickets Module]
     Events --> CFP[CFP Module]
     Events --> Schedule[Schedule Module]
     Events --> Comms[Communications Module]
@@ -68,6 +70,7 @@ graph LR
     Comms --> Registration
     Comms --> Speakers
     
+    style Dashboard fill:#9333ea
     style Events fill:#f59e0b
     style Tickets fill:#10b981
     style Registration fill:#3b82f6
@@ -80,6 +83,7 @@ graph LR
 
 ### Module Dependencies
 
+- **Dashboard** (Entry Point): User landing page after authentication, displays all events
 - **Events** (Core): Foundation module - all other modules depend on it
 - **Tickets** → **Registration**: Tickets define what attendees can register for
 - **Registration** → **Attendees**: Attendees view is essentially registration management
@@ -146,6 +150,9 @@ Each module has comprehensive documentation covering backend, frontend, data mod
 
 ### I want to...
 
+**View and manage my events**
+→ Sign in and you'll be redirected to the [Dashboard](./modules/dashboard/)
+
 **Understand the system**
 → Start with [System Overview](./architecture/system-overview.md) and [Tech Stack](./architecture/tech-stack.md)
 
@@ -173,7 +180,7 @@ Each module has comprehensive documentation covering backend, frontend, data mod
 
 1. **Day 1: Environment Setup**
    - Complete [Getting Started Guide](./getting-started.md)
-   - Explore the running application
+   - Explore the running application (sign in → dashboard)
    - Review [File Structure](./architecture/file-structure.md)
 
 2. **Day 2: Architecture Understanding**
@@ -182,8 +189,9 @@ Each module has comprehensive documentation covering backend, frontend, data mod
    - Understand [tRPC Overview](./api/trpc-overview.md)
 
 3. **Day 3: Feature Deep Dive**
-   - Pick a module (start with [Events](./modules/events/))
-   - Read all 5 documentation files (README, backend, frontend, data-model, workflows)
+   - Start with [Dashboard Module](./modules/dashboard/) (entry point)
+   - Then explore [Events Module](./modules/events/) (core functionality)
+   - Read all documentation files (README, backend/frontend, data-model, workflows)
    - Trace a workflow from UI → tRPC → Service → Database
 
 4. **Day 4: Make Your First Change**

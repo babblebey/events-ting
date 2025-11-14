@@ -59,7 +59,8 @@ export const eventRouter = createTRPCRouter({
       const isAuthenticated = !!ctx.session;
       const baseWhere = isAuthenticated
         ? {
-            ...(status && { status }),
+            // Handle "archived" status by using isArchived field
+            ...(status === "archived" ? { isArchived: true } : status ? { status } : {}),
             ...(organizerId && { organizerId }),
           }
         : {
@@ -67,30 +68,48 @@ export const eventRouter = createTRPCRouter({
             isArchived: false,
           };
 
-      const events = await ctx.db.event.findMany({
-        where: baseWhere,
-        take: limit + 1,
-        ...(cursor && {
-          cursor: { id: cursor },
-          skip: 1,
+      // Execute both queries in parallel for performance
+      const [events, totalCount] = await Promise.all([
+        ctx.db.event.findMany({
+          where: baseWhere,
+          take: limit + 1,
+          ...(cursor && {
+            cursor: { id: cursor },
+            skip: 1,
+          }),
+          orderBy: { startDate: "desc" },
+          select: {
+            id: true,
+            slug: true,
+            name: true,
+            description: true,
+            startDate: true,
+            endDate: true,
+            timezone: true,
+            locationType: true,
+            locationAddress: true,
+            locationUrl: true,
+            status: true,
+            isArchived: true,
+            organizer: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
+            },
+            _count: {
+              select: {
+                registrations: true,
+                ticketTypes: true,
+              },
+            },
+          },
         }),
-        orderBy: { startDate: "desc" },
-        include: {
-          organizer: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-            },
-          },
-          _count: {
-            select: {
-              registrations: true,
-              ticketTypes: true,
-            },
-          },
-        },
-      });
+        ctx.db.event.count({
+          where: baseWhere,
+        }),
+      ]);
 
       let nextCursor: string | undefined = undefined;
       if (events.length > limit) {
@@ -101,6 +120,7 @@ export const eventRouter = createTRPCRouter({
       return {
         events,
         nextCursor,
+        totalCount,
       };
     }),
 
@@ -465,4 +485,34 @@ export const eventRouter = createTRPCRouter({
         recentRegistrations,
       };
     }),
+
+  /**
+   * Get status counts for user's events (for dashboard filters)
+   */
+  getStatusCounts: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+
+    // Get counts for all statuses in parallel
+    const [all, draft, published, archived] = await Promise.all([
+      ctx.db.event.count({
+        where: { organizerId: userId },
+      }),
+      ctx.db.event.count({
+        where: { organizerId: userId, status: "draft" },
+      }),
+      ctx.db.event.count({
+        where: { organizerId: userId, status: "published" },
+      }),
+      ctx.db.event.count({
+        where: { organizerId: userId, isArchived: true },
+      }),
+    ]);
+
+    return {
+      all,
+      draft,
+      published,
+      archived,
+    };
+  }),
 });

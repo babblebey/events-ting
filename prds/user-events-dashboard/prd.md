@@ -111,14 +111,14 @@ The platform needs a dedicated landing page that serves as the primary hub for a
 **So that** I can perform event-specific tasks efficiently
 
 **Acceptance Criteria**:
-- Clicking event card navigates to `/{eventId}` (event dashboard)
-- "Manage" button navigates to `/{eventId}` (event dashboard)
-- "Edit" button navigates to `/{eventId}/settings` (event settings page)
-- "View Event" button opens public event page at `/events/{slug}` in new tab
+- Clicking event card navigates to `/[id]` (event dashboard)
+- "Manage" button navigates to `/[id]` (event dashboard)
+- "Edit" button navigates to `/[id]/settings` (event settings page)
+- "View Event" button opens public event page at `/events/[slug]` in new tab
 - Hover state provides visual feedback
 - Navigation preserves scroll position when returning to dashboard
 
-**Note**: Current implementation uses `/{eventId}` for event routes. Future refactoring may move to `/dashboard/{eventId}` or `/dashboard/{slug}` for better semantics.
+**Note**: Current implementation uses `/[id]` for event routes. Future refactoring may move to `/dashboard/[id]` or `/dashboard/[slug]` for better semantics.
 
 ---
 
@@ -177,10 +177,10 @@ The platform needs a dedicated landing page that serves as the primary hub for a
 
 **Rationale**:
 - Clear, semantic URL for user's event portfolio
-- Separates user dashboard from individual event dashboards (currently at `/{eventId}`)
+- Separates user dashboard from individual event dashboards (currently at `/[id]`)
 - Aligns with existing route structure (`/create-event`)
 
-**Note**: Current implementation uses `/{eventId}` for event-specific routes (e.g., `/{eventId}`, `/{eventId}/settings`). Future refactoring may consolidate routes under `/dashboard/{eventId}` or use slugs (`/dashboard/{slug}`) for better URL semantics.
+**Note**: Current implementation uses `/[id]` for event-specific routes (e.g., `/[id]`, `/[id]/settings`). Future refactoring may consolidate routes under `/dashboard/[id]` or use slugs (`/dashboard/[slug]`) for better URL semantics.
 
 #### Authentication Flow
 **Post-Sign-In Redirect**: 
@@ -288,7 +288,7 @@ const totalCount = await db.event.count({
 
 #### Page Structure
 
-**File**: `src/app/(dashboard)/page.tsx`  
+**File**: `src/app/dashboard/page.tsx`  
 **Route**: `/dashboard`  
 **Type**: Server Component with Client Component for interactions
 
@@ -297,7 +297,7 @@ const totalCount = await db.event.count({
 import { auth } from "@/server/auth";
 import { redirect } from "next/navigation";
 import { api } from "@/trpc/server";
-import { EventsDashboard } from "./_components/events-dashboard";
+import { EventsDashboard } from "@/components/dashboard/events-dashboard";
 
 export const metadata = {
   title: "My Events | Events Ting",
@@ -582,9 +582,9 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 - **Archived Event**: Gray scale, "View Archive" CTA
 
 **Action Buttons**:
-- **Manage**: Primary action, navigates to `/{eventId}` (event dashboard)
-- **Edit**: Secondary action, navigates to `/{eventId}/settings` (event settings)
-- **View Event**: Opens public event page at `/events/{slug}` in new tab
+- **Manage**: Primary action, navigates to `/[id]` (event dashboard)
+- **Edit**: Secondary action, navigates to `/[id]/settings` (event settings)
+- **View Event**: Opens public event page at `/events/[slug]` in new tab
 
 #### Empty States
 
@@ -629,14 +629,14 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Phase 1: Core Dashboard Page (Day 1, 4-5 hours)
 
-- [ ] Create `src/app/(dashboard)/page.tsx` (Server Component)
-- [ ] Implement authentication check and redirect logic
-- [ ] Fetch initial events using `api.event.list` with `organizerId` filter
-- [ ] Add `searchParams` handling for status filter from URL
-- [ ] Pass initial data to client component
-- [ ] Add page metadata (title, description)
-- [ ] Test authentication flow (redirect when not logged in)
-- [ ] Update `src/server/auth.ts` redirect callback to `/dashboard`
+- [X] Create `src/app/dashboard/page.tsx` (Server Component)
+- [X] Implement authentication check and redirect logic
+- [X] Fetch initial events using `api.event.list` with `organizerId` filter
+- [X] Add `searchParams` handling for status filter from URL
+- [X] Pass initial data to client component
+- [X] Add page metadata (title, description)
+- [X] Test authentication flow (redirect when not logged in)
+- [X] Update `src/server/auth.ts` redirect callback to `/dashboard`
 
 **Deliverable**: Authenticated dashboard route that fetches user events
 
@@ -644,17 +644,17 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Phase 2: Event Card Component (Day 1-2, 5-6 hours)
 
-- [ ] Create `src/app/(dashboard)/_components/event-card.tsx`
-- [ ] Implement event card layout with image, title, metadata
-- [ ] Add status badge component with color variants
-- [ ] Format dates with timezone awareness (using `date-fns` or similar)
-- [ ] Add location type icon mapping (virtual, in-person, hybrid)
-- [ ] Display registration count with icon
-- [ ] Implement action buttons (Manage, Edit, View Event)
-- [ ] Add hover states and transitions
-- [ ] Make card clickable (navigate on click)
-- [ ] Responsive design (card stacking on mobile)
-- [ ] Add loading skeleton variant
+- [X] Create `src/app/components/dashboard/event-card.tsx`
+- [X] Implement event card layout with image, title, metadata
+- [X] Add status badge component with color variants
+- [X] Format dates with timezone awareness (using `date-fns` or similar)
+- [X] Add location type icon mapping (virtual, in-person, hybrid)
+- [X] Display registration count with icon
+- [X] Implement action buttons (Manage, Edit, View Event)
+- [X] Add hover states and transitions
+- [X] Make card clickable (navigate on click)
+- [X] Responsive design (card stacking on mobile)
+- [X] Add loading skeleton variant
 
 **Deliverable**: Reusable event card component with all metadata
 
@@ -662,15 +662,15 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Phase 3: Events Grid & List Management (Day 2, 4-5 hours)
 
-- [ ] Create `src/app/(dashboard)/_components/events-dashboard.tsx` (Client Component)
-- [ ] Implement events grid layout (responsive grid)
-- [ ] Add grid/list view toggle (optional for MVP)
-- [ ] Handle empty events array
-- [ ] Sort events by date (upcoming first, then past)
-- [ ] Add visual distinction for past events
-- [ ] Implement loading states during data fetch
-- [ ] Error handling with retry option
-- [ ] Test with various event counts (0, 1, 5, 20+)
+- [X] Create `src/components/dashboard/events-dashboard.tsx` (Client Component)
+- [X] Implement events grid layout (responsive grid)
+- [X] Add grid/list view toggle (optional for MVP)
+- [X] Handle empty events array
+- [X] Sort events by date (upcoming first, then past)
+- [X] Add visual distinction for past events
+- [X] Implement loading states during data fetch
+- [X] Error handling with retry option
+- [X] Test with various event counts (0, 1, 5, 20+)
 
 **Deliverable**: Events grid displaying all user events
 
@@ -678,16 +678,16 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Phase 4: Status Filtering (Day 2-3, 4-5 hours)
 
-- [ ] Create `src/app/(dashboard)/_components/status-filter.tsx`
-- [ ] Implement filter tabs: All, Draft, Published, Archived
-- [ ] Add count badges to each tab
-- [ ] Create `getStatusCounts` tRPC procedure
-- [ ] Update filter state on tab click
-- [ ] Update URL query params on filter change
-- [ ] Re-fetch events based on active filter
-- [ ] Show appropriate empty state when no events match
-- [ ] Add loading indicator during filter switch
-- [ ] Test filter persistence (refresh page maintains filter)
+- [X] Create `src/components/dashboard/status-filter.tsx`
+- [X] Implement filter tabs: All, Draft, Published, Archived
+- [X] Add count badges to each tab
+- [X] Create `getStatusCounts` tRPC procedure
+- [X] Update filter state on tab click
+- [X] Update URL query params on filter change
+- [X] Re-fetch events based on active filter
+- [X] Show appropriate empty state when no events match
+- [X] Add loading indicator during filter switch
+- [X] Test filter persistence (refresh page maintains filter)
 
 **Deliverable**: Functional status filtering with counts
 
@@ -695,13 +695,13 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Phase 5: Dashboard Header & Actions (Day 3, 3-4 hours)
 
-- [ ] Create `src/app/(dashboard)/_components/dashboard-header.tsx`
-- [ ] Add page title and description
-- [ ] Implement "Create Event" button (navigates to `/dashboard/create-event`)
-- [ ] Add user profile dropdown (name, email, sign out)
-- [ ] Style header with consistent spacing
-- [ ] Make header sticky on scroll (optional)
-- [ ] Responsive header (collapse on mobile)
+- [X] Create `src/components/dashboard/dashboard-header.tsx`
+- [X] Add page title and description
+- [X] Implement "Create Event" button (navigates to `/create-event`)
+- [X] Add user profile dropdown (name, email, sign out)
+- [X] Style header with consistent spacing
+- [X] Make header sticky on scroll (optional)
+- [X] Responsive header (collapse on mobile)
 
 **Deliverable**: Dashboard header with creation CTA
 
@@ -709,12 +709,12 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Phase 6: Empty States (Day 3, 2-3 hours)
 
-- [ ] Create `src/app/(dashboard)/_components/empty-state.tsx`
-- [ ] Implement "No events" empty state with CTA
-- [ ] Implement "No events match filter" empty state
-- [ ] Add illustrations or icons
-- [ ] Different messaging per state
-- [ ] Make empty state responsive
+- [X] Create `src/components/dashboard/empty-state.tsx`
+- [X] Implement "No events" empty state with CTA
+- [X] Implement "No events match filter" empty state
+- [X] Add illustrations or icons
+- [X] Different messaging per state
+- [X] Make empty state responsive
 
 **Deliverable**: Polished empty state experiences
 
@@ -722,14 +722,14 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Phase 7: Pagination & Performance (Day 4, 4-5 hours)
 
-- [ ] Implement cursor-based pagination in `event.list` query
-- [ ] Add "Load More" button to dashboard
-- [ ] Show "Showing X of Y events" counter
-- [ ] Implement optimistic updates when navigating
-- [ ] Add pagination state management
+- [X] Implement cursor-based pagination in `event.list` query
+- [X] Add "Load More" button to dashboard
+- [X] Show "Showing X of Y events" counter
+- [X] Implement optimistic updates when navigating
+- [X] Add pagination state management
 - [ ] Test with 50+ events
-- [ ] Optimize query (select only needed fields)
-- [ ] Add query caching strategy with React Query
+- [X] Optimize query (select only needed fields)
+- [X] Add query caching strategy with React Query
 - [ ] Implement infinite scroll (optional alternative)
 
 **Deliverable**: Dashboard handles large event portfolios efficiently
@@ -738,12 +738,12 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Phase 8: Navigation & Integration (Day 4, 2-3 hours)
 
-- [ ] Update sign-in page redirect to `/dashboard` (already in auth config)
-- [ ] Update app navigation to include dashboard link
-- [ ] Add breadcrumbs to event dashboard pages (back to dashboard)
-- [ ] Test navigation flow: Sign in → Dashboard → Event → Back to Dashboard
-- [ ] Update landing page CTA for authenticated users (show "Go to Dashboard")
-- [ ] Ensure event creation redirects back to dashboard after completion
+- [X] Update sign-in page redirect to `/dashboard` (already in auth config)
+- [X] Update app navigation to include dashboard link
+- [X] Add breadcrumbs to event dashboard pages (back to dashboard)
+- [X] Test navigation flow: Sign in → Dashboard → Event → Back to Dashboard
+- [X] Update landing page CTA for authenticated users (show "Go to Dashboard")
+- [X] Ensure event creation redirects back to dashboard after completion
 
 **Deliverable**: Seamless navigation throughout app
 
@@ -774,27 +774,27 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 ### Phase 10: Documentation & Polish (Day 5-6, 3-4 hours)
 
 #### Code Documentation
-- [ ] Add JSDoc comments to dashboard components
-- [ ] Document component props with TypeScript interfaces
-- [ ] Add inline code comments for complex logic
-- [ ] Create component usage examples
+- [ ] Add JSDoc comments to dashboard components - SKIP THIS
+- [ ] Document component props with TypeScript interfaces - SKIP THIS
+- [ ] Add inline code comments for complex logic - SKIP THIS
+- [ ] Create component usage examples - SKIP THIS
 
 #### User Documentation
-- [ ] Update getting started guide with dashboard information
+- [X] Update getting started guide with dashboard information
 - [ ] Add dashboard section to user guide (if exists)
-- [ ] Create dashboard feature walkthrough
+- [X] Create dashboard feature walkthrough
 - [ ] Document keyboard shortcuts (if implemented)
 
 #### Module Documentation Updates
 
-- [ ] **Create `docs/modules/dashboard/README.md`**:
+- [X] **Create `docs/modules/dashboard/README.md`**:
   - Overview of dashboard module
   - User roles (organizers only for MVP)
   - Features list (event listing, filtering, navigation)
   - Module dependencies (Events, Authentication)
   - Future enhancements
 
-- [ ] **Create `docs/modules/dashboard/frontend.md`**:
+- [X] **Create `docs/modules/dashboard/frontend.md`**:
   - Document dashboard page structure
   - Document EventCard component
   - Document StatusFilter component
@@ -802,36 +802,36 @@ This protection applies to all routes under `(dashboard)/`, including the new da
   - Add UI component tree
   - Document responsive behavior
 
-- [ ] **Create `docs/modules/dashboard/workflows.md`**:
+- [X] **Create `docs/modules/dashboard/workflows.md`**:
   - Workflow 1: First-time user creating event from dashboard
   - Workflow 2: Organizer accessing existing event
   - Workflow 3: Filtering events by status
   - Workflow 4: Managing multiple events
 
-- [ ] **Update `docs/architecture/file-structure.md`**:
+- [X] **Update `docs/architecture/file-structure.md`**:
   - Add dashboard page to `(dashboard)/` route group section
   - Document dashboard components location
 
-- [ ] **Update `docs/getting-started.md`**:
+- [X] **Update `docs/getting-started.md`**:
   - Update post-authentication flow (redirects to dashboard)
   - Add dashboard screenshot/description
   - Update "First Steps" section
 
-- [ ] **Update `docs/modules/events/README.md`**:
+- [X] **Update `docs/modules/events/README.md`**:
   - Add reference to dashboard as primary entry point
   - Update navigation flow description
 
-- [ ] **Update `docs/index.md`**:
+- [X] **Update `docs/index.md`**:
   - Add "Dashboard" to the Modules section
   - Add dashboard quick reference link
   - Update "Common Tasks" section to include dashboard navigation
 
-- [ ] **Update `docs/README.md`**:
+- [X] **Update `docs/README.md`**:
   - Add Dashboard to module interconnection map/diagram
   - Add dashboard to "I want to..." navigation section
   - Update learning path to include dashboard as starting point
 
-- [ ] **Update `docs/api/routers.md`** (if new procedures added):
+- [X] **Update `docs/api/routers.md`** (if new procedures added):
   - Document any new dashboard-specific API procedures
   - Update event router documentation if list query changes
   - Add examples for dashboard-related API calls
@@ -850,7 +850,7 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 4. Clicks "Create Your First Event" button
 5. Navigates to `/create-event`
 6. Fills out event form and submits
-7. Redirected to new event dashboard at `/{eventId}`
+7. Redirected to new event dashboard at `/[id]`
 8. Can click "Back to Dashboard" or use navigation to return to `/dashboard`
 
 ### Flow 2: Returning User with Events
@@ -860,7 +860,7 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 3. Sees grid of event cards (sorted by date: upcoming first, then past)
 4. Reviews event statuses and metrics at a glance
 5. Clicks "Manage" on an event needing attention
-6. Navigates to event-specific dashboard at `/{eventId}`
+6. Navigates to event-specific dashboard at `/[id]`
 7. Completes task
 8. Returns to main dashboard via navigation or back button
 
@@ -871,7 +871,7 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 3. Sees first 20 events (sorted: upcoming first, then past)
 4. Clicks "Draft" filter to see only draft events
 5. Reviews 5 draft events
-6. Opens one to complete setup (navigates to `/{eventId}`)
+6. Opens one to complete setup (navigates to `/[id]`)
 7. Returns to dashboard (filter persists - still showing "Draft")
 8. Clicks "Published" to review active events
 9. Scrolls down and clicks "Load More"
@@ -879,10 +879,10 @@ This protection applies to all routes under `(dashboard)/`, including the new da
 
 ### Flow 4: Protected Route Redirect
 
-1. User (logged out) tries to access `/{eventId}` (requires auth)
-2. Redirected to `/auth/signin?callbackUrl=/{eventId}`
+1. User (logged out) tries to access `/[id]` (requires auth)
+2. Redirected to `/auth/signin?callbackUrl=/[id]`
 3. User signs in
-4. Redirected back to `/{eventId}` (intended destination)
+4. Redirected back to `/[id]` (intended destination)
 5. Can navigate to `/dashboard` if needed to see all events
 
 ### Technical Risks
@@ -1175,11 +1175,11 @@ Since the project does not have automated testing infrastructure, all testing wi
 ### Open Questions
 1. ✅ **RESOLVED**: "All" filter shows all events including archived
 2. ✅ **RESOLVED**: Events sorted by upcoming (asc) then past (desc)
-3. ✅ **RESOLVED**: Using `/{eventId}` routes (current implementation)
+3. ✅ **RESOLVED**: Using `/[id]` routes (current implementation)
 4. ✅ **RESOLVED**: Cursor pagination + separate count query
 5. ✅ **RESOLVED**: Create button navigates to `/create-event`
 6. ✅ **RESOLVED**: "View All Events" clears active filter
-7. ✅ **RESOLVED**: Manage → `/{eventId}`, Edit → `/{eventId}/settings`, View → `/events/{slug}`
+7. ✅ **RESOLVED**: Manage → `/[id]`, Edit → `/[id]/settings`, View → `/events/[slug]`
 8. ✅ **RESOLVED**: Stacked filter buttons on mobile
 9. ✅ **RESOLVED**: Performance target is for initial 20 events load
 10. ✅ **RESOLVED**: callbackUrl handling with default to `/dashboard`
@@ -1198,7 +1198,7 @@ Since the project does not have automated testing infrastructure, all testing wi
 - Ensure mobile performance is optimized (lazy loading images)
 - Implement separate count query for accurate "Showing X of Y" display
 - Handle edge cases: events happening today, timezone boundaries
-- Future refactoring: consolidate routes under `/dashboard/{eventId}` or use `/dashboard/{slug}`
+- Future refactoring: consolidate routes under `/dashboard/[id]` or use `/dashboard/[slug]`
 
 ### Authentication Considerations
 - Implement `callbackUrl` handling for seamless auth flow

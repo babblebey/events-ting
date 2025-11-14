@@ -247,14 +247,16 @@ If you seeded the database:
 2. Sign in with:
    - Email: `organizer@test.com`
    - Password: `password123`
-3. You should be redirected to the dashboard
+3. You should be redirected to the dashboard at `/dashboard`
+4. You'll see your events dashboard with any seeded events
 
 ### 4. Test Event Creation
 
-1. Sign in as an organizer
-2. Click "Create Event"
+1. Sign in as an organizer (redirects to `/dashboard`)
+2. Click "Create Event" button in the dashboard header
 3. Fill in event details
-4. Click "Create" - you should see the event dashboard
+4. Click "Create" - you should see the event management dashboard
+5. Return to the main dashboard to see your newly created event
 
 ### 5. Test Public Registration Flow
 

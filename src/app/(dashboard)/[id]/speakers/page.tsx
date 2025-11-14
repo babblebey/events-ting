@@ -18,6 +18,7 @@ import {
 import { LuCircleAlert } from "react-icons/lu";
 import { HiPlus } from "react-icons/hi";
 import { api } from "@/trpc/react";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { SpeakerCard } from "@/components/speakers/speaker-card";
 import { SpeakerForm } from "@/components/speakers/speaker-form";
 import { useParams } from "next/navigation";
@@ -25,6 +26,9 @@ import { useParams } from "next/navigation";
 export default function SpeakersPage() {
   const params = useParams();
   const eventId = params.id as string;
+
+  // Fetch event data for breadcrumbs
+  const { data: event } = api.event.getById.useQuery({ id: eventId });
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingSpeaker, setEditingSpeaker] = useState<string | null>(null);
@@ -77,6 +81,16 @@ export default function SpeakersPage() {
 
   return (
     <div className="space-y-6">
+      {/* Breadcrumbs */}
+      {event && (
+        <Breadcrumbs
+          items={[
+            { label: event.name, href: `/${eventId}` },
+            { label: "Speakers" },
+          ]}
+        />
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 import { api } from "@/trpc/server";
 import { auth } from "@/server/auth";
 import { ScheduleManager } from "./schedule-manager";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 interface SchedulePageProps {
   params: Promise<{ id: string }>;
@@ -42,6 +43,13 @@ export default async function SchedulePage({ params }: SchedulePageProps) {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs
+        items={[
+          { label: event.name, href: `/${id}` },
+          { label: "Schedule" },
+        ]}
+      />
+
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
           Schedule

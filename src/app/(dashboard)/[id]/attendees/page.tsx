@@ -1,5 +1,6 @@
 import { api } from "@/trpc/server";
 import { AttendeeTable } from "@/components/registration/attendee-table";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 interface AttendeesPageProps {
   params: Promise<{
@@ -15,6 +16,13 @@ async function AttendeesPage({ params }: AttendeesPageProps) {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs
+        items={[
+          { label: event.name, href: `/${eventId}` },
+          { label: "Attendees" },
+        ]}
+      />
+
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
           Attendees

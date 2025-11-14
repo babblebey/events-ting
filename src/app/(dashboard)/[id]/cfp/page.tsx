@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import { api } from "@/trpc/server";
 import { auth } from "@/server/auth";
 import { CfpManager } from "./cfp-manager";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 interface CfpPageProps {
   params: Promise<{ id: string }>;
@@ -38,6 +39,13 @@ export default async function CfpPage({ params }: CfpPageProps) {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs
+        items={[
+          { label: event.name, href: `/${id}` },
+          { label: "Call for Papers" },
+        ]}
+      />
+
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
           Call for Papers
