@@ -1,0 +1,4 @@
+name,email,ticketType,paymentStatus,custom_company,custom_role
+John Doe,john.doe@example.com,General Admission,free,Acme Corp,Software Engineer
+Jane Smith,jane.smith@example.com,VIP,paid,TechCo Inc,Product Manager
+Bob Johnson,bob.johnson@example.com,Early Bird,free,StartupXYZ,Founder

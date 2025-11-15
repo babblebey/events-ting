@@ -11,6 +11,7 @@ The Attendees module provides organizers with comprehensive attendee management 
 - **Ticket Type Filtering**: Filter attendees by ticket type
 - **Email Status Tracking**: Monitor email bounces and unsubscribes
 - **CSV Export**: Download attendee data for offline use
+- **CSV Import**: Bulk import attendees from CSV files with validation
 - **Resend Confirmations**: Re-send confirmation emails to attendees
 - **Registration Cancellation**: Cancel registrations (frees up tickets)
 - **Pagination**: Infinite scroll for large attendee lists
@@ -86,6 +87,12 @@ This module provides organizer capabilities for:
 - **Search Functionality**: Real-time search by name/email
 - **Ticket Type Filter**: Filter by specific ticket types
 - **CSV Export** (FR-018): Download attendee data
+- **CSV Import** (FR-019): Bulk import attendees from CSV files
+  - Multi-step wizard with validation
+  - Smart field mapping with auto-suggestions
+  - Duplicate detection (in-file and database)
+  - Partial commit strategy for error handling
+  - CSV template download
 - **Email Management**:
   - Resend confirmations
   - Track email status (active/bounced/unsubscribed)
@@ -118,7 +125,14 @@ This module provides organizer capabilities for:
    - Download CSV file with all attendee data
    - Use for badge printing, email lists, etc.
 
-6. **Manage Individual Attendees**
+6. **Import Attendees**
+   - Click "Import Attendees" button
+   - Upload CSV file with attendee data
+   - Map CSV columns to system fields
+   - Validate data and handle duplicates
+   - Execute import with progress feedback
+
+7. **Manage Individual Attendees**
    - **Resend Confirmation**: Re-send confirmation email
    - **Cancel Registration**: Cancel and free up ticket
 
@@ -175,5 +189,8 @@ This module provides organizer capabilities for:
 - **Bulk Actions**: Bulk resend, bulk cancel
 - **Advanced Filters**: By registration date, payment status, custom fields
 - **Excel Export**: Alternative to CSV with formatting
+- **Excel Import**: Support .xlsx files in addition to CSV
+- **Update Existing Records**: Update attendees via import instead of create only
+- **Import API Endpoint**: Programmatic imports via REST API
 - **Attendee Notes**: Internal organizer notes on attendees
 - **Badge Printing**: Direct integration with badge printers

@@ -7,6 +7,7 @@ import { scheduleRouter } from "@/server/api/routers/schedule";
 import { cfpRouter } from "@/server/api/routers/cfp";
 import { speakerRouter } from "@/server/api/routers/speaker";
 import { communicationRouter } from "@/server/api/routers/communication";
+import { attendeesRouter } from "@/server/api/routers/attendees";
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 
 /**
@@ -24,6 +25,7 @@ export const appRouter = createTRPCRouter({
   cfp: cfpRouter,
   speaker: speakerRouter,
   communication: communicationRouter,
+  attendees: attendeesRouter,
 });
 
 // export type definition of API

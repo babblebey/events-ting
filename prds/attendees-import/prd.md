@@ -394,85 +394,85 @@ const result = await api.attendees.parseCSV({
 ## Implementation Plan
 
 ### Phase 1: File Upload & Parsing (Day 1, 4-5 hours)
-- [ ] Create new `attendeesRouter` in `src/server/api/routers/attendees.ts`
-- [ ] Create tRPC procedure `attendees.parseCSV`
-- [ ] Implement CSV parsing using `papaparse`
-- [ ] Extract column headers and preview data (first 10 rows)
-- [ ] Implement smart field mapping suggestions (fuzzy column name matching)
-- [ ] Add dual file validation: 10MB **AND** 10,000 rows limit
-- [ ] Add format validation (CSV only, UTF-8 encoding, BOM stripping)
-- [ ] Create error handling for malformed CSV
-- [ ] Create static CSV template file in `/public/templates/attendees-import-template.csv`
+- [x] Create new `attendeesRouter` in `src/server/api/routers/attendees.ts`
+- [x] Create tRPC procedure `attendees.parseCSV`
+- [x] Implement CSV parsing using `papaparse`
+- [x] Extract column headers and preview data (first 10 rows)
+- [x] Implement smart field mapping suggestions (fuzzy column name matching)
+- [x] Add dual file validation: 10MB **AND** 10,000 rows limit
+- [x] Add format validation (CSV only, UTF-8 encoding, BOM stripping)
+- [x] Create error handling for malformed CSV
+- [x] Create static CSV template file in `/public/templates/attendees-import-template.csv`
 
 **Deliverable**: API endpoint that parses CSV and returns preview + CSV template file
 
 ---
 
 ### Phase 2: Validation Engine (Day 1-2, 5-6 hours)
-- [ ] Create tRPC procedure `attendees.validateImport`
-- [ ] Implement field-level validation (email format, name length, ticket type)
-- [ ] Implement two-phase duplicate detection:
+- [x] Create tRPC procedure `attendees.validateImport`
+- [x] Implement field-level validation (email format, name length, ticket type)
+- [x] Implement two-phase duplicate detection:
   - Phase 1: In-file duplicates (same email multiple times)
   - Phase 2: Database duplicates (email + eventId against existing registrations)
-- [ ] Build validation error reporting structure (row number, field, error message)
-- [ ] Add ticket type existence check (must exist in event)
-- [ ] Add ticket availability warning (non-blocking)
-- [ ] Test with various CSV samples (valid, invalid, in-file duplicates, db duplicates)
+- [x] Build validation error reporting structure (row number, field, error message)
+- [x] Add ticket type existence check (must exist in event)
+- [x] Add ticket availability warning (non-blocking)
+- [x] Test with various CSV samples (valid, invalid, in-file duplicates, db duplicates)
 
 **Deliverable**: Validation engine with comprehensive two-phase error reporting
 
 ---
 
 ### Phase 3: Import Execution (Day 2-3, 5-6 hours)
-- [ ] Create tRPC procedure `attendees.executeImport`
-- [ ] Implement batch insert with **partial commit** strategy (commit successful rows, skip failed)
-- [ ] Generate unique registration codes for all imported attendees
-- [ ] Handle duplicate strategies (skip/create, default: skip)
-- [ ] Store unmapped columns in `customData` JSON (without `custom_` prefix)
-- [ ] Add optional confirmation email sending (controlled by checkbox from Step 1)
-- [ ] Add error recovery (continue processing after individual row failures)
-- [ ] Return detailed import results (success/failure/skipped counts, per-row errors)
+- [x] Create tRPC procedure `attendees.executeImport`
+- [x] Implement batch insert with **partial commit** strategy (commit successful rows, skip failed)
+- [x] Generate unique registration codes for all imported attendees
+- [x] Handle duplicate strategies (skip/create, default: skip)
+- [x] Store unmapped columns in `customData` JSON (without `custom_` prefix)
+- [x] Add optional confirmation email sending (controlled by checkbox from Step 1)
+- [x] Add error recovery (continue processing after individual row failures)
+- [x] Return detailed import results (success/failure/skipped counts, per-row errors)
 
-**Deliverable**: Fully functional import execution with partial commit
+**Deliverable**: Fully functional import execution with partial commit ✅
 
 ---
 
 ### Phase 4: UI Components (Day 3-5, 8-10 hours)
-- [ ] Create `ImportWizard` component with multi-step flow
-- [ ] **Step 1**: File upload dropzone with drag & drop
-  - [ ] Add "Download CSV Template" button
-  - [ ] Add "Send confirmation emails" checkbox (default: unchecked)
-  - [ ] Show dual file limits (10MB AND 10,000 rows)
-- [ ] **Step 2**: Field mapping interface with dropdowns
-  - [ ] Auto-suggest mappings based on column names
-  - [ ] Load saved mappings from localStorage (`events-ting:import-mapping:{eventId}`)
-  - [ ] Save mappings to localStorage on proceed
-  - [ ] Show sample data for each column
-  - [ ] Display custom field option for unmapped columns
-- [ ] **Step 3**: Validation results table with error details
-  - [ ] Show validation summary (valid/invalid/duplicates)
-  - [ ] Enable "Import" button even with errors (with warning message)
-  - [ ] Add "Download Error Report" button
-  - [ ] Display both in-file and database duplicates
-- [ ] **Step 4**: Import progress with simulated feedback
-  - [ ] Indeterminate spinner during processing (not real-time)
-  - [ ] Display final results upon completion
-  - [ ] Option to download failed rows CSV
-- [ ] Implement responsive design for mobile
-- [ ] Add loading states and optimistic UI updates
+- [X] Create `ImportWizard` component with multi-step flow
+- [X] **Step 1**: File upload dropzone with drag & drop
+  - [X] Add "Download CSV Template" button
+  - [X] Add "Send confirmation emails" checkbox (default: unchecked)
+  - [X] Show dual file limits (10MB AND 10,000 rows)
+- [X] **Step 2**: Field mapping interface with dropdowns
+  - [X] Auto-suggest mappings based on column names
+  - [X] Load saved mappings from localStorage (`events-ting:import-mapping:{eventId}`)
+  - [X] Save mappings to localStorage on proceed
+  - [X] Show sample data for each column
+  - [X] Display custom field option for unmapped columns
+- [X] **Step 3**: Validation results table with error details
+  - [X] Show validation summary (valid/invalid/duplicates)
+  - [X] Enable "Import" button even with errors (with warning message)
+  - [X] Add "Download Error Report" button
+  - [X] Display both in-file and database duplicates
+- [X] **Step 4**: Import progress with simulated feedback
+  - [X] Indeterminate spinner during processing (not real-time)
+  - [X] Display final results upon completion
+  - [X] Option to download failed rows CSV
+- [X] Implement responsive design for mobile
+- [X] Add loading states and optimistic UI updates
 
 **Deliverable**: Complete import wizard UI with all clarified features
 
 ---
 
 ### Phase 5: Integration & Navigation (Day 5, 2-3 hours)
-- [ ] Add "Import Attendees" button to attendees list page
-- [ ] Create route `/dashboard/[id]/attendees/import`
-- [ ] Add navigation breadcrumbs
-- [ ] Update attendees list to refresh after import
-- [ ] Implement success/failure toast notifications
+- [x] Add "Import Attendees" button to attendees list page
+- [x] Create route `/dashboard/[id]/attendees/import`
+- [x] Add navigation breadcrumbs
+- [x] Update attendees list to refresh after import
+- [x] Implement success/failure toast notifications
 
-**Deliverable**: Integrated import flow in dashboard
+**Deliverable**: Integrated import flow in dashboard ✅
 
 ---
 
@@ -500,18 +500,18 @@ const result = await api.attendees.parseCSV({
 - [ ] Write user-facing documentation for import feature
 - [ ] Create CSV template download with example data
 - [ ] Add inline help text and tooltips in UI
-- [ ] Document API endpoints in code (JSDoc comments)
+<!-- - [ ] Document API endpoints in code (JSDoc comments) -->
 - [ ] Create troubleshooting guide for common errors
 
 #### Module Documentation Updates
-- [ ] **Update `docs/modules/attendees/README.md`**:
+- [X] **Update `docs/modules/attendees/README.md`**:
   - Add "CSV Import" to Features list
   - Add import workflow to Getting Started section
   - Add CSV format specification reference
   - Update Feature Coverage to include FR-019 (Import)
   - Add to Future Enhancements: Excel import, update existing records, API endpoint
   
-- [ ] **Update `docs/modules/attendees/backend.md`**:
+- [X] **Update `docs/modules/attendees/backend.md`**:
   - Document new `attendeesRouter` location and purpose
   - Document `attendees.parseCSV` procedure (input, output, usage, smart mapping)
   - Document `attendees.validateImport` procedure (two-phase validation, error format)
@@ -521,7 +521,7 @@ const result = await api.attendees.parseCSV({
   - Add import error handling patterns
   - Update performance considerations for large imports
   
-- [ ] **Update `docs/modules/attendees/frontend.md`**:
+- [X] **Update `docs/modules/attendees/frontend.md`**:
   - Document `ImportWizard` component and its steps
   - Document `FileUploadStep`, `FieldMappingStep`, `ValidationStep`, `ImportProgressStep` components
   - Add CSV import UI flow diagrams
@@ -529,7 +529,7 @@ const result = await api.attendees.parseCSV({
   - Add loading states for import operations
   - Document CSV template download feature
   
-- [ ] **Update `docs/modules/attendees/workflows.md`**:
+- [X] **Update `docs/modules/attendees/workflows.md`**:
   - Add "Workflow 8: Import Attendees from CSV" (complete step-by-step)
   - Add field mapping best practices
   - Add duplicate handling scenarios
@@ -537,7 +537,7 @@ const result = await api.attendees.parseCSV({
   - Add error resolution workflows
   - Add CSV preparation tips for organizers
   
-- [ ] **Update `docs/modules/attendees/data-model.md`**:
+- [X] **Update `docs/modules/attendees/data-model.md`**:
   - Document CSV field mapping to Registration model
   - Add customData format for imported fields
   - Add validation constraints for imported data
@@ -547,7 +547,7 @@ const result = await api.attendees.parseCSV({
 - [ ] **Update `docs/getting-started.md`**:
   - No changes needed (import is an advanced feature, not setup)
   
-- [ ] **Update `docs/troubleshooting.md`** (if exists):
+- [X] **Update `docs/troubleshooting.md`** (if exists):
   - Add "CSV Import Issues" section
   - Common import errors and resolutions
   - File format troubleshooting

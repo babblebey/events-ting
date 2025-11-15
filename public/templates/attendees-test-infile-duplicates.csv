@@ -1,0 +1,7 @@
+name,email,ticketType,paymentStatus
+John Doe,john.doe@example.com,General Admission,free
+Jane Smith,jane.smith@example.com,VIP,paid
+Bob Johnson,john.doe@example.com,Early Bird,free
+Alice Williams,alice.williams@example.com,General Admission,free
+Charlie Brown,jane.smith@example.com,VIP,paid
+David Lee,david.lee@example.com,General Admission,free

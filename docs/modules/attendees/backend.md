@@ -2,15 +2,447 @@
 
 ## Overview
 
-The Attendees module does not have a separate backend router. Instead, it **uses the Registration router** (`registrationRouter`) from the Registration module. This document describes which procedures are used for attendee management and how they're applied in the attendees context.
+The Attendees module uses two backend routers:
+1. **Registration Router** (`registrationRouter`) - For list, export, resend, cancel operations
+2. **Attendees Router** (`attendeesRouter`) - For CSV import operations (NEW)
 
-## Router Location
+This document describes the procedures used for attendee management and import functionality.
 
-**File**: `src/server/api/routers/registration.ts`  
-**Router**: `registrationRouter`  
-**Shared With**: Registration Module
+## Router Locations
+
+**Registration Router**:
+- **File**: `src/server/api/routers/registration.ts`  
+- **Router**: `registrationRouter`  
+- **Shared With**: Registration Module
+- **Purpose**: Attendee list management and basic operations
+
+**Attendees Router** (NEW):
+- **File**: `src/server/api/routers/attendees.ts`  
+- **Router**: `attendeesRouter`  
+- **Purpose**: CSV import operations (organizer-only features)
 
 ## Key Procedures for Attendee Management
+
+---
+
+## CSV Import Procedures (attendeesRouter)
+
+### 6. `attendees.parseCSV` (Protected)
+
+**Purpose**: Parse uploaded CSV file and return preview with smart field mapping suggestions  
+**Type**: Mutation  
+**Authentication**: Required (organizer only)
+
+**Input Schema**:
+```typescript
+{
+  eventId: string (cuid),
+  fileContent: string, // Base64 encoded CSV content
+  fileName: string
+}
+```
+
+**Output**:
+```typescript
+{
+  columns: string[], // CSV column headers
+  preview: Array<Record<string, string>>, // First 10 rows
+  totalRows: number, // Total data rows (excluding header)
+  suggestedMapping: Record<string, string> // Column name -> field mapping suggestions
+}
+```
+
+**Business Logic**:
+1. Validates file size (10MB max) and row count (10,000 max)
+2. Parses CSV using PapaParse library
+3. Strips UTF-8 BOM if present
+4. Extracts column headers
+5. Returns first 10 rows as preview
+6. Generates smart field mapping suggestions using fuzzy matching:
+   - "Full Name" / "Name" / "Attendee Name" → "name"
+   - "Email" / "Email Address" → "email"
+   - "Ticket" / "Ticket Type" → "ticketType"
+   - Etc.
+
+**Authorization**:
+- Verifies user owns the event
+
+**Validation Rules**:
+- File must be valid CSV format
+- Maximum 10MB file size
+- Maximum 10,000 rows (dual limits - whichever is hit first)
+- At least 1 data row required
+- UTF-8 encoding required
+
+**Error Handling**:
+- Malformed CSV → User-friendly error message
+- File too large → "File exceeds 10MB limit"
+- Too many rows → "File exceeds 10,000 row limit"
+- Invalid encoding → "Please ensure file is UTF-8 encoded"
+
+**Feature Requirements**: FR-019 (Import)
+
+---
+
+### 7. `attendees.validateImport` (Protected)
+
+**Purpose**: Validate CSV data before import with two-phase duplicate detection  
+**Type**: Mutation  
+**Authentication**: Required (organizer only)
+
+**Input Schema**:
+```typescript
+{
+  eventId: string (cuid),
+  fileContent: string, // Base64 encoded CSV
+  fieldMapping: Record<string, string>, // CSV column -> system field
+  duplicateStrategy: 'skip' | 'create'
+}
+```
+
+**Output**:
+```typescript
+{
+  validRows: number,
+  invalidRows: number,
+  inFileDuplicates: number, // NEW: Duplicates within CSV
+  databaseDuplicates: number, // NEW: Existing in database
+  errors: Array<{
+    row: number, // 1-indexed row number
+    field: string, // Field name with error
+    value: string, // Invalid value
+    error: string, // Error description
+    type: 'validation' | 'duplicate_in_file' | 'duplicate_in_db'
+  }>
+}
+```
+
+**Two-Phase Duplicate Detection**:
+
+**Phase 1: In-File Duplicates**
+- Detects duplicate emails within the CSV file itself
+- Tracks first occurrence, marks subsequent as duplicates
+- Error type: `duplicate_in_file`
+- Example: Email "john@example.com" appears in rows 5 and 12
+
+**Phase 2: Database Duplicates**
+- Checks each email against existing registrations for the event
+- Query: `email + eventId` combination
+- Error type: `duplicate_in_db`
+- Only checks valid, non-in-file-duplicate rows
+
+**Validation Rules**:
+1. **Required Fields**:
+   - `name` - Must be mapped and non-empty (min 2 chars, max 255)
+   - `email` - Must be mapped, valid format, max 255 chars
+   - `ticketType` - Must be mapped and exist in event
+
+2. **Optional Fields**:
+   - `paymentStatus` - Enum: 'free', 'pending', 'paid', 'failed', 'refunded'
+   - `emailStatus` - Enum: 'active', 'bounced', 'unsubscribed'
+   - Custom fields - Stored in customData JSON
+
+3. **Email Validation**:
+   - Format validation using regex
+   - Case-insensitive comparison for duplicates
+   - Trimmed before validation
+
+4. **Ticket Type Validation**:
+   - Must match existing ticket type name or ID
+   - Case-insensitive matching
+   - Ticket must belong to the event
+
+**Authorization**:
+- Verifies user owns the event
+
+**Performance Optimization**:
+- Batch database queries for ticket types
+- Single query to check all database duplicates
+- In-memory validation for field-level rules
+
+**Example Output**:
+```typescript
+{
+  validRows: 245,
+  invalidRows: 2,
+  inFileDuplicates: 3,
+  databaseDuplicates: 5,
+  errors: [
+    { row: 12, field: 'email', value: 'invalid@', error: 'Invalid email format', type: 'validation' },
+    { row: 15, field: 'email', value: 'john@example.com', error: 'Duplicate email in file (first at row 5)', type: 'duplicate_in_file' },
+    { row: 20, field: 'email', value: 'existing@example.com', error: 'Email already registered for this event', type: 'duplicate_in_db' },
+    { row: 45, field: 'ticketType', value: 'Super VIP', error: 'Ticket type not found', type: 'validation' }
+  ]
+}
+```
+
+**Feature Requirements**: FR-019 (Import)
+
+---
+
+### 8. `attendees.executeImport` (Protected)
+
+**Purpose**: Execute validated CSV import with partial commit strategy  
+**Type**: Mutation  
+**Authentication**: Required (organizer only)
+
+**Input Schema**:
+```typescript
+{
+  eventId: string (cuid),
+  fileContent: string, // Base64 encoded CSV
+  fieldMapping: Record<string, string>,
+  duplicateStrategy: 'skip' | 'create',
+  sendConfirmationEmails: boolean // Default: false
+}
+```
+
+**Output**:
+```typescript
+{
+  successCount: number,
+  failureCount: number,
+  skippedCount: number, // Duplicates skipped
+  errors: Array<{
+    row: number,
+    field: string,
+    value: string,
+    error: string
+  }>,
+  status: 'completed' | 'partial' | 'failed',
+  message: string
+}
+```
+
+**Partial Commit Strategy**:
+
+Unlike traditional all-or-nothing transactions, this import uses **partial commit**:
+1. Process rows one by one
+2. Commit successful rows immediately
+3. Continue processing after individual failures
+4. Return summary of successes and failures
+
+**Benefits**:
+- Organizers get valid data immediately
+- Failed rows can be fixed and re-imported separately
+- Better UX for large imports with minor issues
+- No need to fix all errors before getting any results
+
+**Business Logic**:
+
+1. **Parse and Re-validate**:
+   - Parse CSV again (validation may have been done earlier)
+   - Skip invalid rows
+   - Apply duplicate strategy
+
+2. **Process Each Row**:
+   ```typescript
+   for (const row of validRows) {
+     try {
+       // Generate unique registration code
+       const registrationCode = generateRegistrationCode()
+       
+       // Map custom fields
+       const customData = {
+         registrationCode,
+         ...unmappedFields
+       }
+       
+       // Create registration
+       await db.registration.create({
+         data: {
+           eventId,
+           email: row.email,
+           name: row.name,
+           ticketTypeId: row.ticketTypeId,
+           paymentStatus: row.paymentStatus || 'free',
+           emailStatus: row.emailStatus || 'active',
+           customData
+         }
+       })
+       
+       // Send confirmation email if enabled
+       if (sendConfirmationEmails) {
+         await sendEmail({
+           to: row.email,
+           template: RegistrationConfirmation,
+           data: { registrationCode, eventName, ... }
+         })
+       }
+       
+       successCount++
+     } catch (error) {
+       failureCount++
+       errors.push({ row, error: error.message })
+       // Continue processing next row
+     }
+   }
+   ```
+
+3. **Generate Registration Codes**:
+   - Unique 9-character alphanumeric code
+   - Stored in `customData.registrationCode`
+   - Used for check-in and confirmations
+
+4. **Handle Custom Fields**:
+   - Unmapped CSV columns stored in `customData`
+   - Column names used as-is (no `custom_` prefix in JSON)
+   - Example: CSV column "Company" → `customData.company`
+
+5. **Send Confirmation Emails** (Optional):
+   - Only if `sendConfirmationEmails: true`
+   - Sent asynchronously (failures logged, not blocking)
+   - Uses same template as regular registration
+
+**Duplicate Handling**:
+- **Skip** (default): Skip duplicate rows, count as `skippedCount`
+- **Create**: Create duplicate registrations (with warning)
+
+**Authorization**:
+- Verifies user owns the event
+
+**Performance Considerations**:
+- Large imports (>1000 rows) may take 30-60 seconds
+- MVP: Synchronous processing with indeterminate progress
+- Future: Background job with real-time updates via WebSocket
+
+**Error Recovery**:
+- Individual row failures don't affect other rows
+- Database constraints prevent duplicate IDs
+- Email send failures logged but don't fail import
+
+**Example Output**:
+```typescript
+{
+  successCount: 245,
+  failureCount: 2,
+  skippedCount: 3,
+  errors: [
+    { row: 12, field: 'email', value: 'invalid@', error: 'Invalid email format' },
+    { row: 45, field: 'ticketType', value: 'Unknown', error: 'Ticket type not found' }
+  ],
+  status: 'partial',
+  message: '245 attendees imported successfully, 2 failed, 3 duplicates skipped'
+}
+```
+
+**Feature Requirements**: FR-019 (Import)
+
+---
+
+## CSV Parsing Details
+
+**Library**: PapaParse (v5.4.1)
+
+**Configuration**:
+```typescript
+Papa.parse(csvContent, {
+  header: true, // First row as column names
+  skipEmptyLines: true,
+  transformHeader: (header) => header.trim(), // Remove whitespace
+  transform: (value) => value.trim(), // Trim all values
+})
+```
+
+**File Size Limits** (Dual):
+- **10MB maximum file size** - Prevents memory issues
+- **10,000 rows maximum** - Prevents performance issues
+- Whichever limit is hit first applies
+
+**Encoding**:
+- UTF-8 required
+- BOM (Byte Order Mark) automatically stripped
+- Excel CSV exports supported
+
+---
+
+## Registration Code Generation
+
+**Format**: 9-character alphanumeric (uppercase)  
+**Example**: `ABC123DEF`  
+**Charset**: `ABCDEFGHJKLMNPQRSTUVWXYZ23456789` (ambiguous chars removed)
+
+**Generation Function**:
+```typescript
+function generateRegistrationCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  let code = ''
+  for (let i = 0; i < 9; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return code
+}
+```
+
+**Uniqueness**: Random generation with low collision probability (34^9 combinations)
+
+---
+
+## Import Error Handling Patterns
+
+**CSV Parsing Errors**:
+```typescript
+try {
+  const parsed = Papa.parse(csvContent)
+  if (parsed.errors.length > 0) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: `CSV parsing error: ${parsed.errors[0].message}`
+    })
+  }
+} catch (error) {
+  // Return user-friendly error
+}
+```
+
+**Validation Errors**:
+- Row-level errors collected and returned
+- Non-blocking - valid rows still imported
+- Detailed error messages with row numbers
+
+**Database Errors**:
+- Connection failures → Retry with exponential backoff
+- Constraint violations → Caught and reported per row
+- Partial commit continues on individual failures
+
+---
+
+## Performance Considerations
+
+### Large Import Optimization (>1000 rows)
+
+**Current (MVP)**:
+- Synchronous processing
+- Indeterminate progress spinner
+- Display results upon completion
+
+**Future Enhancement**:
+- Background job processing
+- Real-time progress updates via WebSocket/SSE
+- Resume on failure
+
+### Batch Processing
+
+**Current**: Row-by-row processing with individual commits
+
+**Future Optimization**:
+```typescript
+// Batch inserts in groups of 100
+const batches = chunk(validRows, 100)
+for (const batch of batches) {
+  await db.registration.createMany({ data: batch })
+}
+```
+
+### Database Connection Pooling
+
+- Use Prisma connection pooling
+- Limit concurrent writes
+- Monitor connection pool size
+
+---
+
+## Key Procedures for Attendee Management (registrationRouter)
 
 ### 1. `list` (Protected)
 
