@@ -7,6 +7,9 @@ import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { z } from "zod";
 import Papa from "papaparse";
+import { randomBytes } from "crypto";
+import { sendEmail } from "@/server/services/email";
+import { RegistrationConfirmation } from "../../../../emails/registration-confirmation";
 
 /**
  * Input schema for CSV parsing
@@ -27,6 +30,17 @@ const validateImportSchema = z.object({
 });
 
 /**
+ * Input schema for CSV import execution
+ */
+const executeImportSchema = z.object({
+  eventId: z.string().cuid(),
+  fileContent: z.string(),
+  fieldMapping: z.record(z.string()), // CSV column -> system field
+  duplicateStrategy: z.enum(["skip", "create"]).default("skip"),
+  sendConfirmationEmails: z.boolean().default(false),
+});
+
+/**
  * Validation error structure
  */
 interface ValidationError {
@@ -34,6 +48,16 @@ interface ValidationError {
   field: string;
   value: string;
   error: string;
+}
+
+/**
+ * Import result for a single row
+ */
+interface ImportRowResult {
+  row: number;
+  success: boolean;
+  email?: string;
+  error?: string;
 }
 
 /**
@@ -133,6 +157,13 @@ function stripBOM(str: string): string {
     return str.slice(1);
   }
   return str;
+}
+
+/**
+ * Generate unique registration code
+ */
+function generateRegistrationCode(): string {
+  return randomBytes(8).toString("hex").toUpperCase();
 }
 
 /**
@@ -697,4 +728,299 @@ export const attendeesRouter = createTRPCRouter({
         totalRows,
       };
     }),
+
+  /**
+   * Execute CSV import with partial commit strategy
+   * Imports valid rows, skips/reports invalid rows
+   * Optionally sends confirmation emails to imported attendees
+   */
+  executeImport: protectedProcedure
+    .input(executeImportSchema)
+    .mutation(async ({ ctx, input }) => {
+      // Verify user is event organizer
+      const event = await ctx.db.event.findUnique({
+        where: { id: input.eventId },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          organizerId: true,
+          startDate: true,
+          endDate: true,
+          locationType: true,
+          locationAddress: true,
+          locationUrl: true,
+          ticketTypes: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      });
+
+      if (!event) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Event not found",
+        });
+      }
+
+      if (event.organizerId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message:
+            "You do not have permission to import attendees for this event",
+        });
+      }
+
+      // Parse CSV
+      const cleanContent = stripBOM(input.fileContent);
+      const parseResult = Papa.parse<Record<string, string>>(cleanContent, {
+        header: true,
+        skipEmptyLines: true,
+        transformHeader: (header) => header.trim(),
+        transform: (value) => sanitizeCell(value.trim()),
+      });
+
+      if (parseResult.errors.length > 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `CSV parsing failed: ${parseResult.errors[0]?.message ?? "Unknown error"}`,
+        });
+      }
+
+      const data = parseResult.data;
+
+      // Validate required fields are mapped
+      const requiredFields = ["email", "name", "ticketType"];
+      const mappedFields = Object.values(input.fieldMapping);
+      const missingFields = requiredFields.filter(
+        (field) => !mappedFields.includes(field),
+      );
+
+      if (missingFields.length > 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Required fields not mapped: ${missingFields.join(", ")}`,
+        });
+      }
+
+      // Parse and map rows
+      const mappedRows = parseAndMapRows(data, input.fieldMapping);
+
+      // Create ticket type lookup map (name -> id)
+      const ticketTypeMap = new Map(
+        event.ticketTypes.map((tt) => [tt.name.toLowerCase(), tt.id]),
+      );
+
+      // Validate each row and collect errors
+      const rowsWithErrors = new Set<number>();
+      const allErrors: ValidationError[] = [];
+
+      // Phase 1: Field-level validation
+      for (const row of mappedRows) {
+        const rowErrors = validateRow(row);
+        if (rowErrors.length > 0) {
+          allErrors.push(...rowErrors);
+          rowsWithErrors.add(row.rowNumber);
+        }
+      }
+
+      // Phase 2: In-file duplicate detection
+      const inFileDuplicates = detectInFileDuplicates(mappedRows);
+      for (const duplicate of inFileDuplicates) {
+        allErrors.push(duplicate);
+        rowsWithErrors.add(duplicate.row);
+      }
+
+      // Phase 3: Ticket type existence validation
+      for (const row of mappedRows) {
+        if (row.ticketType && !rowsWithErrors.has(row.rowNumber)) {
+          const ticketTypeId = ticketTypeMap.get(row.ticketType.toLowerCase());
+          if (!ticketTypeId) {
+            allErrors.push({
+              row: row.rowNumber,
+              field: "ticketType",
+              value: row.ticketType,
+              error: `Ticket type '${row.ticketType}' does not exist for this event`,
+            });
+            rowsWithErrors.add(row.rowNumber);
+          }
+        }
+      }
+
+      // Phase 4: Database duplicate detection (based on strategy)
+      const validEmails = mappedRows
+        .filter((row) => row.email && !rowsWithErrors.has(row.rowNumber))
+        .map((row) => row.email!);
+
+      const existingRegistrations = await ctx.db.registration.findMany({
+        where: {
+          eventId: input.eventId,
+          email: {
+            in: validEmails,
+          },
+        },
+        select: {
+          email: true,
+        },
+      });
+
+      const existingEmailSet = new Set(
+        existingRegistrations.map((r) => r.email.toLowerCase()),
+      );
+
+      // Handle duplicates according to strategy
+      let duplicateCount = 0;
+      if (input.duplicateStrategy === "skip") {
+        // Skip duplicates - mark them as errors
+        for (const row of mappedRows) {
+          if (row.email && existingEmailSet.has(row.email) && !rowsWithErrors.has(row.rowNumber)) {
+            allErrors.push({
+              row: row.rowNumber,
+              field: "email",
+              value: row.email,
+              error: "Email already registered for this event (skipped)",
+            });
+            rowsWithErrors.add(row.rowNumber);
+            duplicateCount++;
+          }
+        }
+      }
+      // If strategy is "create", duplicates will be imported as new records
+
+      // Filter to only valid rows
+      const validRows = mappedRows.filter(
+        (row) => !rowsWithErrors.has(row.rowNumber),
+      );
+
+      // Execute import with partial commit strategy
+      const importResults: ImportRowResult[] = [];
+      let successCount = 0;
+      let failureCount = 0;
+
+      for (const row of validRows) {
+        try {
+          // Get ticket type ID
+          const ticketTypeId = ticketTypeMap.get(row.ticketType!.toLowerCase());
+          if (!ticketTypeId) {
+            // Should not happen due to validation, but safety check
+            importResults.push({
+              row: row.rowNumber,
+              success: false,
+              email: row.email,
+              error: `Ticket type '${row.ticketType}' not found`,
+            });
+            failureCount++;
+            continue;
+          }
+
+          // Generate unique registration code
+          const registrationCode = generateRegistrationCode();
+
+          // Prepare custom data with registration code and unmapped fields
+          const customData = {
+            registrationCode,
+            ...row.customData,
+          };
+
+          // Parse registeredAt if provided, otherwise use current time
+          let registeredAt = new Date();
+          if (row.registeredAt) {
+            const parsedDate = new Date(row.registeredAt);
+            if (!isNaN(parsedDate.getTime())) {
+              registeredAt = parsedDate;
+            }
+          }
+
+          // Create registration
+          const registration = await ctx.db.registration.create({
+            data: {
+              eventId: input.eventId,
+              ticketTypeId,
+              email: row.email!,
+              name: row.name!,
+              paymentStatus: (row.paymentStatus as "free" | "pending" | "paid" | "failed" | "refunded") ?? "free",
+              emailStatus: (row.emailStatus as "active" | "bounced" | "unsubscribed") ?? "active",
+              customData,
+              registeredAt,
+            },
+          });
+
+          importResults.push({
+            row: row.rowNumber,
+            success: true,
+            email: row.email,
+          });
+          successCount++;
+
+          // Send confirmation email if enabled
+          if (input.sendConfirmationEmails) {
+            // Get ticket type name for email
+            const ticketTypeName = event.ticketTypes.find(
+              (tt) => tt.id === ticketTypeId,
+            )?.name ?? "General Admission";
+
+            // Fire and forget - don't block import on email failures
+            sendEmail({
+              to: row.email!,
+              subject: `Registration Confirmed: ${event.name}`,
+              react: RegistrationConfirmation({
+                attendeeName: row.name!,
+                eventName: event.name,
+                eventDate: event.startDate,
+                ticketType: ticketTypeName,
+                registrationCode,
+                eventUrl: `${process.env.NEXT_PUBLIC_APP_URL}/events/${event.slug}`,
+              }),
+              tags: [
+                { name: "type", value: "registration-confirmation" },
+                { name: "event", value: event.id },
+              ],
+            }).catch((error) => {
+              // Log error but don't fail import
+              console.error(
+                `[Import] Failed to send confirmation email to ${row.email}:`,
+                error,
+              );
+            });
+          }
+        } catch (error) {
+          // Individual row failure - log and continue
+          const errorMessage =
+            error instanceof Error ? error.message : "Unknown error";
+          
+          console.error(
+            `[Import] Failed to import row ${row.rowNumber}:`,
+            error,
+          );
+
+          importResults.push({
+            row: row.rowNumber,
+            success: false,
+            email: row.email,
+            error: errorMessage,
+          });
+          failureCount++;
+
+          // Add to errors array for reporting
+          allErrors.push({
+            row: row.rowNumber,
+            field: "database",
+            value: row.email ?? "",
+            error: `Database error: ${errorMessage}`,
+          });
+        }
+      }
+
+      return {
+        successCount,
+        failureCount,
+        duplicateCount,
+        errors: allErrors,
+        status: failureCount === 0 && validRows.length > 0 ? "completed" : failureCount === validRows.length ? "failed" : "completed",
+      };
+    }),
 });
+

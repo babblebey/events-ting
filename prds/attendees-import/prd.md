@@ -424,16 +424,16 @@ const result = await api.attendees.parseCSV({
 ---
 
 ### Phase 3: Import Execution (Day 2-3, 5-6 hours)
-- [ ] Create tRPC procedure `attendees.executeImport`
-- [ ] Implement batch insert with **partial commit** strategy (commit successful rows, skip failed)
-- [ ] Generate unique registration codes for all imported attendees
-- [ ] Handle duplicate strategies (skip/create, default: skip)
-- [ ] Store unmapped columns in `customData` JSON (without `custom_` prefix)
-- [ ] Add optional confirmation email sending (controlled by checkbox from Step 1)
-- [ ] Add error recovery (continue processing after individual row failures)
-- [ ] Return detailed import results (success/failure/skipped counts, per-row errors)
+- [x] Create tRPC procedure `attendees.executeImport`
+- [x] Implement batch insert with **partial commit** strategy (commit successful rows, skip failed)
+- [x] Generate unique registration codes for all imported attendees
+- [x] Handle duplicate strategies (skip/create, default: skip)
+- [x] Store unmapped columns in `customData` JSON (without `custom_` prefix)
+- [x] Add optional confirmation email sending (controlled by checkbox from Step 1)
+- [x] Add error recovery (continue processing after individual row failures)
+- [x] Return detailed import results (success/failure/skipped counts, per-row errors)
 
-**Deliverable**: Fully functional import execution with partial commit
+**Deliverable**: Fully functional import execution with partial commit ✅
 
 ---
 
