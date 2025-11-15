@@ -15,6 +15,7 @@ import {
 } from "react-icons/hi";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
+import { useToast } from "@/hooks/use-toast";
 import type {
   ParsedCSVData,
   ValidationResult,
@@ -43,12 +44,44 @@ export function ImportProgressStep({
   onComplete,
 }: ImportProgressStepProps) {
   const router = useRouter();
+  const toast = useToast();
+  const utils = api.useUtils();
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
 
   const executeImport = api.attendees.executeImport.useMutation({
     onSuccess: (result) => {
       setImportResult(result);
       onComplete();
+
+      // Invalidate attendees list to refresh data
+      void utils.registration.list.invalidate({ eventId });
+
+      // Show success toast notification
+      if (result.status === "completed") {
+        if (result.failureCount > 0) {
+          // Partial success - show warning
+          toast.warning(
+            "Import Completed with Errors",
+            `${result.successCount} attendees imported successfully, but ${result.failureCount} rows failed. Download the error report to fix and re-import.`,
+            10000
+          );
+        } else {
+          // Full success
+          toast.success(
+            "Import Completed Successfully",
+            `${result.successCount} attendees imported. ${result.duplicateCount > 0 ? `${result.duplicateCount} duplicates skipped.` : ""}`,
+            7000
+          );
+        }
+      }
+    },
+    onError: (error) => {
+      // Show error toast notification
+      toast.error(
+        "Import Failed",
+        error.message || "An error occurred while importing attendees",
+        7000
+      );
     },
   });
 
