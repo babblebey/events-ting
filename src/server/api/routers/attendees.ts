@@ -935,7 +935,7 @@ export const attendeesRouter = createTRPCRouter({
           }
 
           // Create registration
-          const registration = await ctx.db.registration.create({
+          await ctx.db.registration.create({
             data: {
               eventId: input.eventId,
               ticketTypeId,
