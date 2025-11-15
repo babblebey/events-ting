@@ -438,28 +438,28 @@ const result = await api.attendees.parseCSV({
 ---
 
 ### Phase 4: UI Components (Day 3-5, 8-10 hours)
-- [ ] Create `ImportWizard` component with multi-step flow
-- [ ] **Step 1**: File upload dropzone with drag & drop
-  - [ ] Add "Download CSV Template" button
-  - [ ] Add "Send confirmation emails" checkbox (default: unchecked)
-  - [ ] Show dual file limits (10MB AND 10,000 rows)
-- [ ] **Step 2**: Field mapping interface with dropdowns
-  - [ ] Auto-suggest mappings based on column names
-  - [ ] Load saved mappings from localStorage (`events-ting:import-mapping:{eventId}`)
-  - [ ] Save mappings to localStorage on proceed
-  - [ ] Show sample data for each column
-  - [ ] Display custom field option for unmapped columns
-- [ ] **Step 3**: Validation results table with error details
-  - [ ] Show validation summary (valid/invalid/duplicates)
-  - [ ] Enable "Import" button even with errors (with warning message)
-  - [ ] Add "Download Error Report" button
-  - [ ] Display both in-file and database duplicates
-- [ ] **Step 4**: Import progress with simulated feedback
-  - [ ] Indeterminate spinner during processing (not real-time)
-  - [ ] Display final results upon completion
-  - [ ] Option to download failed rows CSV
-- [ ] Implement responsive design for mobile
-- [ ] Add loading states and optimistic UI updates
+- [X] Create `ImportWizard` component with multi-step flow
+- [X] **Step 1**: File upload dropzone with drag & drop
+  - [X] Add "Download CSV Template" button
+  - [X] Add "Send confirmation emails" checkbox (default: unchecked)
+  - [X] Show dual file limits (10MB AND 10,000 rows)
+- [X] **Step 2**: Field mapping interface with dropdowns
+  - [X] Auto-suggest mappings based on column names
+  - [X] Load saved mappings from localStorage (`events-ting:import-mapping:{eventId}`)
+  - [X] Save mappings to localStorage on proceed
+  - [X] Show sample data for each column
+  - [X] Display custom field option for unmapped columns
+- [X] **Step 3**: Validation results table with error details
+  - [X] Show validation summary (valid/invalid/duplicates)
+  - [X] Enable "Import" button even with errors (with warning message)
+  - [X] Add "Download Error Report" button
+  - [X] Display both in-file and database duplicates
+- [X] **Step 4**: Import progress with simulated feedback
+  - [X] Indeterminate spinner during processing (not real-time)
+  - [X] Display final results upon completion
+  - [X] Option to download failed rows CSV
+- [X] Implement responsive design for mobile
+- [X] Add loading states and optimistic UI updates
 
 **Deliverable**: Complete import wizard UI with all clarified features
 
