@@ -188,8 +188,9 @@ const activeAttendees = await db.registration.findMany({
 
 ## Custom Data Format
 
-The `customData` JSON field stores additional registration information:
+The `customData` JSON field stores additional registration information including registration codes and custom import fields:
 
+### Standard Structure
 ```json
 {
   "registrationCode": "ABC123DEF",
@@ -199,6 +200,61 @@ The `customData` JSON field stores additional registration information:
   }
 }
 ```
+
+### CSV Import Mapping
+
+When importing attendees via CSV, unmapped columns are automatically stored in `customData`:
+
+**Example CSV**:
+```csv
+name,email,ticketType,company,role,dietary
+John Doe,john@example.com,General Admission,Acme Corp,Developer,Vegetarian
+```
+
+**Field Mapping**:
+- `name` → Registration.name
+- `email` → Registration.email
+- `ticketType` → Registration.ticketTypeId (resolved by name)
+- `company` → customData.company (unmapped)
+- `role` → customData.role (unmapped)
+- `dietary` → customData.dietary (unmapped)
+
+**Resulting customData**:
+```json
+{
+  "registrationCode": "ABC123DEF",
+  "company": "Acme Corp",
+  "role": "Developer",
+  "dietary": "Vegetarian"
+}
+```
+
+**Important Notes**:
+- Column names stored as-is (no `custom_` prefix in JSON)
+- All unmapped columns become custom fields
+- Custom field names are case-sensitive
+- Nested JSON structures not supported in CSV import (flat key-value only)
+
+### Validation Constraints for Imported Data
+
+**CSV Import Validation Rules**:
+
+| Field | Import Validation | Notes |
+|-------|------------------|-------|
+| `name` | Required, 2-255 chars | Must be mapped |
+| `email` | Required, valid format, max 255 chars | Must be mapped, format validated |
+| `ticketType` | Required, must exist in event | Matched by name (case-insensitive) |
+| `paymentStatus` | Optional, enum validation | Must be: 'free', 'pending', 'paid', 'failed', 'refunded' |
+| `emailStatus` | Optional, enum validation | Must be: 'active', 'bounced', 'unsubscribed' |
+| Custom fields | No validation | Stored as-is in customData JSON |
+
+**Registration Code Generation**: 
+- Format: 9-character alphanumeric (e.g., ABC123DEF)
+- Auto-generated for all imported attendees
+- Unique per registration
+- Used for check-in and confirmation emails
+
+**Note**: No schema changes required - CSV import uses existing Registration model structure.
 
 **Registration Code**: Unique code for check-in and confirmation emails.
 

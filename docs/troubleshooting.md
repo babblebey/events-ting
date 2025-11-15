@@ -13,6 +13,7 @@ This guide covers common issues you might encounter when setting up and running 
 - [Type Errors](#type-errors)
 - [Runtime Errors](#runtime-errors)
 - [Performance Issues](#performance-issues)
+- [CSV Import Issues](#csv-import-issues)
 
 ---
 
@@ -756,6 +757,418 @@ Error: ENOENT: no such file or directory, open '/public/uploads/...'
 3. **Monitor production**:
    - Use Vercel Analytics
    - Check function logs for memory spikes
+
+---
+
+## CSV Import Issues
+
+### File Upload Fails
+
+**Problem**: CSV file upload fails or is rejected.
+
+**Symptoms**:
+```
+Error: File exceeds 10MB limit
+Error: File exceeds 10,000 row limit
+Error: Please upload a valid CSV file
+```
+
+**Solution**:
+
+**For file size issues**:
+1. Check file size: Right-click file → Properties
+2. If >10MB, split into multiple files:
+   ```bash
+   # PowerShell - Split CSV into batches of 5000 rows
+   $csv = Import-Csv input.csv
+   $batchSize = 5000
+   $batchNum = 0
+   
+   for ($i = 0; $i -lt $csv.Count; $i += $batchSize) {
+     $csv[$i..([Math]::Min($i + $batchSize - 1, $csv.Count - 1))] | 
+       Export-Csv "batch_$batchNum.csv" -NoTypeInformation
+     $batchNum++
+   }
+   ```
+
+**For row count issues**:
+- Maximum 10,000 rows per import
+- Split large files into batches
+
+**For format issues**:
+1. Ensure file is saved as CSV, not Excel (.xlsx)
+2. Use UTF-8 encoding:
+   - Excel: Save As → CSV UTF-8 (Comma delimited)
+   - Google Sheets: File → Download → CSV
+3. Check for special characters or encoding issues
+
+---
+
+### Invalid Email Format Errors
+
+**Problem**: Many rows fail with "Invalid email format" error.
+
+**Symptoms**:
+```
+Row 12: Invalid email format 'john@invalid'
+Row 15: Invalid email format 'notanemail'
+```
+
+**Solution**:
+
+1. **Validate emails before import**:
+   - Use external validation tool
+   - Check for common issues:
+     - Missing @ symbol
+     - Missing domain (.com, .org, etc.)
+     - Spaces in email address
+     - Special characters
+
+2. **Clean email data**:
+   ```python
+   # Python script to validate emails
+   import re
+   import csv
+   
+   email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+   
+   with open('input.csv', 'r') as f:
+       reader = csv.DictReader(f)
+       valid_rows = []
+       invalid_rows = []
+       
+       for row in reader:
+           if re.match(email_regex, row['email']):
+               valid_rows.append(row)
+           else:
+               invalid_rows.append(row)
+   
+   # Export valid and invalid separately
+   with open('valid.csv', 'w', newline='') as f:
+       writer = csv.DictWriter(f, fieldnames=reader.fieldnames)
+       writer.writeheader()
+       writer.writerows(valid_rows)
+   ```
+
+3. **Download error report** and fix emails manually
+
+---
+
+### Ticket Type Not Found
+
+**Problem**: All rows fail with "Ticket type not found" error.
+
+**Symptoms**:
+```
+Row 5: Ticket type 'VIP Pass' not found
+Row 6: Ticket type 'General Admission' not found
+```
+
+**Solution**:
+
+**Option 1: Create missing ticket types**
+1. Go to Event Dashboard → Tickets
+2. Create ticket types matching CSV values exactly
+3. Re-import CSV
+
+**Option 2: Update CSV to match existing ticket types**
+1. Check existing ticket type names in event
+2. Update CSV column to match (case-insensitive)
+3. Example: "VIP" → "VIP Pass"
+
+**Common mistakes**:
+- Extra spaces: "VIP Pass " (with trailing space)
+- Different capitalization: "vip pass" vs "VIP Pass" (both work)
+- Typos: "Genral Admission" vs "General Admission"
+
+**Tip**: Copy exact ticket type name from event and paste into CSV
+
+---
+
+### Duplicate Detection Issues
+
+**Problem**: Getting unexpected duplicate errors.
+
+**Symptoms**:
+```
+Row 15: Duplicate email in file (first at row 5)
+Row 20: Email already registered for this event
+```
+
+**Solution**:
+
+**For in-file duplicates**:
+1. Download error report
+2. Remove duplicate rows from CSV
+3. Keep only first occurrence
+4. Excel: Data → Remove Duplicates → Select Email column
+
+**For database duplicates**:
+1. Check if attendees are truly duplicates:
+   - Review attendee list in dashboard
+   - Verify email address matches exactly
+2. If legitimate duplicates:
+   - Change duplicate strategy to "Create new"
+   - WARNING: This creates multiple registrations for same email
+3. If typos:
+   - Fix email in CSV
+   - Re-import
+
+**To find duplicates in Excel**:
+1. Select email column
+2. Home → Conditional Formatting → Highlight Duplicate Values
+3. Review and remove duplicates
+
+---
+
+### Field Mapping Not Saving
+
+**Problem**: Field mappings reset every import.
+
+**Symptoms**:
+- Must re-map fields for each import
+- Auto-suggestions not remembering previous mappings
+
+**Solution**:
+
+1. **Check browser localStorage**:
+   - Open DevTools → Application → Local Storage
+   - Look for key: `events-ting:import-mapping:{eventId}`
+   - If missing, localStorage might be disabled
+
+2. **Enable localStorage**:
+   - Chrome: Settings → Privacy → Site Settings → Cookies → Allow all
+   - Firefox: Options → Privacy → Custom → Cookies → Keep until expired
+
+3. **Clear and retry**:
+   ```javascript
+   // In browser console
+   localStorage.clear()
+   // Refresh page and re-import
+   ```
+
+4. **Workaround**: Save field mapping as reference document for future imports
+
+---
+
+### Import Takes Too Long
+
+**Problem**: Import processing for >30 seconds with no progress.
+
+**Symptoms**:
+- Spinner shows "Importing attendees..." indefinitely
+- No error message
+- Browser tab not responding
+
+**Solution**:
+
+**For large imports (>1000 rows)**:
+- **Expected behavior**: Large imports take 1-2 minutes
+- Wait for completion
+- Do not close or refresh browser
+
+**If truly stuck (>5 minutes)**:
+1. Check browser console for errors (F12)
+2. Check network tab for failed requests
+3. Possible database timeout:
+   - Retry with smaller batch (<500 rows)
+   - Contact support if issue persists
+
+**Optimization tips**:
+- Split large files into batches of 500-1000 rows
+- Import during off-peak hours
+- Disable confirmation emails for large imports (faster)
+
+---
+
+### Confirmation Emails Not Sent
+
+**Problem**: Imported attendees didn't receive confirmation emails.
+
+**Symptoms**:
+- Import successful
+- Email checkbox was checked
+- Attendees report no email received
+
+**Solution**:
+
+1. **Verify email checkbox was checked**:
+   - In Step 1: "Send confirmation emails" must be enabled
+   - Default is unchecked
+
+2. **Check email status in attendee list**:
+   - Navigate to Attendees page
+   - Look for "Email Status" column
+   - If "Bounced": Email address is invalid
+   - If "Active": Email should have been sent
+
+3. **Check spam folder**:
+   - Confirmation emails might be marked as spam
+   - Ask attendees to check spam/junk folder
+
+4. **Resend manually**:
+   - From attendee list, click mail icon for specific attendee
+   - Bulk resend not available yet (future feature)
+
+5. **Check Resend API status**:
+   - Verify `RESEND_API_KEY` is set correctly
+   - Check Resend dashboard for send logs
+   - Verify domain is verified (production)
+
+---
+
+### Custom Fields Not Appearing
+
+**Problem**: Custom data from CSV not showing in attendee records.
+
+**Symptoms**:
+- Imported successfully
+- Custom columns (company, role, etc.) not visible
+
+**Solution**:
+
+**Custom fields are stored in `customData` JSON**:
+1. Custom fields don't appear as separate columns in attendee list
+2. Stored in database as JSON in `customData` field
+3. To view custom data:
+   - Export attendees as CSV (includes custom fields)
+   - Check database directly in Prisma Studio: `pnpm prisma studio`
+   - Future: Attendee detail page will show custom fields
+
+**Verify custom fields are stored**:
+```sql
+-- In Prisma Studio or database client
+SELECT customData FROM "Registration" WHERE id = 'registration-id';
+
+-- Should show:
+{
+  "registrationCode": "ABC123DEF",
+  "company": "Acme Corp",
+  "role": "Developer"
+}
+```
+
+**If custom data is missing**:
+1. Verify columns were NOT mapped to "-- Do not import --"
+2. Check field mapping in Step 2
+3. Re-import with correct mapping
+
+---
+
+### Encoding Issues (Special Characters)
+
+**Problem**: Names with accents or special characters appear as garbled text.
+
+**Symptoms**:
+```
+Expected: José García
+Displayed: JosÃ© GarcÃ­a
+```
+
+**Solution**:
+
+**Ensure CSV is UTF-8 encoded**:
+
+**Excel**:
+1. Save As → CSV UTF-8 (Comma delimited)
+2. NOT "CSV (Comma delimited)" (uses Windows-1252)
+
+**Google Sheets**:
+1. File → Download → Comma-separated values (.csv)
+2. Automatically UTF-8
+
+**Notepad++ (to convert)**:
+1. Open CSV in Notepad++
+2. Encoding → Convert to UTF-8
+3. Save
+
+**LibreOffice Calc**:
+1. Save As → Text CSV
+2. Character set: Unicode (UTF-8)
+3. Save
+
+**Verify encoding**:
+```powershell
+# PowerShell - Check file encoding
+Get-Content file.csv | Select-Object -First 1 | Format-Hex
+# Look for UTF-8 BOM: EF BB BF (automatically stripped by import)
+```
+
+---
+
+### Validation Errors for Valid Data
+
+**Problem**: Valid rows showing validation errors.
+
+**Symptoms**:
+```
+Row 10: Name too short (but name is "John Doe")
+Row 15: Invalid email (but email is valid)
+```
+
+**Solution**:
+
+1. **Check for hidden characters**:
+   - Extra spaces before/after values
+   - Tab characters
+   - Line breaks within cells
+
+2. **Clean CSV data**:
+   ```python
+   # Python script to clean CSV
+   import csv
+   
+   with open('input.csv', 'r', encoding='utf-8') as f:
+       reader = csv.DictReader(f)
+       rows = []
+       for row in reader:
+           # Strip whitespace from all values
+           cleaned_row = {k: v.strip() if v else '' for k, v in row.items()}
+           rows.append(cleaned_row)
+   
+   with open('cleaned.csv', 'w', newline='', encoding='utf-8') as f:
+       writer = csv.DictWriter(f, fieldnames=reader.fieldnames)
+       writer.writeheader()
+       writer.writerows(rows)
+   ```
+
+3. **Excel method**:
+   - Select all cells
+   - Find & Replace (Ctrl+H)
+   - Find: Extra spaces (multiple spaces)
+   - Replace: Single space
+
+4. **Re-import cleaned CSV**
+
+---
+
+### Import Stuck at Validation Step
+
+**Problem**: Validation step never completes.
+
+**Symptoms**:
+- "Validating data..." spinner indefinitely
+- No progress after 1-2 minutes
+
+**Solution**:
+
+1. **Check browser console** (F12):
+   - Look for API errors
+   - Network timeout errors
+
+2. **Possible causes**:
+   - Very large file (>5000 rows)
+   - Database connection issue
+   - Server timeout
+
+3. **Retry with smaller file**:
+   - Split CSV into batches of 1000 rows
+   - Import one batch at a time
+
+4. **Refresh and retry**:
+   - Refresh browser page
+   - Re-upload file
+   - If issue persists, contact support
 
 ---
 

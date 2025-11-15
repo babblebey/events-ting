@@ -500,18 +500,18 @@ const result = await api.attendees.parseCSV({
 - [ ] Write user-facing documentation for import feature
 - [ ] Create CSV template download with example data
 - [ ] Add inline help text and tooltips in UI
-- [ ] Document API endpoints in code (JSDoc comments)
+<!-- - [ ] Document API endpoints in code (JSDoc comments) -->
 - [ ] Create troubleshooting guide for common errors
 
 #### Module Documentation Updates
-- [ ] **Update `docs/modules/attendees/README.md`**:
+- [X] **Update `docs/modules/attendees/README.md`**:
   - Add "CSV Import" to Features list
   - Add import workflow to Getting Started section
   - Add CSV format specification reference
   - Update Feature Coverage to include FR-019 (Import)
   - Add to Future Enhancements: Excel import, update existing records, API endpoint
   
-- [ ] **Update `docs/modules/attendees/backend.md`**:
+- [X] **Update `docs/modules/attendees/backend.md`**:
   - Document new `attendeesRouter` location and purpose
   - Document `attendees.parseCSV` procedure (input, output, usage, smart mapping)
   - Document `attendees.validateImport` procedure (two-phase validation, error format)
@@ -521,7 +521,7 @@ const result = await api.attendees.parseCSV({
   - Add import error handling patterns
   - Update performance considerations for large imports
   
-- [ ] **Update `docs/modules/attendees/frontend.md`**:
+- [X] **Update `docs/modules/attendees/frontend.md`**:
   - Document `ImportWizard` component and its steps
   - Document `FileUploadStep`, `FieldMappingStep`, `ValidationStep`, `ImportProgressStep` components
   - Add CSV import UI flow diagrams
@@ -529,7 +529,7 @@ const result = await api.attendees.parseCSV({
   - Add loading states for import operations
   - Document CSV template download feature
   
-- [ ] **Update `docs/modules/attendees/workflows.md`**:
+- [X] **Update `docs/modules/attendees/workflows.md`**:
   - Add "Workflow 8: Import Attendees from CSV" (complete step-by-step)
   - Add field mapping best practices
   - Add duplicate handling scenarios
@@ -537,7 +537,7 @@ const result = await api.attendees.parseCSV({
   - Add error resolution workflows
   - Add CSV preparation tips for organizers
   
-- [ ] **Update `docs/modules/attendees/data-model.md`**:
+- [X] **Update `docs/modules/attendees/data-model.md`**:
   - Document CSV field mapping to Registration model
   - Add customData format for imported fields
   - Add validation constraints for imported data
@@ -547,7 +547,7 @@ const result = await api.attendees.parseCSV({
 - [ ] **Update `docs/getting-started.md`**:
   - No changes needed (import is an advanced feature, not setup)
   
-- [ ] **Update `docs/troubleshooting.md`** (if exists):
+- [X] **Update `docs/troubleshooting.md`** (if exists):
   - Add "CSV Import Issues" section
   - Common import errors and resolutions
   - File format troubleshooting
