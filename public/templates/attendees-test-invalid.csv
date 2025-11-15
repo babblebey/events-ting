@@ -1,0 +1,6 @@
+name,email,ticketType,paymentStatus
+John Doe,invalid-email,General Admission,free
+J,jane@example.com,VIP,paid
+Bob Johnson,bob@example.com,,free
+Alice Williams,alice@example.com,General Admission,invalid_status
+,charlie@example.com,VIP,paid

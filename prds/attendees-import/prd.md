@@ -409,15 +409,15 @@ const result = await api.attendees.parseCSV({
 ---
 
 ### Phase 2: Validation Engine (Day 1-2, 5-6 hours)
-- [ ] Create tRPC procedure `attendees.validateImport`
-- [ ] Implement field-level validation (email format, name length, ticket type)
-- [ ] Implement two-phase duplicate detection:
+- [x] Create tRPC procedure `attendees.validateImport`
+- [x] Implement field-level validation (email format, name length, ticket type)
+- [x] Implement two-phase duplicate detection:
   - Phase 1: In-file duplicates (same email multiple times)
   - Phase 2: Database duplicates (email + eventId against existing registrations)
-- [ ] Build validation error reporting structure (row number, field, error message)
-- [ ] Add ticket type existence check (must exist in event)
-- [ ] Add ticket availability warning (non-blocking)
-- [ ] Test with various CSV samples (valid, invalid, in-file duplicates, db duplicates)
+- [x] Build validation error reporting structure (row number, field, error message)
+- [x] Add ticket type existence check (must exist in event)
+- [x] Add ticket availability warning (non-blocking)
+- [x] Test with various CSV samples (valid, invalid, in-file duplicates, db duplicates)
 
 **Deliverable**: Validation engine with comprehensive two-phase error reporting
 

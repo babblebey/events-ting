@@ -1,0 +1,6 @@
+name,email,ticketType,paymentStatus
+John Doe,john.doe@example.com,General Admission,free
+Jane Smith,jane.smith@example.com,VIP,paid
+Bob Johnson,bob.johnson@example.com,NonExistent Ticket,free
+Alice Williams,alice.williams@example.com,Super VIP,free
+Charlie Brown,charlie.brown@example.com,General Admission,paid
