@@ -251,9 +251,9 @@ description: "Task list for Team Collaborators & Permissions feature implementat
 
 ### Edge Case: Invitation to Existing Collaborator
 
-- [ ] T075 [P] Add validation in team.invite to check for existing active collaborator with same email in src/server/api/routers/team.ts
-- [ ] T076 [P] Add validation to check for pending invitations with same email in team.invite procedure
-- [ ] T077 Create error message component suggesting "modify existing permissions" in InviteCollaboratorForm
+- [X] T075 [P] Add validation in team.invite to check for existing active collaborator with same email in src/server/api/routers/team.ts
+- [X] T076 [P] Add validation to check for pending invitations with same email in team.invite procedure
+- [X] T077 Create error message component suggesting "modify existing permissions" in InviteCollaboratorForm
 
 ### Edge Case: Self-Invitation Attempt
 

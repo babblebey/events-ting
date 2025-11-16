@@ -29,6 +29,9 @@ export function InviteCollaboratorForm({
   const [email, setEmail] = useState("");
   const [modulePermissions, setModulePermissions] = useState<ModuleName[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [errorType, setErrorType] = useState<
+    "general" | "existing_member" | "pending_invitation" | null
+  >(null);
   const toast = useToast();
 
   // Note: Utils commented out until User Story 2 procedures are implemented
@@ -45,6 +48,7 @@ export function InviteCollaboratorForm({
       setEmail("");
       setModulePermissions([]);
       setError(null);
+      setErrorType(null);
 
       // Invalidate queries to refresh team data (procedures will be added in User Story 2)
       // void utils.team.getMembers.invalidate({ eventId });
@@ -54,6 +58,16 @@ export function InviteCollaboratorForm({
     },
     onError: (err: { message: string }) => {
       setError(err.message);
+
+      // Determine error type based on message content
+      if (err.message.includes("already has an active membership")) {
+        setErrorType("existing_member");
+      } else if (err.message.includes("invitation has already been sent")) {
+        setErrorType("pending_invitation");
+      } else {
+        setErrorType("general");
+      }
+
       toast.error("Invitation failed", err.message);
     },
   });
@@ -61,20 +75,24 @@ export function InviteCollaboratorForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setErrorType(null);
 
     // Client-side validation
     if (!email.trim()) {
       setError("Please enter an email address");
+      setErrorType("general");
       return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError("Please enter a valid email address");
+      setErrorType("general");
       return;
     }
 
     if (modulePermissions.length === 0) {
       setError("Please select at least one module");
+      setErrorType("general");
       return;
     }
 
@@ -133,10 +151,88 @@ export function InviteCollaboratorForm({
         />
       </div>
 
-      {/* General Error Message */}
+      {/* Error Messages with Actionable Suggestions */}
       {error && !error.includes("email") && !error.includes("module") && (
-        <div className="rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
-          {error}
+        <div
+          className={`rounded-lg border p-4 text-sm ${
+            errorType === "existing_member" || errorType === "pending_invitation"
+              ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400"
+              : "border-red-300 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400"
+          }`}
+        >
+          <div className="flex items-start">
+            <div className="shrink-0">
+              {errorType === "existing_member" ||
+              errorType === "pending_invitation" ? (
+                <svg
+                  className="h-5 w-5 text-amber-400"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  aria-hidden="true"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="h-5 w-5 text-red-400"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  aria-hidden="true"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              )}
+            </div>
+            <div className="ml-3 flex-1">
+              <p className="font-medium">{error}</p>
+              {errorType === "existing_member" && (
+                <div className="mt-2 text-sm">
+                  <p className="font-medium mb-1">What you can do instead:</p>
+                  <ul className="list-disc list-inside space-y-1 ml-2">
+                    <li>
+                      Go to the <strong>Team Members</strong> section below to
+                      view their current permissions
+                    </li>
+                    <li>
+                      Click <strong>Edit Permissions</strong> on their member
+                      card to modify their module access
+                    </li>
+                    <li>
+                      Or click <strong>Remove Access</strong> if you want to
+                      revoke their membership first
+                    </li>
+                  </ul>
+                </div>
+              )}
+              {errorType === "pending_invitation" && (
+                <div className="mt-2 text-sm">
+                  <p className="font-medium mb-1">What you can do instead:</p>
+                  <ul className="list-disc list-inside space-y-1 ml-2">
+                    <li>
+                      Go to the <strong>Pending Invitations</strong> section
+                      below to view the existing invitation
+                    </li>
+                    <li>
+                      Click <strong>Resend Invitation</strong> if they
+                      didn&apos;t receive it
+                    </li>
+                    <li>
+                      Or click <strong>Cancel</strong> to revoke the invitation
+                      and send a new one with different permissions
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
