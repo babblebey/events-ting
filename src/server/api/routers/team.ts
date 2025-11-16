@@ -4,16 +4,15 @@
  */
 
 import { TRPCError } from "@trpc/server";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-} from "@/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import {
   inviteTeamMemberSchema,
   acceptInvitationSchema,
   getCurrentMemberSchema,
   getTeamMembersSchema,
   getPendingInvitationsSchema,
+  resendInvitationSchema,
+  cancelInvitationSchema,
 } from "@/lib/validators";
 import {
   generateInvitationToken,
@@ -353,6 +352,195 @@ export const teamRouter = createTRPCRouter({
           status: result.teamMember.status,
           modulePermissions: result.teamMember.modulePermissions,
         },
+      };
+    }),
+
+  /**
+   * Resend invitation to pending or expired invitation
+   * Generates new token and resets expiry date
+   */
+  resendInvitation: protectedProcedure
+    .input(resendInvitationSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { invitationId } = input;
+
+      // Find the invitation
+      const invitation = await ctx.db.invitation.findUnique({
+        where: { id: invitationId },
+        include: {
+          event: {
+            select: { id: true, name: true },
+          },
+        },
+      });
+
+      if (!invitation) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Invitation not found",
+        });
+      }
+
+      // Verify user is event owner
+      const currentMember = await ctx.db.teamMember.findFirst({
+        where: {
+          eventId: invitation.eventId,
+          userId: ctx.session.user.id,
+          status: "ACTIVE",
+        },
+      });
+
+      if (currentMember?.role !== "OWNER") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only event owners can resend invitations",
+        });
+      }
+
+      // Check if invitation can be resent
+      if (
+        invitation.status === "ACCEPTED" ||
+        invitation.status === "DECLINED" ||
+        invitation.status === "CANCELLED"
+      ) {
+        const statusMessage = {
+          ACCEPTED: "This invitation has already been accepted",
+          DECLINED:
+            "This invitation was declined. Send a new invitation instead",
+          CANCELLED:
+            "This invitation was cancelled. Send a new invitation instead",
+        }[invitation.status];
+
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: statusMessage ?? "This invitation cannot be resent",
+        });
+      }
+
+      // Generate new token and expiry
+      const newToken = generateInvitationToken();
+      const newExpiresAt = calculateInvitationExpiry();
+
+      // Update invitation with new token and expiry
+      const updatedInvitation = await ctx.db.invitation.update({
+        where: { id: invitationId },
+        data: {
+          token: newToken,
+          expiresAt: newExpiresAt,
+          status: "PENDING", // Reset to PENDING if was EXPIRED
+          sentAt: new Date(), // Update sent timestamp
+        },
+      });
+
+      // Send invitation email (async, don't await to avoid blocking)
+      void sendTeamInvitationEmail({
+        to: invitation.email,
+        inviteeName: invitation.email.split("@")[0] ?? "there",
+        eventName: invitation.event.name,
+        eventId: invitation.event.id,
+        organizerName: ctx.session.user.name ?? "Event Organizer",
+        token: newToken,
+        modules: invitation.modulePermissions,
+        expiresAt: newExpiresAt,
+      }).catch((error) => {
+        console.error("Failed to resend team invitation email:", error);
+      });
+
+      return {
+        invitation: {
+          id: updatedInvitation.id,
+          email: updatedInvitation.email,
+          token: updatedInvitation.token,
+          status: updatedInvitation.status,
+          expiresAt: updatedInvitation.expiresAt,
+          sentAt: updatedInvitation.sentAt,
+        },
+      };
+    }),
+
+  /**
+   * Cancel a pending invitation
+   * Updates invitation status and removes pending team member
+   */
+  cancelInvitation: protectedProcedure
+    .input(cancelInvitationSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { invitationId } = input;
+
+      // Find the invitation
+      const invitation = await ctx.db.invitation.findUnique({
+        where: { id: invitationId },
+      });
+
+      if (!invitation) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Invitation not found",
+        });
+      }
+
+      // Verify user is event owner
+      const currentMember = await ctx.db.teamMember.findFirst({
+        where: {
+          eventId: invitation.eventId,
+          userId: ctx.session.user.id,
+          status: "ACTIVE",
+        },
+      });
+
+      if (currentMember?.role !== "OWNER") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only event owners can cancel invitations",
+        });
+      }
+
+      // Check if invitation can be cancelled
+      if (invitation.status === "ACCEPTED") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "This invitation has already been accepted. Use 'Remove Member' to revoke access instead.",
+        });
+      }
+
+      if (invitation.status === "DECLINED") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This invitation was already declined",
+        });
+      }
+
+      if (invitation.status === "CANCELLED") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This invitation is already cancelled",
+        });
+      }
+
+      // Cancel invitation and remove pending team member in transaction
+      await ctx.db.$transaction(async (tx) => {
+        // Update invitation status to CANCELLED
+        await tx.invitation.update({
+          where: { id: invitationId },
+          data: {
+            status: "CANCELLED",
+            respondedAt: new Date(),
+          },
+        });
+
+        // Remove corresponding pending team member
+        await tx.teamMember.deleteMany({
+          where: {
+            eventId: invitation.eventId,
+            email: invitation.email,
+            status: "PENDING",
+          },
+        });
+      });
+
+      return {
+        success: true,
       };
     }),
 

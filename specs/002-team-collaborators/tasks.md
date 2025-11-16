@@ -128,10 +128,10 @@ description: "Task list for Team Collaborators & Permissions feature implementat
 
 #### Additional Features
 
-- [ ] T041 [P] [US2] Implement team.resendInvitation procedure in src/server/api/routers/team.ts
-- [ ] T042 [P] [US2] Implement team.cancelInvitation procedure in src/server/api/routers/team.ts
-- [ ] T043 [US2] Add resend and cancel invitation actions to PendingInvitationsList component
-- [ ] T044 [US2] Add filtering/sorting capabilities to TeamMemberList component for module access
+- [X] T041 [P] [US2] Implement team.resendInvitation procedure in src/server/api/routers/team.ts
+- [X] T042 [P] [US2] Implement team.cancelInvitation procedure in src/server/api/routers/team.ts
+- [X] T043 [US2] Add resend and cancel invitation actions to PendingInvitationsList component
+- [X] T044 [US2] Add filtering/sorting capabilities to TeamMemberList component for module access
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently - full team visibility and invitation management
 
