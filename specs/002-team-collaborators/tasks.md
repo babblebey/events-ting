@@ -95,10 +95,10 @@ description: "Task list for Team Collaborators & Permissions feature implementat
 
 #### Permission Enforcement
 
-- [ ] T029 [US1] Create useTeamPermissions hook in src/hooks/useTeamPermissions.ts for client-side permission checks
-- [ ] T030 [US1] Add module permission checks to existing module routers (cfp.ts, attendees.ts, schedule.ts, speakers.ts, communications.ts, tickets.ts) using teamProtectedProcedure
-- [ ] T031 [US1] Add client-side permission gates to dashboard navigation in src/app/(dashboard)/[id]/layout.tsx
-- [ ] T032 [US1] Create access denied page at src/app/(dashboard)/[id]/access-denied/page.tsx
+- [X] T029 [US1] Create useTeamPermissions hook in src/hooks/useTeamPermissions.ts for client-side permission checks
+- [X] T030 [US1] Add module permission checks to existing module routers (cfp.ts, attendees.ts, schedule.ts, speakers.ts, communications.ts, tickets.ts) using teamProtectedProcedure
+- [X] T031 [US1] Add client-side permission gates to dashboard navigation in src/app/(dashboard)/[id]/layout.tsx
+- [X] T032 [US1] Create access denied page at src/app/(dashboard)/[id]/access-denied/page.tsx
 
 **Checkpoint**: At this point, User Story 1 should be fully functional - organizers can invite collaborators, collaborators can accept and access only their assigned modules
 

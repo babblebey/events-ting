@@ -24,6 +24,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
+import { checkModuleAccess } from "@/server/api/permissions";
 import { sendEmail } from "@/server/services/email";
 import { CfpSubmissionReceived } from "../../../../emails/cfp-submission-received";
 import { CfpAccepted } from "../../../../emails/cfp-accepted";
@@ -128,31 +129,19 @@ const getPublicCfpSchema = z.union([
 
 export const cfpRouter = createTRPCRouter({
   /**
-   * Get CFP by event ID (organizer only)
-   * @protected Requires authentication and organizer permission
+   * Get CFP by event ID (organizer and team members with CFP access)
+   * @protected Requires authentication and CFP module permission
    */
   getCfpByEventId: protectedProcedure
     .input(getCfpByEventIdSchema)
     .query(async ({ ctx, input }) => {
-      // Verify organizer permission
-      const event = await ctx.db.event.findUnique({
-        where: { id: input.eventId },
-        select: { organizerId: true },
+      // Verify CFP module permission (checks event access + CFP module)
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: input.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "CFP",
       });
-
-      if (!event) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Event not found",
-        });
-      }
-
-      if (event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Only the event organizer can view CFP details",
-        });
-      }
 
       // Fetch CFP
       const cfp = await ctx.db.callForPapers.findUnique({
@@ -215,30 +204,18 @@ export const cfpRouter = createTRPCRouter({
 
   /**
    * Open a new Call for Papers for an event
-   * @protected Requires authentication and organizer permission
+   * @protected Requires authentication and CFP module permission
    */
   open: protectedProcedure
     .input(openCfpSchema)
     .mutation(async ({ ctx, input }) => {
-      // Verify organizer permission
-      const event = await ctx.db.event.findUnique({
-        where: { id: input.eventId },
-        select: { organizerId: true },
+      // Verify CFP module permission
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: input.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "CFP",
       });
-
-      if (!event) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Event not found",
-        });
-      }
-
-      if (event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Only the event organizer can open a CFP",
-        });
-      }
 
       // Check if CFP already exists for this event
       const existingCfp = await ctx.db.callForPapers.findUnique({
@@ -285,20 +262,18 @@ export const cfpRouter = createTRPCRouter({
 
   /**
    * Close an existing CFP
-   * @protected Requires authentication and organizer permission
+   * @protected Requires authentication and CFP module permission
    */
   close: protectedProcedure
     .input(closeCfpSchema)
     .mutation(async ({ ctx, input }) => {
-      // Get CFP with event for permission check
+      // Get CFP with eventId for permission check
       const cfp = await ctx.db.callForPapers.findUnique({
         where: { id: input.cfpId },
-        include: {
-          event: {
-            select: {
-              organizerId: true,
-            },
-          },
+        select: {
+          eventId: true,
+          status: true,
+          id: true,
         },
       });
 
@@ -309,12 +284,13 @@ export const cfpRouter = createTRPCRouter({
         });
       }
 
-      if (cfp.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Only the event organizer can close the CFP",
-        });
-      }
+      // Verify CFP module permission
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: cfp.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "CFP",
+      });
 
       if (cfp.status === "closed") {
         throw new TRPCError({
@@ -336,20 +312,19 @@ export const cfpRouter = createTRPCRouter({
 
   /**
    * Reopen a closed CFP (allow submissions again)
-   * @protected Requires authentication and organizer permission
+   * @protected Requires authentication and CFP module permission
    */
   reopen: protectedProcedure
     .input(reopenCfpSchema)
     .mutation(async ({ ctx, input }) => {
-      // Get CFP with event for permission check
+      // Get CFP with eventId for permission check
       const cfp = await ctx.db.callForPapers.findUnique({
         where: { id: input.cfpId },
-        include: {
-          event: {
-            select: {
-              organizerId: true,
-            },
-          },
+        select: {
+          id: true,
+          eventId: true,
+          status: true,
+          deadline: true,
         },
       });
 
@@ -360,12 +335,13 @@ export const cfpRouter = createTRPCRouter({
         });
       }
 
-      if (cfp.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Only the event organizer can reopen the CFP",
-        });
-      }
+      // Verify CFP module permission
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: cfp.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "CFP",
+      });
 
       if (cfp.status === "open") {
         throw new TRPCError({
@@ -395,20 +371,17 @@ export const cfpRouter = createTRPCRouter({
 
   /**
    * Update CFP guidelines and settings
-   * @protected Requires authentication and organizer permission
+   * @protected Requires authentication and CFP module permission
    */
   update: protectedProcedure
     .input(updateCfpSchema)
     .mutation(async ({ ctx, input }) => {
-      // Get CFP with event for permission check
+      // Get CFP with eventId for permission check
       const cfp = await ctx.db.callForPapers.findUnique({
         where: { id: input.cfpId },
-        include: {
-          event: {
-            select: {
-              organizerId: true,
-            },
-          },
+        select: {
+          id: true,
+          eventId: true,
         },
       });
 
@@ -419,12 +392,13 @@ export const cfpRouter = createTRPCRouter({
         });
       }
 
-      if (cfp.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Only the event organizer can update the CFP",
-        });
-      }
+      // Verify CFP module permission
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: cfp.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "CFP",
+      });
 
       // Validate deadline if provided
       if (input.deadline && input.deadline <= new Date()) {
@@ -536,21 +510,18 @@ export const cfpRouter = createTRPCRouter({
     }),
 
   /**
-   * List all submissions for a CFP (organizer only)
-   * @protected Requires authentication and organizer permission
+   * List all submissions for a CFP (organizer and team members with CFP access)
+   * @protected Requires authentication and CFP module permission
    */
   listSubmissions: protectedProcedure
     .input(listSubmissionsSchema)
     .query(async ({ ctx, input }) => {
-      // Get CFP with event for permission check
+      // Get CFP with eventId for permission check
       const cfp = await ctx.db.callForPapers.findUnique({
         where: { id: input.cfpId },
-        include: {
-          event: {
-            select: {
-              organizerId: true,
-            },
-          },
+        select: {
+          id: true,
+          eventId: true,
         },
       });
 
@@ -561,12 +532,13 @@ export const cfpRouter = createTRPCRouter({
         });
       }
 
-      if (cfp.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Only the event organizer can view submissions",
-        });
-      }
+      // Verify CFP module permission
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: cfp.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "CFP",
+      });
 
       // Build where clause
       const whereClause: {
@@ -619,22 +591,19 @@ export const cfpRouter = createTRPCRouter({
 
   /**
    * Add review notes and score to a submission (FR-032)
-   * @protected Requires authentication and organizer permission
+   * @protected Requires authentication and CFP module permission
    */
   reviewSubmission: protectedProcedure
     .input(reviewSubmissionSchema)
     .mutation(async ({ ctx, input }) => {
-      // Get submission with event for permission check
+      // Get submission with eventId for permission check
       const submission = await ctx.db.cfpSubmission.findUnique({
         where: { id: input.submissionId },
         include: {
           cfp: {
-            include: {
-              event: {
-                select: {
-                  organizerId: true,
-                },
-              },
+            select: {
+              id: true,
+              eventId: true,
             },
           },
         },
@@ -647,12 +616,13 @@ export const cfpRouter = createTRPCRouter({
         });
       }
 
-      if (submission.cfp.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Only the event organizer can review submissions",
-        });
-      }
+      // Verify CFP module permission
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: submission.cfp.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "CFP",
+      });
 
       // Update submission with review
       const updatedSubmission = await ctx.db.cfpSubmission.update({
@@ -678,16 +648,17 @@ export const cfpRouter = createTRPCRouter({
   acceptProposal: protectedProcedure
     .input(acceptProposalSchema)
     .mutation(async ({ ctx, input }) => {
-      // Get submission with event for permission check
+      // Get submission with eventId for permission check
       const submission = await ctx.db.cfpSubmission.findUnique({
         where: { id: input.submissionId },
         include: {
           cfp: {
-            include: {
+            select: {
+              id: true,
+              eventId: true,
               event: {
                 select: {
                   id: true,
-                  organizerId: true,
                   name: true,
                 },
               },
@@ -703,12 +674,13 @@ export const cfpRouter = createTRPCRouter({
         });
       }
 
-      if (submission.cfp.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Only the event organizer can accept proposals",
-        });
-      }
+      // Verify CFP module permission
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: submission.cfp.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "CFP",
+      });
 
       if (submission.status === "accepted") {
         throw new TRPCError({
@@ -780,20 +752,21 @@ export const cfpRouter = createTRPCRouter({
 
   /**
    * Reject a proposal with feedback (FR-035)
-   * @protected Requires authentication and organizer permission
+   * @protected Requires authentication and CFP module permission
    */
   rejectProposal: protectedProcedure
     .input(rejectProposalSchema)
     .mutation(async ({ ctx, input }) => {
-      // Get submission with event for permission check
+      // Get submission with eventId for permission check
       const submission = await ctx.db.cfpSubmission.findUnique({
         where: { id: input.submissionId },
         include: {
           cfp: {
-            include: {
+            select: {
+              id: true,
+              eventId: true,
               event: {
                 select: {
-                  organizerId: true,
                   name: true,
                 },
               },
@@ -809,12 +782,13 @@ export const cfpRouter = createTRPCRouter({
         });
       }
 
-      if (submission.cfp.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Only the event organizer can reject proposals",
-        });
-      }
+      // Verify CFP module permission
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: submission.cfp.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "CFP",
+      });
 
       if (submission.status === "rejected") {
         throw new TRPCError({

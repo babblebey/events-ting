@@ -11,6 +11,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
+import { checkModuleAccess } from "@/server/api/permissions";
 import {
   createScheduleEntrySchema,
   updateScheduleEntrySchema,
@@ -41,10 +42,18 @@ export const scheduleRouter = createTRPCRouter({
         speakerIds,
       } = input;
 
-      // Verify event exists and user is the organizer
+      // Verify user has access to SCHEDULE module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "SCHEDULE",
+      });
+
+      // Fetch event data for schedule creation
       const event = await ctx.db.event.findUnique({
         where: { id: eventId },
-        select: { id: true, organizerId: true, timezone: true },
+        select: { id: true, timezone: true },
       });
 
       if (!event) {
@@ -54,14 +63,7 @@ export const scheduleRouter = createTRPCRouter({
         });
       }
 
-      if (event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Only event organizer can create schedule entries",
-        });
-      }
-
-      // Combine date and time into UTC timestamps
+      // Combine date and times into DateTime objects
       const startDateTime = combineDateTime(date, startTime, event.timezone);
       const endDateTime = combineDateTime(date, endTime, event.timezone);
 
@@ -240,13 +242,13 @@ export const scheduleRouter = createTRPCRouter({
         });
       }
 
-      // Check authorization
-      if (existingEntry.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Only event organizer can update schedule entries",
-        });
-      }
+      // Verify user has access to SCHEDULE module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: existingEntry.event.id,
+        userId: ctx.session.user.id,
+        requiredModule: "SCHEDULE",
+      });
 
       // Optimistic concurrency control: check if entry was modified since last read
       if (existingEntry.updatedAt.getTime() !== updatedAt.getTime()) {
@@ -355,12 +357,12 @@ export const scheduleRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ id: z.string().cuid() }))
     .mutation(async ({ ctx, input }) => {
-      // Verify entry exists and user is organizer
+      // Verify entry exists
       const entry = await ctx.db.scheduleEntry.findUnique({
         where: { id: input.id },
         include: {
           event: {
-            select: { organizerId: true },
+            select: { id: true },
           },
         },
       });
@@ -372,12 +374,13 @@ export const scheduleRouter = createTRPCRouter({
         });
       }
 
-      if (entry.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Only event organizer can delete schedule entries",
-        });
-      }
+      // Verify user has access to SCHEDULE module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: entry.event.id,
+        userId: ctx.session.user.id,
+        requiredModule: "SCHEDULE",
+      });
 
       await ctx.db.scheduleEntry.delete({
         where: { id: input.id },
@@ -398,23 +401,23 @@ export const scheduleRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // Verify event exists and user is organizer
+      // Verify user has access to SCHEDULE module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: input.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "SCHEDULE",
+      });
+
+      // Verify event exists
       const event = await ctx.db.event.findUnique({
         where: { id: input.eventId },
-        select: { organizerId: true },
       });
 
       if (!event) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Event not found",
-        });
-      }
-
-      if (event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Only event organizer can reorder schedule entries",
         });
       }
 

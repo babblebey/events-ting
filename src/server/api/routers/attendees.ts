@@ -6,6 +6,7 @@
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { z } from "zod";
+import { checkModuleAccess } from "@/server/api/permissions";
 import Papa from "papaparse";
 import { randomBytes } from "crypto";
 import { sendEmail } from "@/server/services/email";
@@ -431,26 +432,13 @@ export const attendeesRouter = createTRPCRouter({
   parseCSV: protectedProcedure
     .input(parseCSVSchema)
     .mutation(async ({ ctx, input }) => {
-      // Verify user is event organizer
-      const event = await ctx.db.event.findUnique({
-        where: { id: input.eventId },
-        select: { organizerId: true },
+      // Verify user has access to ATTENDEES module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: input.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "ATTENDEES",
       });
-
-      if (!event) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Event not found",
-        });
-      }
-
-      if (event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message:
-            "You do not have permission to import attendees for this event",
-        });
-      }
 
       // Strip BOM and decode content
       const cleanContent = stripBOM(input.fileContent);
@@ -533,11 +521,18 @@ export const attendeesRouter = createTRPCRouter({
   validateImport: protectedProcedure
     .input(validateImportSchema)
     .mutation(async ({ ctx, input }) => {
-      // Verify user is event organizer
+      // Verify user has access to ATTENDEES module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: input.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "ATTENDEES",
+      });
+
+      // Fetch event with ticket types for validation
       const event = await ctx.db.event.findUnique({
         where: { id: input.eventId },
         select: {
-          organizerId: true,
           ticketTypes: {
             select: {
               id: true,
@@ -555,14 +550,6 @@ export const attendeesRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Event not found",
-        });
-      }
-
-      if (event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message:
-            "You do not have permission to validate imports for this event",
         });
       }
 
@@ -737,14 +724,21 @@ export const attendeesRouter = createTRPCRouter({
   executeImport: protectedProcedure
     .input(executeImportSchema)
     .mutation(async ({ ctx, input }) => {
-      // Verify user is event organizer
+      // Verify user has access to ATTENDEES module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: input.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "ATTENDEES",
+      });
+
+      // Fetch event data for import
       const event = await ctx.db.event.findUnique({
         where: { id: input.eventId },
         select: {
           id: true,
           name: true,
           slug: true,
-          organizerId: true,
           startDate: true,
           endDate: true,
           locationType: true,
@@ -763,14 +757,6 @@ export const attendeesRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Event not found",
-        });
-      }
-
-      if (event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message:
-            "You do not have permission to import attendees for this event",
         });
       }
 

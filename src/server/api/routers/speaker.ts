@@ -10,6 +10,7 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { z } from "zod";
+import { checkModuleAccess } from "@/server/api/permissions";
 
 /**
  * Input validation schemas
@@ -64,23 +65,23 @@ export const speakerRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createSpeakerSchema)
     .mutation(async ({ ctx, input }) => {
-      // Verify organizer owns the event
+      // Verify user has access to SPEAKERS module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: input.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "SPEAKERS",
+      });
+
+      // Verify event exists
       const event = await ctx.db.event.findUnique({
         where: { id: input.eventId },
-        select: { organizerId: true },
       });
 
       if (!event) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Event not found",
-        });
-      }
-
-      if (event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You do not have permission to add speakers to this event",
         });
       }
 
@@ -202,12 +203,12 @@ export const speakerRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { id, ...data } = input;
 
-      // Get speaker and verify organizer owns the event
+      // Get speaker
       const speaker = await ctx.db.speaker.findUnique({
         where: { id },
         include: {
           event: {
-            select: { organizerId: true },
+            select: { id: true },
           },
         },
       });
@@ -219,12 +220,13 @@ export const speakerRouter = createTRPCRouter({
         });
       }
 
-      if (speaker.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You do not have permission to update this speaker",
-        });
-      }
+      // Verify user has access to SPEAKERS module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: speaker.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "SPEAKERS",
+      });
 
       // If email is being updated, check for conflicts
       if (data.email && data.email !== speaker.email) {
@@ -257,14 +259,10 @@ export const speakerRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(speakerIdSchema)
     .mutation(async ({ ctx, input }) => {
-      // Get speaker and verify organizer owns the event
+      // Get speaker
       const speaker = await ctx.db.speaker.findUnique({
         where: { id: input.id },
-        include: {
-          event: {
-            select: { organizerId: true },
-          },
-        },
+        select: { eventId: true },
       });
 
       if (!speaker) {
@@ -274,12 +272,13 @@ export const speakerRouter = createTRPCRouter({
         });
       }
 
-      if (speaker.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You do not have permission to delete this speaker",
-        });
-      }
+      // Verify user has access to SPEAKERS module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: speaker.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "SPEAKERS",
+      });
 
       return ctx.db.speaker.delete({
         where: { id: input.id },
@@ -330,14 +329,13 @@ export const speakerRouter = createTRPCRouter({
         });
       }
 
-      // Verify organizer owns the event
-      if (speaker.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message:
-            "You do not have permission to assign speakers for this event",
-        });
-      }
+      // Verify user has access to SPEAKERS module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: speaker.event.id,
+        userId: ctx.session.user.id,
+        requiredModule: "SPEAKERS",
+      });
 
       // Check if assignment already exists
       const existingAssignment = await ctx.db.speakerSession.findFirst({
@@ -386,14 +384,10 @@ export const speakerRouter = createTRPCRouter({
   unassignFromSession: protectedProcedure
     .input(unassignFromSessionSchema)
     .mutation(async ({ ctx, input }) => {
-      // Verify speaker exists and get event
+      // Verify speaker exists
       const speaker = await ctx.db.speaker.findUnique({
         where: { id: input.speakerId },
-        include: {
-          event: {
-            select: { organizerId: true },
-          },
-        },
+        select: { eventId: true },
       });
 
       if (!speaker) {
@@ -403,14 +397,13 @@ export const speakerRouter = createTRPCRouter({
         });
       }
 
-      // Verify organizer owns the event
-      if (speaker.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message:
-            "You do not have permission to unassign speakers for this event",
-        });
-      }
+      // Verify user has access to SPEAKERS module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: speaker.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "SPEAKERS",
+      });
 
       // Find the assignment
       const assignment = await ctx.db.speakerSession.findFirst({
