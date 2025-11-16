@@ -8,6 +8,7 @@ import { api } from "@/trpc/server";
 import { auth } from "@/server/auth";
 import { redirect } from "next/navigation";
 import { AppSidebar, AppSidebarInset } from "@/components/app-sidebar";
+import { PermissionRevokedHandler } from "@/components/team/permission-revoked-handler";
 import type { ModuleName } from "@/lib/validators";
 
 interface EventDashboardLayoutProps {
@@ -130,7 +131,11 @@ async function DashboardLayout({
   return (
     <div className="min-h-screen">
       <AppSidebar menuItems={navItems} />
-      <AppSidebarInset>{children}</AppSidebarInset>
+      <AppSidebarInset>
+        <PermissionRevokedHandler eventId={eventId}>
+          {children}
+        </PermissionRevokedHandler>
+      </AppSidebarInset>
     </div>
   );
 }

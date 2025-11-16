@@ -52,14 +52,95 @@ export function EditPermissionsModal({
   const utils = api.useUtils();
 
   const updatePermissions = api.team.updatePermissions.useMutation({
-    onSuccess: () => {
-      toast.success("Permissions updated successfully");
-      // Invalidate queries to refresh data
+    // Optimistic update: Update UI immediately before server confirmation
+    onMutate: async (newData) => {
+      // Cancel any outgoing refetches to prevent overwriting optimistic update
+      await utils.team.getMembers.cancel({ eventId });
+      await utils.team.getCurrentMember.cancel({ eventId });
+
+      // Snapshot the previous values in case we need to rollback
+      const previousMembers = utils.team.getMembers.getData({ eventId });
+      const previousCurrentMember = utils.team.getCurrentMember.getData({
+        eventId,
+      });
+
+      // Optimistically update the team members list
+      utils.team.getMembers.setData({ eventId }, (old) => {
+        if (!old) return old;
+        return old.map((member) =>
+          member.id === newData.teamMemberId
+            ? { ...member, modulePermissions: newData.modulePermissions }
+            : member,
+        );
+      });
+
+      // If the updated member is the current user, update their permissions too
+      utils.team.getCurrentMember.setData({ eventId }, (old) => {
+        if (!old || old.id !== newData.teamMemberId) return old;
+        return { ...old, modulePermissions: newData.modulePermissions };
+      });
+
+      // Return context with previous values for rollback
+      return { previousMembers, previousCurrentMember };
+    },
+    onSuccess: (_data, variables) => {
+      // Calculate what changed for detailed notification
+      const currentSet = new Set(teamMember.modulePermissions);
+      const newSet = new Set(variables.modulePermissions);
+      const added = variables.modulePermissions.filter((m) => !currentSet.has(m as string));
+      const removed = teamMember.modulePermissions.filter(
+        (m) => !newSet.has(m as ModuleName),
+      );
+
+      // Show detailed success message
+      if (added.length > 0 && removed.length > 0) {
+        toast.success(
+          "Permissions Updated",
+          `Added: ${added.join(", ")} • Removed: ${removed.join(", ")}`,
+          6000,
+        );
+      } else if (added.length > 0) {
+        toast.success(
+          "Permissions Updated",
+          `Added access to: ${added.join(", ")}`,
+          5000,
+        );
+      } else if (removed.length > 0) {
+        toast.success(
+          "Permissions Updated",
+          `Removed access from: ${removed.join(", ")}`,
+          5000,
+        );
+      } else {
+        toast.success("Permissions updated successfully");
+      }
+
+      // Invalidate queries to refetch and ensure consistency
       void utils.team.getMembers.invalidate({ eventId });
+      void utils.team.getCurrentMember.invalidate({ eventId });
       onClose();
     },
-    onError: (error) => {
-      toast.error(error.message ?? "Failed to update permissions");
+    onError: (error, _variables, context) => {
+      // Rollback optimistic update on error
+      if (context?.previousMembers) {
+        utils.team.getMembers.setData({ eventId }, context.previousMembers);
+      }
+      if (context?.previousCurrentMember) {
+        utils.team.getCurrentMember.setData(
+          { eventId },
+          context.previousCurrentMember,
+        );
+      }
+
+      toast.error(
+        "Update Failed",
+        error.message ?? "Failed to update permissions. Please try again.",
+      );
+    },
+    onSettled: () => {
+      // Always refetch after mutation completes (success or error)
+      void utils.team.getMembers.invalidate({ eventId });
+      void utils.team.getCurrentMember.invalidate({ eventId });
     },
   });
 

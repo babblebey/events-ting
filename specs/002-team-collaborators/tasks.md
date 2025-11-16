@@ -158,9 +158,9 @@ description: "Task list for Team Collaborators & Permissions feature implementat
 
 #### Permission Change Handling
 
-- [ ] T050 [US3] Implement optimistic updates for permission changes in EditPermissionsModal
-- [ ] T051 [US3] Add error handling for permission changes during active sessions (403 errors with graceful redirect)
-- [ ] T052 [US3] Add toast notifications for permission change confirmations across the application
+- [X] T050 [US3] Implement optimistic updates for permission changes in EditPermissionsModal
+- [X] T051 [US3] Add error handling for permission changes during active sessions (403 errors with graceful redirect)
+- [X] T052 [US3] Add toast notifications for permission change confirmations across the application
 
 **Checkpoint**: All permission modification workflows complete - organizers can dynamically adjust team member access
 
