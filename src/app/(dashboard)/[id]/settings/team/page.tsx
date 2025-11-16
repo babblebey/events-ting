@@ -4,7 +4,7 @@
  */
 
 import { api } from "@/trpc/server";
-import { Card, Badge } from "flowbite-react";
+import { Card } from "flowbite-react";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { InviteCollaboratorForm } from "@/components/team/invite-collaborator-form";
 import { TeamMemberList } from "@/components/team/team-member-list";

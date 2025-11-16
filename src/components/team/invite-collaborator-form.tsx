@@ -43,9 +43,17 @@ export function InviteCollaboratorForm({
       await utils.team.getPendingInvitations.cancel({ eventId });
 
       // Snapshot previous values
-      const previousMembers = utils.team.getMembers.getData({ eventId, status: undefined });
-      const previousPendingMembers = utils.team.getMembers.getData({ eventId, status: "PENDING" });
-      const previousInvitations = utils.team.getPendingInvitations.getData({ eventId });
+      const previousMembers = utils.team.getMembers.getData({
+        eventId,
+        status: undefined,
+      });
+      const previousPendingMembers = utils.team.getMembers.getData({
+        eventId,
+        status: "PENDING",
+      });
+      const previousInvitations = utils.team.getPendingInvitations.getData({
+        eventId,
+      });
 
       // Optimistically add the new pending member
       const optimisticMember = {
@@ -110,13 +118,22 @@ export function InviteCollaboratorForm({
     onError: (err: { message: string }, _variables, context) => {
       // Rollback optimistic update
       if (context?.previousMembers) {
-        utils.team.getMembers.setData({ eventId, status: undefined }, context.previousMembers);
+        utils.team.getMembers.setData(
+          { eventId, status: undefined },
+          context.previousMembers,
+        );
       }
       if (context?.previousPendingMembers) {
-        utils.team.getMembers.setData({ eventId, status: "PENDING" }, context.previousPendingMembers);
+        utils.team.getMembers.setData(
+          { eventId, status: "PENDING" },
+          context.previousPendingMembers,
+        );
       }
       if (context?.previousInvitations) {
-        utils.team.getPendingInvitations.setData({ eventId }, context.previousInvitations);
+        utils.team.getPendingInvitations.setData(
+          { eventId },
+          context.previousInvitations,
+        );
       }
 
       setError(err.message);
@@ -174,8 +191,8 @@ export function InviteCollaboratorForm({
   const isLoading = inviteMutation.isPending;
 
   return (
-    <form 
-      onSubmit={handleSubmit} 
+    <form
+      onSubmit={handleSubmit}
       className="space-y-6"
       aria-label="Invite team collaborator form"
     >
@@ -201,7 +218,10 @@ export function InviteCollaboratorForm({
           aria-describedby="email-help-text"
           aria-invalid={error?.includes("email") ? "true" : "false"}
         />
-        <p id="email-help-text" className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p
+          id="email-help-text"
+          className="mt-1 text-sm text-gray-500 dark:text-gray-400"
+        >
           We&apos;ll send an invitation email to this address
         </p>
       </div>
@@ -231,7 +251,8 @@ export function InviteCollaboratorForm({
           role="alert"
           aria-live="polite"
           className={`rounded-lg border p-4 text-sm ${
-            errorType === "existing_member" || errorType === "pending_invitation"
+            errorType === "existing_member" ||
+            errorType === "pending_invitation"
               ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400"
               : "border-red-300 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400"
           }`}
@@ -271,8 +292,8 @@ export function InviteCollaboratorForm({
               <p className="font-medium">{error}</p>
               {errorType === "existing_member" && (
                 <div className="mt-2 text-sm">
-                  <p className="font-medium mb-1">What you can do instead:</p>
-                  <ul className="list-disc list-inside space-y-1 ml-2">
+                  <p className="mb-1 font-medium">What you can do instead:</p>
+                  <ul className="ml-2 list-inside list-disc space-y-1">
                     <li>
                       Go to the <strong>Team Members</strong> section below to
                       view their current permissions
@@ -290,8 +311,8 @@ export function InviteCollaboratorForm({
               )}
               {errorType === "pending_invitation" && (
                 <div className="mt-2 text-sm">
-                  <p className="font-medium mb-1">What you can do instead:</p>
-                  <ul className="list-disc list-inside space-y-1 ml-2">
+                  <p className="mb-1 font-medium">What you can do instead:</p>
+                  <ul className="ml-2 list-inside list-disc space-y-1">
                     <li>
                       Go to the <strong>Pending Invitations</strong> section
                       below to view the existing invitation
@@ -313,10 +334,10 @@ export function InviteCollaboratorForm({
       )}
 
       {/* Submit Button */}
-      <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-0">
-        <Button 
-          type="submit" 
-          disabled={isLoading} 
+      <div className="flex flex-col justify-end gap-3 sm:flex-row sm:gap-0">
+        <Button
+          type="submit"
+          disabled={isLoading}
           size="lg"
           className="w-full sm:w-auto"
           aria-label="Send invitation to collaborator"
@@ -336,16 +357,18 @@ export function InviteCollaboratorForm({
       </div>
 
       {/* Info Box */}
-      <div 
-        role="note" 
+      <div
+        role="note"
         aria-label="Invitation process information"
         className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
       >
-        <p className="font-medium mb-1">What happens next?</p>
-        <ul className="list-disc list-inside space-y-1">
+        <p className="mb-1 font-medium">What happens next?</p>
+        <ul className="list-inside list-disc space-y-1">
           <li>The collaborator will receive an email invitation</li>
           <li>They&apos;ll have 7 days to accept the invitation</li>
-          <li>Once accepted, they&apos;ll have access to the selected modules</li>
+          <li>
+            Once accepted, they&apos;ll have access to the selected modules
+          </li>
           <li>You can modify their permissions or remove access anytime</li>
         </ul>
       </div>

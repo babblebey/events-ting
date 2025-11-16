@@ -37,44 +37,47 @@ export function TeamMemberList({ eventId, isOwner }: TeamMemberListProps) {
 
   // Fetch team members - use explicit undefined for ALL filter
   const queryStatus = statusFilter === "ALL" ? undefined : statusFilter;
-  
-  const { data, isLoading, error, refetch } = api.team.getMembers.useQuery({
-    eventId,
-    status: queryStatus,
-    page: currentPage,
-    limit: PAGE_SIZE,
-  }, {
-    // Cache team members for 2 minutes since they don't change frequently
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes (formerly cacheTime)
-    // Refetch when window regains focus to ensure fresh data
-    refetchOnWindowFocus: true,
-    // Don't refetch on reconnect since we already refetch on focus
-    refetchOnReconnect: false,
-  });
+
+  const { data, isLoading, error, refetch } = api.team.getMembers.useQuery(
+    {
+      eventId,
+      status: queryStatus,
+      page: currentPage,
+      limit: PAGE_SIZE,
+    },
+    {
+      // Cache team members for 2 minutes since they don't change frequently
+      staleTime: 2 * 60 * 1000, // 2 minutes
+      gcTime: 5 * 60 * 1000, // 5 minutes (formerly cacheTime)
+      // Refetch when window regains focus to ensure fresh data
+      refetchOnWindowFocus: true,
+      // Don't refetch on reconnect since we already refetch on focus
+      refetchOnReconnect: false,
+    },
+  );
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Alt + F to focus filter
-      if (e.altKey && e.key === 'f') {
+      if (e.altKey && e.key === "f") {
         e.preventDefault();
         filterRef.current?.focus();
       }
       // Alt + S to focus sort
-      if (e.altKey && e.key === 's') {
+      if (e.altKey && e.key === "s") {
         e.preventDefault();
         sortRef.current?.focus();
       }
       // Alt + R to refresh
-      if (e.altKey && e.key === 'r') {
+      if (e.altKey && e.key === "r") {
         e.preventDefault();
         void refetch();
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [refetch]);
 
   const members = data?.members;
@@ -103,7 +106,9 @@ export function TeamMemberList({ eventId, isOwner }: TeamMemberListProps) {
       case "recent":
         // Most recently invited first
         return membersCopy.sort((a, b) => {
-          return new Date(b.invitedAt).getTime() - new Date(a.invitedAt).getTime();
+          return (
+            new Date(b.invitedAt).getTime() - new Date(a.invitedAt).getTime()
+          );
         });
 
       case "name":
@@ -147,24 +152,24 @@ export function TeamMemberList({ eventId, isOwner }: TeamMemberListProps) {
     return (
       <div className="space-y-6">
         {/* Filters Skeleton */}
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-          <div className="flex-1 w-full sm:w-auto">
+        <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end">
+          <div className="w-full flex-1 sm:w-auto">
             <div className="mb-2 block">
-              <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              <div className="h-5 w-32 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
             </div>
-            <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+            <div className="h-10 w-full animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700" />
           </div>
-          <div className="flex-1 w-full sm:w-auto">
+          <div className="w-full flex-1 sm:w-auto">
             <div className="mb-2 block">
-              <div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              <div className="h-5 w-20 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
             </div>
-            <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+            <div className="h-10 w-full animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700" />
           </div>
-          <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+          <div className="h-10 w-24 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700" />
         </div>
 
         {/* Member Count Skeleton */}
-        <div className="h-5 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        <div className="h-5 w-48 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
 
         {/* Member Cards Skeleton */}
         <TeamMemberListSkeleton count={3} />
@@ -195,7 +200,7 @@ export function TeamMemberList({ eventId, isOwner }: TeamMemberListProps) {
   // Empty state
   if (!sortedMembers || sortedMembers.length === 0) {
     return (
-      <div className="text-center py-12">
+      <div className="py-12 text-center">
         <p className="text-gray-600 dark:text-gray-400">
           {statusFilter === "ALL"
             ? "No team members found"
@@ -218,8 +223,8 @@ export function TeamMemberList({ eventId, isOwner }: TeamMemberListProps) {
   return (
     <div className="space-y-6">
       {/* Filters and Sorting */}
-      <div className="flex flex-col gap-4 items-stretch">
-        <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col items-stretch gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row">
           {/* Status Filter */}
           <div className="flex-1">
             <div className="mb-2 block">
@@ -229,7 +234,9 @@ export function TeamMemberList({ eventId, isOwner }: TeamMemberListProps) {
               id="status-filter"
               ref={filterRef}
               value={statusFilter}
-              onChange={(e) => handleFilterChange(e.target.value as FilterOption)}
+              onChange={(e) =>
+                handleFilterChange(e.target.value as FilterOption)
+              }
               icon={HiFilter}
               aria-label="Filter team members by status"
               title="Keyboard shortcut: Alt + F"
@@ -278,7 +285,8 @@ export function TeamMemberList({ eventId, isOwner }: TeamMemberListProps) {
 
       {/* Member Count */}
       <div className="text-sm text-gray-600 dark:text-gray-400">
-        Showing {sortedMembers.length} of {pagination?.totalCount ?? 0} {pagination?.totalCount === 1 ? "member" : "members"}
+        Showing {sortedMembers.length} of {pagination?.totalCount ?? 0}{" "}
+        {pagination?.totalCount === 1 ? "member" : "members"}
         {pagination && pagination.totalPages > 1 && (
           <span className="ml-2">
             (Page {pagination.page} of {pagination.totalPages})
@@ -300,7 +308,11 @@ export function TeamMemberList({ eventId, isOwner }: TeamMemberListProps) {
 
       {/* Pagination Controls */}
       {pagination && pagination.totalPages > 1 && (
-        <div className="flex justify-center mt-6" role="navigation" aria-label="Team members pagination">
+        <div
+          className="mt-6 flex justify-center"
+          role="navigation"
+          aria-label="Team members pagination"
+        >
           <Pagination
             currentPage={currentPage}
             totalPages={pagination.totalPages}

@@ -6,13 +6,25 @@ import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { api } from "@/trpc/react";
 import { useToast } from "@/components/ui/toast-provider";
-import { HiOutlineRefresh, HiCheckCircle, HiXCircle, HiClock, HiMail, HiShieldExclamation } from "react-icons/hi";
+import {
+  HiOutlineRefresh,
+  HiCheckCircle,
+  HiXCircle,
+  HiClock,
+  HiMail,
+  HiShieldExclamation,
+} from "react-icons/hi";
 
-type InvitationState = 
+type InvitationState =
   | { status: "loading" }
   | { status: "needs-auth"; eventName?: string; modules?: string[] }
   | { status: "accepting" }
-  | { status: "success"; eventName: string; eventSlug: string; modules: string[] }
+  | {
+      status: "success";
+      eventName: string;
+      eventSlug: string;
+      modules: string[];
+    }
   | { status: "declining" }
   | { status: "declined"; eventName: string }
   | { status: "error"; message: string };
@@ -29,50 +41,48 @@ export default function AcceptInvitationPage() {
   });
   const [showDeclineConfirm, setShowDeclineConfirm] = useState(false);
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
   const acceptInvitation = api.team.acceptInvitation.useMutation({
     onSuccess: (data) => {
       setInvitationState({
         status: "success",
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+
         eventName: data.event.name,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+
         eventSlug: data.event.slug,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        modules: data.teamMember.modulePermissions as string[],
+
+        modules: data.teamMember.modulePermissions,
       });
       toast.success(
         "Invitation Accepted",
-        `You are now a collaborator on ${data.event.name as string}`,
+        `You are now a collaborator on ${data.event.name}`,
       );
     },
     onError: (error) => {
       setInvitationState({
         status: "error",
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+
         message: error.message,
       });
       toast.error("Failed to Accept Invitation", error.message);
     },
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
   const declineInvitation = api.team.declineInvitation.useMutation({
     onSuccess: (data) => {
       setInvitationState({
         status: "declined",
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+
         eventName: data.eventName,
       });
       toast.info(
         "Invitation Declined",
-        `You have declined the invitation to ${data.eventName as string}`,
+        `You have declined the invitation to ${data.eventName}`,
       );
     },
     onError: (error) => {
       setInvitationState({
         status: "error",
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+
         message: error.message,
       });
       toast.error("Failed to Decline Invitation", error.message);
@@ -82,7 +92,7 @@ export default function AcceptInvitationPage() {
   const handleAcceptance = useCallback(() => {
     if (token && invitationState.status === "loading") {
       setInvitationState({ status: "accepting" });
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+
       acceptInvitation.mutate({ token });
     }
   }, [token, invitationState.status, acceptInvitation]);
@@ -133,7 +143,7 @@ export default function AcceptInvitationPage() {
   const handleDeclineConfirm = () => {
     if (token) {
       setInvitationState({ status: "declining" });
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+
       declineInvitation.mutate({ token });
     }
   };
@@ -143,7 +153,7 @@ export default function AcceptInvitationPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8 dark:bg-gray-900">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -238,15 +248,18 @@ export default function AcceptInvitationPage() {
                   </h3>
                   <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                     You&apos;ve declined the invitation to join{" "}
-                    <span className="font-semibold">{invitationState.eventName}</span>
+                    <span className="font-semibold">
+                      {invitationState.eventName}
+                    </span>
                   </p>
                 </div>
               </div>
 
               <div className="rounded-md bg-blue-50 p-4 dark:bg-blue-900/20">
                 <p className="text-sm text-blue-800 dark:text-blue-300">
-                  The organizer has been notified of your decision. If you change your mind, 
-                  you can ask them to send you a new invitation.
+                  The organizer has been notified of your decision. If you
+                  change your mind, you can ask them to send you a new
+                  invitation.
                 </p>
               </div>
 
@@ -272,7 +285,9 @@ export default function AcceptInvitationPage() {
                   </h3>
                   <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                     You&apos;ve successfully joined the team for{" "}
-                    <span className="font-semibold">{invitationState.eventName}</span>
+                    <span className="font-semibold">
+                      {invitationState.eventName}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -334,7 +349,9 @@ export default function AcceptInvitationPage() {
                       What you can do:
                     </h4>
                     <ul className="mt-2 space-y-1 text-sm text-yellow-800 dark:text-yellow-300">
-                      <li>• Contact the event organizer for a new invitation</li>
+                      <li>
+                        • Contact the event organizer for a new invitation
+                      </li>
                       <li>• Check if the invitation link is correct</li>
                       <li>• Ensure the invitation hasn&apos;t expired</li>
                     </ul>
@@ -365,8 +382,9 @@ export default function AcceptInvitationPage() {
                     Decline Invitation?
                   </h3>
                   <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                    Are you sure you want to decline this invitation? The organizer will be notified, 
-                    and you won&apos;t be able to access this event unless they send you a new invitation.
+                    Are you sure you want to decline this invitation? The
+                    organizer will be notified, and you won&apos;t be able to
+                    access this event unless they send you a new invitation.
                   </p>
                 </div>
               </div>

@@ -90,7 +90,9 @@ export function EditPermissionsModal({
       // Calculate what changed for detailed notification
       const currentSet = new Set(teamMember.modulePermissions);
       const newSet = new Set(variables.modulePermissions);
-      const added = variables.modulePermissions.filter((m) => !currentSet.has(m as string));
+      const added = variables.modulePermissions.filter(
+        (m) => !currentSet.has(m as string),
+      );
       const removed = teamMember.modulePermissions.filter(
         (m) => !newSet.has(m as ModuleName),
       );
@@ -188,9 +190,9 @@ export function EditPermissionsModal({
   };
 
   return (
-    <Modal 
-      show={isOpen} 
-      onClose={handleCancel} 
+    <Modal
+      show={isOpen}
+      onClose={handleCancel}
       size="2xl"
       aria-labelledby="edit-permissions-title"
       aria-describedby="edit-permissions-description"
@@ -198,21 +200,34 @@ export function EditPermissionsModal({
       <ModalHeader>
         <div className="flex items-center justify-between">
           <div>
-            <h3 id="edit-permissions-title" className="text-xl font-semibold text-gray-900 dark:text-white">
+            <h3
+              id="edit-permissions-title"
+              className="text-xl font-semibold text-gray-900 dark:text-white"
+            >
               Edit Permissions
             </h3>
-            <p id="edit-permissions-description" className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <p
+              id="edit-permissions-description"
+              className="mt-1 text-sm text-gray-600 dark:text-gray-400"
+            >
               Update module access for {displayName}
             </p>
           </div>
         </div>
       </ModalHeader>
 
-      <form onSubmit={handleSubmit} aria-label="Edit team member permissions form">
+      <form
+        onSubmit={handleSubmit}
+        aria-label="Edit team member permissions form"
+      >
         <ModalBody>
           <div className="space-y-4">
             {/* Collaborator Info */}
-            <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800" role="region" aria-label="Collaborator information">
+            <div
+              className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800"
+              role="region"
+              aria-label="Collaborator information"
+            >
               <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Collaborator
               </p>
@@ -238,7 +253,9 @@ export function EditPermissionsModal({
             {(() => {
               const currentSet = new Set(teamMember.modulePermissions);
               const newSet = new Set(selectedModules);
-              const added = selectedModules.filter((m) => !currentSet.has(m as string));
+              const added = selectedModules.filter(
+                (m) => !currentSet.has(m as string),
+              );
               const removed = teamMember.modulePermissions.filter(
                 (m) => !newSet.has(m as ModuleName),
               );
@@ -246,7 +263,7 @@ export function EditPermissionsModal({
               if (added.length === 0 && removed.length === 0) return null;
 
               return (
-                <div 
+                <div
                   className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20"
                   role="status"
                   aria-live="polite"
@@ -280,7 +297,7 @@ export function EditPermissionsModal({
             })()}
 
             {/* Warning about immediate effect */}
-            <div 
+            <div
               className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20"
               role="alert"
               aria-label="Important notification about permission changes"
@@ -294,7 +311,7 @@ export function EditPermissionsModal({
         </ModalBody>
 
         <ModalFooter>
-          <div className="flex w-full flex-col-reverse sm:flex-row justify-end gap-3">
+          <div className="flex w-full flex-col-reverse justify-end gap-3 sm:flex-row">
             <Button
               color="gray"
               onClick={handleCancel}

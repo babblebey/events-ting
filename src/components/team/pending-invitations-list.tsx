@@ -47,42 +47,51 @@ export function PendingInvitationsList({
     isLoading,
     error,
     refetch,
-  } = api.team.getPendingInvitations.useQuery({
-    eventId,
-  }, {
-    // Cache for 1 minute since invitations don't change frequently
-    staleTime: 60 * 1000, // 1 minute
-    gcTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: true,
-  });
+  } = api.team.getPendingInvitations.useQuery(
+    {
+      eventId,
+    },
+    {
+      // Cache for 1 minute since invitations don't change frequently
+      staleTime: 60 * 1000, // 1 minute
+      gcTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: true,
+    },
+  );
 
   // Fetch declined invitations
   const {
     data: declinedInvitations,
     isLoading: isLoadingDeclined,
     refetch: refetchDeclined,
-  } = api.team.getDeclinedInvitations.useQuery({
-    eventId,
-  }, {
-    // Cache declined invitations for 5 minutes as they rarely change
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    refetchOnWindowFocus: false,
-  });
+  } = api.team.getDeclinedInvitations.useQuery(
+    {
+      eventId,
+    },
+    {
+      // Cache declined invitations for 5 minutes as they rarely change
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+      refetchOnWindowFocus: false,
+    },
+  );
 
   // Fetch expired invitations
   const {
     data: expiredInvitations,
     isLoading: isLoadingExpired,
     refetch: refetchExpired,
-  } = api.team.getExpiredInvitations.useQuery({
-    eventId,
-  }, {
-    // Cache expired invitations for 5 minutes as they rarely change
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    refetchOnWindowFocus: false,
-  });
+  } = api.team.getExpiredInvitations.useQuery(
+    {
+      eventId,
+    },
+    {
+      // Cache expired invitations for 5 minutes as they rarely change
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+      refetchOnWindowFocus: false,
+    },
+  );
 
   // Resend invitation mutation
   const resendInvitation = api.team.resendInvitation.useMutation({
@@ -157,7 +166,15 @@ export function PendingInvitationsList({
     reinvite.mutate({
       eventId,
       email,
-      modulePermissions: modulePermissions as ("OVERVIEW" | "ATTENDEES" | "TICKETS" | "SCHEDULE" | "SPEAKERS" | "CFP" | "COMMUNICATIONS")[],
+      modulePermissions: modulePermissions as (
+        | "OVERVIEW"
+        | "ATTENDEES"
+        | "TICKETS"
+        | "SCHEDULE"
+        | "SPEAKERS"
+        | "CFP"
+        | "COMMUNICATIONS"
+      )[],
     });
   };
 

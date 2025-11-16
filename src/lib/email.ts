@@ -163,8 +163,6 @@ export async function sendTeamAccessRemovedEmail(
       eventName: data.eventName,
       organizerName: data.organizerName,
     }),
-    tags: [
-      { name: "category", value: "team-access-removed" },
-    ],
+    tags: [{ name: "category", value: "team-access-removed" }],
   });
 }

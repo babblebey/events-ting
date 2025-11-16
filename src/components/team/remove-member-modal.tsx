@@ -54,8 +54,14 @@ export function RemoveMemberModal({
       await utils.team.getMembers.cancel({ eventId });
 
       // Snapshot previous values
-      const previousMembers = utils.team.getMembers.getData({ eventId, status: undefined });
-      const previousActiveMembers = utils.team.getMembers.getData({ eventId, status: "ACTIVE" });
+      const previousMembers = utils.team.getMembers.getData({
+        eventId,
+        status: undefined,
+      });
+      const previousActiveMembers = utils.team.getMembers.getData({
+        eventId,
+        status: "ACTIVE",
+      });
 
       // Optimistically update member status to REMOVED
       const updateMemberStatus = (old: typeof previousMembers) => {
@@ -65,17 +71,22 @@ export function RemoveMemberModal({
           members: old.members.map((member) =>
             member.id === variables.teamMemberId
               ? { ...member, status: "REMOVED" as const }
-              : member
+              : member,
           ),
         };
       };
 
-      utils.team.getMembers.setData({ eventId, status: undefined }, updateMemberStatus);
+      utils.team.getMembers.setData(
+        { eventId, status: undefined },
+        updateMemberStatus,
+      );
       utils.team.getMembers.setData({ eventId, status: "ACTIVE" }, (old) => {
         if (!old) return old;
         return {
           ...old,
-          members: old.members.filter((member) => member.id !== variables.teamMemberId),
+          members: old.members.filter(
+            (member) => member.id !== variables.teamMemberId,
+          ),
         };
       });
 
@@ -90,10 +101,16 @@ export function RemoveMemberModal({
     onError: (error, _variables, context) => {
       // Rollback optimistic update
       if (context?.previousMembers) {
-        utils.team.getMembers.setData({ eventId, status: undefined }, context.previousMembers);
+        utils.team.getMembers.setData(
+          { eventId, status: undefined },
+          context.previousMembers,
+        );
       }
       if (context?.previousActiveMembers) {
-        utils.team.getMembers.setData({ eventId, status: "ACTIVE" }, context.previousActiveMembers);
+        utils.team.getMembers.setData(
+          { eventId, status: "ACTIVE" },
+          context.previousActiveMembers,
+        );
       }
 
       toast.error(
@@ -119,28 +136,39 @@ export function RemoveMemberModal({
     teamMember.user?.name ?? teamMember.email.split("@")[0] ?? "this member";
 
   return (
-    <Modal 
-      show={isOpen} 
-      onClose={onClose} 
+    <Modal
+      show={isOpen}
+      onClose={onClose}
       size="md"
       aria-labelledby="remove-member-title"
       aria-describedby="remove-member-warning"
     >
       <ModalHeader>
         <div className="flex items-center gap-2">
-          <HiTrash className="h-5 w-5 text-red-600 dark:text-red-500" aria-hidden="true" />
+          <HiTrash
+            className="h-5 w-5 text-red-600 dark:text-red-500"
+            aria-hidden="true"
+          />
           <span id="remove-member-title">Remove Team Member</span>
         </div>
       </ModalHeader>
 
       <ModalBody>
         <div className="space-y-4">
-          <Alert color="warning" icon={HiExclamationCircle} role="alert" aria-live="assertive">
+          <Alert
+            color="warning"
+            icon={HiExclamationCircle}
+            role="alert"
+            aria-live="assertive"
+          >
             <span className="font-medium">Warning:</span> This action will
             immediately revoke all access for this team member.
           </Alert>
 
-          <div id="remove-member-warning" className="text-sm text-gray-700 dark:text-gray-300">
+          <div
+            id="remove-member-warning"
+            className="text-sm text-gray-700 dark:text-gray-300"
+          >
             <p className="mb-2">
               Are you sure you want to remove <strong>{displayName}</strong>{" "}
               from this event?
@@ -162,18 +190,18 @@ export function RemoveMemberModal({
       </ModalBody>
 
       <ModalFooter>
-        <div className="flex w-full flex-col-reverse sm:flex-row justify-end gap-3">
-          <Button 
-            color="gray" 
-            onClick={onClose} 
+        <div className="flex w-full flex-col-reverse justify-end gap-3 sm:flex-row">
+          <Button
+            color="gray"
+            onClick={onClose}
             disabled={isRemoving}
             className="w-full sm:w-auto"
           >
             Cancel
           </Button>
-          <Button 
-            color="failure" 
-            onClick={handleRemove} 
+          <Button
+            color="failure"
+            onClick={handleRemove}
             disabled={isRemoving}
             className="w-full sm:w-auto"
           >

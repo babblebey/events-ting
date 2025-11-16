@@ -1,12 +1,12 @@
 /**
  * Permission Revoked Handler Component
- * 
+ *
  * Monitors for 403/FORBIDDEN errors during active sessions and handles
  * permission revocation gracefully by:
  * 1. Allowing current save operations to complete (grace period)
  * 2. Showing notification about permission changes
  * 3. Redirecting to accessible modules or access denied page
- * 
+ *
  * @module components/team/permission-revoked-handler
  */
 
@@ -99,7 +99,7 @@ export function PermissionRevokedHandler({
 
         // Find first available module to redirect to
         const availableModule = currentMember.modulePermissions[0];
-        
+
         if (availableModule) {
           const moduleRoutes: Record<string, string> = {
             ATTENDEES: "attendees",

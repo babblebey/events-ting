@@ -1,7 +1,7 @@
 /**
  * Team Components
  * Reusable components for team collaboration features
- * 
+ *
  * This directory contains components for:
  * - Team member management
  * - Invitation handling
@@ -23,4 +23,3 @@ export * from "./status-badge";
 // User Story 3 & 4 Components
 export * from "./edit-permissions-modal";
 // export * from "./remove-member-modal"; // To be implemented
-

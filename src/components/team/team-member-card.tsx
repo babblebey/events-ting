@@ -82,7 +82,7 @@ export function TeamMemberCard({
         <div className="min-w-0 flex-1">
           {/* Name and Email */}
           <div className="mb-2">
-            <h3 className="truncate text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="truncate text-base font-semibold text-gray-900 sm:text-lg dark:text-white">
               {displayName}
             </h3>
             {isUserActive && member.user?.name && (
@@ -154,7 +154,7 @@ export function TeamMemberCard({
 
         {/* Action Buttons - Owner Only */}
         {isOwner && member.role !== "OWNER" && member.status !== "REMOVED" && (
-          <div className="flex w-full sm:w-auto gap-2 sm:flex-col sm:self-start">
+          <div className="flex w-full gap-2 sm:w-auto sm:flex-col sm:self-start">
             {member.status === "ACTIVE" && (
               <>
                 <Tooltip content="Edit permissions">

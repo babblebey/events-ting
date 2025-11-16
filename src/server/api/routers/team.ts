@@ -468,7 +468,9 @@ export const teamRouter = createTRPCRouter({
       // Rate limiting: 20 invitations per hour
       const rateLimitResult = inviteRateLimiter.check(ctx.session.user.id);
       if (!rateLimitResult.allowed) {
-        const resetTime = new Date(rateLimitResult.resetAt).toLocaleTimeString();
+        const resetTime = new Date(
+          rateLimitResult.resetAt,
+        ).toLocaleTimeString();
         throw new TRPCError({
           code: "TOO_MANY_REQUESTS",
           message: `Rate limit exceeded. You can send ${rateLimitResult.limit} invitations per hour. Try again after ${resetTime}.`,
@@ -667,9 +669,13 @@ export const teamRouter = createTRPCRouter({
       const { invitationId } = input;
 
       // Rate limiting: 5 resends per hour
-      const rateLimitResult = resendInvitationRateLimiter.check(ctx.session.user.id);
+      const rateLimitResult = resendInvitationRateLimiter.check(
+        ctx.session.user.id,
+      );
       if (!rateLimitResult.allowed) {
-        const resetTime = new Date(rateLimitResult.resetAt).toLocaleTimeString();
+        const resetTime = new Date(
+          rateLimitResult.resetAt,
+        ).toLocaleTimeString();
         throw new TRPCError({
           code: "TOO_MANY_REQUESTS",
           message: `Rate limit exceeded. You can resend ${rateLimitResult.limit} invitations per hour. Try again after ${resetTime}.`,
@@ -1220,9 +1226,13 @@ export const teamRouter = createTRPCRouter({
       const { teamMemberId, modulePermissions } = input;
 
       // Rate limiting: 30 permission updates per hour
-      const rateLimitResult = updatePermissionsRateLimiter.check(ctx.session.user.id);
+      const rateLimitResult = updatePermissionsRateLimiter.check(
+        ctx.session.user.id,
+      );
       if (!rateLimitResult.allowed) {
-        const resetTime = new Date(rateLimitResult.resetAt).toLocaleTimeString();
+        const resetTime = new Date(
+          rateLimitResult.resetAt,
+        ).toLocaleTimeString();
         throw new TRPCError({
           code: "TOO_MANY_REQUESTS",
           message: `Rate limit exceeded. You can update permissions ${rateLimitResult.limit} times per hour. Try again after ${resetTime}.`,
@@ -1418,9 +1428,13 @@ export const teamRouter = createTRPCRouter({
       const { teamMemberId } = input;
 
       // Rate limiting: 20 removals per hour
-      const rateLimitResult = removeMemberRateLimiter.check(ctx.session.user.id);
+      const rateLimitResult = removeMemberRateLimiter.check(
+        ctx.session.user.id,
+      );
       if (!rateLimitResult.allowed) {
-        const resetTime = new Date(rateLimitResult.resetAt).toLocaleTimeString();
+        const resetTime = new Date(
+          rateLimitResult.resetAt,
+        ).toLocaleTimeString();
         throw new TRPCError({
           code: "TOO_MANY_REQUESTS",
           message: `Rate limit exceeded. You can remove ${rateLimitResult.limit} members per hour. Try again after ${resetTime}.`,

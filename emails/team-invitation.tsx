@@ -59,8 +59,8 @@ export const TeamInvitation = ({
             </Section>
 
             <Text style={paragraph}>
-              By accepting this invitation, you&apos;ll be able to help manage the
-              assigned modules for this event.
+              By accepting this invitation, you&apos;ll be able to help manage
+              the assigned modules for this event.
             </Text>
 
             <Button style={button} href={acceptUrl}>
