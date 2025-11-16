@@ -16,6 +16,8 @@ async function main() {
   await prisma.scheduleEntry.deleteMany();
   await prisma.registration.deleteMany();
   await prisma.ticketType.deleteMany();
+  await prisma.teamMember.deleteMany();
+  await prisma.invitation.deleteMany();
   await prisma.event.deleteMany();
   await prisma.post.deleteMany();
   await prisma.session.deleteMany();
@@ -177,6 +179,44 @@ async function main() {
       saleStart: new Date("2025-06-01T00:00:00Z"),
       saleEnd: new Date("2025-07-31T23:59:59Z"),
     },
+  });
+
+  // Create Team Members (OWNER for each event)
+  console.log("👥 Creating team members...");
+
+  await prisma.teamMember.createMany({
+    data: [
+      {
+        eventId: nextjsConf.id,
+        userId: organizer1.id,
+        email: organizer1.email!,
+        role: "OWNER",
+        status: "ACTIVE",
+        modulePermissions: [], // Owner has full access
+        invitedById: organizer1.id, // Self-invited
+        invitedAt: nextjsConf.createdAt,
+      },
+      {
+        eventId: reactWorkshop.id,
+        userId: organizer2.id,
+        email: organizer2.email!,
+        role: "OWNER",
+        status: "ACTIVE",
+        modulePermissions: [],
+        invitedById: organizer2.id,
+        invitedAt: reactWorkshop.createdAt,
+      },
+      {
+        eventId: tsSummit.id,
+        userId: organizer1.id,
+        email: organizer1.email!,
+        role: "OWNER",
+        status: "ACTIVE",
+        modulePermissions: [],
+        invitedById: organizer1.id,
+        invitedAt: tsSummit.createdAt,
+      },
+    ],
   });
 
   // Create Registrations
@@ -657,6 +697,7 @@ The Next.js Conf Team`,
     `- Events: 3 (1 published in-person, 1 published virtual, 1 draft hybrid)`,
   );
   console.log(`- Ticket Types: 4 (across all events)`);
+  console.log(`- Team Members: 3 (1 OWNER per event)`);
   console.log(`- Registrations: 5 (across Next.js Conf and React Workshop)`);
   console.log(`- Speakers: 3`);
   console.log(`- Schedule Entries: 7 (across 2 events)`);

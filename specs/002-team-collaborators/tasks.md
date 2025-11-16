@@ -32,10 +32,10 @@ description: "Task list for Team Collaborators & Permissions feature implementat
 
 **Purpose**: Project initialization and database structure setup
 
-- [ ] T001 Run Prisma migration to add TeamMember, Invitation models, and enums (TeamRole, TeamMemberStatus, InvitationStatus) to prisma/schema.prisma
-- [ ] T002 Create seed script to add OWNER TeamMember for all existing events in prisma/seed.ts
-- [ ] T003 [P] Add module name constants and validation schemas to src/lib/validators.ts
-- [ ] T004 [P] Add team collaboration email templates structure in emails/ directory
+- [X] T001 Run Prisma migration to add TeamMember, Invitation models, and enums (TeamRole, TeamMemberStatus, InvitationStatus) to prisma/schema.prisma
+- [X] T002 Create seed script to add OWNER TeamMember for all existing events in prisma/seed.ts
+- [X] T003 [P] Add module name constants and validation schemas to src/lib/validators.ts
+- [X] T004 [P] Add team collaboration email templates structure in emails/ directory
 
 **Checkpoint**: Database schema and foundational types ready
 

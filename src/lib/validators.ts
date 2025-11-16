@@ -353,6 +353,99 @@ export const listCampaignsSchema = paginationSchema.extend({
 });
 
 // ============================================================================
+// TEAM COLLABORATION VALIDATION
+// ============================================================================
+
+/**
+ * Module names matching dashboard navigation structure
+ * Note: SETTINGS is not assignable (owner-only access)
+ */
+export const MODULE_NAMES = [
+  "OVERVIEW",
+  "ATTENDEES",
+  "TICKETS",
+  "SCHEDULE",
+  "SPEAKERS",
+  "CFP",
+  "COMMUNICATIONS",
+] as const;
+
+export type ModuleName = (typeof MODULE_NAMES)[number];
+
+export const moduleNameSchema = z.enum(MODULE_NAMES);
+
+export const inviteTeamMemberSchema = z.object({
+  eventId: z.string().cuid(),
+  email: z.string().email("Invalid email address"),
+  modulePermissions: z
+    .array(moduleNameSchema)
+    .min(1, "Select at least one module")
+    .refine(
+      (permissions) => {
+        // Ensure no duplicate modules
+        const unique = new Set(permissions);
+        return unique.size === permissions.length;
+      },
+      {
+        message: "Duplicate module permissions detected",
+      },
+    ),
+});
+
+export const resendInvitationSchema = z.object({
+  invitationId: z.string().cuid(),
+});
+
+export const cancelInvitationSchema = z.object({
+  invitationId: z.string().cuid(),
+});
+
+export const acceptInvitationSchema = z.object({
+  token: z.string().length(43, "Invalid invitation token"),
+});
+
+export const declineInvitationSchema = z.object({
+  token: z.string().length(43, "Invalid invitation token"),
+});
+
+export const updateTeamMemberPermissionsSchema = z.object({
+  teamMemberId: z.string().cuid(),
+  modulePermissions: z
+    .array(moduleNameSchema)
+    .min(1, "Select at least one module")
+    .refine(
+      (permissions) => {
+        const unique = new Set(permissions);
+        return unique.size === permissions.length;
+      },
+      {
+        message: "Duplicate module permissions detected",
+      },
+    ),
+});
+
+export const removeTeamMemberSchema = z.object({
+  teamMemberId: z.string().cuid(),
+});
+
+export const getTeamMembersSchema = z.object({
+  eventId: z.string().cuid(),
+  status: z.enum(["PENDING", "ACTIVE", "REMOVED"]).optional(),
+});
+
+export const getCurrentMemberSchema = z.object({
+  eventId: z.string().cuid(),
+});
+
+export const getPendingInvitationsSchema = z.object({
+  eventId: z.string().cuid(),
+});
+
+export const getMyMembershipsSchema = z.object({
+  // No parameters needed - uses current user from context
+});
+
+// ============================================================================
 // TYPE EXPORTS
 // ============================================================================
 
@@ -366,3 +459,11 @@ export type CreateScheduleEntryInput = z.infer<
 export type CreateSpeakerInput = z.infer<typeof createSpeakerSchema>;
 export type SubmitCfpProposalInput = z.infer<typeof submitCfpProposalSchema>;
 export type CreateCampaignInput = z.infer<typeof createCampaignSchema>;
+
+// Team Collaboration Types
+export type InviteTeamMemberInput = z.infer<typeof inviteTeamMemberSchema>;
+export type UpdateTeamMemberPermissionsInput = z.infer<
+  typeof updateTeamMemberPermissionsSchema
+>;
+export type AcceptInvitationInput = z.infer<typeof acceptInvitationSchema>;
+export type DeclineInvitationInput = z.infer<typeof declineInvitationSchema>;
