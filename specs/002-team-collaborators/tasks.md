@@ -205,16 +205,16 @@ description: "Task list for Team Collaborators & Permissions feature implementat
 
 #### Backend API
 
-- [ ] T061 [US5] Implement team.declineInvitation procedure in src/server/api/routers/team.ts
-- [ ] T062 [US5] Implement email sending for declination (sends team-invitation-declined.tsx) in declineInvitation procedure
+- [X] T061 [US5] Implement team.declineInvitation procedure in src/server/api/routers/team.ts
+- [X] T062 [US5] Implement email sending for declination (sends team-invitation-declined.tsx) in declineInvitation procedure
 
 #### Frontend Components
 
-- [ ] T063 [P] [US5] Update invitation acceptance page src/app/invitations/accept/page.tsx to show event details and modules
-- [ ] T064 [P] [US5] Add decline button and confirmation dialog to invitation acceptance page
-- [ ] T065 [US5] Integrate decline action with team.declineInvitation mutation
-- [ ] T066 [US5] Create declined invitation confirmation page at src/app/invitations/declined/page.tsx
-- [ ] T067 [US5] Update TeamMemberList to show declined status with option to re-invite
+- [X] T063 [P] [US5] Update invitation acceptance page src/app/invitations/accept/page.tsx to show event details and modules
+- [X] T064 [P] [US5] Add decline button and confirmation dialog to invitation acceptance page
+- [X] T065 [US5] Integrate decline action with team.declineInvitation mutation
+- [X] T066 [US5] Create declined invitation confirmation page at src/app/invitations/declined/page.tsx (implemented inline in accept page)
+- [X] T067 [US5] Update TeamMemberList to show declined status with option to re-invite
 
 **Checkpoint**: Full invitation consent workflow complete - users can accept or decline invitations
 

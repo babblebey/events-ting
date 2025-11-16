@@ -28,6 +28,7 @@ interface TeamInvitationResponseEmailData {
   inviteeName: string;
   inviteeEmail: string;
   modules: string[];
+  organizerName: string;
 }
 
 interface TeamPermissionChangedEmailData {
@@ -110,7 +111,7 @@ export async function sendTeamInvitationDeclinedEmail(
     to: data.to,
     subject: `${data.inviteeName} declined your invitation to ${data.eventName}`,
     react: TeamInvitationDeclined({
-      organizerName: "Organizer", // Will be populated from context
+      organizerName: data.organizerName,
       eventName: data.eventName,
       collaboratorEmail: data.inviteeEmail,
       teamUrl,

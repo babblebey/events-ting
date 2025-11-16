@@ -51,6 +51,15 @@ export function PendingInvitationsList({
     eventId,
   });
 
+  // Fetch declined invitations
+  const {
+    data: declinedInvitations,
+    isLoading: isLoadingDeclined,
+    refetch: refetchDeclined,
+  } = api.team.getDeclinedInvitations.useQuery({
+    eventId,
+  });
+
   // Resend invitation mutation
   const resendInvitation = api.team.resendInvitation.useMutation({
     onSuccess: (data) => {
@@ -59,6 +68,7 @@ export function PendingInvitationsList({
         `A new invitation has been sent to ${data.invitation.email}`,
       );
       void refetch();
+      void refetchDeclined();
     },
     onError: (error) => {
       toast.error("Failed to resend invitation", error.message);
@@ -82,6 +92,21 @@ export function PendingInvitationsList({
     },
   });
 
+  // Re-invite mutation (for declined invitations)
+  const reinvite = api.team.invite.useMutation({
+    onSuccess: () => {
+      toast.success(
+        "Invitation sent",
+        "A new invitation has been sent successfully",
+      );
+      void refetch();
+      void refetchDeclined();
+    },
+    onError: (error) => {
+      toast.error("Failed to send invitation", error.message);
+    },
+  });
+
   // Handle resend click
   const handleResend = (invitationId: string) => {
     resendInvitation.mutate({ invitationId });
@@ -99,6 +124,15 @@ export function PendingInvitationsList({
     if (selectedInvitationId) {
       cancelInvitation.mutate({ invitationId: selectedInvitationId });
     }
+  };
+
+  // Handle re-invite for declined invitation
+  const handleReinvite = (email: string, modulePermissions: string[]) => {
+    reinvite.mutate({
+      eventId,
+      email,
+      modulePermissions,
+    });
   };
 
   // Loading state
@@ -296,6 +330,106 @@ export function PendingInvitationsList({
           </ul>
         </div>
       </div>
+
+      {/* Declined Invitations Section */}
+      {!isLoadingDeclined && declinedInvitations && declinedInvitations.length > 0 && (
+        <div className="space-y-4 mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Recently Declined
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {declinedInvitations.length} invitation{declinedInvitations.length === 1 ? "" : "s"} declined in the last 30 days
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {declinedInvitations.map((invitation) => (
+              <Card
+                key={invitation.id}
+                className="bg-gray-50 transition-colors dark:bg-gray-800/50"
+              >
+                <div className="flex flex-col items-start gap-4 sm:flex-row">
+                  {/* Invitation Info */}
+                  <div className="min-w-0 flex-1">
+                    {/* Email */}
+                    <div className="mb-2 flex items-center gap-2">
+                      <HiMail className="h-5 w-5 shrink-0 text-gray-400" />
+                      <h4 className="truncate text-base font-semibold text-gray-900 dark:text-white">
+                        {invitation.email}
+                      </h4>
+                    </div>
+
+                    {/* Status */}
+                    <div className="mb-3 flex flex-wrap gap-2">
+                      <Badge color="failure" size="xs" icon={HiX}>
+                        DECLINED
+                      </Badge>
+                    </div>
+
+                    {/* Module Permissions */}
+                    {invitation.modulePermissions.length > 0 && (
+                      <div className="mb-3">
+                        <p className="mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+                          Modules:
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          {invitation.modulePermissions.map((module) => (
+                            <Badge key={module} color="gray" size="xs">
+                              {module}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Metadata */}
+                    <div className="flex flex-col gap-1 text-xs text-gray-500 sm:flex-row sm:items-center sm:gap-2 dark:text-gray-400">
+                      <span>
+                        Declined{" "}
+                        {invitation.respondedAt && formatDistanceToNow(new Date(invitation.respondedAt), {
+                          addSuffix: true,
+                        })}
+                      </span>
+                      {invitation.sentBy && (
+                        <>
+                          <span className="hidden sm:inline">•</span>
+                          <span>
+                            originally sent by{" "}
+                            {invitation.sentBy.name ?? invitation.sentBy.email}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  <div className="flex gap-2 self-end sm:self-start">
+                    <Button
+                      size="xs"
+                      color="blue"
+                      disabled={reinvite.isPending}
+                      onClick={() => handleReinvite(invitation.email, invitation.modulePermissions)}
+                    >
+                      <HiRefresh className="mr-1 h-3 w-3" />
+                      {reinvite.isPending ? "Sending..." : "Re-invite"}
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          {/* Info Note */}
+          <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-xs text-orange-800 dark:border-orange-800 dark:bg-orange-900/20 dark:text-orange-400">
+            <p className="font-medium">
+              Re-inviting will send a new invitation email with the same module permissions as the original invitation.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Cancel Confirmation Modal */}
       <Modal

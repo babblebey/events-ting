@@ -5,13 +5,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { api } from "@/trpc/react";
-import { Loader2, CheckCircle2, XCircle, Clock, Mail } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Clock, Mail, ShieldAlert } from "lucide-react";
 
 type InvitationState = 
   | { status: "loading" }
-  | { status: "needs-auth" }
+  | { status: "needs-auth"; eventName?: string; modules?: string[] }
   | { status: "accepting" }
   | { status: "success"; eventName: string; eventSlug: string; modules: string[] }
+  | { status: "declining" }
+  | { status: "declined"; eventName: string }
   | { status: "error"; message: string };
 
 export default function AcceptInvitationPage() {
@@ -23,6 +25,7 @@ export default function AcceptInvitationPage() {
   const [invitationState, setInvitationState] = useState<InvitationState>({
     status: "loading",
   });
+  const [showDeclineConfirm, setShowDeclineConfirm] = useState(false);
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
   const acceptInvitation = api.team.acceptInvitation.useMutation({
@@ -35,6 +38,24 @@ export default function AcceptInvitationPage() {
         eventSlug: data.event.slug,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         modules: data.teamMember.modulePermissions as string[],
+      });
+    },
+    onError: (error) => {
+      setInvitationState({
+        status: "error",
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        message: error.message,
+      });
+    },
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+  const declineInvitation = api.team.declineInvitation.useMutation({
+    onSuccess: (data) => {
+      setInvitationState({
+        status: "declined",
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        eventName: data.eventName,
       });
     },
     onError: (error) => {
@@ -93,6 +114,22 @@ export default function AcceptInvitationPage() {
     }
   };
 
+  const handleDeclineClick = () => {
+    setShowDeclineConfirm(true);
+  };
+
+  const handleDeclineConfirm = () => {
+    if (token) {
+      setInvitationState({ status: "declining" });
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      declineInvitation.mutate({ token });
+    }
+  };
+
+  const handleDeclineCancel = () => {
+    setShowDeclineConfirm(false);
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
@@ -137,6 +174,13 @@ export default function AcceptInvitationPage() {
                 Sign in to continue
               </button>
 
+              <button
+                onClick={handleDeclineClick}
+                className="flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+              >
+                Decline Invitation
+              </button>
+
               <p className="text-center text-sm text-gray-600 dark:text-gray-400">
                 Don&apos;t have an account?{" "}
                 <Link
@@ -156,6 +200,50 @@ export default function AcceptInvitationPage() {
               <p className="text-center text-gray-600 dark:text-gray-300">
                 Accepting invitation...
               </p>
+            </div>
+          )}
+
+          {/* Declining State */}
+          {invitationState.status === "declining" && (
+            <div className="flex flex-col items-center space-y-4">
+              <Loader2 className="h-12 w-12 animate-spin text-orange-600" />
+              <p className="text-center text-gray-600 dark:text-gray-300">
+                Declining invitation...
+              </p>
+            </div>
+          )}
+
+          {/* Declined State */}
+          {invitationState.status === "declined" && (
+            <div className="space-y-6">
+              <div className="flex flex-col items-center space-y-4">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900">
+                  <XCircle className="h-8 w-8 text-orange-600 dark:text-orange-400" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Invitation Declined
+                  </h3>
+                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    You&apos;ve declined the invitation to join{" "}
+                    <span className="font-semibold">{invitationState.eventName}</span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-md bg-blue-50 p-4 dark:bg-blue-900/20">
+                <p className="text-sm text-blue-800 dark:text-blue-300">
+                  The organizer has been notified of your decision. If you change your mind, 
+                  you can ask them to send you a new invitation.
+                </p>
+              </div>
+
+              <Link
+                href="/dashboard"
+                className="flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+              >
+                Go to Dashboard
+              </Link>
             </div>
           )}
 
@@ -251,6 +339,43 @@ export default function AcceptInvitationPage() {
             </div>
           )}
         </div>
+
+        {/* Decline Confirmation Modal */}
+        {showDeclineConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+            <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+              <div className="flex items-start space-x-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
+                  <ShieldAlert className="h-6 w-6 text-red-600 dark:text-red-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Decline Invitation?
+                  </h3>
+                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    Are you sure you want to decline this invitation? The organizer will be notified, 
+                    and you won&apos;t be able to access this event unless they send you a new invitation.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex gap-3">
+                <button
+                  onClick={handleDeclineCancel}
+                  className="flex-1 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeclineConfirm}
+                  className="flex-1 rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500"
+                >
+                  Decline Invitation
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <p className="text-center text-xs text-gray-500 dark:text-gray-400">
           Having trouble? Contact the event organizer.

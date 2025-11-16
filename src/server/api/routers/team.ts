@@ -8,6 +8,7 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import {
   inviteTeamMemberSchema,
   acceptInvitationSchema,
+  declineInvitationSchema,
   getCurrentMemberSchema,
   getTeamMembersSchema,
   getPendingInvitationsSchema,
@@ -23,6 +24,7 @@ import {
 import {
   sendTeamInvitationEmail,
   sendTeamInvitationAcceptedEmail,
+  sendTeamInvitationDeclinedEmail,
   sendTeamPermissionChangedEmail,
   sendTeamAccessRemovedEmail,
 } from "@/lib/email";
@@ -197,6 +199,68 @@ export const teamRouter = createTRPCRouter({
         // Filter out expired invitations from response
         return invitations.filter((inv) => inv.expiresAt >= now);
       }
+
+      return invitations;
+    }),
+
+  /**
+   * Get all declined invitations for an event
+   * Returns invitations with DECLINED status (last 30 days)
+   */
+  getDeclinedInvitations: protectedProcedure
+    .input(getPendingInvitationsSchema)
+    .query(async ({ ctx, input }) => {
+      const { eventId } = input;
+
+      // Verify user has access to this event
+      const currentMember = await ctx.db.teamMember.findFirst({
+        where: {
+          eventId,
+          userId: ctx.session.user.id,
+          status: "ACTIVE",
+        },
+      });
+
+      if (!currentMember) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You do not have access to this event",
+        });
+      }
+
+      // Only owners can view invitations
+      if (currentMember.role !== "OWNER") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only event owners can view declined invitations",
+        });
+      }
+
+      // Fetch declined invitations from last 30 days
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const invitations = await ctx.db.invitation.findMany({
+        where: {
+          eventId,
+          status: "DECLINED",
+          respondedAt: {
+            gte: thirtyDaysAgo,
+          },
+        },
+        include: {
+          sentBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: {
+          respondedAt: "desc", // Most recent first
+        },
+      });
 
       return invitations;
     }),
@@ -675,6 +739,7 @@ export const teamRouter = createTRPCRouter({
       // Send acceptance notification email to organizer (async)
       void sendTeamInvitationAcceptedEmail({
         to: invitation.sentBy.email ?? "",
+        organizerName: invitation.sentBy.name ?? "Event Organizer",
         eventName: invitation.event.name,
         eventId: invitation.event.id,
         inviteeName: ctx.session.user.name ?? invitation.email,
@@ -696,6 +761,112 @@ export const teamRouter = createTRPCRouter({
           status: result.teamMember.status,
           modulePermissions: result.teamMember.modulePermissions,
         },
+      };
+    }),
+
+  /**
+   * Decline an invitation using the token from email link
+   * Updates invitation status and removes pending team member
+   */
+  declineInvitation: protectedProcedure
+    .input(declineInvitationSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { token } = input;
+
+      // Find invitation by token
+      const invitation = await ctx.db.invitation.findUnique({
+        where: { token },
+        include: {
+          event: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          sentBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      if (!invitation) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Invitation not found or invalid token",
+        });
+      }
+
+      // Check if already accepted/declined/cancelled
+      if (invitation.status !== "PENDING") {
+        const statusMessage = {
+          ACCEPTED: "This invitation has already been accepted",
+          DECLINED: "This invitation was already declined",
+          CANCELLED: "This invitation was cancelled by the organizer",
+          EXPIRED: "This invitation has expired",
+        }[invitation.status];
+
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: statusMessage ?? "This invitation is no longer valid",
+        });
+      }
+
+      // Check if expired
+      if (invitation.expiresAt < new Date()) {
+        // Mark as expired
+        await ctx.db.invitation.update({
+          where: { id: invitation.id },
+          data: { status: "EXPIRED" },
+        });
+
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "This invitation has expired. Please request a new invitation from the event organizer.",
+        });
+      }
+
+      // Decline invitation in transaction
+      await ctx.db.$transaction(async (tx) => {
+        // Update invitation status to DECLINED
+        await tx.invitation.update({
+          where: { id: invitation.id },
+          data: {
+            status: "DECLINED",
+            respondedAt: new Date(),
+          },
+        });
+
+        // Remove corresponding pending team member
+        await tx.teamMember.deleteMany({
+          where: {
+            eventId: invitation.eventId,
+            email: invitation.email,
+            status: "PENDING",
+          },
+        });
+      });
+
+      // Send declination notification email to organizer (async)
+      void sendTeamInvitationDeclinedEmail({
+        to: invitation.sentBy.email ?? "",
+        organizerName: invitation.sentBy.name ?? "Event Organizer",
+        eventName: invitation.event.name,
+        eventId: invitation.event.id,
+        inviteeName: ctx.session.user.name ?? invitation.email,
+        inviteeEmail: invitation.email,
+        modules: invitation.modulePermissions,
+      }).catch((error) => {
+        console.error("Failed to send invitation declined email:", error);
+      });
+
+      return {
+        success: true,
+        eventName: invitation.event.name,
       };
     }),
 
