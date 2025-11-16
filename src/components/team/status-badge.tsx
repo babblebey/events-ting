@@ -9,7 +9,7 @@
 
 import { Badge } from "flowbite-react";
 import { HiCheckCircle, HiClock, HiXCircle } from "react-icons/hi";
-import type { TeamMemberStatus } from "@prisma/client";
+import type { TeamMemberStatus } from "generated/prisma";
 
 interface StatusBadgeProps {
   status: TeamMemberStatus;

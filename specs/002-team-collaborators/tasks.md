@@ -315,10 +315,10 @@ description: "Task list for Team Collaborators & Permissions feature implementat
 
 ### Security & Validation
 
-- [ ] T104 [P] Add rate limiting for team.invite (20 per hour) and team.resendInvitation (5 per hour)
-- [ ] T105 [P] Implement audit logging for all team management actions
-- [ ] T106 Add security headers and CSRF protection for invitation acceptance endpoints
-- [ ] T107 Review and test all permission checks across existing module routers
+- [X] T104 [P] Add rate limiting for team.invite (20 per hour) and team.resendInvitation (5 per hour)
+- [X] T105 [P] Implement audit logging for all team management actions
+- [X] T106 Add security headers and CSRF protection for invitation acceptance endpoints
+- [X] T107 Review and test all permission checks across existing module routers
 
 ### Final Quality Checks
 

@@ -8,7 +8,7 @@
 
 import { Badge } from "flowbite-react";
 import { HiStar, HiUserGroup } from "react-icons/hi";
-import type { TeamRole } from "@prisma/client";
+import type { TeamRole } from "generated/prisma";
 
 interface RoleBadgeProps {
   role: TeamRole;

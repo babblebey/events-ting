@@ -28,6 +28,21 @@ import {
   sendTeamPermissionChangedEmail,
   sendTeamAccessRemovedEmail,
 } from "@/lib/email";
+import {
+  inviteRateLimiter,
+  resendInvitationRateLimiter,
+  updatePermissionsRateLimiter,
+  removeMemberRateLimiter,
+} from "@/lib/rate-limit";
+import {
+  logTeamInviteSent,
+  logTeamInviteAccepted,
+  logTeamInviteDeclined,
+  logTeamInviteCancelled,
+  logTeamInviteResent,
+  logTeamPermissionsUpdated,
+  logTeamMemberRemoved,
+} from "@/lib/audit";
 
 /**
  * Team Collaboration Router
@@ -450,6 +465,16 @@ export const teamRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { eventId, email, modulePermissions } = input;
 
+      // Rate limiting: 20 invitations per hour
+      const rateLimitResult = inviteRateLimiter.check(ctx.session.user.id);
+      if (!rateLimitResult.allowed) {
+        const resetTime = new Date(rateLimitResult.resetAt).toLocaleTimeString();
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: `Rate limit exceeded. You can send ${rateLimitResult.limit} invitations per hour. Try again after ${resetTime}.`,
+        });
+      }
+
       // Check if user is a team member and owner
       const currentMember = await ctx.db.teamMember.findFirst({
         where: {
@@ -579,6 +604,16 @@ export const teamRouter = createTRPCRouter({
         console.error("Failed to send team invitation email:", error);
       });
 
+      // Audit log: Team invitation sent
+      void logTeamInviteSent(ctx.db, {
+        userId: ctx.session.user.id,
+        userEmail: ctx.session.user.email ?? null,
+        eventId,
+        eventName: event.name,
+        targetEmail: email,
+        modulePermissions,
+      });
+
       return {
         invitation: {
           id: result.invitation.id,
@@ -630,6 +665,16 @@ export const teamRouter = createTRPCRouter({
     .input(resendInvitationSchema)
     .mutation(async ({ ctx, input }) => {
       const { invitationId } = input;
+
+      // Rate limiting: 5 resends per hour
+      const rateLimitResult = resendInvitationRateLimiter.check(ctx.session.user.id);
+      if (!rateLimitResult.allowed) {
+        const resetTime = new Date(rateLimitResult.resetAt).toLocaleTimeString();
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: `Rate limit exceeded. You can resend ${rateLimitResult.limit} invitations per hour. Try again after ${resetTime}.`,
+        });
+      }
 
       // Find the invitation
       const invitation = await ctx.db.invitation.findUnique({
@@ -711,6 +756,15 @@ export const teamRouter = createTRPCRouter({
         expiresAt: newExpiresAt,
       }).catch((error) => {
         console.error("Failed to resend team invitation email:", error);
+      });
+
+      // Audit log: Team invitation resent
+      void logTeamInviteResent(ctx.db, {
+        userId: ctx.session.user.id,
+        userEmail: ctx.session.user.email ?? null,
+        eventId: invitation.eventId,
+        eventName: invitation.event.name,
+        targetEmail: invitation.email,
       });
 
       return {
@@ -804,6 +858,21 @@ export const teamRouter = createTRPCRouter({
             status: "PENDING",
           },
         });
+      });
+
+      // Get event name for audit log
+      const event = await ctx.db.event.findUnique({
+        where: { id: invitation.eventId },
+        select: { name: true },
+      });
+
+      // Audit log: Team invitation cancelled
+      void logTeamInviteCancelled(ctx.db, {
+        userId: ctx.session.user.id,
+        userEmail: ctx.session.user.email ?? null,
+        eventId: invitation.eventId,
+        eventName: event?.name ?? "Unknown Event",
+        targetEmail: invitation.email,
       });
 
       return {
@@ -975,6 +1044,15 @@ export const teamRouter = createTRPCRouter({
         console.error("Failed to send invitation accepted email:", error);
       });
 
+      // Audit log: Team invitation accepted
+      void logTeamInviteAccepted(ctx.db, {
+        userId: ctx.session.user.id,
+        userEmail: ctx.session.user.email ?? null,
+        eventId: invitation.event.id,
+        eventName: invitation.event.name,
+        modulePermissions: invitation.modulePermissions,
+      });
+
       return {
         event: {
           id: invitation.event.id,
@@ -1090,6 +1168,16 @@ export const teamRouter = createTRPCRouter({
         console.error("Failed to send invitation declined email:", error);
       });
 
+      // Audit log: Team invitation declined
+      void logTeamInviteDeclined(ctx.db, {
+        userId: ctx.session.user.id,
+        userEmail: ctx.session.user.email ?? null,
+        eventId: invitation.event.id,
+        eventName: invitation.event.name,
+        targetEmail: invitation.email,
+        modulePermissions: invitation.modulePermissions,
+      });
+
       return {
         success: true,
         eventName: invitation.event.name,
@@ -1130,6 +1218,16 @@ export const teamRouter = createTRPCRouter({
     .input(updateTeamMemberPermissionsSchema)
     .mutation(async ({ ctx, input }) => {
       const { teamMemberId, modulePermissions } = input;
+
+      // Rate limiting: 30 permission updates per hour
+      const rateLimitResult = updatePermissionsRateLimiter.check(ctx.session.user.id);
+      if (!rateLimitResult.allowed) {
+        const resetTime = new Date(rateLimitResult.resetAt).toLocaleTimeString();
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: `Rate limit exceeded. You can update permissions ${rateLimitResult.limit} times per hour. Try again after ${resetTime}.`,
+        });
+      }
 
       // Find the team member
       const teamMember = await ctx.db.teamMember.findUnique({
@@ -1219,6 +1317,18 @@ export const teamRouter = createTRPCRouter({
         });
       }
 
+      // Audit log: Team permissions updated
+      void logTeamPermissionsUpdated(ctx.db, {
+        userId: ctx.session.user.id,
+        userEmail: ctx.session.user.email ?? null,
+        eventId: teamMember.event.id,
+        eventName: teamMember.event.name,
+        targetUserId: teamMember.user?.id ?? null,
+        targetEmail: teamMember.email,
+        previousPermissions,
+        newPermissions: modulePermissions,
+      });
+
       return {
         teamMember: {
           id: updatedMember.id,
@@ -1307,6 +1417,16 @@ export const teamRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { teamMemberId } = input;
 
+      // Rate limiting: 20 removals per hour
+      const rateLimitResult = removeMemberRateLimiter.check(ctx.session.user.id);
+      if (!rateLimitResult.allowed) {
+        const resetTime = new Date(rateLimitResult.resetAt).toLocaleTimeString();
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: `Rate limit exceeded. You can remove ${rateLimitResult.limit} members per hour. Try again after ${resetTime}.`,
+        });
+      }
+
       // Find the team member
       const teamMember = await ctx.db.teamMember.findUnique({
         where: { id: teamMemberId },
@@ -1391,6 +1511,17 @@ export const teamRouter = createTRPCRouter({
           console.error("Failed to send access removed email:", error);
         });
       }
+
+      // Audit log: Team member removed
+      void logTeamMemberRemoved(ctx.db, {
+        userId: ctx.session.user.id,
+        userEmail: ctx.session.user.email ?? null,
+        eventId: teamMember.event.id,
+        eventName: teamMember.event.name,
+        targetUserId: teamMember.user?.id ?? null,
+        targetEmail: teamMember.email,
+        removedModules,
+      });
 
       return {
         success: true,
