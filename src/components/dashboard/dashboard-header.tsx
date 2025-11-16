@@ -10,7 +10,13 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "flowbite-react";
-import { HiPlus, HiUser, HiLogout, HiChevronDown } from "react-icons/hi";
+import {
+  HiPlus,
+  HiUser,
+  HiLogout,
+  HiChevronDown,
+  HiUserGroup,
+} from "react-icons/hi";
 
 interface User {
   id: string;
@@ -29,7 +35,10 @@ interface DashboardHeaderProps {
 /**
  * Dashboard header with title, description, create button, and user menu
  */
-export function DashboardHeader({ user, className = "" }: DashboardHeaderProps) {
+export function DashboardHeader({
+  user,
+  className = "",
+}: DashboardHeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleSignOut = () => {
@@ -77,7 +86,7 @@ export function DashboardHeader({ user, className = "" }: DashboardHeaderProps) 
               <div className="relative">
                 <button
                   onClick={toggleDropdown}
-                  className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                  className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
                   onBlur={handleClickOutside}
                 >
                   {/* User Avatar/Icon */}
@@ -120,6 +129,14 @@ export function DashboardHeader({ user, className = "" }: DashboardHeaderProps) 
 
                     {/* Menu Items */}
                     <div className="py-1">
+                      <Link
+                        href="/my-teams"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <HiUserGroup className="h-4 w-4" />
+                        My Teams
+                      </Link>
                       <Link
                         href="/profile"
                         className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"

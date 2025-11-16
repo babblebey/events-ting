@@ -230,16 +230,16 @@ description: "Task list for Team Collaborators & Permissions feature implementat
 
 #### Backend API
 
-- [ ] T068 [US6] Implement team.getMyMemberships query to fetch all user's team memberships in src/server/api/routers/team.ts
+- [X] T068 [US6] Implement team.getMyMemberships query to fetch all user's team memberships in src/server/api/routers/team.ts
 
 #### Frontend Components
 
-- [ ] T069 [P] [US6] Create user dashboard page at src/app/(dashboard)/my-teams/page.tsx
-- [ ] T070 [P] [US6] Create MyTeamsList component showing all events user collaborates on in src/components/team/my-teams-list.tsx
-- [ ] T071 [P] [US6] Create PermissionExplainer component describing module permissions in src/components/team/permission-explainer.tsx
-- [ ] T072 [US6] Add navigation link to "My Teams" in main dashboard layout src/app/(dashboard)/layout.tsx
-- [ ] T073 [US6] Integrate MyTeamsList with team.getMyMemberships query in my-teams page
-- [ ] T074 [US6] Add permission highlights to team section showing user's own permissions in src/app/(dashboard)/[id]/settings/team/page.tsx
+- [X] T069 [P] [US6] Create user dashboard page at src/app/(dashboard)/my-teams/page.tsx
+- [X] T070 [P] [US6] Create MyTeamsList component showing all events user collaborates on in src/components/team/my-teams-list.tsx
+- [X] T071 [P] [US6] Create PermissionExplainer component describing module permissions in src/components/team/permission-explainer.tsx
+- [X] T072 [US6] Add navigation link to "My Teams" in main dashboard layout src/app/(dashboard)/layout.tsx
+- [X] T073 [US6] Integrate MyTeamsList with team.getMyMemberships query in my-teams page
+- [X] T074 [US6] Add permission highlights to team section showing user's own permissions in src/app/(dashboard)/[id]/settings/team/page.tsx
 
 **Checkpoint**: Complete collaborator self-service experience - improved user understanding of their access
 

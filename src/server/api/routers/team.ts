@@ -980,6 +980,48 @@ export const teamRouter = createTRPCRouter({
     }),
 
   /**
+   * Get all team memberships for the current user
+   * Returns all events where the user is a collaborator or owner
+   */
+  getMyMemberships: protectedProcedure.query(async ({ ctx }) => {
+    // Fetch all active team memberships for current user
+    const memberships = await ctx.db.teamMember.findMany({
+      where: {
+        userId: ctx.session.user.id,
+        status: "ACTIVE",
+      },
+      include: {
+        event: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            startDate: true,
+            endDate: true,
+            locationType: true,
+            locationAddress: true,
+            locationUrl: true,
+            description: true,
+          },
+        },
+      },
+      orderBy: [
+        { role: "asc" }, // OWNER first, then COLLABORATOR
+        { invitedAt: "desc" }, // Most recent first
+      ],
+    });
+
+    return memberships.map((member) => ({
+      id: member.id,
+      role: member.role,
+      modulePermissions: member.modulePermissions,
+      invitedAt: member.invitedAt,
+      lastAccessedAt: member.lastAccessedAt,
+      event: member.event,
+    }));
+  }),
+
+  /**
    * Remove a collaborator from the team
    * Owner-only operation that revokes all access
    */
