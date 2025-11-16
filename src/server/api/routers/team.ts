@@ -14,6 +14,7 @@ import {
   resendInvitationSchema,
   cancelInvitationSchema,
   updateTeamMemberPermissionsSchema,
+  removeTeamMemberSchema,
 } from "@/lib/validators";
 import {
   generateInvitationToken,
@@ -23,6 +24,7 @@ import {
   sendTeamInvitationEmail,
   sendTeamInvitationAcceptedEmail,
   sendTeamPermissionChangedEmail,
+  sendTeamAccessRemovedEmail,
 } from "@/lib/email";
 
 export const teamRouter = createTRPCRouter({
@@ -790,10 +792,7 @@ export const teamRouter = createTRPCRouter({
           previousPermissions,
           newPermissions: modulePermissions,
         }).catch((error) => {
-          console.error(
-            "Failed to send permission changed email:",
-            error,
-          );
+          console.error("Failed to send permission changed email:", error);
         });
       }
 
@@ -806,6 +805,105 @@ export const teamRouter = createTRPCRouter({
           modulePermissions: updatedMember.modulePermissions,
           updatedAt: updatedMember.updatedAt,
         },
+      };
+    }),
+
+  /**
+   * Remove a collaborator from the team
+   * Owner-only operation that revokes all access
+   */
+  removeMember: protectedProcedure
+    .input(removeTeamMemberSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { teamMemberId } = input;
+
+      // Find the team member
+      const teamMember = await ctx.db.teamMember.findUnique({
+        where: { id: teamMemberId },
+        include: {
+          event: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      if (!teamMember) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Team member not found",
+        });
+      }
+
+      // Verify user is event owner
+      const currentMember = await ctx.db.teamMember.findFirst({
+        where: {
+          eventId: teamMember.eventId,
+          userId: ctx.session.user.id,
+          status: "ACTIVE",
+        },
+      });
+
+      if (currentMember?.role !== "OWNER") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only event owners can remove team members",
+        });
+      }
+
+      // Cannot remove owner (self-removal protection)
+      if (teamMember.role === "OWNER") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "Cannot remove yourself as owner. Transfer ownership to another user first.",
+        });
+      }
+
+      // Check if already removed
+      if (teamMember.status === "REMOVED") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This team member has already been removed",
+        });
+      }
+
+      // Store module permissions for email notification
+      const removedModules = teamMember.modulePermissions;
+
+      // Update team member status to REMOVED
+      await ctx.db.teamMember.update({
+        where: { id: teamMemberId },
+        data: {
+          status: "REMOVED",
+          updatedAt: new Date(),
+        },
+      });
+
+      // Send access removal notification email (async)
+      if (teamMember.user?.email) {
+        void sendTeamAccessRemovedEmail({
+          to: teamMember.user.email,
+          collaboratorName: teamMember.user.name ?? teamMember.email,
+          organizerName: ctx.session.user.name ?? "Event Organizer",
+          eventName: teamMember.event.name,
+          modules: removedModules,
+        }).catch((error) => {
+          console.error("Failed to send access removed email:", error);
+        });
+      }
+
+      return {
+        success: true,
       };
     }),
 });

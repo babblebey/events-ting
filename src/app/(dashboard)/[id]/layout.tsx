@@ -18,13 +18,13 @@ interface EventDashboardLayoutProps {
 
 // Module name mapping for navigation items
 const MODULE_MAP: Record<string, ModuleName> = {
-  "overview": "OVERVIEW",
-  "attendees": "ATTENDEES",
-  "tickets": "TICKETS",
-  "schedule": "SCHEDULE",
-  "speakers": "SPEAKERS",
-  "cfp": "CFP",
-  "communications": "COMMUNICATIONS",
+  overview: "OVERVIEW",
+  attendees: "ATTENDEES",
+  tickets: "TICKETS",
+  schedule: "SCHEDULE",
+  speakers: "SPEAKERS",
+  cfp: "CFP",
+  communications: "COMMUNICATIONS",
 };
 
 async function DashboardLayout({
@@ -49,16 +49,21 @@ async function DashboardLayout({
     redirect(`/${eventId}/access-denied`);
   }
 
+  // If user's access has been removed, redirect to removed page
+  if (teamMember.status === "REMOVED") {
+    redirect(`/${eventId}/removed`);
+  }
+
   /**
    * Check if user has access to a specific module
    */
   const hasModuleAccess = (modulePath: string): boolean => {
     const moduleName = MODULE_MAP[modulePath];
     if (!moduleName) return true; // Unknown module, allow access
-    
+
     // Owners have access to all modules
     if (teamMember.role === "OWNER") return true;
-    
+
     // Collaborators need specific module permission
     return teamMember.modulePermissions.includes(moduleName);
   };
@@ -124,7 +129,7 @@ async function DashboardLayout({
   const navItems = allNavItems.filter((item) => {
     // Settings is always accessible
     if (!item.module) return true;
-    
+
     return hasModuleAccess(item.module);
   });
 

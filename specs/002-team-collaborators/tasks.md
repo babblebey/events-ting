@@ -176,20 +176,20 @@ description: "Task list for Team Collaborators & Permissions feature implementat
 
 #### Backend API
 
-- [ ] T053 [US4] Implement team.removeMember procedure in src/server/api/routers/team.ts
-- [ ] T054 [US4] Implement email sending for access removal (sends team-access-removed.tsx) in removeMember procedure
+- [X] T053 [US4] Implement team.removeMember procedure in src/server/api/routers/team.ts
+- [X] T054 [US4] Implement email sending for access removal (sends team-access-removed.tsx) in removeMember procedure
 
 #### Frontend Components
 
-- [ ] T055 [P] [US4] Create RemoveMemberModal component with confirmation dialog in src/components/team/remove-member-modal.tsx
-- [ ] T056 [US4] Add remove action to TeamMemberCard component in src/components/team/team-member-card.tsx
-- [ ] T057 [US4] Integrate RemoveMemberModal with team.removeMember mutation
+- [X] T055 [P] [US4] Create RemoveMemberModal component with confirmation dialog in src/components/team/remove-member-modal.tsx
+- [X] T056 [US4] Add remove action to TeamMemberCard component in src/components/team/team-member-card.tsx
+- [X] T057 [US4] Integrate RemoveMemberModal with team.removeMember mutation
 
 #### Access Revocation Enforcement
 
-- [ ] T058 [US4] Add validation in teamProtectedProcedure middleware to block removed members from accessing any endpoints
-- [ ] T059 [US4] Create removed-access notification page at src/app/(dashboard)/[id]/removed/page.tsx
-- [ ] T060 [US4] Add automatic redirect to removed-access page when removed member attempts event access
+- [X] T058 [US4] Add validation in teamProtectedProcedure middleware to block removed members from accessing any endpoints
+- [X] T059 [US4] Create removed-access notification page at src/app/(dashboard)/[id]/removed/page.tsx
+- [X] T060 [US4] Add automatic redirect to removed-access page when removed member attempts event access
 
 **Checkpoint**: Complete access revocation system functional - security requirements met
 

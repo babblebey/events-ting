@@ -15,6 +15,7 @@ import { Card, Avatar, Badge, Button, Tooltip } from "flowbite-react";
 import { RoleBadge } from "./role-badge";
 import { StatusBadge } from "./status-badge";
 import { EditPermissionsModal } from "./edit-permissions-modal";
+import { RemoveMemberModal } from "./remove-member-modal";
 import { HiPencil, HiTrash, HiMail } from "react-icons/hi";
 import { formatDistanceToNow } from "date-fns";
 
@@ -43,9 +44,14 @@ interface TeamMemberCardProps {
   eventId: string;
 }
 
-export function TeamMemberCard({ member, isOwner, eventId }: TeamMemberCardProps) {
+export function TeamMemberCard({
+  member,
+  isOwner,
+  eventId,
+}: TeamMemberCardProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  
+  const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
+
   const displayName = member.user?.name ?? member.email.split("@")[0];
   const displayEmail = member.user?.email ?? member.email;
   const isUserActive = member.status === "ACTIVE" && member.user !== null;
@@ -59,8 +65,8 @@ export function TeamMemberCard({ member, isOwner, eventId }: TeamMemberCardProps
   const invitedText = `Invited ${formatDistanceToNow(new Date(member.invitedAt), { addSuffix: true })}`;
 
   return (
-    <Card className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-      <div className="flex flex-col sm:flex-row gap-4 items-start">
+    <Card className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
+      <div className="flex flex-col items-start gap-4 sm:flex-row">
         {/* Avatar Section */}
         <div className="shrink-0">
           <Avatar
@@ -73,21 +79,21 @@ export function TeamMemberCard({ member, isOwner, eventId }: TeamMemberCardProps
         </div>
 
         {/* Member Info Section */}
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           {/* Name and Email */}
           <div className="mb-2">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+            <h3 className="truncate text-lg font-semibold text-gray-900 dark:text-white">
               {displayName}
             </h3>
             {isUserActive && member.user?.name && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+              <p className="truncate text-sm text-gray-600 dark:text-gray-400">
                 {displayEmail}
               </p>
             )}
             {!isUserActive && (
-              <div className="flex items-center gap-2 mt-1">
+              <div className="mt-1 flex items-center gap-2">
                 <HiMail className="h-4 w-4 text-gray-400" />
-                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                <p className="truncate text-sm text-gray-600 dark:text-gray-400">
                   {displayEmail}
                 </p>
               </div>
@@ -95,43 +101,46 @@ export function TeamMemberCard({ member, isOwner, eventId }: TeamMemberCardProps
           </div>
 
           {/* Badges */}
-          <div className="flex flex-wrap gap-2 mb-3">
+          <div className="mb-3 flex flex-wrap gap-2">
             <RoleBadge role={member.role} />
             <StatusBadge status={member.status} />
           </div>
 
           {/* Module Permissions */}
-          {member.role === "COLLABORATOR" && member.modulePermissions.length > 0 && (
-            <div className="mb-3">
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
-                Module Access:
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {member.modulePermissions.map((module) => (
-                  <Badge key={module} color="gray" size="xs">
-                    {module}
-                  </Badge>
-                ))}
+          {member.role === "COLLABORATOR" &&
+            member.modulePermissions.length > 0 && (
+              <div className="mb-3">
+                <p className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+                  Module Access:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {member.modulePermissions.map((module) => (
+                    <Badge key={module} color="gray" size="xs">
+                      {module}
+                    </Badge>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Owner has full access message */}
           {member.role === "OWNER" && (
             <div className="mb-3">
-              <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+              <p className="text-xs text-gray-500 italic dark:text-gray-400">
                 Has full access to all modules
               </p>
             </div>
           )}
 
           {/* Metadata */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex flex-col gap-2 text-xs text-gray-500 sm:flex-row sm:items-center dark:text-gray-400">
             <span>{invitedText}</span>
             {member.invitedBy && (
               <>
                 <span className="hidden sm:inline">•</span>
-                <span>by {member.invitedBy.name ?? member.invitedBy.email}</span>
+                <span>
+                  by {member.invitedBy.name ?? member.invitedBy.email}
+                </span>
               </>
             )}
             {member.status === "ACTIVE" && (
@@ -145,7 +154,7 @@ export function TeamMemberCard({ member, isOwner, eventId }: TeamMemberCardProps
 
         {/* Action Buttons - Owner Only */}
         {isOwner && member.role !== "OWNER" && member.status !== "REMOVED" && (
-          <div className="flex sm:flex-col gap-2 self-end sm:self-start">
+          <div className="flex gap-2 self-end sm:flex-col sm:self-start">
             {member.status === "ACTIVE" && (
               <>
                 <Tooltip content="Edit permissions">
@@ -163,7 +172,7 @@ export function TeamMemberCard({ member, isOwner, eventId }: TeamMemberCardProps
                     size="sm"
                     color="failure"
                     aria-label="Remove member"
-                    disabled
+                    onClick={() => setIsRemoveModalOpen(true)}
                   >
                     <HiTrash className="h-4 w-4" />
                   </Button>
@@ -176,7 +185,7 @@ export function TeamMemberCard({ member, isOwner, eventId }: TeamMemberCardProps
         {/* Pending State Notice */}
         {member.status === "PENDING" && (
           <div className="w-full sm:w-auto">
-            <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+            <div className="text-xs text-gray-500 italic dark:text-gray-400">
               Awaiting invitation acceptance
             </div>
           </div>
@@ -185,7 +194,7 @@ export function TeamMemberCard({ member, isOwner, eventId }: TeamMemberCardProps
         {/* Removed State Notice */}
         {member.status === "REMOVED" && (
           <div className="w-full sm:w-auto">
-            <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+            <div className="text-xs text-gray-500 italic dark:text-gray-400">
               Access has been revoked
             </div>
           </div>
@@ -193,14 +202,28 @@ export function TeamMemberCard({ member, isOwner, eventId }: TeamMemberCardProps
       </div>
 
       {/* Edit Permissions Modal */}
-      {isOwner && member.status === "ACTIVE" && member.role === "COLLABORATOR" && (
-        <EditPermissionsModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          teamMember={member}
-          eventId={eventId}
-        />
-      )}
+      {isOwner &&
+        member.status === "ACTIVE" &&
+        member.role === "COLLABORATOR" && (
+          <EditPermissionsModal
+            isOpen={isEditModalOpen}
+            onClose={() => setIsEditModalOpen(false)}
+            teamMember={member}
+            eventId={eventId}
+          />
+        )}
+
+      {/* Remove Member Modal */}
+      {isOwner &&
+        member.status === "ACTIVE" &&
+        member.role === "COLLABORATOR" && (
+          <RemoveMemberModal
+            isOpen={isRemoveModalOpen}
+            onClose={() => setIsRemoveModalOpen(false)}
+            teamMember={member}
+            eventId={eventId}
+          />
+        )}
     </Card>
   );
 }
