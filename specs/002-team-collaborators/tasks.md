@@ -74,12 +74,12 @@ description: "Task list for Team Collaborators & Permissions feature implementat
 
 #### Backend API (tRPC Procedures)
 
-- [ ] T017 [P] [US1] Implement team.invite procedure with validation in src/server/api/routers/team.ts
-- [ ] T018 [P] [US1] Implement team.acceptInvitation procedure in src/server/api/routers/team.ts
-- [ ] T019 [P] [US1] Implement team.getCurrentMember query in src/server/api/routers/team.ts
-- [ ] T020 [US1] Add invitation token generation utility using crypto.randomBytes in src/lib/utils.ts
-- [ ] T021 [US1] Implement email sending for team.invite (sends team-invitation.tsx) in team.ts invite procedure
-- [ ] T022 [US1] Implement email sending for team.acceptInvitation (sends team-invitation-accepted.tsx) in team.ts acceptInvitation procedure
+- [X] T017 [P] [US1] Implement team.invite procedure with validation in src/server/api/routers/team.ts
+- [X] T018 [P] [US1] Implement team.acceptInvitation procedure in src/server/api/routers/team.ts
+- [X] T019 [P] [US1] Implement team.getCurrentMember query in src/server/api/routers/team.ts
+- [X] T020 [US1] Add invitation token generation utility using crypto.randomBytes in src/lib/utils.ts
+- [X] T021 [US1] Implement email sending for team.invite (sends team-invitation.tsx) in team.ts invite procedure
+- [X] T022 [US1] Implement email sending for team.acceptInvitation (sends team-invitation-accepted.tsx) in team.ts acceptInvitation procedure
 
 #### Frontend - Team Management Page
 
