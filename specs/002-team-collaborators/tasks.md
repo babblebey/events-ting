@@ -83,10 +83,10 @@ description: "Task list for Team Collaborators & Permissions feature implementat
 
 #### Frontend - Team Management Page
 
-- [ ] T023 [P] [US1] Create team management page at src/app/(dashboard)/[id]/settings/team/page.tsx
-- [ ] T024 [P] [US1] Create loading state for team page at src/app/(dashboard)/[id]/settings/team/loading.tsx
-- [ ] T025 [P] [US1] Create InviteCollaboratorForm component in src/components/team/invite-collaborator-form.tsx
-- [ ] T026 [P] [US1] Create ModulePermissionsSelector component with checkboxes in src/components/team/module-permissions-selector.tsx
+- [X] T023 [P] [US1] Create team management page at src/app/(dashboard)/[id]/settings/team/page.tsx
+- [X] T024 [P] [US1] Create loading state for team page at src/app/(dashboard)/[id]/settings/team/loading.tsx
+- [X] T025 [P] [US1] Create InviteCollaboratorForm component in src/components/team/invite-collaborator-form.tsx
+- [X] T026 [P] [US1] Create ModulePermissionsSelector component with checkboxes in src/components/team/module-permissions-selector.tsx
 
 #### Frontend - Invitation Acceptance Flow
 

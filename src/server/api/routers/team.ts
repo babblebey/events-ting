@@ -341,17 +341,4 @@ export const teamRouter = createTRPCRouter({
         },
       };
     }),
-}),
- id: invitation.event.id,
-          name: invitation.event.name,
-          slug: invitation.event.slug,
-        },
-        teamMember: {
-          id: result.teamMember.id,
-          role: result.teamMember.role,
-          status: result.teamMember.status,
-          modulePermissions: result.teamMember.modulePermissions,
-        },
-      };
-    }),
 });
