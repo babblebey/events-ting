@@ -209,7 +209,7 @@ function TeamEventCard({ membership }: { membership: Membership }) {
       {/* Action Buttons */}
       <div className="mt-auto flex gap-2">
         <Link href={`/${event.slug}`} className="flex-1">
-          <Button color="primary" className="w-full" size="sm">
+          <Button color="blue" className="w-full" size="sm">
             <HiExternalLink className="mr-2 h-4 w-4" />
             View Event
           </Button>
