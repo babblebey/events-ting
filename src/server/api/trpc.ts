@@ -131,3 +131,79 @@ export const protectedProcedure = t.procedure
       },
     });
   });
+
+/**
+ * Team Protected Procedure
+ * 
+ * Middleware for team collaboration operations that require permission checks.
+ * Verifies user is authenticated and has appropriate access to the event:
+ * - OWNER: Full access to all modules
+ * - COLLABORATOR: Access only to assigned modules
+ * 
+ * Usage: Include eventId and optionally requiredModule in the input schema.
+ * 
+ * @example
+ * ```ts
+ * teamProtectedProcedure
+ *   .input(z.object({ 
+ *     eventId: z.string(),
+ *     requiredModule: z.enum(MODULE_NAMES).optional(),
+ *   }))
+ *   .query(async ({ ctx }) => {
+ *     // ctx.teamMember is now available
+ *   });
+ * ```
+ */
+export const teamProtectedProcedure = protectedProcedure.use(
+  async ({ ctx, next, rawInput }) => {
+    const input = rawInput as { 
+      eventId?: string; 
+      requiredModule?: string; 
+    };
+
+    // eventId is required for team permission checks
+    if (!input.eventId) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "eventId is required for team operations",
+      });
+    }
+
+    // Check if user is a team member
+    const member = await ctx.db.teamMember.findFirst({
+      where: { 
+        eventId: input.eventId,
+        userId: ctx.session.user.id,
+        status: "ACTIVE",
+      },
+    });
+
+    if (!member) {
+      throw new TRPCError({ 
+        code: "FORBIDDEN",
+        message: "You are not a member of this event team",
+      });
+    }
+
+    // Check module permission if required
+    if (input.requiredModule) {
+      const hasAccess = 
+        member.role === "OWNER" || 
+        member.modulePermissions.includes(input.requiredModule);
+
+      if (!hasAccess) {
+        throw new TRPCError({ 
+          code: "FORBIDDEN",
+          message: `You don't have access to the ${input.requiredModule} module`,
+        });
+      }
+    }
+
+    return next({ 
+      ctx: { 
+        ...ctx, 
+        teamMember: member 
+      } 
+    });
+  }
+);

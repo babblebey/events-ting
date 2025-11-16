@@ -97,7 +97,7 @@ export function EmptyState({
   // No events created at all
   if (type === "no-events") {
     return (
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto">
         <div className="rounded-xl border-2 border-dashed border-gray-300 bg-white px-6 py-12 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:px-12 sm:py-16">
           {/* Icon/Illustration */}
           <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/20">

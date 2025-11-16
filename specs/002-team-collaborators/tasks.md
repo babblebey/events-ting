@@ -47,18 +47,18 @@ description: "Task list for Team Collaborators & Permissions feature implementat
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Create team tRPC router file src/server/api/routers/team.ts with base structure and exports
-- [ ] T006 Add team router to root tRPC router in src/server/api/root.ts
-- [ ] T007 Create teamProtectedProcedure middleware in src/server/api/trpc.ts for permission checks
-- [ ] T008 [P] Create settings layout with submenu navigation in src/app/(dashboard)/[id]/settings/layout.tsx
-- [ ] T009 [P] Move existing settings content to src/app/(dashboard)/[id]/settings/general/page.tsx
-- [ ] T010 [P] Create email utility helper functions for team collaboration emails in src/lib/email.ts
-- [ ] T011 [P] Create team-invitation email template in emails/team-invitation.tsx
-- [ ] T012 [P] Create team-invitation-accepted email template in emails/team-invitation-accepted.tsx
-- [ ] T013 [P] Create team-invitation-declined email template in emails/team-invitation-declined.tsx
-- [ ] T014 [P] Create team-permission-changed email template in emails/team-permission-changed.tsx
-- [ ] T015 [P] Create team-access-removed email template in emails/team-access-removed.tsx
-- [ ] T016 [P] Create base team components directory structure at src/components/team/
+- [X] T005 Create team tRPC router file src/server/api/routers/team.ts with base structure and exports
+- [X] T006 Add team router to root tRPC router in src/server/api/root.ts
+- [X] T007 Create teamProtectedProcedure middleware in src/server/api/trpc.ts for permission checks
+- [X] T008 [P] Update settings layout navigation to link general tab to /settings (not /settings/general) in src/app/(dashboard)/[id]/settings/layout.tsx
+- [X] T009 [P] Keep existing settings content at src/app/(dashboard)/[id]/settings/page.tsx (no separate /general route needed)
+- [X] T010 [P] Create email utility helper functions for team collaboration emails in src/lib/email.ts
+- [X] T011 [P] Create team-invitation email template in emails/team-invitation.tsx
+- [X] T012 [P] Create team-invitation-accepted email template in emails/team-invitation-accepted.tsx
+- [X] T013 [P] Create team-invitation-declined email template in emails/team-invitation-declined.tsx
+- [X] T014 [P] Create team-permission-changed email template in emails/team-permission-changed.tsx
+- [X] T015 [P] Create team-access-removed email template in emails/team-access-removed.tsx
+- [X] T016 [P] Create base team components directory structure at src/components/team/
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
