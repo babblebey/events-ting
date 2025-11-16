@@ -7,7 +7,6 @@ import { TRPCError } from "@trpc/server";
 import {
   createTRPCRouter,
   protectedProcedure,
-  teamProtectedProcedure,
 } from "@/server/api/trpc";
 import {
   inviteTeamMemberSchema,
@@ -52,13 +51,21 @@ export const teamRouter = createTRPCRouter({
    * Invite a new collaborator to the event
    * Creates both Invitation and TeamMember records, sends email
    */
-  invite: teamProtectedProcedure
+  invite: protectedProcedure
     .input(inviteTeamMemberSchema)
     .mutation(async ({ ctx, input }) => {
       const { eventId, email, modulePermissions } = input;
 
-      // Verify user is owner
-      if (ctx.teamMember.role !== "OWNER") {
+      // Check if user is a team member and owner
+      const currentMember = await ctx.db.teamMember.findFirst({
+        where: {
+          eventId,
+          userId: ctx.session.user.id,
+          status: "ACTIVE",
+        },
+      });
+
+      if (!currentMember || currentMember.role !== "OWNER") {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only event owners can invite collaborators",

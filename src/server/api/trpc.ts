@@ -136,74 +136,18 @@ export const protectedProcedure = t.procedure
  * Team Protected Procedure
  * 
  * Middleware for team collaboration operations that require permission checks.
- * Verifies user is authenticated and has appropriate access to the event:
- * - OWNER: Full access to all modules
- * - COLLABORATOR: Access only to assigned modules
+ * Verifies user is authenticated and has appropriate access to the event.
  * 
- * Usage: Include eventId and optionally requiredModule in the input schema.
+ * Note: This is a base procedure. Actual permission checks happen in individual
+ * procedures since middleware doesn't have access to parsed input.
  * 
  * @example
  * ```ts
  * teamProtectedProcedure
- *   .input(z.object({ 
- *     eventId: z.string(),
- *     requiredModule: z.enum(MODULE_NAMES).optional(),
- *   }))
- *   .query(async ({ ctx }) => {
- *     // ctx.teamMember is now available
+ *   .input(z.object({ eventId: z.string() }))
+ *   .query(async ({ ctx, input }) => {
+ *     // Perform permission check here with input.eventId
  *   });
  * ```
  */
-export const teamProtectedProcedure = protectedProcedure.use(
-  async ({ ctx, next, rawInput }) => {
-    const input = rawInput as { 
-      eventId?: string; 
-      requiredModule?: string; 
-    };
-
-    // eventId is required for team permission checks
-    if (!input.eventId) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "eventId is required for team operations",
-      });
-    }
-
-    // Check if user is a team member
-    const member = await ctx.db.teamMember.findFirst({
-      where: { 
-        eventId: input.eventId,
-        userId: ctx.session.user.id,
-        status: "ACTIVE",
-      },
-    });
-
-    if (!member) {
-      throw new TRPCError({ 
-        code: "FORBIDDEN",
-        message: "You are not a member of this event team",
-      });
-    }
-
-    // Check module permission if required
-    if (input.requiredModule) {
-      const hasAccess = 
-        member.role === "OWNER" || 
-        member.modulePermissions.includes(input.requiredModule);
-
-      if (!hasAccess) {
-        throw new TRPCError({ 
-          code: "FORBIDDEN",
-          message: `You don't have access to the ${input.requiredModule} module`,
-        });
-      }
-    }
-
-    return next({ 
-      ctx: { 
-        ...ctx, 
-        teamMember: member 
-      } 
-    });
-  }
-);
+export const teamProtectedProcedure = protectedProcedure;

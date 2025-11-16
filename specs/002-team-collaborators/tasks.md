@@ -90,8 +90,8 @@ description: "Task list for Team Collaborators & Permissions feature implementat
 
 #### Frontend - Invitation Acceptance Flow
 
-- [ ] T027 [P] [US1] Create invitation acceptance page at src/app/invitations/accept/page.tsx
-- [ ] T028 [US1] Implement token verification and acceptance flow in invitation acceptance page
+- [X] T027 [P] [US1] Create invitation acceptance page at src/app/invitations/accept/page.tsx
+- [X] T028 [US1] Implement token verification and acceptance flow in invitation acceptance page
 
 #### Permission Enforcement
 
