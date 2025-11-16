@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { api } from "@/trpc/react";
-import { Loader2, CheckCircle2, XCircle, Clock, Mail, ShieldAlert } from "lucide-react";
+import { HiOutlineRefresh, HiCheckCircle, HiXCircle, HiClock, HiMail, HiShieldExclamation } from "react-icons/hi";
 
 type InvitationState = 
   | { status: "loading" }
@@ -143,7 +143,7 @@ export default function AcceptInvitationPage() {
           {/* Loading State */}
           {invitationState.status === "loading" && (
             <div className="flex flex-col items-center space-y-4">
-              <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+              <HiOutlineRefresh className="h-12 w-12 animate-spin text-blue-600" />
               <p className="text-center text-gray-600 dark:text-gray-300">
                 Verifying invitation...
               </p>
@@ -155,7 +155,7 @@ export default function AcceptInvitationPage() {
             <div className="space-y-6">
               <div className="flex flex-col items-center space-y-4">
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
-                  <Mail className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                  <HiMail className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="text-center">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -196,7 +196,7 @@ export default function AcceptInvitationPage() {
           {/* Accepting State */}
           {invitationState.status === "accepting" && (
             <div className="flex flex-col items-center space-y-4">
-              <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+              <HiOutlineRefresh className="h-12 w-12 animate-spin text-blue-600" />
               <p className="text-center text-gray-600 dark:text-gray-300">
                 Accepting invitation...
               </p>
@@ -206,7 +206,7 @@ export default function AcceptInvitationPage() {
           {/* Declining State */}
           {invitationState.status === "declining" && (
             <div className="flex flex-col items-center space-y-4">
-              <Loader2 className="h-12 w-12 animate-spin text-orange-600" />
+              <HiOutlineRefresh className="h-12 w-12 animate-spin text-orange-600" />
               <p className="text-center text-gray-600 dark:text-gray-300">
                 Declining invitation...
               </p>
@@ -218,7 +218,7 @@ export default function AcceptInvitationPage() {
             <div className="space-y-6">
               <div className="flex flex-col items-center space-y-4">
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900">
-                  <XCircle className="h-8 w-8 text-orange-600 dark:text-orange-400" />
+                  <HiXCircle className="h-8 w-8 text-orange-600 dark:text-orange-400" />
                 </div>
                 <div className="text-center">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -252,7 +252,7 @@ export default function AcceptInvitationPage() {
             <div className="space-y-6">
               <div className="flex flex-col items-center space-y-4">
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
-                  <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
+                  <HiCheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
                 </div>
                 <div className="text-center">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -275,7 +275,7 @@ export default function AcceptInvitationPage() {
                       key={module}
                       className="flex items-center text-sm text-blue-800 dark:text-blue-300"
                     >
-                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      <HiCheckCircle className="mr-2 h-4 w-4" />
                       {module}
                     </li>
                   ))}
@@ -300,7 +300,7 @@ export default function AcceptInvitationPage() {
             <div className="space-y-6">
               <div className="flex flex-col items-center space-y-4">
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
-                  <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+                  <HiXCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
                 </div>
                 <div className="text-center">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -315,7 +315,7 @@ export default function AcceptInvitationPage() {
               <div className="rounded-md bg-yellow-50 p-4 dark:bg-yellow-900/20">
                 <div className="flex">
                   <div className="shrink-0">
-                    <Clock className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+                    <HiClock className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
                   </div>
                   <div className="ml-3">
                     <h4 className="text-sm font-semibold text-yellow-900 dark:text-yellow-300">
@@ -346,7 +346,7 @@ export default function AcceptInvitationPage() {
             <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
               <div className="flex items-start space-x-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
-                  <ShieldAlert className="h-6 w-6 text-red-600 dark:text-red-400" />
+                  <HiShieldExclamation className="h-6 w-6 text-red-600 dark:text-red-400" />
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
