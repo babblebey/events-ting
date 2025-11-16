@@ -300,11 +300,11 @@ description: "Task list for Team Collaborators & Permissions feature implementat
 
 ### Accessibility & UX
 
-- [ ] T095 [P] Add ARIA labels to all team management forms and modals
-- [ ] T096 [P] Implement keyboard navigation for TeamMemberList and ModulePermissionsSelector
-- [ ] T097 [P] Add loading states and skeleton screens for all team components
-- [ ] T098 [P] Ensure mobile-responsive design for all team management pages
-- [ ] T099 Add confirmation toasts for all successful actions (invite, update, remove, accept, decline)
+- [X] T095 [P] Add ARIA labels to all team management forms and modals
+- [X] T096 [P] Implement keyboard navigation for TeamMemberList and ModulePermissionsSelector
+- [X] T097 [P] Add loading states and skeleton screens for all team components
+- [X] T098 [P] Ensure mobile-responsive design for all team management pages
+- [X] T099 Add confirmation toasts for all successful actions (invite, update, remove, accept, decline)
 
 ### Documentation
 

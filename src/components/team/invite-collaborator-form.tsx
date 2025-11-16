@@ -174,7 +174,11 @@ export function InviteCollaboratorForm({
   const isLoading = inviteMutation.isPending;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form 
+      onSubmit={handleSubmit} 
+      className="space-y-6"
+      aria-label="Invite team collaborator form"
+    >
       {/* Email Input */}
       <div>
         <div className="mb-2 block">
@@ -193,16 +197,19 @@ export function InviteCollaboratorForm({
           disabled={isLoading}
           required
           autoComplete="email"
+          aria-label="Collaborator email address"
+          aria-describedby="email-help-text"
+          aria-invalid={error?.includes("email") ? "true" : "false"}
         />
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p id="email-help-text" className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           We&apos;ll send an invitation email to this address
         </p>
       </div>
 
       {/* Module Permissions Selector */}
-      <div>
+      <div role="group" aria-labelledby="module-permissions-label">
         <div className="mb-3 block">
-          <Label>
+          <Label id="module-permissions-label">
             Module Permissions <span className="text-red-600">*</span>
           </Label>
         </div>
@@ -221,6 +228,8 @@ export function InviteCollaboratorForm({
       {/* Error Messages with Actionable Suggestions */}
       {error && !error.includes("email") && !error.includes("module") && (
         <div
+          role="alert"
+          aria-live="polite"
           className={`rounded-lg border p-4 text-sm ${
             errorType === "existing_member" || errorType === "pending_invitation"
               ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400"
@@ -304,8 +313,14 @@ export function InviteCollaboratorForm({
       )}
 
       {/* Submit Button */}
-      <div className="flex justify-end">
-        <Button type="submit" disabled={isLoading} size="lg">
+      <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-0">
+        <Button 
+          type="submit" 
+          disabled={isLoading} 
+          size="lg"
+          className="w-full sm:w-auto"
+          aria-label="Send invitation to collaborator"
+        >
           {isLoading ? (
             <>
               <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -321,7 +336,11 @@ export function InviteCollaboratorForm({
       </div>
 
       {/* Info Box */}
-      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
+      <div 
+        role="note" 
+        aria-label="Invitation process information"
+        className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+      >
         <p className="font-medium mb-1">What happens next?</p>
         <ul className="list-disc list-inside space-y-1">
           <li>The collaborator will receive an email invitation</li>

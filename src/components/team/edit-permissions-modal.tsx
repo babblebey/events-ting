@@ -67,11 +67,14 @@ export function EditPermissionsModal({
       // Optimistically update the team members list
       utils.team.getMembers.setData({ eventId }, (old) => {
         if (!old) return old;
-        return old.map((member) =>
-          member.id === newData.teamMemberId
-            ? { ...member, modulePermissions: newData.modulePermissions }
-            : member,
-        );
+        return {
+          ...old,
+          members: old.members.map((member) =>
+            member.id === newData.teamMemberId
+              ? { ...member, modulePermissions: newData.modulePermissions }
+              : member,
+          ),
+        };
       });
 
       // If the updated member is the current user, update their permissions too
@@ -185,25 +188,31 @@ export function EditPermissionsModal({
   };
 
   return (
-    <Modal show={isOpen} onClose={handleCancel} size="2xl">
+    <Modal 
+      show={isOpen} 
+      onClose={handleCancel} 
+      size="2xl"
+      aria-labelledby="edit-permissions-title"
+      aria-describedby="edit-permissions-description"
+    >
       <ModalHeader>
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+            <h3 id="edit-permissions-title" className="text-xl font-semibold text-gray-900 dark:text-white">
               Edit Permissions
             </h3>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <p id="edit-permissions-description" className="mt-1 text-sm text-gray-600 dark:text-gray-400">
               Update module access for {displayName}
             </p>
           </div>
         </div>
       </ModalHeader>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} aria-label="Edit team member permissions form">
         <ModalBody>
           <div className="space-y-4">
             {/* Collaborator Info */}
-            <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
+            <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800" role="region" aria-label="Collaborator information">
               <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Collaborator
               </p>
@@ -237,7 +246,12 @@ export function EditPermissionsModal({
               if (added.length === 0 && removed.length === 0) return null;
 
               return (
-                <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
+                <div 
+                  className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20"
+                  role="status"
+                  aria-live="polite"
+                  aria-label="Permission changes summary"
+                >
                   <p className="mb-2 text-sm font-medium text-blue-900 dark:text-blue-200">
                     Summary of Changes:
                   </p>
@@ -266,7 +280,11 @@ export function EditPermissionsModal({
             })()}
 
             {/* Warning about immediate effect */}
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20">
+            <div 
+              className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20"
+              role="alert"
+              aria-label="Important notification about permission changes"
+            >
               <p className="text-sm text-amber-800 dark:text-amber-200">
                 ⚠️ Changes take effect immediately. The collaborator will
                 receive an email notification.
@@ -276,11 +294,12 @@ export function EditPermissionsModal({
         </ModalBody>
 
         <ModalFooter>
-          <div className="flex w-full justify-end gap-3">
+          <div className="flex w-full flex-col-reverse sm:flex-row justify-end gap-3">
             <Button
               color="gray"
               onClick={handleCancel}
               disabled={updatePermissions.isPending}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
@@ -288,6 +307,7 @@ export function EditPermissionsModal({
               type="submit"
               color="blue"
               disabled={updatePermissions.isPending}
+              className="w-full sm:w-auto"
             >
               {updatePermissions.isPending
                 ? "Updating..."

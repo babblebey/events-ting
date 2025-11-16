@@ -82,7 +82,7 @@ export function TeamMemberCard({
         <div className="min-w-0 flex-1">
           {/* Name and Email */}
           <div className="mb-2">
-            <h3 className="truncate text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="truncate text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
               {displayName}
             </h3>
             {isUserActive && member.user?.name && (
@@ -154,7 +154,7 @@ export function TeamMemberCard({
 
         {/* Action Buttons - Owner Only */}
         {isOwner && member.role !== "OWNER" && member.status !== "REMOVED" && (
-          <div className="flex gap-2 self-end sm:flex-col sm:self-start">
+          <div className="flex w-full sm:w-auto gap-2 sm:flex-col sm:self-start">
             {member.status === "ACTIVE" && (
               <>
                 <Tooltip content="Edit permissions">
@@ -163,6 +163,7 @@ export function TeamMemberCard({
                     color="gray"
                     aria-label="Edit permissions"
                     onClick={() => setIsEditModalOpen(true)}
+                    className="flex-1 sm:flex-none"
                   >
                     <HiPencil className="h-4 w-4" />
                   </Button>
@@ -173,6 +174,7 @@ export function TeamMemberCard({
                     color="failure"
                     aria-label="Remove member"
                     onClick={() => setIsRemoveModalOpen(true)}
+                    className="flex-1 sm:flex-none"
                   >
                     <HiTrash className="h-4 w-4" />
                   </Button>

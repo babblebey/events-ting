@@ -119,22 +119,28 @@ export function RemoveMemberModal({
     teamMember.user?.name ?? teamMember.email.split("@")[0] ?? "this member";
 
   return (
-    <Modal show={isOpen} onClose={onClose} size="md">
+    <Modal 
+      show={isOpen} 
+      onClose={onClose} 
+      size="md"
+      aria-labelledby="remove-member-title"
+      aria-describedby="remove-member-warning"
+    >
       <ModalHeader>
         <div className="flex items-center gap-2">
-          <HiTrash className="h-5 w-5 text-red-600 dark:text-red-500" />
-          <span>Remove Team Member</span>
+          <HiTrash className="h-5 w-5 text-red-600 dark:text-red-500" aria-hidden="true" />
+          <span id="remove-member-title">Remove Team Member</span>
         </div>
       </ModalHeader>
 
       <ModalBody>
         <div className="space-y-4">
-          <Alert color="warning" icon={HiExclamationCircle}>
+          <Alert color="warning" icon={HiExclamationCircle} role="alert" aria-live="assertive">
             <span className="font-medium">Warning:</span> This action will
             immediately revoke all access for this team member.
           </Alert>
 
-          <div className="text-sm text-gray-700 dark:text-gray-300">
+          <div id="remove-member-warning" className="text-sm text-gray-700 dark:text-gray-300">
             <p className="mb-2">
               Are you sure you want to remove <strong>{displayName}</strong>{" "}
               from this event?
@@ -156,11 +162,21 @@ export function RemoveMemberModal({
       </ModalBody>
 
       <ModalFooter>
-        <div className="flex w-full justify-end gap-2">
-          <Button color="gray" onClick={onClose} disabled={isRemoving}>
+        <div className="flex w-full flex-col-reverse sm:flex-row justify-end gap-3">
+          <Button 
+            color="gray" 
+            onClick={onClose} 
+            disabled={isRemoving}
+            className="w-full sm:w-auto"
+          >
             Cancel
           </Button>
-          <Button color="failure" onClick={handleRemove} disabled={isRemoving}>
+          <Button 
+            color="failure" 
+            onClick={handleRemove} 
+            disabled={isRemoving}
+            className="w-full sm:w-auto"
+          >
             {isRemoving ? (
               <>
                 <HiTrash className="mr-2 h-4 w-4 animate-spin" />

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { api } from "@/trpc/react";
+import { useToast } from "@/components/ui/toast-provider";
 import { HiOutlineRefresh, HiCheckCircle, HiXCircle, HiClock, HiMail, HiShieldExclamation } from "react-icons/hi";
 
 type InvitationState = 
@@ -21,6 +22,7 @@ export default function AcceptInvitationPage() {
   const searchParams = useSearchParams();
   const { status: sessionStatus } = useSession();
   const token = searchParams.get("token");
+  const toast = useToast();
 
   const [invitationState, setInvitationState] = useState<InvitationState>({
     status: "loading",
@@ -39,6 +41,10 @@ export default function AcceptInvitationPage() {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         modules: data.teamMember.modulePermissions as string[],
       });
+      toast.success(
+        "Invitation Accepted",
+        `You are now a collaborator on ${data.event.name as string}`,
+      );
     },
     onError: (error) => {
       setInvitationState({
@@ -46,6 +52,7 @@ export default function AcceptInvitationPage() {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
         message: error.message,
       });
+      toast.error("Failed to Accept Invitation", error.message);
     },
   });
 
@@ -57,6 +64,10 @@ export default function AcceptInvitationPage() {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
         eventName: data.eventName,
       });
+      toast.info(
+        "Invitation Declined",
+        `You have declined the invitation to ${data.eventName as string}`,
+      );
     },
     onError: (error) => {
       setInvitationState({
@@ -64,6 +75,7 @@ export default function AcceptInvitationPage() {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
         message: error.message,
       });
+      toast.error("Failed to Decline Invitation", error.message);
     },
   });
 

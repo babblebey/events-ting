@@ -9,10 +9,11 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { api } from "@/trpc/react";
 import { TeamMemberCard } from "./team-member-card";
-import { Spinner, Button, Select, Label, Pagination } from "flowbite-react";
+import { TeamMemberListSkeleton } from "./team-member-skeleton";
+import { Button, Select, Label, Pagination } from "flowbite-react";
 import { HiFilter, HiRefresh } from "react-icons/hi";
 
 interface TeamMemberListProps {
@@ -29,6 +30,10 @@ export function TeamMemberList({ eventId, isOwner }: TeamMemberListProps) {
   const [statusFilter, setStatusFilter] = useState<FilterOption>("ACTIVE");
   const [sortBy, setSortBy] = useState<SortOption>("role");
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Focus management for keyboard navigation
+  const filterRef = useRef<HTMLSelectElement>(null);
+  const sortRef = useRef<HTMLSelectElement>(null);
 
   // Fetch team members - use explicit undefined for ALL filter
   const queryStatus = statusFilter === "ALL" ? undefined : statusFilter;
@@ -47,6 +52,30 @@ export function TeamMemberList({ eventId, isOwner }: TeamMemberListProps) {
     // Don't refetch on reconnect since we already refetch on focus
     refetchOnReconnect: false,
   });
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Alt + F to focus filter
+      if (e.altKey && e.key === 'f') {
+        e.preventDefault();
+        filterRef.current?.focus();
+      }
+      // Alt + S to focus sort
+      if (e.altKey && e.key === 's') {
+        e.preventDefault();
+        sortRef.current?.focus();
+      }
+      // Alt + R to refresh
+      if (e.altKey && e.key === 'r') {
+        e.preventDefault();
+        void refetch();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [refetch]);
 
   const members = data?.members;
   const pagination = data?.pagination;
@@ -116,11 +145,29 @@ export function TeamMemberList({ eventId, isOwner }: TeamMemberListProps) {
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Spinner size="xl" />
-        <span className="ml-3 text-gray-600 dark:text-gray-400">
-          Loading team members...
-        </span>
+      <div className="space-y-6">
+        {/* Filters Skeleton */}
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+          <div className="flex-1 w-full sm:w-auto">
+            <div className="mb-2 block">
+              <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            </div>
+            <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+          </div>
+          <div className="flex-1 w-full sm:w-auto">
+            <div className="mb-2 block">
+              <div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            </div>
+            <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+          </div>
+          <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+        </div>
+
+        {/* Member Count Skeleton */}
+        <div className="h-5 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+
+        {/* Member Cards Skeleton */}
+        <TeamMemberListSkeleton count={3} />
       </div>
     );
   }
@@ -171,40 +218,48 @@ export function TeamMemberList({ eventId, isOwner }: TeamMemberListProps) {
   return (
     <div className="space-y-6">
       {/* Filters and Sorting */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-        {/* Status Filter */}
-        <div className="flex-1 w-full sm:w-auto">
-          <div className="mb-2 block">
-            <Label htmlFor="status-filter">Filter by Status</Label>
+      <div className="flex flex-col gap-4 items-stretch">
+        <div className="flex flex-col sm:flex-row gap-4">
+          {/* Status Filter */}
+          <div className="flex-1">
+            <div className="mb-2 block">
+              <Label htmlFor="status-filter">Filter by Status</Label>
+            </div>
+            <Select
+              id="status-filter"
+              ref={filterRef}
+              value={statusFilter}
+              onChange={(e) => handleFilterChange(e.target.value as FilterOption)}
+              icon={HiFilter}
+              aria-label="Filter team members by status"
+              title="Keyboard shortcut: Alt + F"
+            >
+              <option value="ALL">All Members ({memberCounts.ALL})</option>
+              <option value="ACTIVE">Active ({memberCounts.ACTIVE})</option>
+              <option value="PENDING">Pending ({memberCounts.PENDING})</option>
+              <option value="REMOVED">Removed ({memberCounts.REMOVED})</option>
+            </Select>
           </div>
-          <Select
-            id="status-filter"
-            value={statusFilter}
-            onChange={(e) => handleFilterChange(e.target.value as FilterOption)}
-            icon={HiFilter}
-          >
-            <option value="ALL">All Members ({memberCounts.ALL})</option>
-            <option value="ACTIVE">Active ({memberCounts.ACTIVE})</option>
-            <option value="PENDING">Pending ({memberCounts.PENDING})</option>
-            <option value="REMOVED">Removed ({memberCounts.REMOVED})</option>
-          </Select>
-        </div>
 
-        {/* Sort By */}
-        <div className="flex-1 w-full sm:w-auto">
-          <div className="mb-2 block">
-            <Label htmlFor="sort-by">Sort By</Label>
+          {/* Sort By */}
+          <div className="flex-1">
+            <div className="mb-2 block">
+              <Label htmlFor="sort-by">Sort By</Label>
+            </div>
+            <Select
+              id="sort-by"
+              ref={sortRef}
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              aria-label="Sort team members"
+              title="Keyboard shortcut: Alt + S"
+            >
+              <option value="role">Role (Owner First)</option>
+              <option value="recent">Recently Added</option>
+              <option value="name">Name (A-Z)</option>
+              <option value="module">Module Access</option>
+            </Select>
           </div>
-          <Select
-            id="sort-by"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortOption)}
-          >
-            <option value="role">Role (Owner First)</option>
-            <option value="recent">Recently Added</option>
-            <option value="name">Name (A-Z)</option>
-            <option value="module">Module Access</option>
-          </Select>
         </div>
 
         {/* Refresh Button */}
@@ -212,6 +267,9 @@ export function TeamMemberList({ eventId, isOwner }: TeamMemberListProps) {
           color="gray"
           onClick={() => void refetch()}
           disabled={isLoading}
+          aria-label="Refresh team members list"
+          title="Keyboard shortcut: Alt + R"
+          className="w-full sm:w-auto"
         >
           <HiRefresh className="mr-2 h-4 w-4" />
           Refresh
@@ -242,7 +300,7 @@ export function TeamMemberList({ eventId, isOwner }: TeamMemberListProps) {
 
       {/* Pagination Controls */}
       {pagination && pagination.totalPages > 1 && (
-        <div className="flex justify-center mt-6">
+        <div className="flex justify-center mt-6" role="navigation" aria-label="Team members pagination">
           <Pagination
             currentPage={currentPage}
             totalPages={pagination.totalPages}

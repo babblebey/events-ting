@@ -157,7 +157,7 @@ export function PendingInvitationsList({
     reinvite.mutate({
       eventId,
       email,
-      modulePermissions,
+      modulePermissions: modulePermissions as ("OVERVIEW" | "ATTENDEES" | "TICKETS" | "SCHEDULE" | "SPEAKERS" | "CFP" | "COMMUNICATIONS")[],
     });
   };
 
