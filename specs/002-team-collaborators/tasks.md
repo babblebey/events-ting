@@ -257,31 +257,31 @@ description: "Task list for Team Collaborators & Permissions feature implementat
 
 ### Edge Case: Self-Invitation Attempt
 
-- [ ] T078 [P] Add validation in team.invite to reject invitations to owner's own email in src/server/api/routers/team.ts
-- [ ] T079 Add specific error message "Cannot invite yourself - you already own this event" to InviteCollaboratorForm
+- [X] T078 [P] Add validation in team.invite to reject invitations to owner's own email in src/server/api/routers/team.ts
+- [X] T079 Add specific error message "Cannot invite yourself - you already own this event" to InviteCollaboratorForm
 
 ### Edge Case: Owner Self-Removal Attempt
 
-- [ ] T080 [P] Add validation in team.removeMember to block owner from removing themselves in src/server/api/routers/team.ts
-- [ ] T081 Add specific error message "Cannot remove yourself as owner. Transfer ownership to another user first" to RemoveMemberModal
+- [X] T080 [P] Add validation in team.removeMember to block owner from removing themselves in src/server/api/routers/team.ts
+- [X] T081 Add specific error message "Cannot remove yourself as owner. Transfer ownership to another user first" to RemoveMemberModal
 
 ### Edge Case: Expired Invitation Links
 
-- [ ] T082 [P] Add expiry checking in team.acceptInvitation procedure in src/server/api/routers/team.ts
-- [ ] T083 [P] Implement background job or cron to mark expired invitations (status PENDING -> EXPIRED) in src/lib/cron/expire-invitations.ts
-- [ ] T084 Create expired invitation error page at src/app/invitations/expired/page.tsx
-- [ ] T085 Update PendingInvitationsList to show expired invitations with resend option
+- [X] T082 [P] Add expiry checking in team.acceptInvitation procedure in src/server/api/routers/team.ts
+- [X] T083 [P] Implement background job or cron to mark expired invitations (status PENDING -> EXPIRED) in src/lib/cron/expire-invitations.ts
+- [X] T084 Create expired invitation error page at src/app/invitations/expired/page.tsx
+- [X] T085 Update PendingInvitationsList to show expired invitations with resend option
 
 ### Edge Case: Disabled or Removed Module
 
-- [ ] T086 Implement auto-revocation logic when module is disabled in event configuration (future: event settings changes)
-- [ ] T087 Add silent permission cleanup without notifications for disabled modules
+- [X] T086 Implement auto-revocation logic when module is disabled in event configuration (future: event settings changes)
+- [X] T087 Add silent permission cleanup without notifications for disabled modules
 
 ### Edge Case: Permission Revocation During Active Session
 
-- [ ] T088 Add 403 error handling with grace period messaging across all module pages
-- [ ] T089 Implement automatic redirect to accessible module when current module access is revoked
-- [ ] T090 Add notification banner for permission changes during active session
+- [X] T088 Add 403 error handling with grace period messaging across all module pages
+- [X] T089 Implement automatic redirect to accessible module when current module access is revoked
+- [X] T090 Add notification banner for permission changes during active session
 
 **Checkpoint**: All edge cases handled - robust error handling complete
 

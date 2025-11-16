@@ -266,6 +266,68 @@ export const teamRouter = createTRPCRouter({
     }),
 
   /**
+   * Get all expired invitations for an event
+   * Returns invitations with EXPIRED status (last 30 days)
+   */
+  getExpiredInvitations: protectedProcedure
+    .input(getPendingInvitationsSchema)
+    .query(async ({ ctx, input }) => {
+      const { eventId } = input;
+
+      // Verify user has access to this event
+      const currentMember = await ctx.db.teamMember.findFirst({
+        where: {
+          eventId,
+          userId: ctx.session.user.id,
+          status: "ACTIVE",
+        },
+      });
+
+      if (!currentMember) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You do not have access to this event",
+        });
+      }
+
+      // Only owners can view invitations
+      if (currentMember.role !== "OWNER") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only event owners can view expired invitations",
+        });
+      }
+
+      // Fetch expired invitations from last 30 days
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const invitations = await ctx.db.invitation.findMany({
+        where: {
+          eventId,
+          status: "EXPIRED",
+          respondedAt: {
+            gte: thirtyDaysAgo,
+          },
+        },
+        include: {
+          sentBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: {
+          respondedAt: "desc", // Most recent first
+        },
+      });
+
+      return invitations;
+    }),
+
+  /**
    * Invite a new collaborator to the event
    * Creates both Invitation and TeamMember records, sends email
    */
