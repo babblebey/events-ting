@@ -12,6 +12,8 @@ import {
   inviteTeamMemberSchema,
   acceptInvitationSchema,
   getCurrentMemberSchema,
+  getTeamMembersSchema,
+  getPendingInvitationsSchema,
 } from "@/lib/validators";
 import {
   generateInvitationToken,
@@ -45,6 +47,155 @@ export const teamRouter = createTRPCRouter({
       });
 
       return member;
+    }),
+
+  /**
+   * Get all team members for an event
+   * Supports filtering by status (PENDING, ACTIVE, REMOVED)
+   */
+  getMembers: protectedProcedure
+    .input(getTeamMembersSchema)
+    .query(async ({ ctx, input }) => {
+      const { eventId, status } = input;
+
+      // Verify user has access to this event
+      const currentMember = await ctx.db.teamMember.findFirst({
+        where: {
+          eventId,
+          userId: ctx.session.user.id,
+          status: "ACTIVE",
+        },
+      });
+
+      if (!currentMember) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You do not have access to this event",
+        });
+      }
+
+      // Only owners can view all team members
+      if (currentMember.role !== "OWNER") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only event owners can view team members",
+        });
+      }
+
+      // Build where clause
+      const where = {
+        eventId,
+        ...(status ? { status } : {}),
+      };
+
+      // Fetch team members
+      const members = await ctx.db.teamMember.findMany({
+        where,
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+            },
+          },
+          invitedBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: [
+          { role: "asc" }, // OWNER first, then COLLABORATOR
+          { invitedAt: "desc" }, // Most recent first
+        ],
+      });
+
+      return members;
+    }),
+
+  /**
+   * Get all pending invitations for an event
+   * Returns invitations with PENDING status
+   */
+  getPendingInvitations: protectedProcedure
+    .input(getPendingInvitationsSchema)
+    .query(async ({ ctx, input }) => {
+      const { eventId } = input;
+
+      // Verify user has access to this event
+      const currentMember = await ctx.db.teamMember.findFirst({
+        where: {
+          eventId,
+          userId: ctx.session.user.id,
+          status: "ACTIVE",
+        },
+      });
+
+      if (!currentMember) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You do not have access to this event",
+        });
+      }
+
+      // Only owners can view invitations
+      if (currentMember.role !== "OWNER") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only event owners can view pending invitations",
+        });
+      }
+
+      // Fetch pending invitations
+      const invitations = await ctx.db.invitation.findMany({
+        where: {
+          eventId,
+          status: "PENDING",
+        },
+        include: {
+          sentBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: {
+          sentAt: "desc", // Most recent first
+        },
+      });
+
+      // Check for expired invitations and mark them
+      const now = new Date();
+      const expiredInvitationIds = invitations
+        .filter((inv) => inv.expiresAt < now)
+        .map((inv) => inv.id);
+
+      if (expiredInvitationIds.length > 0) {
+        // Update expired invitations in background
+        void ctx.db.invitation
+          .updateMany({
+            where: {
+              id: { in: expiredInvitationIds },
+            },
+            data: {
+              status: "EXPIRED",
+            },
+          })
+          .catch((error) => {
+            console.error("Failed to mark invitations as expired:", error);
+          });
+
+        // Filter out expired invitations from response
+        return invitations.filter((inv) => inv.expiresAt >= now);
+      }
+
+      return invitations;
     }),
 
   /**

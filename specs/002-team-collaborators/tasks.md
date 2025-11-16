@@ -114,8 +114,8 @@ description: "Task list for Team Collaborators & Permissions feature implementat
 
 #### Backend API
 
-- [ ] T033 [P] [US2] Implement team.getMembers query with status filtering in src/server/api/routers/team.ts
-- [ ] T034 [P] [US2] Implement team.getPendingInvitations query in src/server/api/routers/team.ts
+- [X] T033 [P] [US2] Implement team.getMembers query with status filtering in src/server/api/routers/team.ts
+- [X] T034 [P] [US2] Implement team.getPendingInvitations query in src/server/api/routers/team.ts
 
 #### Frontend Components
 
