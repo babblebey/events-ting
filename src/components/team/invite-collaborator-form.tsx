@@ -33,11 +33,62 @@ export function InviteCollaboratorForm({
     "general" | "existing_member" | "pending_invitation" | null
   >(null);
   const toast = useToast();
-
-  // Note: Utils commented out until User Story 2 procedures are implemented
-  // const utils = api.useUtils();
+  const utils = api.useUtils();
 
   const inviteMutation = api.team.invite.useMutation({
+    // Optimistic update: Add pending member to UI immediately
+    onMutate: async (newInvite) => {
+      // Cancel outgoing refetches
+      await utils.team.getMembers.cancel({ eventId });
+      await utils.team.getPendingInvitations.cancel({ eventId });
+
+      // Snapshot previous values
+      const previousMembers = utils.team.getMembers.getData({ eventId, status: undefined });
+      const previousPendingMembers = utils.team.getMembers.getData({ eventId, status: "PENDING" });
+      const previousInvitations = utils.team.getPendingInvitations.getData({ eventId });
+
+      // Optimistically add the new pending member
+      const optimisticMember = {
+        id: `temp-${Date.now()}`,
+        eventId,
+        email: newInvite.email,
+        role: "COLLABORATOR" as const,
+        status: "PENDING" as const,
+        modulePermissions: newInvite.modulePermissions,
+        userId: null,
+        user: null,
+        invitedById: "",
+        invitedBy: {
+          id: "",
+          name: "You",
+          email: "",
+        },
+        invitedAt: new Date(),
+        lastAccessedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      // Update all members list
+      utils.team.getMembers.setData({ eventId, status: undefined }, (old) => {
+        if (!old) return old;
+        return {
+          members: [optimisticMember, ...old.members],
+          pagination: old.pagination,
+        };
+      });
+
+      // Update pending members list
+      utils.team.getMembers.setData({ eventId, status: "PENDING" }, (old) => {
+        if (!old) return old;
+        return {
+          members: [optimisticMember, ...old.members],
+          pagination: old.pagination,
+        };
+      });
+
+      return { previousMembers, previousPendingMembers, previousInvitations };
+    },
     onSuccess: (data) => {
       toast.success(
         "Invitation sent",
@@ -50,13 +101,24 @@ export function InviteCollaboratorForm({
       setError(null);
       setErrorType(null);
 
-      // Invalidate queries to refresh team data (procedures will be added in User Story 2)
-      // void utils.team.getMembers.invalidate({ eventId });
-      // void utils.team.getPendingInvitations.invalidate({ eventId });
+      // Invalidate queries to refresh with real data
+      void utils.team.getMembers.invalidate({ eventId });
+      void utils.team.getPendingInvitations.invalidate({ eventId });
 
       onSuccess?.();
     },
-    onError: (err: { message: string }) => {
+    onError: (err: { message: string }, _variables, context) => {
+      // Rollback optimistic update
+      if (context?.previousMembers) {
+        utils.team.getMembers.setData({ eventId, status: undefined }, context.previousMembers);
+      }
+      if (context?.previousPendingMembers) {
+        utils.team.getMembers.setData({ eventId, status: "PENDING" }, context.previousPendingMembers);
+      }
+      if (context?.previousInvitations) {
+        utils.team.getPendingInvitations.setData({ eventId }, context.previousInvitations);
+      }
+
       setError(err.message);
 
       // Determine error type based on message content
@@ -69,6 +131,11 @@ export function InviteCollaboratorForm({
       }
 
       toast.error("Invitation failed", err.message);
+    },
+    onSettled: () => {
+      // Always refetch to ensure consistency
+      void utils.team.getMembers.invalidate({ eventId });
+      void utils.team.getPendingInvitations.invalidate({ eventId });
     },
   });
 

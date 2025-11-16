@@ -43,6 +43,12 @@ export function PermissionChangeBanner({
     {
       // Poll every 30 seconds to detect changes
       refetchInterval: 30000,
+      // Use the same cache as permission-revoked-handler
+      staleTime: 25 * 1000, // 25 seconds
+      gcTime: 60 * 1000, // 1 minute
+      // This will reuse cached data from permission-revoked-handler
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
     },
   );
 

@@ -440,6 +440,7 @@ model TeamMember {
   @@index([email])
   @@index([status])
   @@index([eventId, status])          // For filtering active members
+  @@index([eventId, userId])          // For fast member lookup by event and user
   @@index([eventId, role])            // For owner lookups
 }
 

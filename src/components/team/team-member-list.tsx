@@ -12,7 +12,7 @@
 import { useState, useMemo } from "react";
 import { api } from "@/trpc/react";
 import { TeamMemberCard } from "./team-member-card";
-import { Spinner, Button, Select, Label } from "flowbite-react";
+import { Spinner, Button, Select, Label, Pagination } from "flowbite-react";
 import { HiFilter, HiRefresh } from "react-icons/hi";
 
 interface TeamMemberListProps {
@@ -23,17 +23,39 @@ interface TeamMemberListProps {
 type FilterOption = "ALL" | "ACTIVE" | "PENDING" | "REMOVED";
 type SortOption = "role" | "recent" | "name" | "module";
 
+const PAGE_SIZE = 20;
+
 export function TeamMemberList({ eventId, isOwner }: TeamMemberListProps) {
   const [statusFilter, setStatusFilter] = useState<FilterOption>("ACTIVE");
   const [sortBy, setSortBy] = useState<SortOption>("role");
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Fetch team members - use explicit undefined for ALL filter
   const queryStatus = statusFilter === "ALL" ? undefined : statusFilter;
   
-  const { data: members, isLoading, error, refetch } = api.team.getMembers.useQuery({
+  const { data, isLoading, error, refetch } = api.team.getMembers.useQuery({
     eventId,
     status: queryStatus,
+    page: currentPage,
+    limit: PAGE_SIZE,
+  }, {
+    // Cache team members for 2 minutes since they don't change frequently
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes (formerly cacheTime)
+    // Refetch when window regains focus to ensure fresh data
+    refetchOnWindowFocus: true,
+    // Don't refetch on reconnect since we already refetch on focus
+    refetchOnReconnect: false,
   });
+
+  const members = data?.members;
+  const pagination = data?.pagination;
+
+  // Reset to page 1 when filter changes
+  const handleFilterChange = (newFilter: FilterOption) => {
+    setStatusFilter(newFilter);
+    setCurrentPage(1);
+  };
 
   // Sort members based on selected option
   const sortedMembers = useMemo(() => {
@@ -137,7 +159,7 @@ export function TeamMemberList({ eventId, isOwner }: TeamMemberListProps) {
             color="gray"
             size="sm"
             className="mt-4"
-            onClick={() => setStatusFilter("ALL")}
+            onClick={() => handleFilterChange("ALL")}
           >
             Show All Members
           </Button>
@@ -158,7 +180,7 @@ export function TeamMemberList({ eventId, isOwner }: TeamMemberListProps) {
           <Select
             id="status-filter"
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as FilterOption)}
+            onChange={(e) => handleFilterChange(e.target.value as FilterOption)}
             icon={HiFilter}
           >
             <option value="ALL">All Members ({memberCounts.ALL})</option>
@@ -198,7 +220,12 @@ export function TeamMemberList({ eventId, isOwner }: TeamMemberListProps) {
 
       {/* Member Count */}
       <div className="text-sm text-gray-600 dark:text-gray-400">
-        Showing {sortedMembers.length} {sortedMembers.length === 1 ? "member" : "members"}
+        Showing {sortedMembers.length} of {pagination?.totalCount ?? 0} {pagination?.totalCount === 1 ? "member" : "members"}
+        {pagination && pagination.totalPages > 1 && (
+          <span className="ml-2">
+            (Page {pagination.page} of {pagination.totalPages})
+          </span>
+        )}
       </div>
 
       {/* Members List */}
@@ -212,6 +239,18 @@ export function TeamMemberList({ eventId, isOwner }: TeamMemberListProps) {
           />
         ))}
       </div>
+
+      {/* Pagination Controls */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="flex justify-center mt-6">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={pagination.totalPages}
+            onPageChange={setCurrentPage}
+            showIcons
+          />
+        </div>
+      )}
     </div>
   );
 }

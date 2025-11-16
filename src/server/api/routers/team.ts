@@ -56,12 +56,12 @@ export const teamRouter = createTRPCRouter({
 
   /**
    * Get all team members for an event
-   * Supports filtering by status (PENDING, ACTIVE, REMOVED)
+   * Supports filtering by status (PENDING, ACTIVE, REMOVED) and pagination
    */
   getMembers: protectedProcedure
     .input(getTeamMembersSchema)
     .query(async ({ ctx, input }) => {
-      const { eventId, status } = input;
+      const { eventId, status, page = 1, limit = 20 } = input;
 
       // Verify user has access to this event
       const currentMember = await ctx.db.teamMember.findFirst({
@@ -93,7 +93,13 @@ export const teamRouter = createTRPCRouter({
         ...(status ? { status } : {}),
       };
 
-      // Fetch team members
+      // Calculate pagination
+      const skip = (page - 1) * limit;
+
+      // Get total count for pagination
+      const totalCount = await ctx.db.teamMember.count({ where });
+
+      // Fetch team members with pagination
       const members = await ctx.db.teamMember.findMany({
         where,
         include: {
@@ -117,9 +123,20 @@ export const teamRouter = createTRPCRouter({
           { role: "asc" }, // OWNER first, then COLLABORATOR
           { invitedAt: "desc" }, // Most recent first
         ],
+        skip,
+        take: limit,
       });
 
-      return members;
+      return {
+        members,
+        pagination: {
+          page,
+          limit,
+          totalCount,
+          totalPages: Math.ceil(totalCount / limit),
+          hasMore: skip + members.length < totalCount,
+        },
+      };
     }),
 
   /**

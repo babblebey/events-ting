@@ -40,8 +40,13 @@ export function PermissionRevokedHandler({
     {
       // Poll every 30 seconds to detect permission changes
       refetchInterval: 30000,
+      // Cache for 25 seconds to avoid redundant fetches between polls
+      staleTime: 25 * 1000, // 25 seconds
+      gcTime: 60 * 1000, // 1 minute
       // Don't retry on error
       retry: false,
+      // Keep previous data while refetching for smoother UX
+      placeholderData: (previousData) => previousData,
     },
   );
 

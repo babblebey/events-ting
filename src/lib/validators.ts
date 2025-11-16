@@ -431,6 +431,8 @@ export const removeTeamMemberSchema = z.object({
 export const getTeamMembersSchema = z.object({
   eventId: z.string().cuid(),
   status: z.enum(["PENDING", "ACTIVE", "REMOVED"]).optional(),
+  page: z.number().int().positive().default(1).optional(),
+  limit: z.number().int().positive().max(100).default(20).optional(),
 });
 
 export const getCurrentMemberSchema = z.object({

@@ -48,13 +48,54 @@ export function RemoveMemberModal({
   const toast = useToast();
   const utils = api.useUtils();
   const removeMemberMutation = api.team.removeMember.useMutation({
+    // Optimistic update: Remove member from UI immediately
+    onMutate: async (variables) => {
+      // Cancel outgoing refetches
+      await utils.team.getMembers.cancel({ eventId });
+
+      // Snapshot previous values
+      const previousMembers = utils.team.getMembers.getData({ eventId, status: undefined });
+      const previousActiveMembers = utils.team.getMembers.getData({ eventId, status: "ACTIVE" });
+
+      // Optimistically update member status to REMOVED
+      const updateMemberStatus = (old: typeof previousMembers) => {
+        if (!old) return old;
+        return {
+          ...old,
+          members: old.members.map((member) =>
+            member.id === variables.teamMemberId
+              ? { ...member, status: "REMOVED" as const }
+              : member
+          ),
+        };
+      };
+
+      utils.team.getMembers.setData({ eventId, status: undefined }, updateMemberStatus);
+      utils.team.getMembers.setData({ eventId, status: "ACTIVE" }, (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          members: old.members.filter((member) => member.id !== variables.teamMemberId),
+        };
+      });
+
+      return { previousMembers, previousActiveMembers };
+    },
     onSuccess: () => {
       toast.success("Team member removed successfully");
-      // Invalidate queries to refresh the team member list
+      // Invalidate queries to refresh with real data
       void utils.team.getMembers.invalidate({ eventId });
       onClose();
     },
-    onError: (error) => {
+    onError: (error, _variables, context) => {
+      // Rollback optimistic update
+      if (context?.previousMembers) {
+        utils.team.getMembers.setData({ eventId, status: undefined }, context.previousMembers);
+      }
+      if (context?.previousActiveMembers) {
+        utils.team.getMembers.setData({ eventId, status: "ACTIVE" }, context.previousActiveMembers);
+      }
+
       toast.error(
         "Removal Failed",
         error.message ?? "Failed to remove team member",
@@ -62,6 +103,8 @@ export function RemoveMemberModal({
     },
     onSettled: () => {
       setIsRemoving(false);
+      // Always refetch to ensure consistency
+      void utils.team.getMembers.invalidate({ eventId });
     },
   });
 

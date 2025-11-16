@@ -291,12 +291,12 @@ description: "Task list for Team Collaborators & Permissions feature implementat
 
 **Purpose**: Improvements that affect multiple user stories and final touches
 
-### Performance Optimization
+### Performance Otimization
 
-- [ ] T091 [P] Add database indexes for team member queries (eventId + status, eventId + userId) in prisma/schema.prisma
-- [ ] T092 [P] Implement pagination for TeamMemberList when more than 20 members
-- [ ] T093 [P] Add optimistic updates for all team mutations (invite, update, remove)
-- [ ] T094 Implement query caching strategy for team.getMembers and team.getCurrentMember
+- [X] T091 [P] Add database indexes for team member queries (eventId + status, eventId + userId) in prisma/schema.prisma
+- [X] T092 [P] Implement pagination for TeamMemberList when more than 20 members
+- [X] T093 [P] Add optimistic updates for all team mutations (invite, update, remove)
+- [X] T094 Implement query caching strategy for team.getMembers and team.getCurrentMember
 
 ### Accessibility & UX
 
