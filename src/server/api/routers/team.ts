@@ -216,7 +216,14 @@ export const teamRouter = createTRPCRouter({
         },
       });
 
-      if (!currentMember || currentMember.role !== "OWNER") {
+      if (!currentMember) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You do not have access to this event",
+        });
+      }
+
+      if (currentMember.role !== "OWNER") {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only event owners can invite collaborators",

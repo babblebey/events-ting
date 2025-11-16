@@ -1,0 +1,191 @@
+/**
+ * Team Member Card Component
+ *
+ * Displays individual team member information including avatar,
+ * name, role, status, and module permissions. Includes action buttons
+ * for owners to manage member permissions.
+ *
+ * @module components/team/team-member-card
+ */
+
+"use client";
+
+import { Card, Avatar, Badge, Button, Tooltip } from "flowbite-react";
+import { RoleBadge } from "./role-badge";
+import { StatusBadge } from "./status-badge";
+import { HiPencil, HiTrash, HiMail } from "react-icons/hi";
+import { formatDistanceToNow } from "date-fns";
+
+interface TeamMemberCardProps {
+  member: {
+    id: string;
+    email: string;
+    role: "OWNER" | "COLLABORATOR";
+    status: "PENDING" | "ACTIVE" | "REMOVED";
+    modulePermissions: string[];
+    user: {
+      id: string;
+      name: string | null;
+      email: string | null;
+      image: string | null;
+    } | null;
+    invitedBy: {
+      id: string;
+      name: string | null;
+      email: string | null;
+    };
+    invitedAt: Date;
+    lastAccessedAt: Date | null;
+  };
+  isOwner: boolean;
+}
+
+export function TeamMemberCard({ member, isOwner }: TeamMemberCardProps) {
+  const displayName = member.user?.name ?? member.email.split("@")[0];
+  const displayEmail = member.user?.email ?? member.email;
+  const isUserActive = member.status === "ACTIVE" && member.user !== null;
+
+  // Format last accessed date
+  const lastAccessedText = member.lastAccessedAt
+    ? `Last active ${formatDistanceToNow(new Date(member.lastAccessedAt), { addSuffix: true })}`
+    : "Never accessed";
+
+  // Format invited date
+  const invitedText = `Invited ${formatDistanceToNow(new Date(member.invitedAt), { addSuffix: true })}`;
+
+  return (
+    <Card className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+      <div className="flex flex-col sm:flex-row gap-4 items-start">
+        {/* Avatar Section */}
+        <div className="shrink-0">
+          <Avatar
+            img={member.user?.image ?? undefined}
+            alt={displayName ?? "Team member"}
+            size="lg"
+            rounded
+            placeholderInitials={displayName?.[0]?.toUpperCase() ?? "?"}
+          />
+        </div>
+
+        {/* Member Info Section */}
+        <div className="flex-1 min-w-0">
+          {/* Name and Email */}
+          <div className="mb-2">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+              {displayName}
+            </h3>
+            {isUserActive && member.user?.name && (
+              <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                {displayEmail}
+              </p>
+            )}
+            {!isUserActive && (
+              <div className="flex items-center gap-2 mt-1">
+                <HiMail className="h-4 w-4 text-gray-400" />
+                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                  {displayEmail}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Badges */}
+          <div className="flex flex-wrap gap-2 mb-3">
+            <RoleBadge role={member.role} />
+            <StatusBadge status={member.status} />
+          </div>
+
+          {/* Module Permissions */}
+          {member.role === "COLLABORATOR" && member.modulePermissions.length > 0 && (
+            <div className="mb-3">
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                Module Access:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {member.modulePermissions.map((module) => (
+                  <Badge key={module} color="gray" size="xs">
+                    {module}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Owner has full access message */}
+          {member.role === "OWNER" && (
+            <div className="mb-3">
+              <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                Has full access to all modules
+              </p>
+            </div>
+          )}
+
+          {/* Metadata */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+            <span>{invitedText}</span>
+            {member.invitedBy && (
+              <>
+                <span className="hidden sm:inline">•</span>
+                <span>by {member.invitedBy.name ?? member.invitedBy.email}</span>
+              </>
+            )}
+            {member.status === "ACTIVE" && (
+              <>
+                <span className="hidden sm:inline">•</span>
+                <span>{lastAccessedText}</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Action Buttons - Owner Only */}
+        {isOwner && member.role !== "OWNER" && member.status !== "REMOVED" && (
+          <div className="flex sm:flex-col gap-2 self-end sm:self-start">
+            {member.status === "ACTIVE" && (
+              <>
+                <Tooltip content="Edit permissions">
+                  <Button
+                    size="sm"
+                    color="gray"
+                    aria-label="Edit permissions"
+                    disabled
+                  >
+                    <HiPencil className="h-4 w-4" />
+                  </Button>
+                </Tooltip>
+                <Tooltip content="Remove member">
+                  <Button
+                    size="sm"
+                    color="failure"
+                    aria-label="Remove member"
+                    disabled
+                  >
+                    <HiTrash className="h-4 w-4" />
+                  </Button>
+                </Tooltip>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Pending State Notice */}
+        {member.status === "PENDING" && (
+          <div className="w-full sm:w-auto">
+            <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+              Awaiting invitation acceptance
+            </div>
+          </div>
+        )}
+
+        {/* Removed State Notice */}
+        {member.status === "REMOVED" && (
+          <div className="w-full sm:w-auto">
+            <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+              Access has been revoked
+            </div>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}

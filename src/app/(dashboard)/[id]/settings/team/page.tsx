@@ -7,6 +7,8 @@ import { api } from "@/trpc/server";
 import { Card } from "flowbite-react";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { InviteCollaboratorForm } from "@/components/team/invite-collaborator-form";
+import { TeamMemberList } from "@/components/team/team-member-list";
+import { PendingInvitationsList } from "@/components/team/pending-invitations-list";
 
 interface TeamPageProps {
   params: { id: string };
@@ -68,25 +70,23 @@ export default async function TeamPage({ params }: TeamPageProps) {
             View and manage all team members
           </p>
         </div>
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-          Team member list will be implemented in User Story 2 (T035-T040)
-        </div>
+        <TeamMemberList eventId={params.id} isOwner={isOwner} />
       </Card>
 
-      {/* Pending Invitations List - Placeholder for T037 (User Story 2) */}
-      <Card>
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Pending Invitations
-          </h2>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            View and manage outstanding invitations
-          </p>
-        </div>
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-          Pending invitations list will be implemented in User Story 2 (T037)
-        </div>
-      </Card>
+      {/* Pending Invitations List - T037 (User Story 2) */}
+      {isOwner && (
+        <Card>
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              Pending Invitations
+            </h2>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              View and manage outstanding invitations
+            </p>
+          </div>
+          <PendingInvitationsList eventId={params.id} />
+        </Card>
+      )}
 
       {/* Non-Owner Access View */}
       {!isOwner && (

@@ -119,12 +119,12 @@ description: "Task list for Team Collaborators & Permissions feature implementat
 
 #### Frontend Components
 
-- [ ] T035 [P] [US2] Create TeamMemberList component in src/components/team/team-member-list.tsx
-- [ ] T036 [P] [US2] Create TeamMemberCard component showing member details in src/components/team/team-member-card.tsx
-- [ ] T037 [P] [US2] Create PendingInvitationsList component in src/components/team/pending-invitations-list.tsx
-- [ ] T038 [P] [US2] Create RoleBadge component for displaying OWNER/COLLABORATOR badges in src/components/team/role-badge.tsx
-- [ ] T039 [P] [US2] Create StatusBadge component for displaying PENDING/ACTIVE/REMOVED status in src/components/team/status-badge.tsx
-- [ ] T040 [US2] Integrate TeamMemberList and PendingInvitationsList into team settings page src/app/(dashboard)/[id]/settings/team/page.tsx
+- [X] T035 [P] [US2] Create TeamMemberList component in src/components/team/team-member-list.tsx
+- [X] T036 [P] [US2] Create TeamMemberCard component showing member details in src/components/team/team-member-card.tsx
+- [X] T037 [P] [US2] Create PendingInvitationsList component in src/components/team/pending-invitations-list.tsx
+- [X] T038 [P] [US2] Create RoleBadge component for displaying OWNER/COLLABORATOR badges in src/components/team/role-badge.tsx
+- [X] T039 [P] [US2] Create StatusBadge component for displaying PENDING/ACTIVE/REMOVED status in src/components/team/status-badge.tsx
+- [X] T040 [US2] Integrate TeamMemberList and PendingInvitationsList into team settings page src/app/(dashboard)/[id]/settings/team/page.tsx
 
 #### Additional Features
 
