@@ -29,10 +29,40 @@ import {
   sendTeamAccessRemovedEmail,
 } from "@/lib/email";
 
+/**
+ * Team Collaboration Router
+ *
+ * Handles all team collaboration operations including:
+ * - Inviting collaborators with module-specific permissions
+ * - Managing invitation lifecycle (send, accept, decline, resend, cancel)
+ * - Updating team member permissions
+ * - Removing team members
+ * - Querying team composition and individual memberships
+ *
+ * @module teamRouter
+ * @see {@link ../../../docs/modules/team/README.md} for module documentation
+ * @see {@link ../../../specs/002-team-collaborators/contracts/team-router.md} for API contracts
+ */
 export const teamRouter = createTRPCRouter({
   /**
-   * Get current user's team membership for an event
-   * Used for permission checks on the client side
+   * Get Current User's Team Membership
+   *
+   * Retrieves the current authenticated user's team membership for a specific event.
+   * Returns null if the user is not a member. Used for client-side permission checks
+   * and determining which modules the user can access.
+   *
+   * @access Authenticated users only
+   * @returns TeamMember object with role, status, and modulePermissions, or null if not a member
+   *
+   * @example
+   * ```typescript
+   * const member = await api.team.getCurrentMember.useQuery({ eventId: "evt_123" });
+   * if (member?.role === "OWNER") {
+   *   // User is the event owner
+   * } else if (member?.modulePermissions.includes("CFP")) {
+   *   // User has CFP access
+   * }
+   * ```
    */
   getCurrentMember: protectedProcedure
     .input(getCurrentMemberSchema)
@@ -55,8 +85,30 @@ export const teamRouter = createTRPCRouter({
     }),
 
   /**
-   * Get all team members for an event
-   * Supports filtering by status (PENDING, ACTIVE, REMOVED) and pagination
+   * Get All Team Members
+   *
+   * Retrieves all team members for an event with optional status filtering and pagination.
+   * Only event owners can view the full team list. Returns complete member information
+   * including user details, inviter information, and permission assignments.
+   *
+   * @access Event owner only
+   * @param eventId - Event ID to query
+   * @param status - Optional filter by TeamMemberStatus (PENDING | ACTIVE | REMOVED)
+   * @param page - Page number for pagination (default: 1)
+   * @param limit - Results per page (default: 20, max: 50)
+   * @returns Paginated list of team members with user details and pagination metadata
+   * @throws FORBIDDEN - If user is not the event owner
+   * @throws NOT_FOUND - If event does not exist
+   *
+   * @example
+   * ```typescript
+   * const { members, pagination } = await api.team.getMembers.useQuery({
+   *   eventId: "evt_123",
+   *   status: "ACTIVE",
+   *   page: 1,
+   *   limit: 20
+   * });
+   * ```
    */
   getMembers: protectedProcedure
     .input(getTeamMembersSchema)
@@ -140,8 +192,25 @@ export const teamRouter = createTRPCRouter({
     }),
 
   /**
-   * Get all pending invitations for an event
-   * Returns invitations with PENDING status
+   * Get Pending Invitations
+   *
+   * Retrieves all pending invitations for an event. Automatically marks expired invitations
+   * and filters them from the response. Only event owners can view pending invitations.
+   *
+   * @access Event owner only
+   * @param eventId - Event ID to query
+   * @returns Array of pending invitations with sender information
+   * @throws FORBIDDEN - If user is not the event owner
+   * @throws NOT_FOUND - If event does not exist
+   *
+   * @sideEffects Updates expired invitations to EXPIRED status in the background
+   *
+   * @example
+   * ```typescript
+   * const invitations = await api.team.getPendingInvitations.useQuery({
+   *   eventId: "evt_123"
+   * });
+   * ```
    */
   getPendingInvitations: protectedProcedure
     .input(getPendingInvitationsSchema)
@@ -345,8 +414,36 @@ export const teamRouter = createTRPCRouter({
     }),
 
   /**
-   * Invite a new collaborator to the event
-   * Creates both Invitation and TeamMember records, sends email
+   * Invite Collaborator
+   *
+   * Invites a new collaborator to the event with specified module permissions.
+   * Creates both Invitation and TeamMember records, generates a secure token,
+   * and sends an invitation email. Includes validation to prevent duplicate
+   * invitations and self-invitations.
+   *
+   * @access Event owner only
+   * @param eventId - Event ID
+   * @param email - Email address of the person to invite
+   * @param modulePermissions - Array of module names the collaborator can access
+   * @returns Created invitation and team member records
+   * @throws FORBIDDEN - If user is not the event owner
+   * @throws BAD_REQUEST - If email has active membership, pending invitation, or is self-invitation
+   * @throws NOT_FOUND - If event does not exist
+   *
+   * @sideEffects
+   * - Creates Invitation record with unique token
+   * - Creates TeamMember record with PENDING status
+   * - Sends invitation email asynchronously
+   * - Invalidates team query caches
+   *
+   * @example
+   * ```typescript
+   * const { invitation, teamMember } = await api.team.invite.mutate({
+   *   eventId: "evt_123",
+   *   email: "collaborator@example.com",
+   *   modulePermissions: ["CFP", "SPEAKERS"]
+   * });
+   * ```
    */
   invite: protectedProcedure
     .input(inviteTeamMemberSchema)
@@ -503,8 +600,31 @@ export const teamRouter = createTRPCRouter({
     }),
 
   /**
-   * Resend invitation to pending or expired invitation
-   * Generates new token and resets expiry date
+   * Resend Invitation
+   *
+   * Resends an invitation by generating a new token and resetting the expiry date.
+   * Can be used for pending or expired invitations. Cannot be used for accepted,
+   * declined, or cancelled invitations.
+   *
+   * @access Event owner only
+   * @param invitationId - ID of the invitation to resend
+   * @returns Updated invitation with new token and expiry
+   * @throws FORBIDDEN - If user is not the event owner
+   * @throws BAD_REQUEST - If invitation is accepted, declined, or cancelled
+   * @throws NOT_FOUND - If invitation does not exist
+   *
+   * @sideEffects
+   * - Generates new token (invalidates old token)
+   * - Resets expiry to 7 days from now
+   * - Updates status to PENDING if was EXPIRED
+   * - Sends new invitation email
+   *
+   * @example
+   * ```typescript
+   * const { invitation } = await api.team.resendInvitation.mutate({
+   *   invitationId: "inv_123"
+   * });
+   * ```
    */
   resendInvitation: protectedProcedure
     .input(resendInvitationSchema)
@@ -692,8 +812,35 @@ export const teamRouter = createTRPCRouter({
     }),
 
   /**
-   * Accept an invitation using the token from email link
-   * Updates invitation status and activates team member
+   * Accept Invitation
+   *
+   * Accepts an invitation using the token from the email link. Links the team member
+   * to the authenticated user, activates their membership, and sends notification to
+   * the event owner. Validates token, expiry, and prevents duplicate acceptances.
+   *
+   * @access Authenticated users with valid token
+   * @param token - Unique 43-character invitation token from email
+   * @returns Event details and activated team member information
+   * @throws NOT_FOUND - If token is invalid
+   * @throws BAD_REQUEST - If invitation is already accepted, declined, cancelled, or expired
+   * @throws BAD_REQUEST - If user already has active membership (edge case)
+   *
+   * @sideEffects
+   * - Updates Invitation status to ACCEPTED
+   * - Sets respondedAt timestamp
+   * - Updates TeamMember status to ACTIVE
+   * - Links TeamMember.userId to current user
+   * - Sets lastAccessedAt timestamp
+   * - Sends acceptance notification email to organizer
+   * - Invalidates team query caches
+   *
+   * @example
+   * ```typescript
+   * const { event, teamMember } = await api.team.acceptInvitation.mutate({
+   *   token: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v"
+   * });
+   * // Redirect to: `/${event.slug}`
+   * ```
    */
   acceptInvitation: protectedProcedure
     .input(acceptInvitationSchema)
@@ -950,8 +1097,34 @@ export const teamRouter = createTRPCRouter({
     }),
 
   /**
-   * Update a collaborator's module permissions
-   * Owner-only operation that replaces existing permissions
+   * Update Collaborator Permissions
+   *
+   * Updates a collaborator's module permissions. This is a full replacement operation -
+   * the provided modulePermissions array completely replaces the existing permissions.
+   * Cannot be used to modify owner permissions. Sends notification email to the collaborator.
+   *
+   * @access Event owner only
+   * @param teamMemberId - ID of the team member to update
+   * @param modulePermissions - New full list of module permissions (replaces existing)
+   * @returns Updated team member with new permissions
+   * @throws FORBIDDEN - If user is not the event owner
+   * @throws BAD_REQUEST - If trying to modify owner permissions or inactive member
+   * @throws NOT_FOUND - If team member does not exist
+   *
+   * @sideEffects
+   * - Replaces TeamMember.modulePermissions
+   * - Updates TeamMember.updatedAt timestamp
+   * - Sends permission change notification email to collaborator
+   * - Invalidates team query caches
+   *
+   * @example
+   * ```typescript
+   * // Add SCHEDULE to existing CFP access
+   * const { teamMember } = await api.team.updatePermissions.mutate({
+   *   teamMemberId: "tm_123",
+   *   modulePermissions: ["CFP", "SPEAKERS", "SCHEDULE"] // Full replacement
+   * });
+   * ```
    */
   updatePermissions: protectedProcedure
     .input(updateTeamMemberPermissionsSchema)
@@ -1101,8 +1274,33 @@ export const teamRouter = createTRPCRouter({
   }),
 
   /**
-   * Remove a collaborator from the team
-   * Owner-only operation that revokes all access
+   * Remove Team Member
+   *
+   * Revokes a collaborator's access to the event. Sets their status to REMOVED,
+   * which prevents access to all modules. Cannot be used for self-removal (owner
+   * protection). Sends notification email to the removed collaborator.
+   *
+   * @access Event owner only
+   * @param teamMemberId - ID of the team member to remove
+   * @returns Success confirmation
+   * @throws FORBIDDEN - If user is not the event owner
+   * @throws BAD_REQUEST - If trying to remove owner (self-removal) or already removed member
+   * @throws NOT_FOUND - If team member does not exist
+   *
+   * @sideEffects
+   * - Updates TeamMember status to REMOVED
+   * - Updates TeamMember.updatedAt timestamp
+   * - Sends access removal notification email to collaborator
+   * - Invalidates team query caches
+   * - Next API call from removed user will return FORBIDDEN
+   *
+   * @example
+   * ```typescript
+   * await api.team.removeMember.mutate({
+   *   teamMemberId: "tm_123"
+   * });
+   * // Removed user will be redirected to /[id]/removed on next action
+   * ```
    */
   removeMember: protectedProcedure
     .input(removeTeamMemberSchema)

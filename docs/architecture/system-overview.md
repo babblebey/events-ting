@@ -10,6 +10,7 @@ Events-Ting is a full-stack event management platform that enables organizers to
 - Build event schedules with speaker assignments
 - Accept and review session proposals (CFP)
 - Communicate with attendees and speakers
+- Collaborate with team members using granular permissions
 
 ## 🏗️ High-Level Architecture
 
@@ -48,6 +49,7 @@ graph TB
         ScheduleService[Schedule Service]
         SpeakerService[Speaker Service]
         CFPService[CFP Service]
+        TeamService[Team Service]
     end
     
     subgraph "Data Layer"
@@ -74,6 +76,7 @@ graph TB
     tRPC --> ScheduleService
     tRPC --> SpeakerService
     tRPC --> CFPService
+    tRPC --> TeamService
     
     EventService --> Prisma
     TicketService --> Prisma
@@ -81,6 +84,7 @@ graph TB
     ScheduleService --> Prisma
     SpeakerService --> Prisma
     CFPService --> Prisma
+    TeamService --> Prisma
     
     EmailService --> Resend
     Auth --> OAuth
@@ -347,6 +351,7 @@ UI Update (submission marked accepted)
 - **Schedule Service**: Schedule management, conflict detection
 - **Speaker Service**: Speaker profiles, session assignments
 - **CFP Service**: Submission flow, review, acceptance
+- **Team Service**: Team member invitations, permission management, access control
 
 **Key Decisions**:
 - ✅ Service layer for reusability (shared logic)
@@ -385,7 +390,7 @@ UI Update (submission marked accepted)
 
 ## 🔒 Security Architecture
 
-### Authentication Layers
+### Authorization Layers
 
 1. **Session-based Auth** (NextAuth.js)
    - Secure session cookies (httpOnly, secure, sameSite)
@@ -394,6 +399,7 @@ UI Update (submission marked accepted)
 
 2. **Authorization Checks**
    - **protectedProcedure**: Requires authenticated user
+   - **teamProtectedProcedure**: Requires team membership + module permission
    - **Organizer checks**: Verify event ownership
    - **Resource-level permissions**: Check user can access resource
 
@@ -401,6 +407,55 @@ UI Update (submission marked accepted)
    - Zod schemas for all inputs
    - Type coercion and sanitization
    - Custom validation rules
+
+### Team Collaboration Security
+
+The team collaboration system implements **defense-in-depth** security:
+
+1. **API Layer Security** (`teamProtectedProcedure` middleware)
+   ```typescript
+   // Check 1: User authenticated
+   if (!ctx.session) throw UNAUTHORIZED;
+   
+   // Check 2: User is active team member
+   const member = await db.teamMember.findFirst({
+     where: { eventId, userId: ctx.session.user.id, status: "ACTIVE" }
+   });
+   if (!member) throw FORBIDDEN;
+   
+   // Check 3: User has required module permission
+   if (requiredModule && member.role !== "OWNER" 
+       && !member.modulePermissions.includes(requiredModule)) {
+     throw FORBIDDEN;
+   }
+   ```
+
+2. **Client-side Guards** (UX only, not security)
+   ```typescript
+   const { hasPermission } = useTeamPermissions(eventId);
+   
+   if (!hasPermission("CFP")) {
+     return <AccessDenied module="CFP" />;
+   }
+   ```
+
+3. **Invitation Security**
+   - **Token generation**: `crypto.randomBytes(32)` → 256 bits entropy
+   - **Token format**: Base64 URL-safe (43 characters)
+   - **Expiry**: 7 days from creation (database-enforced)
+   - **Single-use**: Token invalidated after acceptance/decline
+   - **No hashing needed**: Not a password, single-use, expires
+
+4. **Owner Protection**
+   - Cannot remove self (must transfer ownership first)
+   - Cannot modify own permissions (always full access)
+   - Database prevents deleting inviters (`onDelete: Restrict`)
+
+5. **Permission Change Enforcement**
+   - Immediate revocation at API layer
+   - Next request after permission change returns 403
+   - Client shows error and redirects to accessible module
+   - No grace period in MVP (planned future enhancement)
 
 ### Data Security
 
@@ -419,6 +474,8 @@ UI Update (submission marked accepted)
   - `Registration`: eventId, ticketTypeId, email
   - `ScheduleEntry`: eventId, startTime
   - `Speaker`: eventId, email
+  - `TeamMember`: eventId + status, eventId + userId, email
+  - `Invitation`: token, eventId + status, email
 
 - **Eager Loading**: Include related data to avoid N+1 queries
   ```typescript
@@ -532,6 +589,7 @@ graph LR
     A --> D[CFP]
     A --> E[Communications]
     A --> F[Speakers]
+    A --> I[Team]
     
     B --> G[Registration]
     G --> H[Attendees]
@@ -542,6 +600,15 @@ graph LR
     E --> G
     E --> F
     
+    I -.->|controls access to| A
+    I -.->|controls access to| B
+    I -.->|controls access to| C
+    I -.->|controls access to| D
+    I -.->|controls access to| E
+    I -.->|controls access to| F
+    I -.->|controls access to| G
+    I -.->|controls access to| H
+    
     style A fill:#f59e0b
     style B fill:#10b981
     style C fill:#8b5cf6
@@ -550,6 +617,7 @@ graph LR
     style F fill:#ec4899
     style G fill:#3b82f6
     style H fill:#14b8a6
+    style I fill:#f97316
 ```
 
 **Module Dependencies**:
@@ -561,6 +629,7 @@ graph LR
 - **Speakers**: Depends on Events (can be created via CFP)
 - **CFP**: Depends on Events (creates Speakers on acceptance)
 - **Communications**: Depends on Events (sends to Registrations, Speakers)
+- **Team**: Cross-cutting module that controls access to all other modules
 
 ### Module Dependency Graph
 
@@ -574,12 +643,14 @@ graph TD
     Speakers[Speakers Module]
     CFP[CFP Module]
     Communications[Communications Module]
+    Team[Team Module<br/>Permission Gateway]
     
     Events --> Tickets
     Events --> Schedule
     Events --> Speakers
     Events --> CFP
     Events --> Communications
+    Events --> Team
     
     Tickets --> Registration
     Events --> Registration
@@ -591,6 +662,15 @@ graph TD
     Registration -.->|sends to| Communications
     Speakers -.->|sends to| Communications
     
+    Team -.->|enforces access to| Events
+    Team -.->|enforces access to| Tickets
+    Team -.->|enforces access to| Registration
+    Team -.->|enforces access to| Attendees
+    Team -.->|enforces access to| Schedule
+    Team -.->|enforces access to| Speakers
+    Team -.->|enforces access to| CFP
+    Team -.->|enforces access to| Communications
+    
     style Events fill:#0070f3,stroke:#0050c3,color:#fff
     style Tickets fill:#10b981,stroke:#059669,color:#fff
     style Registration fill:#f59e0b,stroke:#d97706,color:#fff
@@ -599,11 +679,81 @@ graph TD
     style Speakers fill:#ec4899,stroke:#db2777,color:#fff
     style CFP fill:#ef4444,stroke:#dc2626,color:#fff
     style Communications fill:#06b6d4,stroke:#0891b2,color:#fff
+    style Team fill:#f97316,stroke:#ea580c,color:#fff
 ```
 
 **Legend**:
 - Solid arrows: Direct dependencies
 - Dashed arrows: Communication/integration points
+
+### Team Module: Permission Gateway
+
+The Team module is a **cross-cutting concern** that controls access to all other modules:
+
+**Architecture Pattern**: Middleware-based authorization
+```typescript
+// Every protected procedure checks team permissions
+export const cfpRouter = createTRPCRouter({
+  getSubmissions: teamProtectedProcedure
+    .input(z.object({ 
+      eventId: z.string(),
+      requiredModule: z.literal("CFP"), // Permission check
+    }))
+    .query(async ({ ctx, input }) => {
+      // At this point, teamProtectedProcedure middleware has:
+      // 1. Verified user is authenticated
+      // 2. Verified user is active team member of this event
+      // 3. Verified user has CFP permission (or is owner)
+      
+      return ctx.db.cfpSubmission.findMany({
+        where: { eventId: input.eventId }
+      });
+    }),
+});
+```
+
+**Database Relationships**:
+```prisma
+model Event {
+  id          String       @id
+  teamMembers TeamMember[] // Team members can access this event
+  // ... other fields
+}
+
+model TeamMember {
+  id                String   @id
+  eventId           String
+  userId            String?
+  role              TeamRole  // OWNER or COLLABORATOR
+  status            TeamMemberStatus // PENDING, ACTIVE, REMOVED
+  modulePermissions String[]  // ["CFP", "SPEAKERS", "SCHEDULE"]
+  // ... other fields
+  
+  @@index([eventId, status])      // Fast active member lookup
+  @@index([eventId, userId])      // Fast permission check
+}
+```
+
+**Permission Enforcement Flow**:
+```
+1. User requests CFP submissions
+2. teamProtectedProcedure middleware runs
+3. Query: Find TeamMember WHERE eventId AND userId AND status=ACTIVE
+4. Check: member.role === "OWNER" OR "CFP" IN member.modulePermissions
+5. If check passes: Proceed to query
+6. If check fails: Return 403 FORBIDDEN
+```
+
+**Module Permissions**:
+- `OVERVIEW` - Dashboard statistics (read-only)
+- `ATTENDEES` - Registration management
+- `TICKETS` - Ticket type management
+- `SCHEDULE` - Schedule building
+- `SPEAKERS` - Speaker profiles
+- `CFP` - Submission review
+- `COMMUNICATIONS` - Email campaigns
+
+**Note**: SETTINGS module is owner-only and not assignable to collaborators.
 
 ## 📚 Related Documentation
 
@@ -611,10 +761,11 @@ graph TD
 - **[Data Model](./data-model.md)** - Database schema and relationships
 - **[Authentication](./authentication.md)** - Auth implementation details
 - **[File Structure](./file-structure.md)** - Project organization
+- **[Team Module](../modules/team/README.md)** - Team collaboration documentation
 
 ---
 
 [← Back to Documentation Index](../index.md) | [Tech Stack →](./tech-stack.md)
 
-**Last Updated**: November 10, 2025  
-**Next Review**: December 10, 2025
+**Last Updated**: November 16, 2025  
+**Next Review**: December 16, 2025

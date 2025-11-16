@@ -308,10 +308,10 @@ description: "Task list for Team Collaborators & Permissions feature implementat
 
 ### Documentation
 
-- [ ] T100 [P] Update project documentation in docs/modules/team/ (create directory and README)
-- [ ] T101 [P] Add API documentation comments to all team router procedures
-- [ ] T102 [P] Create team collaboration user guide in docs/guides/team-collaboration.md
-- [ ] T103 Update architecture documentation to include team collaboration in docs/architecture/system-overview.md
+- [X] T100 [P] Update project documentation in docs/modules/team/ (create directory and README)
+- [X] T101 [P] Add API documentation comments to all team router procedures
+- [X] T102 [P] Create team collaboration user guide in docs/guides/team-collaboration.md
+- [X] T103 Update architecture documentation to include team collaboration in docs/architecture/system-overview.md
 
 ### Security & Validation
 
