@@ -13,6 +13,7 @@ import {
   getPendingInvitationsSchema,
   resendInvitationSchema,
   cancelInvitationSchema,
+  updateTeamMemberPermissionsSchema,
 } from "@/lib/validators";
 import {
   generateInvitationToken,
@@ -21,6 +22,7 @@ import {
 import {
   sendTeamInvitationEmail,
   sendTeamInvitationAcceptedEmail,
+  sendTeamPermissionChangedEmail,
 } from "@/lib/email";
 
 export const teamRouter = createTRPCRouter({
@@ -691,6 +693,118 @@ export const teamRouter = createTRPCRouter({
           role: result.teamMember.role,
           status: result.teamMember.status,
           modulePermissions: result.teamMember.modulePermissions,
+        },
+      };
+    }),
+
+  /**
+   * Update a collaborator's module permissions
+   * Owner-only operation that replaces existing permissions
+   */
+  updatePermissions: protectedProcedure
+    .input(updateTeamMemberPermissionsSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { teamMemberId, modulePermissions } = input;
+
+      // Find the team member
+      const teamMember = await ctx.db.teamMember.findUnique({
+        where: { id: teamMemberId },
+        include: {
+          event: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      if (!teamMember) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Team member not found",
+        });
+      }
+
+      // Verify user is event owner
+      const currentMember = await ctx.db.teamMember.findFirst({
+        where: {
+          eventId: teamMember.eventId,
+          userId: ctx.session.user.id,
+          status: "ACTIVE",
+        },
+      });
+
+      if (currentMember?.role !== "OWNER") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only event owners can update team member permissions",
+        });
+      }
+
+      // Cannot modify owner's permissions
+      if (teamMember.role === "OWNER") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "Cannot modify owner's permissions. Owner has full access to all modules.",
+        });
+      }
+
+      // TeamMember must be active
+      if (teamMember.status !== "ACTIVE") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "Cannot update permissions for inactive team member. Member must accept invitation first.",
+        });
+      }
+
+      // Store previous permissions for email notification
+      const previousPermissions = teamMember.modulePermissions;
+
+      // Update permissions
+      const updatedMember = await ctx.db.teamMember.update({
+        where: { id: teamMemberId },
+        data: {
+          modulePermissions,
+          updatedAt: new Date(),
+        },
+      });
+
+      // Send permission change notification email (async)
+      if (teamMember.user?.email) {
+        void sendTeamPermissionChangedEmail({
+          to: teamMember.user.email,
+          collaboratorName: teamMember.user.name ?? teamMember.email,
+          organizerName: ctx.session.user.name ?? "Event Organizer",
+          eventName: teamMember.event.name,
+          eventId: teamMember.event.id,
+          previousPermissions,
+          newPermissions: modulePermissions,
+        }).catch((error) => {
+          console.error(
+            "Failed to send permission changed email:",
+            error,
+          );
+        });
+      }
+
+      return {
+        teamMember: {
+          id: updatedMember.id,
+          email: updatedMember.email,
+          role: updatedMember.role,
+          status: updatedMember.status,
+          modulePermissions: updatedMember.modulePermissions,
+          updatedAt: updatedMember.updatedAt,
         },
       };
     }),

@@ -208,6 +208,7 @@ export function TeamMemberList({ eventId, isOwner }: TeamMemberListProps) {
             key={member.id}
             member={member}
             isOwner={isOwner}
+            eventId={eventId}
           />
         ))}
       </div>

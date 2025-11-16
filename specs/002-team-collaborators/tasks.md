@@ -147,14 +147,14 @@ description: "Task list for Team Collaborators & Permissions feature implementat
 
 #### Backend API
 
-- [ ] T045 [US3] Implement team.updatePermissions procedure in src/server/api/routers/team.ts
-- [ ] T046 [US3] Implement email sending for permission changes (sends team-permission-changed.tsx) in updatePermissions procedure
+- [X] T045 [US3] Implement team.updatePermissions procedure in src/server/api/routers/team.ts
+- [X] T046 [US3] Implement email sending for permission changes (sends team-permission-changed.tsx) in updatePermissions procedure
 
 #### Frontend Components
 
-- [ ] T047 [P] [US3] Create EditPermissionsModal component in src/components/team/edit-permissions-modal.tsx
-- [ ] T048 [US3] Add edit permissions action to TeamMemberCard component in src/components/team/team-member-card.tsx
-- [ ] T049 [US3] Integrate EditPermissionsModal with team.updatePermissions mutation
+- [X] T047 [P] [US3] Create EditPermissionsModal component in src/components/team/edit-permissions-modal.tsx
+- [X] T048 [US3] Add edit permissions action to TeamMemberCard component in src/components/team/team-member-card.tsx
+- [X] T049 [US3] Integrate EditPermissionsModal with team.updatePermissions mutation
 
 #### Permission Change Handling
 

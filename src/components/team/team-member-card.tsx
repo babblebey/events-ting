@@ -10,9 +10,11 @@
 
 "use client";
 
+import { useState } from "react";
 import { Card, Avatar, Badge, Button, Tooltip } from "flowbite-react";
 import { RoleBadge } from "./role-badge";
 import { StatusBadge } from "./status-badge";
+import { EditPermissionsModal } from "./edit-permissions-modal";
 import { HiPencil, HiTrash, HiMail } from "react-icons/hi";
 import { formatDistanceToNow } from "date-fns";
 
@@ -38,9 +40,12 @@ interface TeamMemberCardProps {
     lastAccessedAt: Date | null;
   };
   isOwner: boolean;
+  eventId: string;
 }
 
-export function TeamMemberCard({ member, isOwner }: TeamMemberCardProps) {
+export function TeamMemberCard({ member, isOwner, eventId }: TeamMemberCardProps) {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  
   const displayName = member.user?.name ?? member.email.split("@")[0];
   const displayEmail = member.user?.email ?? member.email;
   const isUserActive = member.status === "ACTIVE" && member.user !== null;
@@ -148,7 +153,7 @@ export function TeamMemberCard({ member, isOwner }: TeamMemberCardProps) {
                     size="sm"
                     color="gray"
                     aria-label="Edit permissions"
-                    disabled
+                    onClick={() => setIsEditModalOpen(true)}
                   >
                     <HiPencil className="h-4 w-4" />
                   </Button>
@@ -186,6 +191,16 @@ export function TeamMemberCard({ member, isOwner }: TeamMemberCardProps) {
           </div>
         )}
       </div>
+
+      {/* Edit Permissions Modal */}
+      {isOwner && member.status === "ACTIVE" && member.role === "COLLABORATOR" && (
+        <EditPermissionsModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          teamMember={member}
+          eventId={eventId}
+        />
+      )}
     </Card>
   );
 }
