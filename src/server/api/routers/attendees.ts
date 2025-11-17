@@ -383,7 +383,8 @@ function validateRow(row: MappedRow): ValidationError[] {
         row: row.rowNumber,
         field: "registeredAt",
         value: row.registeredAt,
-        error: "Invalid date format. Use ISO 8601 format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss)",
+        error:
+          "Invalid date format. Use ISO 8601 format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss)",
       });
     }
   }
@@ -465,7 +466,8 @@ export const attendeesRouter = createTRPCRouter({
       if (data.length === 0) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "CSV file is empty. Please upload a file with at least one row of data.",
+          message:
+            "CSV file is empty. Please upload a file with at least one row of data.",
         });
       }
 
@@ -473,7 +475,8 @@ export const attendeesRouter = createTRPCRouter({
       if (columns.length === 0) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "CSV file has no columns. Please ensure the first row contains column headers.",
+          message:
+            "CSV file has no columns. Please ensure the first row contains column headers.",
         });
       }
 
@@ -662,7 +665,7 @@ export const attendeesRouter = createTRPCRouter({
 
       // Step 5: Ticket availability warnings (non-blocking)
       const warnings: ValidationError[] = [];
-      
+
       // Count how many registrations per ticket type will be created
       const ticketTypeCounts = new Map<string, number>();
       for (const row of mappedRows) {
@@ -677,11 +680,13 @@ export const attendeesRouter = createTRPCRouter({
 
       // Check availability for each ticket type
       for (const [ticketTypeId, importCount] of ticketTypeCounts.entries()) {
-        const ticketType = event.ticketTypes.find((tt) => tt.id === ticketTypeId);
+        const ticketType = event.ticketTypes.find(
+          (tt) => tt.id === ticketTypeId,
+        );
         if (ticketType) {
           const currentSold = ticketType._count.registrations;
           const availableSlots = ticketType.quantity - currentSold;
-          
+
           if (importCount > availableSlots) {
             // This is a warning, not a blocking error
             warnings.push({
@@ -701,7 +706,7 @@ export const attendeesRouter = createTRPCRouter({
         ...inFileDuplicates.map((e) => e.row),
         ...dbDuplicates.map((e) => e.row),
       ]);
-      
+
       const validRows = totalRows - invalidRowNumbers.size;
       const invalidRows = invalidRowNumbers.size;
       const duplicates = duplicateRowNumbers.size;
@@ -862,7 +867,11 @@ export const attendeesRouter = createTRPCRouter({
       if (input.duplicateStrategy === "skip") {
         // Skip duplicates - mark them as errors
         for (const row of mappedRows) {
-          if (row.email && existingEmailSet.has(row.email) && !rowsWithErrors.has(row.rowNumber)) {
+          if (
+            row.email &&
+            existingEmailSet.has(row.email) &&
+            !rowsWithErrors.has(row.rowNumber)
+          ) {
             allErrors.push({
               row: row.rowNumber,
               field: "email",
@@ -927,8 +936,16 @@ export const attendeesRouter = createTRPCRouter({
               ticketTypeId,
               email: row.email!,
               name: row.name!,
-              paymentStatus: (row.paymentStatus as "free" | "pending" | "paid" | "failed" | "refunded") ?? "free",
-              emailStatus: (row.emailStatus as "active" | "bounced" | "unsubscribed") ?? "active",
+              paymentStatus:
+                (row.paymentStatus as
+                  | "free"
+                  | "pending"
+                  | "paid"
+                  | "failed"
+                  | "refunded") ?? "free",
+              emailStatus:
+                (row.emailStatus as "active" | "bounced" | "unsubscribed") ??
+                "active",
               customData,
               registeredAt,
             },
@@ -944,9 +961,9 @@ export const attendeesRouter = createTRPCRouter({
           // Send confirmation email if enabled
           if (input.sendConfirmationEmails) {
             // Get ticket type name for email
-            const ticketTypeName = event.ticketTypes.find(
-              (tt) => tt.id === ticketTypeId,
-            )?.name ?? "General Admission";
+            const ticketTypeName =
+              event.ticketTypes.find((tt) => tt.id === ticketTypeId)?.name ??
+              "General Admission";
 
             // Fire and forget - don't block import on email failures
             sendEmail({
@@ -976,7 +993,7 @@ export const attendeesRouter = createTRPCRouter({
           // Individual row failure - log and continue
           const errorMessage =
             error instanceof Error ? error.message : "Unknown error";
-          
+
           console.error(
             `[Import] Failed to import row ${row.rowNumber}:`,
             error,
@@ -1005,8 +1022,12 @@ export const attendeesRouter = createTRPCRouter({
         failureCount,
         duplicateCount,
         errors: allErrors,
-        status: failureCount === 0 && validRows.length > 0 ? "completed" : failureCount === validRows.length ? "failed" : "completed",
+        status:
+          failureCount === 0 && validRows.length > 0
+            ? "completed"
+            : failureCount === validRows.length
+              ? "failed"
+              : "completed",
       };
     }),
 });
-

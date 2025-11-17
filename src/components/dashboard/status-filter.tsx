@@ -48,7 +48,7 @@ export function StatusFilter({ statusCounts, isLoading }: StatusFilterProps) {
     if (status === activeFilter) return;
 
     const params = new URLSearchParams(searchParams.toString());
-    
+
     if (status === "all") {
       // Remove status param for "All" filter
       params.delete("status");
@@ -81,15 +81,11 @@ export function StatusFilter({ statusCounts, isLoading }: StatusFilterProps) {
               key={tab.value}
               onClick={() => handleFilterChange(tab.value)}
               disabled={isLoading}
-              className={`
-                flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium
-                transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60
-                ${
-                  isActive
-                    ? "bg-blue-600 text-white shadow-md hover:bg-blue-700"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-                }
-              `}
+              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 ${
+                isActive
+                  ? "bg-blue-600 text-white shadow-md hover:bg-blue-700"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              } `}
             >
               <span>{tab.label}</span>
               {count !== undefined && (
@@ -117,22 +113,15 @@ export function StatusFilter({ statusCounts, isLoading }: StatusFilterProps) {
               key={tab.value}
               onClick={() => handleFilterChange(tab.value)}
               disabled={isLoading}
-              className={`
-                flex w-full items-center justify-between rounded-lg px-4 py-3 text-sm font-medium
-                transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60
-                ${
-                  isActive
-                    ? "bg-blue-600 text-white shadow-md"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-                }
-              `}
+              className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 ${
+                isActive
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              } `}
             >
               <span>{tab.label}</span>
               {count !== undefined && (
-                <Badge
-                  color={isActive ? "light" : tab.color}
-                  size="sm"
-                >
+                <Badge color={isActive ? "light" : tab.color} size="sm">
                   {count}
                 </Badge>
               )}

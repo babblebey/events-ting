@@ -1,12 +1,12 @@
 /**
  * Email Template Validation Script
- * 
+ *
  * This script validates that all email templates:
  * 1. Use only email-safe HTML/CSS patterns
  * 2. Have proper structure with required @react-email components
  * 3. Follow best practices for cross-client compatibility
  * 4. Include all required props and render without errors
- * 
+ *
  * Email client compatibility targets:
  * - Gmail (web, iOS, Android)
  * - Outlook (Windows, Mac, iOS, Android, web)
@@ -240,7 +240,7 @@ async function validateTemplate(test: TemplateTest): Promise<ValidationResult> {
     }
 
     // Check for accessibility
-    if (!html.includes('alt=')) {
+    if (!html.includes("alt=")) {
       result.warnings.push(
         "Consider adding alt text to any images for accessibility",
       );
@@ -365,7 +365,9 @@ function generateReport(results: ValidationResult[]): void {
   console.log("   - Advanced CSS (flexbox, grid, animations) not supported");
   console.log("   - JavaScript disabled in all email clients");
   console.log("   - SVG support varies by client");
-  console.log("   - Outlook uses Microsoft Word rendering engine (limited CSS)");
+  console.log(
+    "   - Outlook uses Microsoft Word rendering engine (limited CSS)",
+  );
 
   console.log("\n📚 Best Practices Applied:");
   console.log("   - Table-based layouts for compatibility");
@@ -396,7 +398,9 @@ async function main(): Promise<void> {
   // Exit with error code if any template failed
   const hasFailures = results.some((r) => !r.passed);
   if (hasFailures) {
-    console.log("❌ Some templates failed validation. Please fix the errors.\n");
+    console.log(
+      "❌ Some templates failed validation. Please fix the errors.\n",
+    );
     process.exit(1);
   } else {
     console.log("✅ All templates passed validation!\n");

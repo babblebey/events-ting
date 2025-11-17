@@ -1,13 +1,13 @@
 /**
  * useTrpcError Hook
- * 
+ *
  * Provides standardized error handling for tRPC mutations and queries.
  * Specifically handles:
  * - FORBIDDEN (403) errors from permission changes
  * - UNAUTHORIZED (401) errors
  * - Validation errors
  * - Generic errors
- * 
+ *
  * @module hooks/useTrpcError
  */
 
@@ -30,22 +30,18 @@ interface UseTrpcErrorOptions {
 
 /**
  * Hook for handling tRPC errors consistently across the application
- * 
+ *
  * @example
  * ```tsx
  * const handleError = useTrpcError({ eventId, showToast: true });
- * 
+ *
  * const mutation = api.cfp.submitProposal.useMutation({
  *   onError: handleError,
  * });
  * ```
  */
 export function useTrpcError(options: UseTrpcErrorOptions = {}) {
-  const {
-    eventId,
-    customMessages = {},
-    showToast = true,
-  } = options;
+  const { eventId, customMessages = {}, showToast = true } = options;
 
   const router = useRouter();
   const toast = useToast();
@@ -78,8 +74,7 @@ export function useTrpcError(options: UseTrpcErrorOptions = {}) {
         if (showToast) {
           toast.error(
             "Authentication Required",
-            customMessages.UNAUTHORIZED ??
-              "Please sign in to continue.",
+            customMessages.UNAUTHORIZED ?? "Please sign in to continue.",
           );
         }
         router.push("/auth/signin");
@@ -89,11 +84,7 @@ export function useTrpcError(options: UseTrpcErrorOptions = {}) {
       // Handle NOT_FOUND (404)
       if (errorCode === "NOT_FOUND") {
         if (showToast) {
-          toast.error(
-            "Not Found",
-            customMessages.NOT_FOUND ??
-              error.message,
-          );
+          toast.error("Not Found", customMessages.NOT_FOUND ?? error.message);
         }
         return;
       }
@@ -101,11 +92,7 @@ export function useTrpcError(options: UseTrpcErrorOptions = {}) {
       // Handle CONFLICT (409)
       if (errorCode === "CONFLICT") {
         if (showToast) {
-          toast.error(
-            "Conflict",
-            customMessages.CONFLICT ??
-              error.message,
-          );
+          toast.error("Conflict", customMessages.CONFLICT ?? error.message);
         }
         return;
       }
@@ -115,8 +102,7 @@ export function useTrpcError(options: UseTrpcErrorOptions = {}) {
         if (showToast) {
           toast.error(
             "Invalid Request",
-            customMessages.BAD_REQUEST ??
-              error.message,
+            customMessages.BAD_REQUEST ?? error.message,
           );
         }
         return;

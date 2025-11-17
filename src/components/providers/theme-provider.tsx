@@ -16,8 +16,8 @@ const ourTheme = createTheme({
     },
   },
   button: {
-    base: "cursor-pointer"
-  }
+    base: "cursor-pointer",
+  },
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {

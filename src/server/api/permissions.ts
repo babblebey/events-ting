@@ -1,10 +1,10 @@
 /**
  * Permission Helpers for Team Collaboration
- * 
+ *
  * Utilities for checking team member permissions in tRPC procedures.
  * These helpers verify that authenticated users have appropriate access
  * to events and specific modules based on their team membership.
- * 
+ *
  * @module server/api/permissions
  */
 
@@ -27,11 +27,11 @@ export interface TeamMemberContext {
 
 /**
  * Check if user has access to an event (either as owner or team member)
- * 
+ *
  * @param params - Parameters for permission check
  * @returns Team member context with permission info
  * @throws TRPCError with FORBIDDEN code if user doesn't have access
- * 
+ *
  * @example
  * ```ts
  * const { teamMember, isOwner } = await checkEventAccess({
@@ -81,11 +81,11 @@ export async function checkEventAccess(params: {
 
 /**
  * Check if user has access to a specific module within an event
- * 
+ *
  * @param params - Parameters for module permission check
  * @returns Team member context with permission info
  * @throws TRPCError with FORBIDDEN code if user doesn't have module access
- * 
+ *
  * @example
  * ```ts
  * const { teamMember, isOwner } = await checkModuleAccess({
@@ -94,7 +94,7 @@ export async function checkEventAccess(params: {
  *   userId: ctx.session.user.id,
  *   requiredModule: "CFP",
  * });
- * 
+ *
  * // If this doesn't throw, user has access to CFP module
  * // Proceed with CFP operations
  * ```
@@ -116,7 +116,8 @@ export async function checkModuleAccess(params: {
   }
 
   // Collaborators need specific module permission
-  const hasModuleAccess = context.teamMember.modulePermissions.includes(requiredModule);
+  const hasModuleAccess =
+    context.teamMember.modulePermissions.includes(requiredModule);
 
   if (!hasModuleAccess) {
     throw new TRPCError({
@@ -130,10 +131,10 @@ export async function checkModuleAccess(params: {
 
 /**
  * Check if user is the event owner
- * 
+ *
  * @param params - Parameters for owner check
  * @throws TRPCError with FORBIDDEN code if user is not the owner
- * 
+ *
  * @example
  * ```ts
  * await checkIsOwner({
@@ -141,7 +142,7 @@ export async function checkModuleAccess(params: {
  *   eventId: input.eventId,
  *   userId: ctx.session.user.id,
  * });
- * 
+ *
  * // If this doesn't throw, user is the owner
  * // Proceed with owner-only operations
  * ```

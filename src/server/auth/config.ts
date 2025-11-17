@@ -104,12 +104,12 @@ export const authConfig = {
       if (url.startsWith("/")) {
         return `${baseUrl}${url}`;
       }
-      
+
       // Allow callback URLs on the same origin
       if (new URL(url).origin === baseUrl) {
         return url;
       }
-      
+
       // Default redirect to dashboard after successful sign-in
       return `${baseUrl}/dashboard`;
     },

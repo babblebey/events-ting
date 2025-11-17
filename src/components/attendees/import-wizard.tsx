@@ -58,15 +58,15 @@ export function ImportWizard({ eventId, eventName }: ImportWizardProps) {
   const [fieldMapping, setFieldMapping] = useState<Record<string, string>>({});
   const [validationResult, setValidationResult] =
     useState<ValidationResult | null>(null);
-  const [duplicateStrategy, setDuplicateStrategy] = useState<
-    "skip" | "create"
-  >("skip");
+  const [duplicateStrategy, setDuplicateStrategy] = useState<"skip" | "create">(
+    "skip",
+  );
   const [sendConfirmationEmails, setSendConfirmationEmails] = useState(false);
 
   const handleUploadComplete = (
     data: ParsedCSVData,
     sendEmails: boolean,
-    suggestedMapping: Record<string, string>
+    suggestedMapping: Record<string, string>,
   ) => {
     setParsedData(data);
     setSendConfirmationEmails(sendEmails);
@@ -81,7 +81,7 @@ export function ImportWizard({ eventId, eventName }: ImportWizardProps) {
 
   const handleValidationComplete = (
     result: ValidationResult,
-    strategy: "skip" | "create"
+    strategy: "skip" | "create",
   ) => {
     setValidationResult(result);
     setDuplicateStrategy(strategy);
@@ -125,9 +125,7 @@ export function ImportWizard({ eventId, eventName }: ImportWizardProps) {
             Import Attendees
           </h2>
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <span className="font-medium">
-              Step {getStepNumber()} of 4:
-            </span>
+            <span className="font-medium">Step {getStepNumber()} of 4:</span>
             <span>
               {currentStep === "upload" && "Upload CSV File"}
               {currentStep === "mapping" && "Map CSV Fields"}

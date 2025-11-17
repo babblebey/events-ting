@@ -1,9 +1,9 @@
 /**
  * Rate Limiting Utility
- * 
+ *
  * Provides in-memory rate limiting for API endpoints.
  * Uses a sliding window approach to track requests per user/identifier.
- * 
+ *
  * @module rate-limit
  */
 
@@ -12,12 +12,12 @@ interface RateLimitConfig {
    * Maximum number of requests allowed within the window
    */
   maxRequests: number;
-  
+
   /**
    * Time window in milliseconds
    */
   windowMs: number;
-  
+
   /**
    * Optional custom identifier function (defaults to userId)
    */
@@ -32,7 +32,7 @@ interface RateLimitRecord {
 /**
  * In-memory store for rate limit records
  * Format: Map<key, { count: number, resetAt: timestamp }>
- * 
+ *
  * Note: In production, consider using Redis for distributed rate limiting
  */
 const rateLimitStore = new Map<string, RateLimitRecord>();
@@ -41,31 +41,34 @@ const rateLimitStore = new Map<string, RateLimitRecord>();
  * Cleanup expired rate limit records every 5 minutes
  * Prevents memory leaks from accumulating stale records
  */
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, record] of rateLimitStore.entries()) {
-    if (record.resetAt < now) {
-      rateLimitStore.delete(key);
+setInterval(
+  () => {
+    const now = Date.now();
+    for (const [key, record] of rateLimitStore.entries()) {
+      if (record.resetAt < now) {
+        rateLimitStore.delete(key);
+      }
     }
-  }
-}, 5 * 60 * 1000);
+  },
+  5 * 60 * 1000,
+);
 
 /**
  * Rate Limiter
- * 
+ *
  * Creates a rate limiter function that tracks requests per identifier
  * and enforces the specified limits.
- * 
+ *
  * @param config - Rate limit configuration
  * @returns Rate limiter function
- * 
+ *
  * @example
  * ```typescript
  * const inviteRateLimiter = createRateLimiter({
  *   maxRequests: 20,
  *   windowMs: 60 * 60 * 1000, // 1 hour
  * });
- * 
+ *
  * // In tRPC procedure:
  * const { allowed, remaining, resetAt } = await inviteRateLimiter.check(ctx.session.user.id);
  * if (!allowed) {
@@ -82,7 +85,7 @@ export function createRateLimiter(config: RateLimitConfig) {
   return {
     /**
      * Check if request is allowed and update counters
-     * 
+     *
      * @param identifier - Unique identifier (typically userId)
      * @returns Rate limit status
      */
@@ -94,14 +97,14 @@ export function createRateLimiter(config: RateLimitConfig) {
     } {
       const now = Date.now();
       const key = `${config.identifier ?? "default"}:${identifier}`;
-      
+
       const record = rateLimitStore.get(key);
 
       // No record or window expired - create new
       if (!record || record.resetAt < now) {
         const resetAt = now + windowMs;
         rateLimitStore.set(key, { count: 1, resetAt });
-        
+
         return {
           allowed: true,
           remaining: maxRequests - 1,
@@ -135,7 +138,7 @@ export function createRateLimiter(config: RateLimitConfig) {
 
     /**
      * Get current rate limit status without incrementing
-     * 
+     *
      * @param identifier - Unique identifier (typically userId)
      * @returns Current rate limit status
      */
@@ -166,7 +169,7 @@ export function createRateLimiter(config: RateLimitConfig) {
     /**
      * Reset rate limit for specific identifier
      * Useful for testing or administrative overrides
-     * 
+     *
      * @param identifier - Unique identifier to reset
      */
     reset(identifier: string): void {

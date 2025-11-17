@@ -44,7 +44,7 @@ export function ValidationStep({
   onBack,
 }: ValidationStepProps) {
   const [duplicateStrategy, setDuplicateStrategy] = useState<"skip" | "create">(
-    "skip"
+    "skip",
   );
   const [validationResult, setValidationResult] =
     useState<ValidationResult | null>(null);
@@ -89,9 +89,7 @@ export function ValidationStep({
     const csv = [
       headers.join(","),
       ...rows.map((row) =>
-        row
-          .map((cell) => `"${cell.replace(/"/g, '""')}"`)
-          .join(",")
+        row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(","),
       ),
     ].join("\n");
 
@@ -181,8 +179,8 @@ export function ValidationStep({
               </span>
             ) : (
               <span>
-                <span className="font-medium">All rows are valid!</span> Ready to
-                import {validationResult.validRows} attendees.
+                <span className="font-medium">All rows are valid!</span> Ready
+                to import {validationResult.validRows} attendees.
               </span>
             )}
           </Alert>
@@ -221,7 +219,11 @@ export function ValidationStep({
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Validation Errors
                 </h3>
-                <Button size="sm" color="light" onClick={handleDownloadErrorReport}>
+                <Button
+                  size="sm"
+                  color="light"
+                  onClick={handleDownloadErrorReport}
+                >
                   <HiDownload className="mr-2 h-4 w-4" />
                   Download Error Report
                 </Button>
@@ -273,9 +275,7 @@ export function ValidationStep({
           {/* No errors message */}
           {!hasErrors && (
             <Alert color="success" icon={HiCheckCircle}>
-              <span className="font-medium">
-                No validation errors found!
-              </span>{" "}
+              <span className="font-medium">No validation errors found!</span>{" "}
               All rows passed validation checks and are ready to import.
             </Alert>
           )}
@@ -283,9 +283,9 @@ export function ValidationStep({
           {/* Cannot proceed warning */}
           {!canProceed && (
             <Alert color="failure">
-              <span className="font-medium">Cannot proceed with import.</span> All
-              rows have validation errors. Please fix the errors in your CSV file
-              and try again.
+              <span className="font-medium">Cannot proceed with import.</span>{" "}
+              All rows have validation errors. Please fix the errors in your CSV
+              file and try again.
             </Alert>
           )}
         </>
@@ -301,7 +301,11 @@ export function ValidationStep({
 
       {/* Action buttons */}
       <div className="flex justify-between">
-        <Button color="gray" onClick={onBack} disabled={validateImport.isPending}>
+        <Button
+          color="gray"
+          onClick={onBack}
+          disabled={validateImport.isPending}
+        >
           Back
         </Button>
         <div className="flex gap-3">
