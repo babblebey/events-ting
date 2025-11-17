@@ -6,7 +6,7 @@
 import { api } from "@/trpc/server";
 import { Card } from "flowbite-react";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { InviteCollaboratorForm } from "@/components/team/invite-collaborator-form";
+import { InviteCollaboratorButton } from "@/components/team/invite-collaborator-button";
 import { TeamMemberList } from "@/components/team/team-member-list";
 import { PendingInvitationsList } from "@/components/team/pending-invitations-list";
 import { RoleBadge } from "@/components/team/role-badge";
@@ -72,13 +72,17 @@ export default async function TeamPage({ params }: TeamPageProps) {
       />
 
       {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Team Management
-        </h1>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
-          Manage team members and their module permissions
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Team Management
+          </h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
+            Manage team members and their module permissions
+          </p>
+        </div>
+        {/* Invite Collaborator Button - Owner Only */}
+        {isOwner && <InviteCollaboratorButton eventId={params.id} />}
       </div>
 
       {/* Your Permissions Section - Shown to All Users */}
@@ -176,22 +180,6 @@ export default async function TeamPage({ params }: TeamPageProps) {
                 </div>
               )}
           </div>
-        </Card>
-      )}
-
-      {/* Invite New Collaborator Section - Owner Only */}
-      {isOwner && (
-        <Card>
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Invite Collaborator
-            </h2>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              Add team members to help manage your event. Assign specific
-              modules they can access.
-            </p>
-          </div>
-          <InviteCollaboratorForm eventId={params.id} />
         </Card>
       )}
 
