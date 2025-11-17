@@ -297,23 +297,25 @@ import { Label, TextInput, Textarea, Select, Checkbox } from "flowbite-react";
 #### 5. **Tables**
 
 ```tsx
-import { Table } from "flowbite-react";
+import { Table, TableHead, TableHeadCell, TableBody, TableCell, TableRow } from "flowbite-react";
 
-<Table>
-  <Table.Head>
-    <Table.HeadCell>Name</Table.HeadCell>
-    <Table.HeadCell>Email</Table.HeadCell>
-    <Table.HeadCell>Actions</Table.HeadCell>
-  </Table.Head>
-  <Table.Body>
-    <Table.Row>
-      <Table.Cell>John Doe</Table.Cell>
-      <Table.Cell>john@example.com</Table.Cell>
-      <Table.Cell>
+<Table hoverable>
+  <TableHead>
+    <TableRow>
+      <TableHeadCell>Name</TableHeadCell>
+      <TableHeadCell>Email</TableHeadCell>
+      <TableHeadCell>Actions</TableHeadCell>
+    </TableRow>
+  </TableHead>
+  <TableBody className="divide-y">
+    <TableRow>
+      <TableCell>John Doe</TableCell>
+      <TableCell>john@example.com</TableCell>
+      <TableCell>
         <Button size="xs">Edit</Button>
-      </Table.Cell>
-    </Table.Row>
-  </Table.Body>
+      </TableCell>
+    </TableRow>
+  </TableBody>
 </Table>
 ```
 
