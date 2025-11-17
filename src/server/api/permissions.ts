@@ -49,7 +49,7 @@ export async function checkEventAccess(params: {
   const { db, eventId, userId } = params;
 
   // Check if user is a team member with ACTIVE status
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+   
   const member = await db.teamMember.findFirst({
     where: {
       eventId,
@@ -72,9 +72,9 @@ export async function checkEventAccess(params: {
   }
 
   return {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+     
     teamMember: member,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+     
     isOwner: member.role === "OWNER",
   };
 }

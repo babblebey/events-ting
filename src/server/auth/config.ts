@@ -62,7 +62,7 @@ export const authConfig = {
 
         // Verify password
         try {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+           
           const passwordsMatch = await compare(password, user.password);
 
           if (!passwordsMatch) {
