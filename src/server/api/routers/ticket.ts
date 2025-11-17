@@ -9,6 +9,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
+import { checkModuleAccess } from "@/server/api/permissions";
 import {
   createTicketTypeSchema,
   updateTicketTypeSchema,
@@ -23,24 +24,23 @@ export const ticketRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createTicketTypeSchema)
     .mutation(async ({ ctx, input }) => {
-      // Verify event exists and user is organizer
+      // Verify user has access to TICKETS module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: input.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "TICKETS",
+      });
+
+      // Verify event exists
       const event = await ctx.db.event.findUnique({
         where: { id: input.eventId },
-        select: { organizerId: true },
       });
 
       if (!event) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Event not found",
-        });
-      }
-
-      if (event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message:
-            "You do not have permission to create tickets for this event",
         });
       }
 
@@ -136,10 +136,17 @@ export const ticketRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const ticketType = await ctx.db.ticketType.findUnique({
         where: { id: input.id },
-        include: {
-          event: {
-            select: { organizerId: true },
-          },
+        select: {
+          id: true,
+          eventId: true,
+          name: true,
+          description: true,
+          price: true,
+          quantity: true,
+          saleStart: true,
+          saleEnd: true,
+          createdAt: true,
+          updatedAt: true,
           _count: {
             select: { registrations: true },
           },
@@ -153,13 +160,13 @@ export const ticketRouter = createTRPCRouter({
         });
       }
 
-      // Verify user is event organizer
-      if (ticketType.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You do not have permission to view this ticket type",
-        });
-      }
+      // Verify user has access to TICKETS module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: ticketType.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "TICKETS",
+      });
 
       const soldCount = ticketType._count.registrations;
       const available = ticketType.quantity - soldCount;
@@ -214,10 +221,9 @@ export const ticketRouter = createTRPCRouter({
 
       const ticketType = await ctx.db.ticketType.findUnique({
         where: { id },
-        include: {
-          event: {
-            select: { organizerId: true },
-          },
+        select: {
+          eventId: true,
+          price: true,
           _count: {
             select: { registrations: true },
           },
@@ -231,13 +237,13 @@ export const ticketRouter = createTRPCRouter({
         });
       }
 
-      // Verify user is event organizer
-      if (ticketType.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You do not have permission to update this ticket type",
-        });
-      }
+      // Verify user has access to TICKETS module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: ticketType.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "TICKETS",
+      });
 
       const soldCount = ticketType._count.registrations;
 
@@ -283,10 +289,8 @@ export const ticketRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const ticketType = await ctx.db.ticketType.findUnique({
         where: { id: input.id },
-        include: {
-          event: {
-            select: { organizerId: true },
-          },
+        select: {
+          eventId: true,
           _count: {
             select: { registrations: true },
           },
@@ -300,13 +304,13 @@ export const ticketRouter = createTRPCRouter({
         });
       }
 
-      // Verify user is event organizer
-      if (ticketType.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You do not have permission to delete this ticket type",
-        });
-      }
+      // Verify user has access to TICKETS module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: ticketType.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "TICKETS",
+      });
 
       // Cannot delete if registrations exist
       if (ticketType._count.registrations > 0) {

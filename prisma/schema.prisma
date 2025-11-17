@@ -68,6 +68,14 @@ model User {
     events        Event[] // Events created by this user (organizer)
     registrations Registration[] // Attendee registrations
     
+    // Team Collaboration
+    teamMemberships  TeamMember[]   @relation("TeamMemberUser")
+    invitedMembers   TeamMember[]   @relation("TeamMemberInviter")
+    invitationsSent  Invitation[]
+    
+    // Audit Trail
+    auditLogs     AuditLog[]
+    
     createdAt     DateTime  @default(now())
     updatedAt     DateTime  @default(now()) @updatedAt
 }
@@ -113,6 +121,13 @@ model Event {
     callForPapers    CallForPapers?
     speakers         Speaker[]
     emailCampaigns   EmailCampaign[]
+    
+    // Team Collaboration
+    teamMembers      TeamMember[]
+    invitations      Invitation[]
+    
+    // Audit Trail
+    auditLogs        AuditLog[]
     
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
@@ -363,4 +378,161 @@ model EmailCampaign {
     @@index([status, scheduledFor])
     @@index([status]) // For filtering by status
     @@index([createdAt]) // For sorting by creation date
+}
+
+// ============================================================================
+// TEAM COLLABORATION & PERMISSIONS
+// ============================================================================
+
+/// Role of team member in event
+enum TeamRole {
+  OWNER          /// Event creator, full access
+  COLLABORATOR   /// Invited team member, configurable access
+}
+
+/// Lifecycle status of team member
+enum TeamMemberStatus {
+  PENDING   /// Invitation sent, awaiting acceptance
+  ACTIVE    /// Invitation accepted, user has access
+  REMOVED   /// Access revoked by organizer
+}
+
+/// Status of invitation
+enum InvitationStatus {
+  PENDING    /// Awaiting user response
+  ACCEPTED   /// User accepted invitation
+  DECLINED   /// User declined invitation
+  EXPIRED    /// Past 7-day expiration date
+  CANCELLED  /// Organizer cancelled before acceptance
+}
+
+model TeamMember {
+  id                String            @id @default(cuid())
+  
+  // Relations
+  eventId           String
+  event             Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  userId            String?           // Null until invitation accepted
+  user              User?             @relation("TeamMemberUser", fields: [userId], references: [id], onDelete: SetNull)
+  
+  // Identity
+  email             String            // Always present for invitations
+  
+  // Role & Status
+  role              TeamRole          @default(COLLABORATOR)
+  status            TeamMemberStatus  @default(PENDING)
+  
+  // Permissions
+  modulePermissions String[]          @default([])  // ["CFP", "ATTENDEES", "SCHEDULE"]
+  
+  // Audit Trail
+  invitedById       String
+  invitedBy         User              @relation("TeamMemberInviter", fields: [invitedById], references: [id], onDelete: Restrict)
+  invitedAt         DateTime          @default(now())
+  lastAccessedAt    DateTime?
+  
+  // Timestamps
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  // Constraints
+  @@unique([eventId, email])          // One membership per email per event
+  @@unique([eventId, userId])         // One membership per user per event (after accepted)
+  
+  // Indexes
+  @@index([eventId])
+  @@index([userId])
+  @@index([email])
+  @@index([status])
+  @@index([eventId, status])          // For filtering active members
+  @@index([eventId, userId])          // For fast member lookup by event and user
+  @@index([eventId, role])            // For owner lookups
+}
+
+model Invitation {
+  id                String            @id @default(cuid())
+  
+  // Relations
+  eventId           String
+  event             Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  // Invitation Details
+  email             String
+  token             String            @unique  // crypto.randomBytes(32) in base64url
+  modulePermissions String[]          @default([])
+  
+  // Status & Expiry
+  status            InvitationStatus  @default(PENDING)
+  expiresAt         DateTime          // Set to now() + 7 days on creation
+  
+  // Sender
+  sentById          String
+  sentBy            User              @relation(fields: [sentById], references: [id], onDelete: Restrict)
+  sentAt            DateTime          @default(now())
+  
+  // Response Tracking
+  respondedAt       DateTime?         // Set when accepted/declined
+  
+  // Indexes
+  @@index([token])                    // For fast token lookup
+  @@index([eventId])                  // For listing invitations per event
+  @@index([email])                    // For duplicate detection
+  @@index([status, expiresAt])        // For expiry cleanup queries
+  @@index([eventId, status])          // For filtering pending invitations
+}
+
+// ============================================================================
+// AUDIT LOG
+// ============================================================================
+
+enum AuditAction {
+  // Team Management Actions
+  TEAM_INVITE_SENT
+  TEAM_INVITE_ACCEPTED
+  TEAM_INVITE_DECLINED
+  TEAM_INVITE_CANCELLED
+  TEAM_INVITE_RESENT
+  TEAM_INVITE_EXPIRED
+  TEAM_PERMISSIONS_UPDATED
+  TEAM_MEMBER_REMOVED
+  
+  // Future: Additional audit actions can be added here
+  // EVENT_CREATED
+  // EVENT_UPDATED
+  // CFP_SUBMISSION_APPROVED
+  // etc.
+}
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  
+  // What happened
+  action      AuditAction
+  description String      @db.Text
+  
+  // Who did it
+  userId      String?     // Null for system actions
+  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userEmail   String?     // Store email for historical record even if user deleted
+  
+  // Where it happened
+  eventId     String?
+  event       Event?      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  // Additional context (JSON for flexibility)
+  metadata    Json?       // { targetUserId, targetEmail, modulePermissions, previousPermissions, etc. }
+  
+  // Request context
+  ipAddress   String?
+  userAgent   String?
+  
+  // When it happened
+  createdAt   DateTime    @default(now())
+  
+  // Indexes for efficient querying
+  @@index([eventId, createdAt])       // Event audit trail
+  @@index([userId, createdAt])        // User activity log
+  @@index([action, createdAt])        // Filter by action type
+  @@index([createdAt])                // Time-based queries
 }

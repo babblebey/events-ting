@@ -131,3 +131,23 @@ export const protectedProcedure = t.procedure
       },
     });
   });
+
+/**
+ * Team Protected Procedure
+ * 
+ * Middleware for team collaboration operations that require permission checks.
+ * Verifies user is authenticated and has appropriate access to the event.
+ * 
+ * Note: This is a base procedure. Actual permission checks happen in individual
+ * procedures since middleware doesn't have access to parsed input.
+ * 
+ * @example
+ * ```ts
+ * teamProtectedProcedure
+ *   .input(z.object({ eventId: z.string() }))
+ *   .query(async ({ ctx, input }) => {
+ *     // Perform permission check here with input.eventId
+ *   });
+ * ```
+ */
+export const teamProtectedProcedure = protectedProcedure;

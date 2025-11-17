@@ -6,6 +6,7 @@ import { Geist } from "next/font/google";
 import { ToastProvider } from "@/components/ui/toast-provider";
 import { TRPCReactProvider } from "@/trpc/react";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { SessionProvider } from "@/components/providers/session-provider";
 
 export const metadata: Metadata = {
   title: "Events-Ting | All-in-One Event Management",
@@ -25,11 +26,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geist.variable}`}>
       <body className="bg-white dark:bg-gray-900">
-        <TRPCReactProvider>
-          <ThemeProvider>
-            <ToastProvider>{children}</ToastProvider>
-          </ThemeProvider>
-        </TRPCReactProvider>
+        <SessionProvider>
+          <TRPCReactProvider>
+            <ThemeProvider>
+              <ToastProvider>{children}</ToastProvider>
+            </ThemeProvider>
+          </TRPCReactProvider>
+        </SessionProvider>
       </body>
     </html>
   );

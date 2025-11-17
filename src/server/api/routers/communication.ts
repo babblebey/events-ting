@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
+import { checkModuleAccess } from "@/server/api/permissions";
 import { sendBatchEmailsWithRetry } from "@/server/services/email";
 import type { db } from "@/server/db";
 
@@ -31,24 +32,23 @@ export const communicationRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // Verify organizer owns this event
+      // Verify user has access to COMMUNICATIONS module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: input.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "COMMUNICATIONS",
+      });
+
+      // Verify event exists
       const event = await ctx.db.event.findUnique({
         where: { id: input.eventId },
-        select: { organizerId: true },
       });
 
       if (!event) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Event not found",
-        });
-      }
-
-      if (event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message:
-            "You do not have permission to create campaigns for this event",
         });
       }
 
@@ -78,24 +78,23 @@ export const communicationRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      // Verify organizer owns this event
+      // Verify user has access to COMMUNICATIONS module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: input.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "COMMUNICATIONS",
+      });
+
+      // Verify event exists
       const event = await ctx.db.event.findUnique({
         where: { id: input.eventId },
-        select: { organizerId: true },
       });
 
       if (!event) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Event not found",
-        });
-      }
-
-      if (event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message:
-            "You do not have permission to view campaigns for this event",
         });
       }
 
@@ -141,12 +140,13 @@ export const communicationRouter = createTRPCRouter({
         });
       }
 
-      if (campaign.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You do not have permission to view this campaign",
-        });
-      }
+      // Verify user has access to COMMUNICATIONS module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: campaign.event.id,
+        userId: ctx.session.user.id,
+        requiredModule: "COMMUNICATIONS",
+      });
 
       return campaign;
     }),
@@ -170,11 +170,7 @@ export const communicationRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const campaign = await ctx.db.emailCampaign.findUnique({
         where: { id: input.id },
-        include: {
-          event: {
-            select: { organizerId: true },
-          },
-        },
+        select: { eventId: true, status: true },
       });
 
       if (!campaign) {
@@ -184,12 +180,13 @@ export const communicationRouter = createTRPCRouter({
         });
       }
 
-      if (campaign.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You do not have permission to update this campaign",
-        });
-      }
+      // Verify user has access to COMMUNICATIONS module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: campaign.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "COMMUNICATIONS",
+      });
 
       if (campaign.status !== "draft") {
         throw new TRPCError({
@@ -237,12 +234,13 @@ export const communicationRouter = createTRPCRouter({
         });
       }
 
-      if (campaign.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You do not have permission to send this campaign",
-        });
-      }
+      // Verify user has access to COMMUNICATIONS module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: campaign.event.id,
+        userId: ctx.session.user.id,
+        requiredModule: "COMMUNICATIONS",
+      });
 
       if (campaign.status !== "draft") {
         throw new TRPCError({
@@ -326,11 +324,7 @@ export const communicationRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const campaign = await ctx.db.emailCampaign.findUnique({
         where: { id: input.id },
-        include: {
-          event: {
-            select: { organizerId: true },
-          },
-        },
+        select: { eventId: true, status: true },
       });
 
       if (!campaign) {
@@ -340,12 +334,13 @@ export const communicationRouter = createTRPCRouter({
         });
       }
 
-      if (campaign.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You do not have permission to schedule this campaign",
-        });
-      }
+      // Verify user has access to COMMUNICATIONS module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: campaign.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "COMMUNICATIONS",
+      });
 
       if (campaign.status !== "draft") {
         throw new TRPCError({
@@ -380,10 +375,13 @@ export const communicationRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const campaign = await ctx.db.emailCampaign.findUnique({
         where: { id: input.id },
-        include: {
-          event: {
-            select: { organizerId: true },
-          },
+        select: {
+          eventId: true,
+          totalRecipients: true,
+          delivered: true,
+          bounced: true,
+          opened: true,
+          clicked: true,
         },
       });
 
@@ -394,13 +392,13 @@ export const communicationRouter = createTRPCRouter({
         });
       }
 
-      if (campaign.event.organizerId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message:
-            "You do not have permission to view this campaign's statistics",
-        });
-      }
+      // Verify user has access to COMMUNICATIONS module
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: campaign.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "COMMUNICATIONS",
+      });
 
       return {
         totalRecipients: campaign.totalRecipients,

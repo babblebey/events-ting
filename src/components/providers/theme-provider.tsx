@@ -15,6 +15,9 @@ const ourTheme = createTheme({
       base: "w-fit",
     },
   },
+  button: {
+    base: "cursor-pointer"
+  }
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
