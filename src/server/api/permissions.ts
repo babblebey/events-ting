@@ -49,7 +49,7 @@ export async function checkEventAccess(params: {
   const { db, eventId, userId } = params;
 
   // Check if user is a team member with ACTIVE status
-   
+
   const member = await db.teamMember.findFirst({
     where: {
       eventId,
@@ -72,9 +72,8 @@ export async function checkEventAccess(params: {
   }
 
   return {
-     
     teamMember: member,
-     
+
     isOwner: member.role === "OWNER",
   };
 }

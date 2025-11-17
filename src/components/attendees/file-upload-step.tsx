@@ -1,10 +1,5 @@
 "use client";
 
- 
- 
- 
- 
-
 /**
  * FileUploadStep Component
  * First step: Upload CSV file with drag & drop

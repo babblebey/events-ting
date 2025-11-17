@@ -62,7 +62,6 @@ export const authConfig = {
 
         // Verify password
         try {
-           
           const passwordsMatch = await compare(password, user.password);
 
           if (!passwordsMatch) {
