@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { FC, SVGProps } from "react";
+import { usePathname } from "next/navigation";
 import { BiBuoy } from "react-icons/bi";
 import { HiViewBoards, HiMenu, HiX } from "react-icons/hi";
 import { FaCalendarAlt } from "react-icons/fa";
@@ -61,6 +62,7 @@ function AppSidebar({
 }: AppSidebarProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
   // Close sidebar when clicking outside
   useEffect(() => {
@@ -139,24 +141,36 @@ function AppSidebar({
                 const IconComponent = item.icon
                   ? iconMap[item.icon]
                   : undefined;
+                const isActive = item.href && pathname === item.href;
+                const hasActiveChild = item.children?.some(
+                  (child) => pathname === child.href
+                );
                 return item.children ? (
                   <SidebarCollapse
-                    key={item.href}
+                    key={item.label}
                     icon={IconComponent}
                     label={item.label}
+                    open={hasActiveChild}
                   >
-                    {item.children.map((child) => (
-                      <SidebarItem key={child.href} href={child.href}>
-                        {child.label}
-                      </SidebarItem>
-                    ))}
+                    {item.children.map((child) => {
+                      const isChildActive = pathname === child.href;
+                      return (
+                        <SidebarItem 
+                          key={child.href} 
+                          href={child.href}
+                          className={isChildActive ? "bg-gray-100 dark:bg-gray-700" : ""}
+                        >
+                          {child.label}
+                        </SidebarItem>
+                      );
+                    })}
                   </SidebarCollapse>
                 ) : (
                   <SidebarItem
                     key={item.href}
                     href={item.href}
                     icon={IconComponent}
-                    className="flex justify-between"
+                    className={`flex justify-between ${isActive ? "bg-gray-100 dark:bg-gray-700" : ""}`}
                   >
                     <span>{item.label}</span>
                     {/* {item.count !== undefined && (
@@ -174,11 +188,13 @@ function AppSidebar({
                   const IconComponent = item.icon
                     ? iconMap[item.icon]
                     : undefined;
+                  const isActive = pathname === item.href;
                   return (
                     <SidebarItem
                       key={`footer-${item.label}`}
                       href={item.href}
                       icon={IconComponent}
+                      className={isActive ? "bg-gray-100 dark:bg-gray-700" : ""}
                     >
                       {item.label}
                     </SidebarItem>
