@@ -192,11 +192,13 @@ import { Button } from "flowbite-react";
 ```
 
 **Props**:
-- `color`: `blue`, `gray`, `green`, `red`, `yellow`, `purple`, `failure`, `success`, `warning`
+- `color`: `blue`, `gray`, `green`, `red`, `yellow`, `purple`, `pink`, `light`, `dark`
 - `size`: `xs`, `sm`, `md`, `lg`, `xl`
 - `pill`: Rounded pill shape
 - `disabled`: Disabled state
 - `type`: `button`, `submit`, `reset`
+
+**Note**: State-specific colors like `success`, `warning`, and `failure` are only valid for Alert, Badge, and Toast components, not for Buttons.
 
 ---
 
