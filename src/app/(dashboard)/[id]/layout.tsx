@@ -118,7 +118,7 @@ async function DashboardLayout({
       module: "communications",
     },
     {
-      href: "",
+      href: undefined,
       label: "Settings",
       icon: "RiSettings3Fill",
       children: [

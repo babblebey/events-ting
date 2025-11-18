@@ -5,9 +5,8 @@
  * Displays speaker profile in a card format for grid displays
  */
 
-import { Card, Badge } from "flowbite-react";
+import { Card, Badge, Button } from "flowbite-react";
 import { FaXTwitter } from "react-icons/fa6";
-import { Button } from "flowbite-react";
 import { HiOutlineMail, HiOutlineGlobeAlt } from "react-icons/hi";
 import { AiOutlineLinkedin, AiOutlineGithub } from "react-icons/ai";
 

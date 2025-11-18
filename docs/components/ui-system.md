@@ -198,7 +198,7 @@ import { Button } from "flowbite-react";
 - `disabled`: Disabled state
 - `type`: `button`, `submit`, `reset`
 
-**Note**: State-specific colors like `success`, `warning`, and `failure` are only valid for Alert, Badge, and Toast components, not for Buttons.
+**Note**: For Buttons, use standard color names like `blue`, `green`, `red`, etc. instead of semantic color names such as `success`, `warning`, or `failure` (which are only valid for Alert, Badge, and Toast components).
 
 ---
 

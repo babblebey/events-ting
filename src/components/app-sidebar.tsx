@@ -40,7 +40,7 @@ interface AppSidebarProps {
 
 interface AppSidebarMenuItem {
   label: string;
-  href: string;
+  href?: string;
   icon?: string;
   children?: Array<{
     label: string;
@@ -169,8 +169,8 @@ function AppSidebar({
                   </SidebarCollapse>
                 ) : (
                   <SidebarItem
-                    key={item.href}
-                    href={item.href}
+                    key={item.href ?? item.label}
+                    href={item.href!}
                     icon={IconComponent}
                     className={`flex justify-between ${isActive ? "bg-gray-100 dark:bg-gray-700" : ""}`}
                   >
