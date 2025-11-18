@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+import "nprogress/nprogress.css";
 
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
@@ -7,6 +8,7 @@ import { ToastProvider } from "@/components/ui/toast-provider";
 import { TRPCReactProvider } from "@/trpc/react";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { SessionProvider } from "@/components/providers/session-provider";
+import { ProgressBarProvider } from "@/components/providers/progress-bar-provider";
 
 export const metadata: Metadata = {
   title: "Events-Ting | All-in-One Event Management",
@@ -29,7 +31,9 @@ export default function RootLayout({
         <SessionProvider>
           <TRPCReactProvider>
             <ThemeProvider>
-              <ToastProvider>{children}</ToastProvider>
+              <ProgressBarProvider>
+                <ToastProvider>{children}</ToastProvider>
+              </ProgressBarProvider>
             </ThemeProvider>
           </TRPCReactProvider>
         </SessionProvider>
