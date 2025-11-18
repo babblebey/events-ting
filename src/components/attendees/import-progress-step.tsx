@@ -63,14 +63,14 @@ export function ImportProgressStep({
           toast.warning(
             "Import Completed with Errors",
             `${result.successCount} attendees imported successfully, but ${result.failureCount} rows failed. Download the error report to fix and re-import.`,
-            10000
+            10000,
           );
         } else {
           // Full success
           toast.success(
             "Import Completed Successfully",
             `${result.successCount} attendees imported. ${result.duplicateCount > 0 ? `${result.duplicateCount} duplicates skipped.` : ""}`,
-            7000
+            7000,
           );
         }
       }
@@ -80,7 +80,7 @@ export function ImportProgressStep({
       toast.error(
         "Import Failed",
         error.message || "An error occurred while importing attendees",
-        7000
+        7000,
       );
     },
   });
@@ -111,9 +111,7 @@ export function ImportProgressStep({
     const csv = [
       headers.join(","),
       ...rows.map((row) =>
-        row
-          .map((cell) => `"${cell.replace(/"/g, '""')}"`)
-          .join(",")
+        row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(","),
       ),
     ].join("\n");
 
@@ -224,7 +222,9 @@ export function ImportProgressStep({
           {/* Success message */}
           <Alert color="success" icon={HiCheckCircle}>
             <div>
-              <span className="font-medium">Import completed successfully!</span>
+              <span className="font-medium">
+                Import completed successfully!
+              </span>
               <ul className="mt-2 list-inside list-disc space-y-1">
                 <li>
                   {importResult.successCount} attendees imported with unique
@@ -264,9 +264,7 @@ export function ImportProgressStep({
               </div>
 
               <Alert color="warning">
-                <span className="font-medium">
-                  Some rows failed to import.
-                </span>{" "}
+                <span className="font-medium">Some rows failed to import.</span>{" "}
                 You can download the failed rows, fix the issues, and re-import
                 them.
               </Alert>
@@ -297,8 +295,8 @@ export function ImportProgressStep({
                 </div>
                 {importResult.errors.length > 10 && (
                   <div className="border-t border-gray-200 bg-gray-50 p-3 text-center text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
-                    Showing first 10 failed rows. Download full report to see all{" "}
-                    {importResult.errors.length} failures.
+                    Showing first 10 failed rows. Download full report to see
+                    all {importResult.errors.length} failures.
                   </div>
                 )}
               </div>

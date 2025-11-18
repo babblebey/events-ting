@@ -166,7 +166,7 @@ pnpm run check            # Run all checks (lint + typecheck)
 pnpm run lint             # Run ESLint
 pnpm run lint:fix         # Fix ESLint issues
 pnpm run typecheck        # TypeScript type checking
-pnpm run format:write     # Format code with Prettier
+pnpm run format           # Format code with Prettier
 pnpm run format:check     # Check code formatting
 
 # Database

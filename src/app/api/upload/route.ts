@@ -3,7 +3,7 @@
  * Handles speaker photos, event images, and other file uploads
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/server/auth";
 import {
   storage,

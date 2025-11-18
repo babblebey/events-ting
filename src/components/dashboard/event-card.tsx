@@ -93,7 +93,10 @@ function getLocationDisplay(
  */
 export function EventCard({ event }: EventCardProps) {
   const isEventPast = isPast(event.endDate, event.timezone);
-  const location = getLocationDisplay(event.locationType, event.locationAddress);
+  const location = getLocationDisplay(
+    event.locationType,
+    event.locationAddress,
+  );
   const statusColor = getStatusBadgeColor(event.status);
   const statusLabel = getStatusLabel(event.status);
 
@@ -105,7 +108,7 @@ export function EventCard({ event }: EventCardProps) {
           <div className="min-w-0 flex-1">
             <Link
               href={`/${event.id}`}
-              className="group/link block transition-colors hover:text-primary-600 dark:hover:text-primary-400"
+              className="group/link hover:text-primary-600 dark:hover:text-primary-400 block transition-colors"
             >
               <h3 className="line-clamp-2 text-xl font-bold text-gray-900 transition-colors dark:text-white">
                 {event.name}
@@ -128,10 +131,14 @@ export function EventCard({ event }: EventCardProps) {
         <div className="space-y-2.5">
           {/* Date */}
           <div className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <HiOutlineCalendar className="h-4 w-4 shrink-0 mt-0.5" />
+            <HiOutlineCalendar className="mt-0.5 h-4 w-4 shrink-0" />
             <div className="flex flex-col">
               <span className="font-medium">
-                {formatDateRange(event.startDate, event.endDate, event.timezone)}
+                {formatDateRange(
+                  event.startDate,
+                  event.endDate,
+                  event.timezone,
+                )}
               </span>
               {isEventPast && (
                 <span className="text-xs text-gray-500 dark:text-gray-500">
@@ -160,11 +167,7 @@ export function EventCard({ event }: EventCardProps) {
         {/* Action buttons */}
         <div className="flex flex-col gap-2 pt-2 sm:flex-row">
           <Link href={`/${event.id}`} className="flex-1">
-            <Button
-              size="sm"
-              className="w-full"
-              color="blue"
-            >
+            <Button size="sm" className="w-full" color="blue">
               Manage
             </Button>
           </Link>

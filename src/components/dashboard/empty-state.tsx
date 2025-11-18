@@ -59,7 +59,8 @@ function getFilterContent(filter?: string) {
         title: "No Published Events",
         message:
           "You don't have any published events yet. Publish your draft events to make them visible to attendees.",
-        suggestion: "Check your draft events or create a new one to get started.",
+        suggestion:
+          "Check your draft events or create a new one to get started.",
       };
     case "archived":
       return {
@@ -91,26 +92,28 @@ export function EmptyState({
     const params = new URLSearchParams(searchParams.toString());
     params.delete("status");
     const queryString = params.toString();
-    router.push(`/dashboard${queryString ? "?" + queryString : ""}`, { scroll: false });
+    router.push(`/dashboard${queryString ? "?" + queryString : ""}`, {
+      scroll: false,
+    });
   };
 
   // No events created at all
   if (type === "no-events") {
     return (
       <div className="mx-auto">
-        <div className="rounded-xl border-2 border-dashed border-gray-300 bg-white px-6 py-12 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:px-12 sm:py-16">
+        <div className="rounded-xl border-2 border-dashed border-gray-300 bg-white px-6 py-12 text-center shadow-sm sm:px-12 sm:py-16 dark:border-gray-700 dark:bg-gray-800">
           {/* Icon/Illustration */}
           <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/20">
             <HiCalendar className="h-12 w-12 text-blue-600 dark:text-blue-400" />
           </div>
 
           {/* Title */}
-          <h2 className="mb-3 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
+          <h2 className="mb-3 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
             Create Your First Event
           </h2>
 
           {/* Description */}
-          <p className="mx-auto mb-2 max-w-md text-base text-gray-600 dark:text-gray-400 sm:text-lg">
+          <p className="mx-auto mb-2 max-w-md text-base text-gray-600 sm:text-lg dark:text-gray-400">
             Start managing amazing events with Events Ting. It takes just a few
             minutes to get started.
           </p>
@@ -150,19 +153,19 @@ export function EmptyState({
 
   return (
     <div className="mx-auto">
-      <div className="rounded-xl border-2 border-dashed border-gray-300 bg-white px-6 py-12 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:px-12 sm:py-16">
+      <div className="rounded-xl border-2 border-dashed border-gray-300 bg-white px-6 py-12 text-center shadow-sm sm:px-12 sm:py-16 dark:border-gray-700 dark:bg-gray-800">
         {/* Icon/Illustration */}
         <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-700/50">
           <FilterIcon className="h-12 w-12 text-gray-400 dark:text-gray-500" />
         </div>
 
         {/* Title */}
-        <h2 className="mb-3 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
+        <h2 className="mb-3 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
           {content.title}
         </h2>
 
         {/* Description */}
-        <p className="mx-auto mb-2 max-w-md text-base text-gray-600 dark:text-gray-400 sm:text-lg">
+        <p className="mx-auto mb-2 max-w-md text-base text-gray-600 sm:text-lg dark:text-gray-400">
           {content.message}
         </p>
 

@@ -69,7 +69,11 @@ function sortEventsByDate(events: Event[]): Event[] {
 
 export function EventsDashboard({ initialEvents, user }: EventsDashboardProps) {
   const searchParams = useSearchParams();
-  const activeFilter = searchParams.get("status") as "draft" | "published" | "archived" | undefined;
+  const activeFilter = searchParams.get("status") as
+    | "draft"
+    | "published"
+    | "archived"
+    | undefined;
 
   // Fetch status counts for filter badges
   const { data: statusCounts, isLoading: isLoadingCounts } =
@@ -102,7 +106,7 @@ export function EventsDashboard({ initialEvents, user }: EventsDashboardProps) {
       gcTime: 1000 * 60 * 30, // 30 minutes - keep in cache (formerly cacheTime)
       refetchOnWindowFocus: false, // Don't refetch when tab regains focus
       refetchOnMount: false, // Don't refetch on component mount (use initialData)
-    }
+    },
   );
 
   // Flatten all pages into a single array of events
@@ -143,10 +147,7 @@ export function EventsDashboard({ initialEvents, user }: EventsDashboardProps) {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         {/* Status Filter */}
-        <StatusFilter
-          statusCounts={statusCounts}
-          isLoading={isLoadingCounts}
-        />
+        <StatusFilter statusCounts={statusCounts} isLoading={isLoadingCounts} />
 
         {/* Error State */}
         {isError && (

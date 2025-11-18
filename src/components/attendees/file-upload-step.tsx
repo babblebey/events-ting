@@ -1,10 +1,5 @@
 "use client";
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-
 /**
  * FileUploadStep Component
  * First step: Upload CSV file with drag & drop
@@ -23,16 +18,13 @@ interface FileUploadStepProps {
   onComplete: (
     data: ParsedCSVData,
     sendEmails: boolean,
-    suggestedMapping: Record<string, string>
+    suggestedMapping: Record<string, string>,
   ) => void;
 }
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-export function FileUploadStep({
-  eventId,
-  onComplete,
-}: FileUploadStepProps) {
+export function FileUploadStep({ eventId, onComplete }: FileUploadStepProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileContent, setFileContent] = useState<string | null>(null);
   const [sendConfirmationEmails, setSendConfirmationEmails] = useState(false);
@@ -48,7 +40,7 @@ export function FileUploadStep({
           fileContent: fileContent!, // Pass the original file content
         },
         sendConfirmationEmails,
-        result.suggestedMapping
+        result.suggestedMapping,
       );
     },
     onError: (error: { message?: string }) => {

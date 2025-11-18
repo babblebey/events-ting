@@ -60,7 +60,11 @@ export const eventRouter = createTRPCRouter({
       const baseWhere = isAuthenticated
         ? {
             // Handle "archived" status by using isArchived field
-            ...(status === "archived" ? { isArchived: true } : status ? { status } : {}),
+            ...(status === "archived"
+              ? { isArchived: true }
+              : status
+                ? { status }
+                : {}),
             ...(organizerId && { organizerId }),
           }
         : {
