@@ -9,7 +9,7 @@
 
 "use client";
 
-import { Modal, ModalHeader, ModalBody, Button } from "flowbite-react";
+import { Modal, ModalHeader, ModalBody } from "flowbite-react";
 import { PermissionExplainer } from "./permission-explainer";
 
 interface PermissionExplainerModalProps {

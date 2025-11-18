@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useIsFetching, useIsMutating } from "@tanstack/react-query";
 import NProgress from "nprogress";
@@ -19,7 +19,7 @@ import NProgress from "nprogress";
  * - Configurable NProgress settings (speed, easing, etc.)
  * - No spinner (cleaner UI)
  * - Respects prefers-reduced-motion (via CSS)
- * - Theme-aware (uses --primary CSS variable)
+ * - Uses hardcoded color (#1c64f2) for progress bar
  *
  * @param children - Child components to render
  */
@@ -34,6 +34,15 @@ export function ProgressBarProvider({
   // Track active queries and mutations
   const isFetching = useIsFetching();
   const isMutating = useIsMutating();
+
+  // Use refs to avoid stale closures in event handlers
+  const isFetchingRef = useRef(isFetching);
+  const isMutatingRef = useRef(isMutating);
+
+  useEffect(() => {
+    isFetchingRef.current = isFetching;
+    isMutatingRef.current = isMutating;
+  }, [isFetching, isMutating]);
 
   useEffect(() => {
     // Configure NProgress on mount
@@ -72,8 +81,8 @@ export function ProgressBarProvider({
     const handleFormChange = (event: Event) => {
       const target = event.target as HTMLElement;
 
-      // Only proceed if there are active API requests
-      if (!isFetching && !isMutating) {
+      // Only proceed if there are active API requests (using refs to avoid stale closure)
+      if (!isFetchingRef.current && !isMutatingRef.current) {
         return;
       }
 
@@ -94,15 +103,10 @@ export function ProgressBarProvider({
       NProgress.start();
     };
 
-    const handleLoad = () => {
-      NProgress.done();
-    };
-
     // Listen for browser navigation events
     document.addEventListener("click", handleAnchorClick);
     document.addEventListener("change", handleFormChange);
     window.addEventListener("beforeunload", handleBeforeUnload);
-    window.addEventListener("load", handleLoad);
 
     // For pages that are already loaded when this mounts
     if (document.readyState === "complete") {
@@ -113,9 +117,8 @@ export function ProgressBarProvider({
       document.removeEventListener("click", handleAnchorClick);
       document.removeEventListener("change", handleFormChange);
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      window.removeEventListener("load", handleLoad);
     };
-  }, [isFetching, isMutating]);
+  }, []);
 
   useEffect(() => {
     // Start progress bar when route changes (client-side navigation)
