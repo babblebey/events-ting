@@ -70,8 +70,9 @@ A ticket is considered "available" when:
 - Cannot change price after tickets are sold
 - Cannot delete ticket type with existing registrations
 - Must be event organizer to manage tickets
+- Registration uses row-level locking to prevent overselling ([see details](../registration/backend.md#concurrency--race-conditions))
 
 ## Related Modules
 
-- **Events Module**: Parent module for ticket types
-- **Registration Module**: Consumes ticket availability, creates registrations
+- **[Events Module](../events/)**: Parent module for ticket types, tickets created within event dashboard
+- **[Registration Module](../registration/)**: Consumes ticket availability, creates registrations with atomic availability checks

@@ -318,9 +318,9 @@ await api.ticket.update.mutate({
 ## Integration Points
 
 **This workflow integrates with:**
-- **Events Module**: Tickets belong to events
-- **Registration Module**: Ticket selection during registration
-- **Communications Module**: Notify about ticket availability
+- **[Events Module](../events/)**: Tickets belong to events, created in event management dashboard
+- **[Registration Module](../registration/)**: Ticket selection during registration, availability checked atomically ([see registration workflows](../registration/workflows.md#workflow-1-public-attendee-registration))
+- **[Communications Module](../communications/)**: Notify about ticket availability changes
 
 ---
 
@@ -328,7 +328,7 @@ await api.ticket.update.mutate({
 
 ### Overselling Prevention
 **Problem**: Multiple users registering simultaneously  
-**Solution**: Database-level locking in registration transaction
+**Solution**: Database-level locking in registration transaction ([see concurrency control](../registration/backend.md#concurrency--race-conditions))
 
 ### Sale Period Confusion
 **Problem**: Timezone handling for sale dates  
