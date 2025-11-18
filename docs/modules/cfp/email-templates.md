@@ -485,3 +485,4 @@ npm run email:dev
 - [Backend Documentation](./backend.md) - Email sending in tRPC procedures
 - [Workflows](./workflows.md) - When emails are triggered
 - [Communications Module](../communications/email-integration.md) - Email service details
+- [Registration Email Templates](../registration/email-templates.md) - Similar template patterns for attendee emails
