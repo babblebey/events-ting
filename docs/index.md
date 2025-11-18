@@ -40,6 +40,7 @@ Feature-specific documentation organized by domain:
 - **[Schedule](./modules/schedule/)** - Event schedules, sessions, and tracks
 - **[Speakers](./modules/speakers/)** - Speaker profiles and management
 - **[CFP (Call for Papers)](./modules/cfp/)** - Proposal submission and review workflow
+- **[Team](./modules/team/)** - Team collaboration and module-based permissions
 - **[Communications](./modules/communications/)** - Email campaigns and messaging
 - **[Attendees](./modules/attendees/)** - Attendee management and tracking
 

@@ -13,6 +13,7 @@ Built with the [T3 Stack](https://create.t3.gg/) (Next.js 15, tRPC, Prisma, Next
 - **📅 Schedule Builder**: Create event schedules with sessions, tracks, and speaker assignments
 - **📢 Call for Papers (CFP)**: Accept and review session proposals from the community
 - **🎤 Speaker Management**: Manage speaker profiles with photos, bios, and session assignments
+- **👥 Team Collaboration**: Invite team members with granular module-based permissions
 - **📧 Email Campaigns**: Send targeted communications to attendees, speakers, or custom groups
 - **🔒 Authentication**: Secure OAuth login with Google and GitHub
 - **📊 Dashboard Analytics**: Real-time metrics for registrations, attendance, and engagement
@@ -124,6 +125,7 @@ src/
 │   ├── schedule/             # Schedule components
 │   ├── cfp/                  # Call for Papers components
 │   ├── speakers/             # Speaker components
+│   ├── team/                 # Team collaboration components
 │   └── communications/       # Email campaign components
 ├── server/
 │   ├── api/
@@ -222,6 +224,7 @@ See [.specify/memory/constitution.md](./.specify/memory/constitution.md) for ful
 - **[Schedule](./docs/modules/schedule/)** - Event schedules and sessions
 - **[Speakers](./docs/modules/speakers/)** - Speaker profiles and management
 - **[CFP](./docs/modules/cfp/)** - Call for Papers workflow
+- **[Team](./docs/modules/team/)** - Team collaboration and permissions
 - **[Communications](./docs/modules/communications/)** - Email campaigns
 - **[Attendees](./docs/modules/attendees/)** - Attendee management
 
