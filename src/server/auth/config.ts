@@ -62,7 +62,6 @@ export const authConfig = {
 
         // Verify password
         try {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
           const passwordsMatch = await compare(password, user.password);
 
           if (!passwordsMatch) {
@@ -104,12 +103,12 @@ export const authConfig = {
       if (url.startsWith("/")) {
         return `${baseUrl}${url}`;
       }
-      
+
       // Allow callback URLs on the same origin
       if (new URL(url).origin === baseUrl) {
         return url;
       }
-      
+
       // Default redirect to dashboard after successful sign-in
       return `${baseUrl}/dashboard`;
     },

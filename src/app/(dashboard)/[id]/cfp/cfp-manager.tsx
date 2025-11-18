@@ -25,7 +25,12 @@ import { SubmissionCard } from "@/components/cfp/submission-card";
 import { ReviewPanel } from "@/components/cfp/review-panel";
 import type { CallForPapers } from "generated/prisma";
 import type { RouterOutputs } from "@/trpc/react";
-import { HiPlus, HiLockClosed, HiLockOpen, HiInformationCircle } from "react-icons/hi";
+import {
+  HiPlus,
+  HiLockClosed,
+  HiLockOpen,
+  HiInformationCircle,
+} from "react-icons/hi";
 import { LuCircleAlert } from "react-icons/lu";
 
 type CfpSubmission =
@@ -60,7 +65,12 @@ export function CfpManager({
     { eventId },
     {
       // Use server-rendered data to avoid loading state on initial render
-      placeholderData: initialCfp ? { ...initialCfp, event: { id: eventId, name: eventName, slug: eventSlug } } : undefined,
+      placeholderData: initialCfp
+        ? {
+            ...initialCfp,
+            event: { id: eventId, name: eventName, slug: eventSlug },
+          }
+        : undefined,
     },
   );
 
@@ -132,9 +142,7 @@ export function CfpManager({
 
   const cfpUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/events/${eventSlug}/cfp`;
   const isOpen = cfp?.status === "open";
-  const deadlinePassed = cfp
-    ? new Date(cfp.deadline) < new Date()
-    : false;
+  const deadlinePassed = cfp ? new Date(cfp.deadline) < new Date() : false;
 
   // No CFP exists yet
   if (!cfp) {
@@ -442,15 +450,17 @@ export function CfpManager({
         <ModalBody>
           <div className="space-y-4">
             <Alert color="info" icon={HiInformationCircle}>
-              <span className="font-medium">Info:</span> Speakers will be able to
-              submit proposals again until the deadline on{" "}
-              {cfp && new Date(cfp.deadline).toLocaleDateString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-              })}.
+              <span className="font-medium">Info:</span> Speakers will be able
+              to submit proposals again until the deadline on{" "}
+              {cfp &&
+                new Date(cfp.deadline).toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
+              .
             </Alert>
             <p className="text-gray-600 dark:text-gray-300">
               Are you sure you want to reopen the Call for Papers?

@@ -6,7 +6,10 @@
  * Uses Flowbite React Breadcrumb component
  */
 
-import { Breadcrumb, BreadcrumbItem as FlowbiteBreadcrumbItem } from "flowbite-react";
+import {
+  Breadcrumb,
+  BreadcrumbItem as FlowbiteBreadcrumbItem,
+} from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 
 export interface BreadcrumbItem {
@@ -27,7 +30,7 @@ export function Breadcrumbs({ items, className = "" }: BreadcrumbsProps) {
       </FlowbiteBreadcrumbItem>
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
-        
+
         return (
           <FlowbiteBreadcrumbItem
             key={index}

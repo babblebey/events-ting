@@ -1,9 +1,9 @@
 /**
  * Audit Logging Utility
- * 
+ *
  * Provides functions to log team management actions for compliance,
  * security monitoring, and audit trail purposes.
- * 
+ *
  * @module audit
  */
 
@@ -26,11 +26,11 @@ export interface AuditLogEntry {
 
 /**
  * Create an audit log entry
- * 
+ *
  * @param db - Prisma client instance
  * @param entry - Audit log entry details
  * @returns Promise that resolves when log is created (fire-and-forget)
- * 
+ *
  * @example
  * ```typescript
  * await createAuditLog(db, {
@@ -48,7 +48,7 @@ export interface AuditLogEntry {
  */
 export async function createAuditLog(
   db: PrismaClient,
-  entry: AuditLogEntry
+  entry: AuditLogEntry,
 ): Promise<void> {
   try {
     await db.auditLog.create({
@@ -58,7 +58,9 @@ export async function createAuditLog(
         userId: entry.userId,
         userEmail: entry.userEmail,
         eventId: entry.eventId,
-        metadata: entry.metadata ? JSON.parse(JSON.stringify(entry.metadata)) : undefined,
+        metadata: entry.metadata
+          ? JSON.parse(JSON.stringify(entry.metadata))
+          : undefined,
         ipAddress: entry.ipAddress,
         userAgent: entry.userAgent,
       },
@@ -85,7 +87,7 @@ export async function logTeamInviteSent(
     eventName: string;
     targetEmail: string;
     modulePermissions: string[];
-  }
+  },
 ): Promise<void> {
   await createAuditLog(db, {
     action: "TEAM_INVITE_SENT",
@@ -112,7 +114,7 @@ export async function logTeamInviteAccepted(
     eventId: string;
     eventName: string;
     modulePermissions: string[];
-  }
+  },
 ): Promise<void> {
   await createAuditLog(db, {
     action: "TEAM_INVITE_ACCEPTED",
@@ -139,7 +141,7 @@ export async function logTeamInviteDeclined(
     eventName: string;
     targetEmail: string;
     modulePermissions: string[];
-  }
+  },
 ): Promise<void> {
   await createAuditLog(db, {
     action: "TEAM_INVITE_DECLINED",
@@ -166,7 +168,7 @@ export async function logTeamInviteCancelled(
     eventId: string;
     eventName: string;
     targetEmail: string;
-  }
+  },
 ): Promise<void> {
   await createAuditLog(db, {
     action: "TEAM_INVITE_CANCELLED",
@@ -192,7 +194,7 @@ export async function logTeamInviteResent(
     eventId: string;
     eventName: string;
     targetEmail: string;
-  }
+  },
 ): Promise<void> {
   await createAuditLog(db, {
     action: "TEAM_INVITE_RESENT",
@@ -221,13 +223,13 @@ export async function logTeamPermissionsUpdated(
     targetEmail: string;
     previousPermissions: string[];
     newPermissions: string[];
-  }
+  },
 ): Promise<void> {
   const added = params.newPermissions.filter(
-    (p) => !params.previousPermissions.includes(p)
+    (p) => !params.previousPermissions.includes(p),
   );
   const removed = params.previousPermissions.filter(
-    (p) => !params.newPermissions.includes(p)
+    (p) => !params.newPermissions.includes(p),
   );
 
   let changeDescription = "";
@@ -272,7 +274,7 @@ export async function logTeamMemberRemoved(
     targetUserId: string | null;
     targetEmail: string;
     removedModules: string[];
-  }
+  },
 ): Promise<void> {
   await createAuditLog(db, {
     action: "TEAM_MEMBER_REMOVED",
@@ -291,12 +293,12 @@ export async function logTeamMemberRemoved(
 
 /**
  * Query audit logs for an event
- * 
+ *
  * @param db - Prisma client instance
  * @param eventId - Event ID to query
  * @param options - Query options (limit, offset, action filter)
  * @returns Array of audit log entries
- * 
+ *
  * @example
  * ```typescript
  * const logs = await getEventAuditLogs(db, eventId, {
@@ -313,7 +315,7 @@ export async function getEventAuditLogs(
     limit?: number;
     offset?: number;
     action?: AuditAction;
-  }
+  },
 ) {
   const limit = options?.limit ?? 100;
   const offset = options?.offset ?? 0;
@@ -342,12 +344,12 @@ export async function getEventAuditLogs(
 
 /**
  * Query audit logs for a user
- * 
+ *
  * @param db - Prisma client instance
  * @param userId - User ID to query
  * @param options - Query options (limit, offset, action filter)
  * @returns Array of audit log entries
- * 
+ *
  * @example
  * ```typescript
  * const logs = await getUserAuditLogs(db, userId, {
@@ -363,7 +365,7 @@ export async function getUserAuditLogs(
     limit?: number;
     offset?: number;
     action?: AuditAction;
-  }
+  },
 ) {
   const limit = options?.limit ?? 100;
   const offset = options?.offset ?? 0;

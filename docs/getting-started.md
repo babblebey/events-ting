@@ -446,7 +446,7 @@ pnpm run dev
 pnpm run check
 
 # Format code
-pnpm run format:write
+pnpm run format
 
 # Run database migrations (if you changed schema)
 pnpm run db:generate

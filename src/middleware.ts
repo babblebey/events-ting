@@ -1,11 +1,11 @@
 /**
  * Next.js Middleware
- * 
+ *
  * Handles security concerns including:
  * - CSRF protection for invitation acceptance endpoints
  * - Request logging for security monitoring
  * - Additional security validations
- * 
+ *
  * @see https://nextjs.org/docs/app/building-your-application/routing/middleware
  */
 
@@ -13,11 +13,11 @@ import { type NextRequest, NextResponse } from "next/server";
 
 /**
  * CSRF Token Validation
- * 
+ *
  * NextAuth.js already provides CSRF protection for its routes.
  * For invitation acceptance, we use token-based authentication
  * where the token itself serves as the security mechanism.
- * 
+ *
  * Additional CSRF protection is applied to state-changing operations
  * that don't use tokens.
  */
@@ -40,7 +40,7 @@ export const config = {
 
 /**
  * Middleware function
- * 
+ *
  * Runs on every request matched by the matcher configuration.
  * Used for security headers, logging, and validation.
  */
@@ -60,7 +60,9 @@ export default function middleware(request: NextRequest) {
     const token = request.nextUrl.searchParams.get("token");
     if (token && !isValidTokenFormat(token)) {
       // Invalid token format - redirect to error page
-      return NextResponse.redirect(new URL("/invitations/invalid", request.url));
+      return NextResponse.redirect(
+        new URL("/invitations/invalid", request.url),
+      );
     }
   }
 
@@ -78,7 +80,7 @@ export default function middleware(request: NextRequest) {
       "font-src 'self' data:",
       "connect-src 'self' https:",
       "frame-ancestors 'self'",
-    ].join("; ")
+    ].join("; "),
   );
 
   return response;
@@ -86,7 +88,7 @@ export default function middleware(request: NextRequest) {
 
 /**
  * Validate token format
- * 
+ *
  * Tokens should be 43 characters (base64url encoded 32 bytes)
  * This prevents injection attacks and invalid token attempts
  */
@@ -98,7 +100,7 @@ function isValidTokenFormat(token: string): boolean {
 
 /**
  * Log security-relevant events
- * 
+ *
  * In production, this should log to a proper logging service
  * (e.g., Datadog, LogRocket, Sentry)
  */
@@ -108,7 +110,10 @@ function logSecurityEvent(request: NextRequest, eventType: string): void {
     eventType,
     path: request.nextUrl.pathname,
     method: request.method,
-    ip: request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown",
+    ip:
+      request.headers.get("x-forwarded-for") ??
+      request.headers.get("x-real-ip") ??
+      "unknown",
     userAgent: request.headers.get("user-agent") ?? "unknown",
   };
 

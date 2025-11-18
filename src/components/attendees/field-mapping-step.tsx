@@ -58,7 +58,7 @@ export function FieldMappingStep({
   // Load saved mappings from localStorage
   useEffect(() => {
     const savedMapping = localStorage.getItem(
-      `events-ting:import-mapping:${eventId}`
+      `events-ting:import-mapping:${eventId}`,
     );
     if (savedMapping && Object.keys(initialMapping).length === 0) {
       try {
@@ -94,29 +94,31 @@ export function FieldMappingStep({
 
     // Check required fields are mapped
     const requiredFields = SYSTEM_FIELDS.filter((f) => f.required).map(
-      (f) => f.value
+      (f) => f.value,
     );
     const mappedSystemFields = Object.values(fieldMapping).filter(
-      (v) => v && v !== CUSTOM_FIELD_VALUE
+      (v) => v && v !== CUSTOM_FIELD_VALUE,
     );
 
     for (const required of requiredFields) {
       if (!mappedSystemFields.includes(required)) {
-        const fieldLabel = SYSTEM_FIELDS.find((f) => f.value === required)?.label;
+        const fieldLabel = SYSTEM_FIELDS.find(
+          (f) => f.value === required,
+        )?.label;
         newErrors.push(`Required field "${fieldLabel}" must be mapped`);
       }
     }
 
     // Check for duplicate mappings (except custom fields and empty)
     const nonEmptyMappings = Object.entries(fieldMapping).filter(
-      ([, value]) => value && value !== CUSTOM_FIELD_VALUE
+      ([, value]) => value && value !== CUSTOM_FIELD_VALUE,
     );
     const seenFields = new Set<string>();
 
     for (const [, field] of nonEmptyMappings) {
       if (seenFields.has(field)) {
         newErrors.push(
-          `Field "${field}" is mapped to multiple columns. Each system field can only be mapped once.`
+          `Field "${field}" is mapped to multiple columns. Each system field can only be mapped once.`,
         );
       }
       seenFields.add(field);
@@ -125,9 +127,7 @@ export function FieldMappingStep({
     // Check custom field names are provided
     for (const [column, mapping] of Object.entries(fieldMapping)) {
       if (mapping === CUSTOM_FIELD_VALUE && !customFieldNames[column]) {
-        newErrors.push(
-          `Custom field name required for column "${column}"`
-        );
+        newErrors.push(`Custom field name required for column "${column}"`);
       }
     }
 
@@ -146,7 +146,7 @@ export function FieldMappingStep({
       JSON.stringify({
         fieldMapping,
         customFieldNames,
-      })
+      }),
     );
 
     // Build final mapping with custom field names
@@ -166,9 +166,11 @@ export function FieldMappingStep({
     <div className="space-y-6">
       {/* Info alert */}
       <Alert color="info" icon={HiInformationCircle}>
-        <span className="font-medium">Map your CSV columns to system fields.</span>{" "}
-        Required fields must be mapped. Additional columns can be stored as custom
-        fields.
+        <span className="font-medium">
+          Map your CSV columns to system fields.
+        </span>{" "}
+        Required fields must be mapped. Additional columns can be stored as
+        custom fields.
       </Alert>
 
       {/* File info */}
@@ -191,10 +193,8 @@ export function FieldMappingStep({
           </TableHead>
           <TableBody className="divide-y">
             {parsedData.columns.map((column) => {
-              const sampleValue =
-                parsedData.preview[0]?.[column] ?? "(empty)";
-              const isCustomField =
-                fieldMapping[column] === CUSTOM_FIELD_VALUE;
+              const sampleValue = parsedData.preview[0]?.[column] ?? "(empty)";
+              const isCustomField = fieldMapping[column] === CUSTOM_FIELD_VALUE;
 
               return (
                 <TableRow key={column}>
@@ -221,7 +221,10 @@ export function FieldMappingStep({
                       {/* Custom field name input */}
                       {isCustomField && (
                         <div className="space-y-1">
-                          <Label htmlFor={`custom-${column}`} className="text-xs">
+                          <Label
+                            htmlFor={`custom-${column}`}
+                            className="text-xs"
+                          >
                             Custom Field Name
                           </Label>
                           <input
@@ -230,7 +233,10 @@ export function FieldMappingStep({
                             placeholder="e.g., company, role, dietary"
                             value={customFieldNames[column] ?? ""}
                             onChange={(e) =>
-                              handleCustomFieldNameChange(column, e.target.value)
+                              handleCustomFieldNameChange(
+                                column,
+                                e.target.value,
+                              )
                             }
                             className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                           />

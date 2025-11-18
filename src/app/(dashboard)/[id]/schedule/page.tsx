@@ -44,10 +44,7 @@ export default async function SchedulePage({ params }: SchedulePageProps) {
   return (
     <div className="space-y-6">
       <Breadcrumbs
-        items={[
-          { label: event.name, href: `/${id}` },
-          { label: "Schedule" },
-        ]}
+        items={[{ label: event.name, href: `/${id}` }, { label: "Schedule" }]}
       />
 
       <div>

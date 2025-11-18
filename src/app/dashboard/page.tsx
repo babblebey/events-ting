@@ -31,7 +31,11 @@ export default async function DashboardPage({
   }
 
   const params = await searchParams;
-  const statusFilter = params.status as "draft" | "published" | "archived" | undefined;
+  const statusFilter = params.status as
+    | "draft"
+    | "published"
+    | "archived"
+    | undefined;
 
   // Fetch initial events (first 20) for the authenticated user
   const initialEvents = await api.event.list({

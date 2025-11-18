@@ -354,7 +354,8 @@ export const cfpRouter = createTRPCRouter({
       if (cfp.deadline < new Date()) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Cannot reopen CFP after the deadline has passed. Please update the deadline first.",
+          message:
+            "Cannot reopen CFP after the deadline has passed. Please update the deadline first.",
         });
       }
 

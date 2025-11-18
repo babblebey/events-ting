@@ -10,7 +10,7 @@
  * @module app/api/cron/close-expired-cfps
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/server/db";
 
 /**

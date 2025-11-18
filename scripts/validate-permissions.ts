@@ -1,9 +1,9 @@
 /**
  * Permission Check Validation Script
- * 
+ *
  * Validates that all module routers have proper team permission checks.
  * Run this script to ensure security compliance across the application.
- * 
+ *
  * Usage: tsx scripts/validate-permissions.ts
  */
 
@@ -54,7 +54,7 @@ function validateRouter(routerName: string): ValidationResult {
       result.checksPassed++;
     } else {
       result.issues.push(
-        "Missing team membership check (ctx.db.teamMember.findFirst)"
+        "Missing team membership check (ctx.db.teamMember.findFirst)",
       );
     }
 
@@ -62,13 +62,15 @@ function validateRouter(routerName: string): ValidationResult {
     result.checksTotal++;
     const modulePermissionCheck =
       content.includes("modulePermissions.includes") ||
-      content.includes(`modulePermissions.includes("${routerName.toUpperCase()}")`);
+      content.includes(
+        `modulePermissions.includes("${routerName.toUpperCase()}")`,
+      );
 
     if (modulePermissionCheck) {
       result.checksPassed++;
     } else {
       result.issues.push(
-        `Missing module permission check (modulePermissions.includes("${routerName.toUpperCase()}"))`
+        `Missing module permission check (modulePermissions.includes("${routerName.toUpperCase()}"))`,
       );
     }
 
@@ -85,7 +87,9 @@ function validateRouter(routerName: string): ValidationResult {
     if (content.includes('code: "FORBIDDEN"')) {
       result.checksPassed++;
     } else {
-      result.issues.push('Missing FORBIDDEN error handling (code: "FORBIDDEN")');
+      result.issues.push(
+        'Missing FORBIDDEN error handling (code: "FORBIDDEN")',
+      );
     }
 
     // Check 5: Does the router handle OWNER special case?
@@ -112,7 +116,7 @@ function validateRouter(routerName: string): ValidationResult {
  */
 function validateAllRouters(): void {
   console.log("🔒 Validating Team Permission Checks\n");
-  console.log("=" .repeat(60));
+  console.log("=".repeat(60));
 
   const results: ValidationResult[] = [];
   let totalPassed = 0;
@@ -136,11 +140,13 @@ function validateAllRouters(): void {
   for (const result of results) {
     const status = result.hasPermissionChecks ? "✅ PASS" : "❌ FAIL";
     const percentage = Math.round(
-      (result.checksPassed / result.checksTotal) * 100
+      (result.checksPassed / result.checksTotal) * 100,
     );
 
     console.log(`${status} ${result.router}.ts`);
-    console.log(`   Coverage: ${result.checksPassed}/${result.checksTotal} checks (${percentage}%)`);
+    console.log(
+      `   Coverage: ${result.checksPassed}/${result.checksTotal} checks (${percentage}%)`,
+    );
 
     if (result.issues.length > 0) {
       console.log("   Issues:");
@@ -152,7 +158,7 @@ function validateAllRouters(): void {
   }
 
   // Summary
-  console.log("=" .repeat(60));
+  console.log("=".repeat(60));
   console.log(`\n📈 Summary:`);
   console.log(`   Total Routers: ${REQUIRED_MODULES.length}`);
   console.log(`   ✅ Passed: ${totalPassed}`);
@@ -163,7 +169,7 @@ function validateAllRouters(): void {
     process.exit(0);
   } else {
     console.log(
-      `\n⚠️  ${totalFailed} router(s) need permission checks. Please review and fix.`
+      `\n⚠️  ${totalFailed} router(s) need permission checks. Please review and fix.`,
     );
     process.exit(1);
   }
