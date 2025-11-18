@@ -77,7 +77,7 @@ All dates are stored in UTC in the database, but displayed in the event's config
 
 ## Related Modules
 
-- **Tickets Module**: Manages ticket types and availability for events
-- **Registration Module**: Handles attendee sign-ups for events
-- **Schedule Module**: Organizes event sessions and timeline
-- **Communications Module**: Sends emails to event attendees
+- **[Tickets Module](../tickets/)**: Manages ticket types and availability for events
+- **[Registration Module](../registration/)**: Handles attendee sign-ups with atomic availability checks ([see workflows](../registration/workflows.md))
+- **[Schedule Module](../schedule/)**: Organizes event sessions and timeline
+- **[Communications Module](../communications/)**: Sends emails to event attendees via confirmation and campaigns
