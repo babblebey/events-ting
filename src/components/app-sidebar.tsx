@@ -143,7 +143,7 @@ function AppSidebar({
                   : undefined;
                 const isActive = item.href && pathname === item.href;
                 const hasActiveChild = item.children?.some(
-                  (child) => pathname === child.href
+                  (child) => pathname === child.href,
                 );
                 return item.children ? (
                   <SidebarCollapse
@@ -155,10 +155,12 @@ function AppSidebar({
                     {item.children.map((child) => {
                       const isChildActive = pathname === child.href;
                       return (
-                        <SidebarItem 
-                          key={child.href} 
+                        <SidebarItem
+                          key={child.href}
                           href={child.href}
-                          className={isChildActive ? "bg-gray-100 dark:bg-gray-700" : ""}
+                          className={
+                            isChildActive ? "bg-gray-100 dark:bg-gray-700" : ""
+                          }
                         >
                           {child.label}
                         </SidebarItem>
