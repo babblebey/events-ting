@@ -47,10 +47,11 @@ The Registration module handles attendee sign-ups for events. It manages the ent
 
 ## Quick Links
 
-- [Backend Documentation](./backend.md) - tRPC router and business logic
-- [Frontend Documentation](./frontend.md) - Components and forms
-- [Data Model](./data-model.md) - Registration schema
-- [Workflows](./workflows.md) - Registration flows
+- [Backend Documentation](./backend.md) - tRPC router, procedures, and business logic
+- [Frontend Documentation](./frontend.md) - Components, pages, and forms
+- [Data Model](./data-model.md) - Registration schema and relationships
+- [Workflows](./workflows.md) - Step-by-step registration flows
+- [Email Templates](./email-templates.md) - Confirmation and notification emails
 - [Exports](./exports.md) - CSV export functionality
 
 ## Key Concepts
@@ -85,7 +86,7 @@ Organizers can add attendees manually, bypassing:
 
 ## Related Modules
 
-- **Events Module**: Parent module
-- **Tickets Module**: Ticket availability and validation
-- **Communications Module**: Confirmation emails, campaigns
-- **Attendees Module**: Alternative view of registrations
+- **[Events Module](../events/)** - Parent module, all registrations belong to events
+- **[Tickets Module](../tickets/)** - Ticket availability and validation for registration
+- **[Communications Module](../communications/)** - Email confirmation and campaigns
+- **[Attendees Module](../attendees/)** - Alternative view of registration data (check-in, imports)

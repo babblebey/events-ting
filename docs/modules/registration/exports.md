@@ -76,27 +76,75 @@ const exportRegistrations = api.registration.export.useMutation({
 
 ### Future Enhancements
 
-- **Excel format** (.xlsx)
-- **Custom field selection** (choose which columns to include)
-- **Filtered exports** (by ticket type, date range)
+**Additional Formats**:
+- **Excel format** (.xlsx) with multiple sheets
+- **JSON format** for programmatic access
+- **PDF format** for printing
+
+**Custom Field Selection**:
+- Choose which columns to include/exclude
+- Reorder columns
+- Save export templates
+
+**Filtered Exports**:
+- Export by ticket type
+- Export by date range (registration date)
+- Export by email status
+- Export by payment status
+
+**Delivery Options**:
 - **Email export** (send file via email instead of download)
 - **Scheduled exports** (daily/weekly automated exports)
+- **Cloud storage** (save to Google Drive, Dropbox)
+
+**Enhanced Data**:
+- Include custom field data
+- Include check-in status (future)
+- Include QR codes (future)
+- Include payment details
+
+**See Also**: [Backend Documentation](./backend.md#registrationexport) for implementation details
 
 ### Error Handling
 
+**Authorization Errors**:
 ```typescript
 onError: (error) => {
   if (error.code === 'FORBIDDEN') {
     toast.error('You do not have permission to export this data');
+  } else if (error.code === 'NOT_FOUND') {
+    toast.error('Event not found');
   } else {
-    toast.error('Failed to generate export');
+    toast.error('Failed to generate export. Please try again.');
   }
 }
 ```
 
+**Network Errors**:
+- Display retry button
+- Log error for debugging
+- Show user-friendly message
+
+**Data Processing Errors**:
+- Validate CSV generation
+- Handle special characters
+- Ensure proper encoding
+
 ### Security
 
+**Authorization**:
 - Authorization check: Must be event organizer
 - No caching: Export generated fresh each time
 - Short-lived data URI: Expires after 5 minutes
 - No storage: File not saved on server
+
+**Data Privacy**:
+- Contains personal identifiable information (PII)
+- Organizer responsibility: Handle data securely
+- GDPR compliance: Right to data portability
+- Recommend: Encrypt downloaded files locally
+
+**Rate Limiting** (Future):
+- Limit exports per user per hour
+- Prevent abuse and server overload
+- Monitor export frequency
