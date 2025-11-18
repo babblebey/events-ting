@@ -202,7 +202,7 @@ export function ReviewPanel({ submission, onSuccess }: ReviewPanelProps) {
           <div className="flex gap-3 border-t border-blue-200 pt-4 dark:border-blue-700">
             <Button
               onClick={handleAccept}
-              color="success"
+              color="blue"
               className="flex-1"
               disabled={acceptMutation.isPending || rejectMutation.isPending}
             >

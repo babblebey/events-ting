@@ -184,7 +184,7 @@ export function CampaignCard({
         )}
 
         {campaign.status === "draft" && onSchedule && (
-          <Button size="sm" color="info" onClick={onSchedule}>
+          <Button size="sm" color="green" onClick={onSchedule}>
             Schedule
           </Button>
         )}

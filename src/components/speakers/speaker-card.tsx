@@ -5,7 +5,7 @@
  * Displays speaker profile in a card format for grid displays
  */
 
-import { Card, Badge } from "flowbite-react";
+import { Card, Badge, Button } from "flowbite-react";
 import { FaXTwitter } from "react-icons/fa6";
 import { HiOutlineMail, HiOutlineGlobeAlt } from "react-icons/hi";
 import { AiOutlineLinkedin, AiOutlineGithub } from "react-icons/ai";
@@ -189,20 +189,22 @@ export function SpeakerCard({
         {(onEdit ?? onDelete) && (
           <div className="flex w-full gap-2 border-t pt-2">
             {onEdit && (
-              <button
+              <Button
+                color="blue"
                 onClick={onEdit}
-                className="flex-1 px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                className="flex-1 px-3 py-2 text-sm font-medium"
               >
                 Edit
-              </button>
+              </Button>
             )}
             {onDelete && (
-              <button
+              <Button
+                color="red"
                 onClick={onDelete}
-                className="flex-1 px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                className="flex-1 px-3 py-2 text-sm font-medium"
               >
                 Delete
-              </button>
+              </Button>
             )}
           </div>
         )}

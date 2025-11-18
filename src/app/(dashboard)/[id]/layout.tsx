@@ -118,9 +118,13 @@ async function DashboardLayout({
       module: "communications",
     },
     {
-      href: `/${eventId}/settings`,
+      href: undefined,
       label: "Settings",
       icon: "RiSettings3Fill",
+      children: [
+        { label: "General", href: `/${eventId}/settings` },
+        { label: "Team", href: `/${eventId}/settings/team` },
+      ],
       // Settings is always visible (contains team management)
     },
   ];
