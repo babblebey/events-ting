@@ -6,21 +6,30 @@
  * Accessible via email link without authentication
  */
 
-import { useParams } from "next/navigation";
+import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { Card, Button, Alert, Spinner } from "flowbite-react";
 import { HiArrowLeft, HiInformationCircle } from "react-icons/hi";
 import Link from "next/link";
 import { api } from "@/trpc/react";
 import { TicketList } from "@/components/tickets/ticket-list";
 import { RegistrationSummary } from "@/components/tickets/registration-summary";
+import { ReassignmentModal } from "@/components/tickets/reassignment-modal";
 
 export default function RegistrationManagementPage() {
   const params = useParams();
+  const router = useRouter();
   const slug = params.slug as string;
   const registrationId = params.registrationId as string;
 
+  // Modal state
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+
+  const utils = api.useUtils();
+
   // Fetch registration with tickets
-  const { data: registration, isLoading, error } = api.registration.getByIdPublic.useQuery(
+  const { data: registration, isLoading, error, refetch } = api.registration.getByIdPublic.useQuery(
     { id: registrationId },
     {
       refetchOnWindowFocus: false,
@@ -78,6 +87,49 @@ export default function RegistrationManagementPage() {
       </div>
     );
   }
+
+  // Get selected ticket for modal
+  const selectedTicket = registration.tickets.find((t) => t.id === selectedTicketId);
+
+  // Handler functions
+  const handleAssign = (ticketId: string) => {
+    setSelectedTicketId(ticketId);
+    setIsAssignModalOpen(true);
+  };
+
+  const handleReassign = (ticketId: string) => {
+    setSelectedTicketId(ticketId);
+    setIsAssignModalOpen(true);
+  };
+
+  const handleUnassign = async (ticketId: string) => {
+    const ticket = registration.tickets.find((t) => t.id === ticketId);
+    if (!ticket) return;
+
+    if (confirm("Are you sure you want to unassign this ticket? The attendee information will be permanently deleted.")) {
+      try {
+        await utils.client.tickets.unassign.mutate({
+          ticketId,
+          expectedUpdatedAt: ticket.updatedAt,
+        });
+        await refetch();
+      } catch (error) {
+        console.error("Failed to unassign ticket:", error);
+        alert("Failed to unassign ticket. Please try again.");
+      }
+    }
+  };
+
+  const handleViewQR = (ticketId: string) => {
+    // Navigate to the individual ticket page which has the QR code
+    router.push(`/tickets/${ticketId}`);
+  };
+
+  const handleAssignmentSuccess = async () => {
+    setIsAssignModalOpen(false);
+    setSelectedTicketId(null);
+    await refetch();
+  };
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
@@ -141,27 +193,35 @@ export default function RegistrationManagementPage() {
           },
           attendee: ticket.attendee,
           createdAt: registration.registeredAt,
+          updatedAt: ticket.updatedAt,
         }))}
         loading={false}
         eventTimezone={registration.event.timezone}
         showActions={true}
-        onAssign={(ticketId) => {
-          // TODO: Open assignment modal (implement in next iteration)
-          console.log("Assign ticket:", ticketId);
-        }}
-        onReassign={(ticketId) => {
-          // TODO: Open reassignment modal (implement in next iteration)
-          console.log("Reassign ticket:", ticketId);
-        }}
-        onUnassign={(ticketId) => {
-          // TODO: Implement unassign functionality
-          console.log("Unassign ticket:", ticketId);
-        }}
-        onViewQR={(ticketId) => {
-          // TODO: Implement view QR functionality
-          console.log("View QR for ticket:", ticketId);
-        }}
+        onAssign={handleAssign}
+        onReassign={handleReassign}
+        onUnassign={handleUnassign}
+        onViewQR={handleViewQR}
       />
+
+      {/* Reassignment/Assignment Modal */}
+      {selectedTicket && (
+        <ReassignmentModal
+          isOpen={isAssignModalOpen}
+          onClose={() => {
+            setIsAssignModalOpen(false);
+            setSelectedTicketId(null);
+          }}
+          ticket={{
+            id: selectedTicket.id,
+            ticketNumber: selectedTicket.ticketNumber,
+            attendee: selectedTicket.attendee,
+            updatedAt: selectedTicket.updatedAt,
+          }}
+          eventName={registration.event.name}
+          onSuccess={handleAssignmentSuccess}
+        />
+      )}
     </div>
   );
 }
