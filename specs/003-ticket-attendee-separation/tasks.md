@@ -102,10 +102,10 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 
 ### Implementation for User Story 2
 
-- [ ] T036 [P] [US2] Add customData field definition to Event model documentation in docs/modules/events/
-- [ ] T037 [P] [US2] Create custom field schema types in src/lib/validators/custom-fields.ts
-- [ ] T038 [US2] Update AssignmentForm to render custom fields dynamically in src/components/tickets/assignment-form.tsx
-- [ ] T039 [US2] Add custom field validation to tickets.assign procedure in src/server/api/routers/tickets.ts
+- [X] T036 [P] [US2] Add customData field definition to Event model documentation in docs/modules/events/
+- [X] T037 [P] [US2] Create custom field schema types in src/lib/validators/custom-fields.ts
+- [X] T038 [US2] Update AssignmentForm to render custom fields dynamically in src/components/tickets/assignment-form.tsx
+- [X] T039 [US2] Add custom field validation to tickets.assign procedure in src/server/api/routers/tickets.ts
 - [ ] T040 [P] [US2] Create Zod schemas for attendees router in src/server/api/routers/attendees.ts
 - [ ] T041 [US2] Implement attendees.list procedure in src/server/api/routers/attendees.ts
 - [ ] T042 [US2] Implement attendees.getById procedure in src/server/api/routers/attendees.ts

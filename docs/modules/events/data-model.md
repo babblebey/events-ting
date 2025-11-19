@@ -93,6 +93,72 @@ model Event {
 - `published`: Event is live and visible
 - `archived`: Event is hidden (soft deleted)
 
+### Custom Field Configuration
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `customFields` | JSON? | Optional array of custom registration field definitions |
+
+**Custom Fields Schema**:
+The `customFields` field stores an array of field definitions that attendees must fill during ticket assignment. Each field definition follows this structure:
+
+```typescript
+interface CustomFieldDefinition {
+  id: string;              // Unique identifier (e.g., "dietary", "tshirt")
+  label: string;           // Display label (e.g., "Dietary Restrictions")
+  type: 'text' | 'textarea' | 'select' | 'checkbox' | 'radio';
+  required: boolean;       // Whether response is mandatory
+  placeholder?: string;    // Placeholder text (for text/textarea)
+  options?: string[];      // Options array (for select/radio/checkbox)
+  pattern?: string;        // Validation regex pattern (for text/textarea)
+  minLength?: number;      // Minimum length (for text/textarea)
+  maxLength?: number;      // Maximum length (for text/textarea)
+  minSelections?: number;  // Minimum selections (for checkbox)
+  maxSelections?: number;  // Maximum selections (for checkbox)
+  helpText?: string;       // Help text displayed below field
+}
+```
+
+**Example Configuration**:
+```json
+[
+  {
+    "id": "dietary",
+    "label": "Dietary Restrictions",
+    "type": "select",
+    "required": false,
+    "options": ["None", "Vegetarian", "Vegan", "Gluten-Free", "Other"],
+    "helpText": "Let us know if you have any dietary requirements"
+  },
+  {
+    "id": "tshirt",
+    "label": "T-Shirt Size",
+    "type": "select",
+    "required": true,
+    "options": ["XS", "S", "M", "L", "XL", "XXL"]
+  },
+  {
+    "id": "accessibility",
+    "label": "Accessibility Needs",
+    "type": "textarea",
+    "required": false,
+    "maxLength": 500,
+    "helpText": "Please describe any accessibility accommodations you need"
+  },
+  {
+    "id": "sessionPreferences",
+    "label": "Session Interests",
+    "type": "checkbox",
+    "required": false,
+    "options": ["Web Development", "AI/ML", "DevOps", "Mobile", "Security"],
+    "minSelections": 1,
+    "maxSelections": 3
+  }
+]
+```
+
+**Usage**: Custom field responses are collected during ticket assignment and stored in `Attendee.customData`. The system validates responses against these definitions before saving.
+
 ### Audit Fields
 
 | Field | Type | Description |

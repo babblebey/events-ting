@@ -724,3 +724,24 @@ export type GenerateQRCodeOutput = z.infer<typeof generateQRCodeOutputSchema>;
 export type GetCheckInMetricsOutput = z.infer<
   typeof getCheckInMetricsOutputSchema
 >;
+
+// Custom Field Types (Ticket Separation Feature - User Story 2)
+export type {
+  CustomFieldType,
+  CustomFieldDefinition,
+  CustomFieldValue,
+  CustomFieldResponses,
+  FieldValidationResult,
+  FormValidationResult,
+} from './validators/custom-fields';
+
+export {
+  CUSTOM_FIELD_TYPES,
+  customFieldDefinitionSchema,
+  customFieldDefinitionsSchema,
+  validateFieldDefinition,
+  validateFieldResponse,
+  validateCustomFieldResponses,
+  createCustomFieldSchema,
+  sanitizeCustomFieldResponses,
+} from './validators/custom-fields';

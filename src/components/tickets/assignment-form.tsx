@@ -12,21 +12,14 @@ import { api } from "@/trpc/react";
 import { HiCheckCircle, HiExclamationCircle } from "react-icons/hi";
 import type { TRPCClientErrorLike } from "@trpc/client";
 import type { AppRouter } from "@/server/api/root";
-
-interface CustomField {
-  id: string;
-  label: string;
-  type: "text" | "textarea" | "select" | "checkbox" | "radio";
-  required: boolean;
-  options?: string[];
-  helpText?: string;
-}
+import type { CustomFieldDefinition, CustomFieldValue } from "@/lib/validators";
+import { sanitizeCustomFieldResponses } from "@/lib/validators";
 
 interface AssignmentFormProps {
   ticketId: string;
   ticketNumber: string;
   expectedUpdatedAt: Date;
-  customFields?: CustomField[];
+  customFields?: CustomFieldDefinition[];
   eventName?: string;
   onSuccess?: (attendeeId: string) => void;
   onCancel?: () => void;
@@ -43,7 +36,7 @@ export function AssignmentForm({
 }: AssignmentFormProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [customData, setCustomData] = useState<Record<string, unknown>>({});
+  const [customData, setCustomData] = useState<Record<string, CustomFieldValue>>({});
   const [buyerConsent, setBuyerConsent] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [emailWarning, setEmailWarning] = useState<string | null>(null);
@@ -115,7 +108,7 @@ export function AssignmentForm({
     }
   };
 
-  const handleCustomFieldChange = (fieldId: string, value: unknown) => {
+  const handleCustomFieldChange = (fieldId: string, value: CustomFieldValue) => {
     setCustomData((prev) => ({
       ...prev,
       [fieldId]: value,
@@ -172,6 +165,9 @@ export function AssignmentForm({
       return;
     }
 
+    // Sanitize custom field responses (trim strings, remove empty values)
+    const sanitizedCustomData = sanitizeCustomFieldResponses(customData);
+
     try {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       await assignMutation.mutateAsync({
@@ -179,7 +175,7 @@ export function AssignmentForm({
         attendee: {
           name: name.trim(),
           email: email.trim(),
-          customData: Object.keys(customData).length > 0 ? customData : undefined,
+          customData: Object.keys(sanitizedCustomData).length > 0 ? sanitizedCustomData : undefined,
         },
         expectedUpdatedAt,
       });
@@ -188,7 +184,7 @@ export function AssignmentForm({
     }
   };
 
-  const renderCustomField = (field: CustomField) => {
+  const renderCustomField = (field: CustomFieldDefinition) => {
     const value = customData[field.id];
 
     switch (field.type) {
@@ -206,6 +202,7 @@ export function AssignmentForm({
             }
             error={errors[field.id]}
             helpText={field.helpText}
+            placeholder={field.placeholder}
           />
         );
 
@@ -227,6 +224,8 @@ export function AssignmentForm({
               }
               rows={4}
               color={errors[field.id] ? "failure" : undefined}
+              placeholder={field.placeholder}
+              maxLength={field.maxLength}
             />
             {(errors[field.id] ?? field.helpText) && (
               <p
@@ -274,6 +273,47 @@ export function AssignmentForm({
         );
 
       case "checkbox":
+        // For checkbox type, support multi-select with options array
+        if (field.options && field.options.length > 0) {
+          const selectedValues = (value as string[]) ?? [];
+          
+          return (
+            <div key={field.id} className="mb-4">
+              <div className="mb-2 block">
+                <Label>
+                  {field.label}
+                  {field.required && <span className="ml-1 text-red-500">*</span>}
+                </Label>
+              </div>
+              <div className="space-y-2">
+                {field.options.map((option) => (
+                  <div key={option} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`${field.id}-${option}`}
+                      checked={selectedValues.includes(option)}
+                      onChange={(e) => {
+                        const newValues = e.currentTarget.checked
+                          ? [...selectedValues, option]
+                          : selectedValues.filter((v) => v !== option);
+                        handleCustomFieldChange(field.id, newValues);
+                      }}
+                    />
+                    <Label htmlFor={`${field.id}-${option}`}>{option}</Label>
+                  </div>
+                ))}
+              </div>
+              {(errors[field.id] ?? field.helpText) && (
+                <p
+                  className={`mt-2 text-sm ${errors[field.id] ? "text-red-600 dark:text-red-500" : "text-gray-500 dark:text-gray-400"}`}
+                >
+                  {errors[field.id] ?? field.helpText}
+                </p>
+              )}
+            </div>
+          );
+        }
+        
+        // Single checkbox (boolean value)
         return (
           <div key={field.id} className="mb-4">
             <div className="flex items-center gap-2">

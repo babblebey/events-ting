@@ -5,7 +5,7 @@
  * Supports multiple field types (text, textarea, select, checkbox, radio) with
  * comprehensive validation rules.
  * 
- * Custom fields are stored in Event.customData (field definitions) and
+ * Custom fields are stored in Event.customFields (field definitions) and
  * Attendee.customData (attendee responses).
  */
 

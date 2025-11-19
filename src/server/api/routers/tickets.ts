@@ -1,9 +1,3 @@
-/**
- * Tickets Router
- * Handles ticket instance management, assignment, and check-in operations
- * Part of Feature: 003-ticket-attendee-separation
- */
-
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
@@ -19,6 +13,10 @@ import {
   assignTicketInputSchema,
   unassignTicketInputSchema,
   type ListTicketsInput,
+  customFieldDefinitionsSchema,
+  validateCustomFieldResponses,
+  type CustomFieldDefinition,
+  type CustomFieldResponses,
 } from "@/lib/validators";
 import { generateTicketQRCode, generateTicketQRCodeSVG } from "@/lib/qr-code/generator";
 import { isValidTicketNumberFormat } from "@/lib/tickets/generate-ticket-number";
@@ -447,6 +445,8 @@ export const ticketsRouter = createTRPCRouter({
               assignmentCutoffType: true,
               assignmentCutoffTime: true,
               startDate: true,
+              // TODO: Add customFields to Event schema (will be done in T044)
+              // customFields: true,
             },
           },
           attendee: true,
@@ -524,7 +524,63 @@ export const ticketsRouter = createTRPCRouter({
       }
 
       // TODO: Validate custom data against event's custom field schema
-      // This will be implemented when custom field schema is added to Event model
+      // NOTE: This validation will be activated once Event.customFields is added to the Prisma schema (T044)
+      // The validation logic is implemented and ready to use:
+      /*
+      if (ticket.event.customFields && attendeeData.customData) {
+        try {
+          const customFieldDefinitions = customFieldDefinitionsSchema.parse(
+            ticket.event.customFields
+          ) as CustomFieldDefinition[];
+
+          const validationResult = validateCustomFieldResponses(
+            customFieldDefinitions,
+            attendeeData.customData as CustomFieldResponses
+          );
+
+          if (!validationResult.isValid) {
+            const fieldErrors = Object.entries(validationResult.fields)
+              .filter(([_, result]) => !result.isValid)
+              .map(([fieldId, result]) => result.error)
+              .filter(Boolean);
+
+            const allErrors = [
+              ...validationResult.errors,
+              ...fieldErrors,
+            ].join(", ");
+
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `Custom field validation failed: ${allErrors}`,
+            });
+          }
+        } catch (error) {
+          if (error instanceof TRPCError) {
+            throw error;
+          }
+          console.error("[Tickets] Invalid custom fields schema in event", {
+            eventId: ticket.event.id,
+            error,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Event has invalid custom field configuration",
+          });
+        }
+      } else if (ticket.event.customFields && !attendeeData.customData) {
+        const customFieldDefinitions = customFieldDefinitionsSchema.parse(
+          ticket.event.customFields
+        ) as CustomFieldDefinition[];
+
+        const requiredFields = customFieldDefinitions.filter(f => f.required);
+        if (requiredFields.length > 0) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `Missing required custom fields: ${requiredFields.map(f => f.label).join(", ")}`,
+          });
+        }
+      }
+      */
 
       // If ticket already assigned, delete old attendee record (privacy)
       if (ticket.attendee) {
@@ -610,7 +666,7 @@ export const ticketsRouter = createTRPCRouter({
             eventName: result.updatedTicket.event.name,
             eventDate: result.updatedTicket.event.startDate,
             eventEndDate: result.updatedTicket.event.endDate ?? undefined,
-            eventLocationType: result.updatedTicket.event.locationType,
+            eventLocationType: result.updatedTicket.event.locationType as "virtual" | "hybrid" | "physical",
             eventLocationAddress: result.updatedTicket.event.locationAddress ?? undefined,
             ticketType: result.updatedTicket.ticketType.name,
             ticketNumber: result.updatedTicket.ticketNumber,
