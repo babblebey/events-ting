@@ -116,6 +116,9 @@ model Event {
   assignmentCutoffTime  DateTime? // Custom cutoff time (if type = 'custom')
   maxTicketsPerPurchase Int       @default(10) // Maximum tickets in one transaction
 
+  // Custom Registration Fields
+  customFields Json? // Array of CustomFieldDefinition objects
+
   // Organizer
   organizerId String
   organizer   User   @relation(fields: [organizerId], references: [id], onDelete: Restrict)
