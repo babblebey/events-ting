@@ -72,11 +72,11 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 - [X] T018 [P] [US1] Create Zod input schemas for tickets.list procedure in src/server/api/routers/tickets.ts
 - [X] T019 [P] [US1] Create Zod output schemas for ticket operations in src/server/api/routers/tickets.ts
 - [X] T020 [US1] Implement tickets.list procedure in src/server/api/routers/tickets.ts
-- [ ] T021 [US1] Implement tickets.getByNumber procedure in src/server/api/routers/tickets.ts
-- [ ] T022 [US1] Implement tickets.generateQRCode procedure in src/server/api/routers/tickets.ts
-- [ ] T023 [US1] Implement tickets.assign procedure with optimistic locking in src/server/api/routers/tickets.ts
-- [ ] T024 [US1] Implement tickets.unassign procedure in src/server/api/routers/tickets.ts
-- [ ] T025 [US1] Add tickets and attendees routers to root router in src/server/api/root.ts
+- [X] T021 [US1] Implement tickets.getByNumber procedure in src/server/api/routers/tickets.ts
+- [X] T022 [US1] Implement tickets.generateQRCode procedure in src/server/api/routers/tickets.ts
+- [X] T023 [US1] Implement tickets.assign procedure with optimistic locking in src/server/api/routers/tickets.ts
+- [X] T024 [US1] Implement tickets.unassign procedure in src/server/api/routers/tickets.ts
+- [X] T025 [US1] Add tickets and attendees routers to root router in src/server/api/root.ts
 - [ ] T026 [P] [US1] Create TicketCard component in src/components/tickets/ticket-card.tsx
 - [ ] T027 [P] [US1] Create QRCodeDisplay component in src/components/tickets/qr-code-display.tsx
 - [ ] T028 [P] [US1] Create AssignmentForm component in src/components/tickets/assignment-form.tsx
