@@ -85,10 +85,10 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 - [X] T031 [US1] Create individual ticket view page in src/app/tickets/[ticketId]/page.tsx
 - [X] T032 [US1] Create ticket assignment page in src/app/tickets/assign/page.tsx
 - [X] T033 [US1] Create ticket-assigned email template in emails/ticket-assigned.tsx
-- [ ] T034 [US1] Integrate email sending in tickets.assign procedure in src/server/api/routers/tickets.ts
-- [ ] T035 [US1] Update buyer registration confirmation email to reference ticket assignments in emails/registration-confirmation.tsx
-- [ ] T035a [US1] Add mock buyer permission confirmation checkbox to AssignmentForm (FR-018 placeholder - full implementation deferred)
-- [ ] T035b [US1] Add mock attendee terms acceptance to individual ticket view page (FR-019 placeholder - full implementation deferred)
+- [X] T034 [US1] Integrate email sending in tickets.assign procedure in src/server/api/routers/tickets.ts
+- [X] T035 [US1] Update buyer registration confirmation email to reference ticket assignments in emails/registration-confirmation.tsx
+- [X] T035a [US1] Add mock buyer permission confirmation checkbox to AssignmentForm (FR-018 placeholder - full implementation deferred)
+- [X] T035b [US1] Add mock attendee terms acceptance to individual ticket view page (FR-019 placeholder - full implementation deferred)
 
 **Checkpoint**: User Story 1 complete - buyers can purchase multiple tickets, assign them to different people, and each attendee receives unique ticket with QR code
 

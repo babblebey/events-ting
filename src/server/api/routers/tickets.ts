@@ -22,6 +22,8 @@ import {
 } from "@/lib/validators";
 import { generateTicketQRCode, generateTicketQRCodeSVG } from "@/lib/qr-code/generator";
 import { isValidTicketNumberFormat } from "@/lib/tickets/generate-ticket-number";
+import { sendEmail } from "@/server/services/email";
+import { TicketAssigned } from "emails/ticket-assigned";
 
 export const ticketsRouter = createTRPCRouter({
   /**
@@ -567,14 +569,76 @@ export const ticketsRouter = createTRPCRouter({
                 customData: true,
               },
             },
+            event: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+                startDate: true,
+                endDate: true,
+                locationType: true,
+                locationAddress: true,
+              },
+            },
+            registration: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
           },
         });
 
         return { updatedTicket, newAttendee };
       });
 
-      // TODO: Send email to attendee with ticket details
-      // This will be implemented in T034
+      // Generate QR code for email
+      const qrCodeDataUrl = await generateTicketQRCode(result.updatedTicket.qrCodeData, {
+        width: 400,
+      });
+
+      // Build ticket URL
+      const ticketUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/tickets/${result.updatedTicket.id}`;
+
+      // Send email to attendee with ticket details
+      try {
+        await sendEmail({
+          to: result.newAttendee.email,
+          subject: `Your ticket for ${result.updatedTicket.event.name} is ready! 🎟️`,
+          react: TicketAssigned({
+            attendeeName: result.newAttendee.name,
+            eventName: result.updatedTicket.event.name,
+            eventDate: result.updatedTicket.event.startDate,
+            eventEndDate: result.updatedTicket.event.endDate ?? undefined,
+            eventLocationType: result.updatedTicket.event.locationType,
+            eventLocationAddress: result.updatedTicket.event.locationAddress ?? undefined,
+            ticketType: result.updatedTicket.ticketType.name,
+            ticketNumber: result.updatedTicket.ticketNumber,
+            ticketPrice: result.updatedTicket.ticketType.price.toNumber(),
+            buyerName: result.updatedTicket.registration.name,
+            buyerEmail: result.updatedTicket.registration.email,
+            ticketUrl,
+            qrCodeDataUrl,
+            customData: result.newAttendee.customData as Record<string, unknown> | undefined,
+          }),
+          tags: [
+            { name: "category", value: "ticket-assigned" },
+            { name: "eventId", value: result.updatedTicket.event.id },
+          ],
+        });
+
+        console.log("[Tickets] Sent ticket assignment email", {
+          ticketId: result.updatedTicket.id,
+          attendeeEmail: result.newAttendee.email,
+        });
+      } catch (error) {
+        // Log error but don't fail the assignment
+        console.error("[Tickets] Failed to send ticket assignment email", {
+          ticketId: result.updatedTicket.id,
+          attendeeEmail: result.newAttendee.email,
+          error,
+        });
+      }
 
       return {
         ticket: {
