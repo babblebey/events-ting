@@ -21,6 +21,33 @@ import { AssignmentForm } from "@/components/tickets/assignment-form";
 import { formatDate } from "@/lib/utils/date";
 import { useToast } from "@/components/ui/toast-provider";
 
+// Type guard for ticket and event data
+type TicketData = {
+  event: {
+    id: string;
+    name: string;
+    timezone?: string | null;
+    startDate: Date | string;
+  };
+  ticketType: {
+    name: string;
+    price: number;
+  };
+  attendee?: {
+    name: string;
+    email: string;
+  } | null;
+  ticketNumber: string;
+  isAssigned: boolean;
+  updatedAt: Date | string;
+};
+
+type EventData = {
+  customData?: unknown;
+  assignmentCutoffType?: string | null;
+  assignmentCutoffTime?: Date | string | null;
+};
+
 export default function TicketAssignmentPage() {
   const params = useParams();
   const router = useRouter();
@@ -32,7 +59,7 @@ export default function TicketAssignmentPage() {
 
   // Fetch ticket details
   const {
-    data: ticket,
+    data: ticketData,
     isLoading: isLoadingTicket,
     isError: isTicketError,
     error: ticketError,
@@ -44,13 +71,17 @@ export default function TicketAssignmentPage() {
     },
   );
 
+  const ticket = ticketData as TicketData | undefined;
+
   // Fetch event details for custom fields
-  const { data: event } = api.event.getById.useQuery(
+  const { data: eventData } = api.event.getById.useQuery(
     { id: ticket?.event.id ?? "" },
     {
       enabled: !!ticket?.event.id,
     },
   );
+
+  const event = eventData as EventData | undefined;
 
   // Parse custom fields from event
   const customFields = event?.customData
@@ -60,7 +91,7 @@ export default function TicketAssignmentPage() {
             typeof event.customData === "string"
               ? event.customData
               : JSON.stringify(event.customData),
-          );
+          ) as { registrationFields?: unknown[] };
           return Array.isArray(parsed?.registrationFields)
             ? parsed.registrationFields
             : [];
@@ -70,7 +101,7 @@ export default function TicketAssignmentPage() {
       })()
     : [];
 
-  const handleAssignmentSuccess = (attendeeId: string) => {
+  const handleAssignmentSuccess = (_attendeeId: string) => {
     setAssignmentComplete(true);
     toast.success(
       "Ticket Assigned Successfully",
@@ -190,7 +221,7 @@ export default function TicketAssignmentPage() {
               </p>
               <p className="mt-2 text-sm">
                 Reassigning this ticket will permanently delete the current
-                attendee's information and send the new attendee an email.
+                attendee&apos;s information and send the new attendee an email.
               </p>
             </div>
           </Alert>
@@ -226,7 +257,7 @@ export default function TicketAssignmentPage() {
                 Event Date
               </p>
               <p className="text-sm text-gray-900 dark:text-white">
-                {formatDate(ticket.event.startDate, timezone, "PPP")}
+                {formatDate(new Date(ticket.event.startDate), timezone, "PPP")}
               </p>
             </div>
             <div>
@@ -272,7 +303,7 @@ export default function TicketAssignmentPage() {
           <AssignmentForm
             ticketId={ticketId}
             ticketNumber={ticket.ticketNumber}
-            expectedUpdatedAt={ticket.updatedAt}
+            expectedUpdatedAt={new Date(ticket.updatedAt)}
             customFields={customFields}
             eventName={ticket.event.name}
             onSuccess={handleAssignmentSuccess}
@@ -290,10 +321,10 @@ export default function TicketAssignmentPage() {
             <ul className="mt-2 list-inside list-disc space-y-1">
               <li>The attendee will receive an email with their ticket details</li>
               <li>
-                They'll get a unique QR code for event check-in
+                They&apos;ll get a unique QR code for event check-in
               </li>
               <li>
-                All event communications will be sent to the attendee's email
+                All event communications will be sent to the attendee&apos;s email
               </li>
               <li>
                 You can reassign the ticket anytime before the event (unless

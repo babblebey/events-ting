@@ -156,7 +156,7 @@ export function ImportProgressStep({
           </div>
 
           <Alert color="info">
-            <span className="font-medium">Please don't close this window.</span>{" "}
+            <span className="font-medium">Please don&apos;t close this window.</span>{" "}
             The import process is running and will complete shortly.
           </Alert>
         </>

@@ -83,7 +83,7 @@ export const TicketAssigned = ({
             <Text style={paragraph}>Hi {attendeeName},</Text>
 
             <Text style={paragraph}>
-              Great news! You've been assigned a ticket for{" "}
+              Great news! You&apos;ve been assigned a ticket for{" "}
               <strong>{eventName}</strong>. Your ticket details and QR code are
               ready.
             </Text>
@@ -193,7 +193,7 @@ export const TicketAssigned = ({
               <Text style={importantTitle}>📌 Important Information</Text>
               <ul style={list}>
                 <li style={listItem}>
-                  <strong>Save this email</strong> - You'll need it for
+                  <strong>Save this email</strong> - You&apos;ll need it for
                   check-in
                 </li>
                 <li style={listItem}>

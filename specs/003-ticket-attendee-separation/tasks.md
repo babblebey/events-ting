@@ -171,8 +171,8 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 - [X] T077 [P] Create attendee management documentation in docs/modules/attendees/
 - [X] T078 [P] Update API documentation with new routers in docs/api/routers.md
 - [X] T079 [P] Add error handling documentation in docs/api/error-handling.md
-- [ ] T080 Run ESLint and Prettier checks: `pnpm run check`
-- [ ] T081 Fix any linting or type errors identified
+- [X] T080 Run ESLint and Prettier checks: `pnpm run check`
+- [X] T081 Fix any linting or type errors identified
 - [ ] T082 Validate all email templates using script: `pnpm run validate:emails`
 - [ ] T083 Manual QA: Verify unassigned ticket behavior at event start (currently no cutoff enforcement - document expected behavior)
 - [ ] T084 Manual QA: Verify ticket reassignment deletes previous attendee data (GDPR compliance)

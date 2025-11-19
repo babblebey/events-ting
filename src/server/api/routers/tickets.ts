@@ -12,11 +12,6 @@ import {
   generateQRCodeInputSchema,
   assignTicketInputSchema,
   unassignTicketInputSchema,
-  type ListTicketsInput,
-  customFieldDefinitionsSchema,
-  validateCustomFieldResponses,
-  type CustomFieldDefinition,
-  type CustomFieldResponses,
 } from "@/lib/validators";
 import { generateTicketQRCode, generateTicketQRCodeSVG } from "@/lib/qr-code/generator";
 import { isValidTicketNumberFormat } from "@/lib/tickets/generate-ticket-number";
@@ -473,7 +468,7 @@ export const ticketsRouter = createTRPCRouter({
             userId: ctx.session.user.id,
             requiredModule: "TICKETS",
           });
-          isOrganizer = true;
+          // isOrganizer = true; // Unused variable
         } catch {
           throw new TRPCError({
             code: "FORBIDDEN",
@@ -585,8 +580,8 @@ export const ticketsRouter = createTRPCRouter({
 
       // If ticket already assigned, delete old attendee record (privacy)
       const wasReassignment = !!ticket.attendee;
-      const previousAttendeeName = ticket.attendee?.name;
-      const previousAttendeeEmail = ticket.attendee?.email;
+      // const previousAttendeeName = ticket.attendee?.name; // Unused
+      // const previousAttendeeEmail = ticket.attendee?.email; // Unused
 
       if (ticket.attendee) {
         await ctx.db.attendee.delete({

@@ -97,7 +97,7 @@ export const EventReminderEmail = ({
 
             {daysUntilEvent <= 0 ? (
               <Text style={paragraph}>
-                <strong>{eventName}</strong> is happening today! We're excited
+                <strong>{eventName}</strong> is happening today! We&apos;re excited
                 to see you there.
               </Text>
             ) : daysUntilEvent === 1 ? (
@@ -225,7 +225,7 @@ export const EventReminderEmail = ({
                   </li>
                 )}
                 <li style={listItem}>
-                  <strong>Contact info</strong> - Save the organizer's contact
+                  <strong>Contact info</strong> - Save the organizer&apos;s contact
                   information in case you need assistance
                 </li>
               </ul>
@@ -233,8 +233,8 @@ export const EventReminderEmail = ({
 
             {/* Footer */}
             <Text style={footer}>
-              We can't wait to see you at {eventName}! If you have any
-              questions or need assistance, please don't hesitate to reach out.
+              We can&apos;t wait to see you at {eventName}! If you have any
+              questions or need assistance, please don&apos;t hesitate to reach out.
             </Text>
 
             <Text style={footer}>See you soon! 🚀</Text>

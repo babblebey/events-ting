@@ -10,7 +10,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, Card, Badge, Alert, Spinner } from "flowbite-react";
 import {
-  HiTicket,
   HiCheckCircle,
   HiXCircle,
   HiCalendar,
@@ -24,6 +23,37 @@ import { api } from "@/trpc/react";
 import { QRCodeDisplay } from "@/components/tickets/qr-code-display";
 import { formatDate } from "@/lib/utils/date";
 
+// Type guard for ticket data
+type TicketData = {
+  event: {
+    name: string;
+    description?: string | null;
+    timezone?: string | null;
+    startDate: Date | string;
+    endDate?: Date | string | null;
+    locationType?: string | null;
+    locationAddress?: string | null;
+    customData?: unknown;
+  };
+  ticketType: {
+    name: string;
+    description?: string | null;
+    price: number;
+  };
+  attendee?: {
+    name: string;
+    email: string;
+    customData?: unknown;
+  } | null;
+  registration: {
+    email: string;
+  };
+  ticketNumber: string;
+  isAssigned: boolean;
+  isCheckedIn: boolean;
+  assignedAt?: Date | string | null;
+};
+
 export default function IndividualTicketViewPage() {
   const params = useParams();
   const router = useRouter();
@@ -33,7 +63,7 @@ export default function IndividualTicketViewPage() {
 
   // Fetch ticket details
   const {
-    data: ticket,
+    data: ticketData,
     isLoading,
     isError,
     error,
@@ -44,6 +74,8 @@ export default function IndividualTicketViewPage() {
       retry: 1,
     },
   );
+
+  const ticket = ticketData as TicketData | undefined;
 
   // Generate QR code
   const { data: qrCodeData } = api.tickets.generateQRCode.useQuery(
@@ -370,14 +402,14 @@ export default function IndividualTicketViewPage() {
                     Event Terms and Conditions
                   </h3>
                   <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                    By attending this event, you agree to the event organizer's
+                    By attending this event, you agree to the event organizer&apos;s
                     terms and conditions, including their privacy policy and
                     code of conduct.
                   </p>
                   <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
                     <p className="mb-2 font-medium">You agree to:</p>
                     <ul className="list-inside list-disc space-y-1">
-                      <li>Follow the event's code of conduct</li>
+                      <li>Follow the event&apos;s code of conduct</li>
                       <li>
                         Allow the organizer to use your information for event
                         communications
@@ -404,7 +436,7 @@ export default function IndividualTicketViewPage() {
       {termsAccepted && (
         <div className="mt-4">
           <Alert color="success" icon={HiCheckCircle}>
-            <span className="font-medium">Terms Accepted</span> - You're all
+            <span className="font-medium">Terms Accepted</span> - You&apos;re all
             set for the event!
           </Alert>
         </div>

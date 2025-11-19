@@ -6,7 +6,6 @@ import {
   Heading,
   Hr,
   Html,
-  Link,
   Preview,
   Section,
   Text,
@@ -44,7 +43,7 @@ export const RegistrationConfirmation = ({
   return (
     <Html>
       <Head />
-      <Preview>You're registered for {eventName}! 🎉</Preview>
+      <Preview>You&apos;re registered for {eventName}! 🎉</Preview>
       <Body style={main}>
         <Container style={container}>
           <Section style={box}>
@@ -53,7 +52,7 @@ export const RegistrationConfirmation = ({
             <Text style={paragraph}>Hi {attendeeName},</Text>
 
             <Text style={paragraph}>
-              Great news! You're all set for <strong>{eventName}</strong>.
+              Great news! You&apos;re all set for <strong>{eventName}</strong>.
             </Text>
 
             <Section style={infoBox}>
@@ -108,7 +107,7 @@ export const RegistrationConfirmation = ({
             <Hr style={hr} />
 
             <Text style={footer}>
-              If you have any questions, please don't hesitate to reach out to
+              If you have any questions, please don&apos;t hesitate to reach out to
               the event organizer.
             </Text>
 

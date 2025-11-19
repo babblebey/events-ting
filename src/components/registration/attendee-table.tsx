@@ -41,7 +41,7 @@ export function AttendeeTable({
   const debouncedSearch = useDebounce(search, 500);
 
   // Fetch registrations with filters
-  const { data, isLoading, fetchNextPage, hasNextPage, refetch } =
+  const { data, isLoading, fetchNextPage, hasNextPage, refetch: _refetch } =
     api.registration.list.useInfiniteQuery(
       {
         eventId,
