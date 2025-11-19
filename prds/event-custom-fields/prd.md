@@ -323,7 +323,7 @@ export type CustomFieldResponses = Record<string, string | string[] | boolean>;
 
 ---
 
-#### T003: Update Validation Schemas
+#### T003: Update Validation Schemas - ✅ DONE
 **Priority**: P0  
 **Estimate**: 30 minutes
 
@@ -334,7 +334,7 @@ export type CustomFieldResponses = Record<string, string | string[] | boolean>;
 
 ---
 
-#### T004: Update Event Router
+#### T004: Update Event Router - ✅ DONE
 **Priority**: P0  
 **Estimate**: 45 minutes
 

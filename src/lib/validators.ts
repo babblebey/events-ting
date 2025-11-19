@@ -4,6 +4,7 @@
  */
 
 import { z } from "zod";
+import { customFieldDefinitionsSchema } from "./validators/custom-fields";
 
 // ============================================================================
 // EVENT VALIDATION
@@ -86,6 +87,7 @@ export const updateEventSchema = z.object({
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
   status: z.enum(["draft", "published", "archived"]).optional(),
+  customFields: customFieldDefinitionsSchema.optional(),
 });
 
 export const eventIdSchema = z.object({

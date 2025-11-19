@@ -92,24 +92,51 @@ export interface FormValidationResult {
  * Zod schema for custom field definition
  */
 export const customFieldDefinitionSchema = z.object({
-  id: z.string().min(1, 'Field ID is required'),
-  label: z.string().min(1, 'Field label is required'),
+  id: z.string().min(1).max(100).regex(/^[a-zA-Z0-9_]+$/, {
+    message: 'Field ID must contain only letters, numbers, and underscores',
+  }),
+  label: z.string().min(1).max(255),
   type: z.enum(CUSTOM_FIELD_TYPES),
   required: z.boolean(),
-  placeholder: z.string().optional(),
-  options: z.array(z.string()).optional(),
-  pattern: z.string().optional(),
-  minLength: z.number().int().min(0).optional(),
-  maxLength: z.number().int().min(1).optional(),
-  minSelections: z.number().int().min(0).optional(),
-  maxSelections: z.number().int().min(1).optional(),
-  helpText: z.string().optional(),
+  placeholder: z.string().max(500).optional(),
+  options: z.array(z.string().min(1).max(500)).min(1).max(100).optional(),
+  // pattern: z.string().optional(),
+  // minLength: z.number().int().min(0).optional(),
+  // maxLength: z.number().int().min(1).optional(),
+  // minSelections: z.number().int().min(0).optional(),
+  // maxSelections: z.number().int().min(1).optional(),
+  // helpText: z.string().optional(),
+}).refine((data) => {
+  // Options required for select/radio/checkbox
+  if (['select', 'radio', 'checkbox'].includes(data.type)) {
+    return data.options && data.options.length > 0;
+  }
+  return true;
+}, {
+  message: 'Options are required for select, radio, and checkbox field types',
+  path: ['options'],
+}).refine((data) => {
+  // Options not allowed for text/textarea
+  if (['text', 'textarea'].includes(data.type)) {
+    return !data.options || data.options.length === 0;
+  }
+  return true;
+}, {
+  message: 'Options are not allowed for text and textarea field types',
+  path: ['options'],
 });
 
 /**
  * Zod schema for array of custom field definitions
+ * Includes duplicate ID validation
  */
-export const customFieldDefinitionsSchema = z.array(customFieldDefinitionSchema);
+export const customFieldDefinitionsSchema = z.array(customFieldDefinitionSchema).refine((fields) => {
+  const ids = fields.map(f => f.id);
+  const uniqueIds = new Set(ids);
+  return ids.length === uniqueIds.size;
+}, {
+  message: 'Duplicate field IDs are not allowed',
+});
 
 /**
  * Validate a custom field definition.

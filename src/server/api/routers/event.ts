@@ -289,6 +289,31 @@ export const eventRouter = createTRPCRouter({
         }
       }
 
+      // Validate custom fields if provided
+      if (data.customFields) {
+        // Ensure no duplicate IDs
+        const ids = data.customFields.map((f) => f.id);
+        const uniqueIds = new Set(ids);
+        if (ids.length !== uniqueIds.size) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Duplicate field IDs are not allowed",
+          });
+        }
+
+        // Validate options for select/radio/checkbox
+        for (const field of data.customFields) {
+          if (["select", "radio", "checkbox"].includes(field.type)) {
+            if (!field.options || field.options.length === 0) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: `Field '${field.label}' requires at least one option`,
+              });
+            }
+          }
+        }
+      }
+
       return ctx.db.event.update({
         where: { id },
         data,
