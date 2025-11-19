@@ -34,8 +34,8 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 
 **Purpose**: Project initialization, dependencies, and database schema
 
-- [ ] T001 Update Prisma schema with Ticket and Attendee models in prisma/schema.prisma
-- [ ] T002 Add assignmentCutoffType, assignmentCutoffTime, maxTicketsPerPurchase fields to Event model in prisma/schema.prisma
+- [X] T001 Update Prisma schema with Ticket and Attendee models in prisma/schema.prisma
+- [X] T002 Add assignmentCutoffType, assignmentCutoffTime, maxTicketsPerPurchase fields to Event model in prisma/schema.prisma
 - [ ] T003 [P] Add tickets relation to Registration model in prisma/schema.prisma
 - [ ] T004 [P] Add tickets relation to TicketType model in prisma/schema.prisma
 - [ ] T005 Generate Prisma migration for new models using `pnpm db:migrate dev --name ticket-attendee-separation`

@@ -111,6 +111,11 @@ model Event {
     status      String   @default("draft") // 'draft' | 'published' | 'archived'
     isArchived  Boolean  @default(false) // Soft delete flag
     
+    // Ticket Assignment Configuration
+    assignmentCutoffType  String   @default("event_start") // 'event_start' | '1h_before' | '24h_before' | 'custom'
+    assignmentCutoffTime  DateTime? // Custom cutoff time (if type = 'custom')
+    maxTicketsPerPurchase Int      @default(10) // Maximum tickets in one transaction
+    
     // Organizer
     organizerId String
     organizer   User     @relation(fields: [organizerId], references: [id], onDelete: Restrict)
