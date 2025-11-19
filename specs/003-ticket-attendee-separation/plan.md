@@ -65,12 +65,15 @@ src/
 │   ├── (dashboard)/              # Authenticated dashboard routes
 │   │   ├── events/
 │   │   │   └── [eventId]/
-│   │   │       ├── tickets/      # Ticket management UI (organizer view)
-│   │   │       └── check-in/     # Check-in interface
+│   │   │       └── tickets/      # Ticket management UI (organizer view)
 │   └── (public)/                 # Public routes
 │       ├── events/
 │       │   └── [slug]/
-│       │       └── register/     # Ticket purchase flow
+│       │       ├── register/     # Ticket purchase flow
+│       │       └── registrations/
+│       │           ├── page.tsx  # Registration lookup by email
+│       │           └── [registrationId]/
+│       │               └── page.tsx  # Registration ticket management
 │       └── tickets/
 │           ├── [ticketId]/       # Individual ticket view (attendee)
 │           └── assign/           # Ticket assignment form
@@ -78,7 +81,6 @@ src/
 │   ├── tickets/                  # Ticket-related components
 │   │   ├── ticket-card.tsx
 │   │   ├── qr-code-generator.tsx
-│   │   ├── check-in-scanner.tsx
 │   │   └── assignment-form.tsx
 │   └── ui/                       # Shared UI components (Flowbite-based)
 ├── server/
@@ -86,8 +88,7 @@ src/
 │   │   └── routers/
 │   │       ├── tickets.ts        # NEW: Ticket CRUD + assignment
 │   │       ├── attendees.ts      # NEW: Attendee management
-│   │       ├── registrations.ts  # UPDATED: Buyer/purchase logic
-│   │       └── check-in.ts       # NEW: Check-in procedures
+│   │       └── registrations.ts  # UPDATED: Buyer/purchase logic
 │   └── db/
 │       └── schema.prisma         # UPDATED: Ticket + Attendee models
 └── lib/
@@ -98,18 +99,6 @@ src/
 prisma/
 ├── schema.prisma                 # UPDATED: Add Ticket + Attendee models
 └── migrations/                   # Database migration files
-
-tests/
-├── integration/
-│   ├── ticket-purchase.test.ts   # NEW: Multi-ticket purchase flow
-│   ├── ticket-assignment.test.ts # NEW: Assignment + reassignment
-│   └── check-in.test.ts          # NEW: QR scan + check-in tracking
-├── contract/
-│   ├── tickets-router.test.ts    # NEW: tRPC ticket procedures
-│   └── prisma-schema.test.ts     # UPDATED: Validate new models
-└── unit/
-    ├── qr-code-generator.test.ts # NEW: QR code utility
-    └── email-helpers.test.ts     # UPDATED: Attendee email logic
 ```
 
 **Structure Decision**: This is a Next.js web application following the T3 Stack conventions. The App Router structure separates authenticated dashboard routes (`(dashboard)`) from public-facing routes (`(public)`) using route groups. Server-side logic lives in `src/server/api/routers/` as tRPC procedures. Components are organized by domain (`tickets/`, `attendees/`) with shared UI components in `ui/`. Tests mirror the source structure and are placed in a top-level `tests/` directory. Database schema is managed via Prisma in `prisma/schema.prisma`.

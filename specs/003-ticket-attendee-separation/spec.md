@@ -131,7 +131,7 @@ Event organizers need to communicate with actual attendees, not just buyers. Whe
 - **FR-013**: System MUST validate attendee email addresses during assignment using RFC 5322 compliant format validation and provide soft warnings for suspicious patterns (common typos like "gmial.com" or missing "@" symbols) while still allowing assignment to proceed
 - **FR-014**: System MUST handle unassigned tickets gracefully, allowing assignment up to the organizer-configured cutoff time
 - **FR-016**: System MUST allow event organizers to configure a ticket assignment/reassignment cutoff time (options: event start time, 1 hour before, 24 hours before, or custom)
-- **FR-017**: System MUST support refunds for individual tickets (not just entire orders) up to the organizer-configured cutoff time, with buyer responsible for notifying affected attendees
+- **FR-017**: System MUST support refunds for individual tickets (not just entire orders) up to the organizer-configured cutoff time, with buyer responsible for notifying affected attendees *(DEFERRED to future sprint - requires payment/paid ticket module)*
 - **FR-018**: System MUST require buyers to confirm they have permission to share attendee information during ticket assignment
 - **FR-019**: System MUST require attendees to accept terms and conditions when they first access their assigned ticket (via email link or ticket access page)
 - **FR-020**: System MUST allow event organizers to configure the maximum number of tickets allowed per transaction (with a system default of 10 tickets)

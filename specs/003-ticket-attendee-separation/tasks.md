@@ -10,7 +10,7 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 
 **Tests**: Automated testing excluded from this feature scope.
 
-**Organization**: Tasks are grouped by user story (5 user stories: US1-P1, US2-P2, US3-P2, US4-P1, US5-P3) to enable independent implementation and testing.
+**Organization**: Tasks are grouped by user story (4 user stories: US1-P1, US2-P2, US3-P2, US5-P3) to enable independent implementation and testing. Note: User Story 4 (Check-in Tracking) deferred to separate sprint.
 
 **Constitution Compliance**: All tasks adhere to events-ting Constitution v1.0.0:
 - TypeScript 5.8+ strict mode, no `any` types
@@ -36,9 +36,9 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 
 - [ ] T001 Update Prisma schema with Ticket and Attendee models in prisma/schema.prisma
 - [ ] T002 Add assignmentCutoffType, assignmentCutoffTime, maxTicketsPerPurchase fields to Event model in prisma/schema.prisma
-- [ ] T003 Add tickets relation to Registration model in prisma/schema.prisma
-- [ ] T004 Add tickets relation to TicketType model in prisma/schema.prisma
-- [ ] T005 Generate Prisma migration for new models using `pnpm db:generate`
+- [ ] T003 [P] Add tickets relation to Registration model in prisma/schema.prisma
+- [ ] T004 [P] Add tickets relation to TicketType model in prisma/schema.prisma
+- [ ] T005 Generate Prisma migration for new models using `pnpm db:migrate dev --name ticket-attendee-separation`
 - [ ] T006 [P] Install QR code generation dependencies: `pnpm add qrcode nanoid`
 - [ ] T007 [P] Install QR code scanner dependency: `pnpm add html5-qrcode`
 - [ ] T008 [P] Install QR code type definitions: `pnpm add -D @types/qrcode`
@@ -51,9 +51,9 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T013 [P] Create ticket number generator utility in src/lib/tickets/generate-ticket-number.ts
-- [ ] T014 [P] Create QR code generator utilities (data URL and SVG) in src/lib/qr-code/generator.ts
-- [ ] T015 [P] Create assignment cutoff helper functions in src/lib/events/assignment-cutoff.ts
+- [ ] T013 [P] Create ticket number generator utility (human-readable unique ID) in src/lib/tickets/generate-ticket-number.ts
+- [ ] T014 [P] Create QR code generator utilities (data URL and SVG, encoding Ticket.id+eventId) in src/lib/qr-code/generator.ts
+- [ ] T015 [P] Create assignment cutoff helper functions (display only, validation deferred) in src/lib/events/assignment-cutoff.ts
 - [ ] T016 [P] Create email validation helper with soft warnings in src/lib/validators/email.ts
 - [ ] T017 [P] Create custom field validation utilities in src/lib/validators/custom-fields.ts
 
@@ -81,12 +81,14 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 - [ ] T027 [P] [US1] Create QRCodeDisplay component in src/components/tickets/qr-code-display.tsx
 - [ ] T028 [P] [US1] Create AssignmentForm component in src/components/tickets/assignment-form.tsx
 - [ ] T029 [US1] Update registration creation logic to create ticket instances in src/app/(public)/events/[slug]/register/page.tsx
-- [ ] T030 [US1] Create buyer ticket management dashboard page in src/app/(dashboard)/my-tickets/page.tsx
+- [ ] T030 [US1] Create buyer registration lookup page (by email) in src/app/(public)/events/[slug]/registrations/page.tsx
 - [ ] T031 [US1] Create individual ticket view page in src/app/(public)/tickets/[ticketId]/page.tsx
 - [ ] T032 [US1] Create ticket assignment page in src/app/(public)/tickets/assign/page.tsx
 - [ ] T033 [US1] Create ticket-assigned email template in emails/ticket-assigned.tsx
 - [ ] T034 [US1] Integrate email sending in tickets.assign procedure in src/server/api/routers/tickets.ts
 - [ ] T035 [US1] Update buyer registration confirmation email to reference ticket assignments in emails/registration-confirmation.tsx
+- [ ] T035a [US1] Add mock buyer permission confirmation checkbox to AssignmentForm (FR-018 placeholder - full implementation deferred)
+- [ ] T035b [US1] Add mock attendee terms acceptance to individual ticket view page (FR-019 placeholder - full implementation deferred)
 
 **Checkpoint**: User Story 1 complete - buyers can purchase multiple tickets, assign them to different people, and each attendee receives unique ticket with QR code
 
@@ -125,43 +127,20 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 ### Implementation for User Story 3
 
 - [ ] T047 [P] [US3] Create TicketList component with assignment status in src/components/tickets/ticket-list.tsx
-- [ ] T048 [P] [US3] Create OrderSummary component showing all tickets in src/components/tickets/order-summary.tsx
-- [ ] T049 [US3] Enhance my-tickets dashboard with filtering and search in src/app/(dashboard)/my-tickets/page.tsx
+- [ ] T048 [P] [US3] Create RegistrationSummary component showing all tickets in src/components/tickets/registration-summary.tsx
+- [ ] T049 [US3] Add filtering and search to registration management page in src/app/(public)/events/[slug]/registrations/[registrationId]/page.tsx
 - [ ] T050 [US3] Create ticket reassignment modal component in src/components/tickets/reassignment-modal.tsx
-- [ ] T051 [US3] Add cutoff time display and warnings to AssignmentForm in src/components/tickets/assignment-form.tsx
+- [ ] T051 [US3] Add cutoff time display (UI only, no validation) to AssignmentForm in src/components/tickets/assignment-form.tsx (TODO: Add cutoff enforcement validation in future sprint)
 - [ ] T052 [US3] Create ticket-reassigned email template in emails/ticket-reassigned.tsx
 - [ ] T053 [US3] Add email notification for reassignments in tickets.assign procedure in src/server/api/routers/tickets.ts
-- [ ] T054 [US3] Implement order confirmation page accessible via email link in src/app/(public)/orders/[orderId]/page.tsx
+- [ ] T054 [US3] Implement registration management page accessible via email link in src/app/(public)/events/[slug]/registrations/[registrationId]/page.tsx
 - [ ] T055 [US3] Add unassigned ticket warning/reminder UI in src/components/tickets/unassigned-reminder.tsx
 
 **Checkpoint**: User Story 3 complete - buyers can fully manage their tickets through self-service dashboard
 
 ---
 
-## Phase 6: User Story 4 - Individual Check-in Tracking (Priority: P1) 🎯 MVP
-
-**Goal**: Enable event staff to check in attendees individually using QR codes and track real-time check-in metrics
-
-**Independent Test**: Generate tickets with QR codes → scan at check-in → verify status recorded → see metrics update
-
-### Implementation for User Story 4
-
-- [ ] T056 [P] [US4] Implement tickets.checkIn procedure in src/server/api/routers/tickets.ts
-- [ ] T057 [P] [US4] Implement tickets.getCheckInMetrics procedure in src/server/api/routers/tickets.ts
-- [ ] T058 [P] [US4] Create CheckInScanner component using html5-qrcode in src/components/tickets/check-in-scanner.tsx
-- [ ] T059 [P] [US4] Create CheckInMetrics dashboard component in src/components/tickets/check-in-metrics.tsx
-- [ ] T060 [P] [US4] Create ManualCheckIn fallback component for typing ticket numbers in src/components/tickets/manual-check-in.tsx
-- [ ] T061 [US4] Create event check-in interface page in src/app/(dashboard)/events/[eventId]/check-in/page.tsx
-- [ ] T062 [US4] Add check-in status indicator to TicketCard component in src/components/tickets/ticket-card.tsx
-- [ ] T063 [US4] Create check-in history log component in src/components/tickets/check-in-history.tsx
-- [ ] T064 [US4] Add real-time metrics polling to check-in page in src/app/(dashboard)/events/[eventId]/check-in/page.tsx
-- [ ] T065 [US4] Implement duplicate check-in prevention logic in tickets.checkIn procedure in src/server/api/routers/tickets.ts
-
-**Checkpoint**: User Story 4 complete - staff can check in attendees with QR scanning and view real-time metrics
-
----
-
-## Phase 7: User Story 5 - Buyer vs Attendee Communication (Priority: P3)
+## Phase 6: User Story 5 - Buyer vs Attendee Communication (Priority: P3)
 
 **Goal**: Enable organizers to send event communications to individual attendees rather than just buyers
 
@@ -183,24 +162,24 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 
 ---
 
-## Phase 8: Polish & Cross-Cutting Concerns
+## Phase 7: Polish & Cross-Cutting Concerns
 
 **Purpose**: Quality improvements, documentation, and final validation
 
-- [ ] T071 [P] Add database indexes for ticket lookup performance (ticketNumber, eventId+isCheckedIn) in prisma/schema.prisma
-- [ ] T072 [P] Create ticket management documentation in docs/modules/tickets/
-- [ ] T073 [P] Create attendee management documentation in docs/modules/attendees/
-- [ ] T074 [P] Update API documentation with new routers in docs/api/routers.md
-- [ ] T075 [P] Add error handling documentation in docs/api/error-handling.md
-- [ ] T076 Run ESLint and Prettier checks: `pnpm run check`
-- [ ] T077 Fix any linting or type errors identified
-- [ ] T078 Validate all email templates using script: `pnpm run validate:emails`
-- [ ] T079 Manual QA: Verify assignment cutoff enforcement for all cutoff types
-- [ ] T080 Manual QA: Verify ticket reassignment deletes previous attendee data (GDPR compliance)
-- [ ] T081 Manual QA: Verify email deliverability for ticket assignment notifications
-- [ ] T082 Manual QA: Validate accessibility (keyboard navigation, screen reader, WCAG AA contrast)
-- [ ] T083 Manual QA: Test mobile responsiveness for all ticket-related pages
-- [ ] T084 Manual QA: Measure Core Web Vitals (LCP, FID, CLS) for ticket pages
+- [ ] T075 [P] Add database indexes for ticket lookup performance (ticketNumber, eventId+isCheckedIn) in prisma/schema.prisma
+- [ ] T076 [P] Create ticket management documentation in docs/modules/tickets/
+- [ ] T077 [P] Create attendee management documentation in docs/modules/attendees/
+- [ ] T078 [P] Update API documentation with new routers in docs/api/routers.md
+- [ ] T079 [P] Add error handling documentation in docs/api/error-handling.md
+- [ ] T080 Run ESLint and Prettier checks: `pnpm run check`
+- [ ] T081 Fix any linting or type errors identified
+- [ ] T082 Validate all email templates using script: `pnpm run validate:emails`
+- [ ] T083 Manual QA: Verify unassigned ticket behavior at event start (currently no cutoff enforcement - document expected behavior)
+- [ ] T084 Manual QA: Verify ticket reassignment deletes previous attendee data (GDPR compliance)
+- [ ] T085 Manual QA: Verify email deliverability for ticket assignment notifications
+- [ ] T086 Manual QA: Validate accessibility (keyboard navigation, screen reader, WCAG AA contrast)
+- [ ] T087 Manual QA: Test mobile responsiveness for all ticket-related pages
+- [ ] T088 Manual QA: Measure Core Web Vitals (LCP, FID, CLS) for ticket pages
 
 ---
 
@@ -210,21 +189,19 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 
 - **Setup (Phase 1)**: No dependencies - start immediately
 - **Foundational (Phase 2)**: Depends on Phase 1 complete - BLOCKS all user stories
-- **User Stories (Phases 3-7)**: All depend on Phase 2 completion
+- **User Stories (Phases 3-6)**: All depend on Phase 2 completion
   - User Story 1 (P1) - MVP priority, no dependencies on other stories
   - User Story 2 (P2) - Can start after Phase 2, may reference US1 components
   - User Story 3 (P2) - Can start after Phase 2, enhances US1 dashboard
-  - User Story 4 (P1) - MVP priority, can start after Phase 2, independent of US1-3
-  - User Story 5 (P3) - Depends on attendee data from US1, should follow US1-4
-- **Polish (Phase 8)**: Depends on desired user stories being complete
+  - User Story 5 (P3) - Depends on attendee data from US1, should follow US1-3
+- **Polish (Phase 7)**: Depends on desired user stories being complete
 
 ### User Story Dependencies
 
 - **US1 (P1) - Multiple Ticket Purchase**: Foundation only → Fully independent
 - **US2 (P2) - Attendee Information**: Foundation only → Independent (extends US1 assignment form)
 - **US3 (P2) - Buyer Dashboard**: Foundation + US1 UI components → Enhances US1
-- **US4 (P1) - Check-in Tracking**: Foundation only → Fully independent (MVP alongside US1)
-- **US5 (P3) - Communications**: Foundation + Attendee data (US1) → Should follow US1
+- **US5 (P3) - Communications**: Foundation + Attendee data (US1) → Should follow US1-3
 
 ### Within Each User Story
 
@@ -250,22 +227,18 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 - T036, T037 (schemas/types) can run in parallel
 - T040, T041, T042, T043 (attendees router) can run in sequence but T040 can start immediately
 
-**User Story 4**:
-- T056, T057 (procedures) can run in parallel
-- T058, T059, T060 (components) can run in parallel after procedures complete
-
 **User Story 5**:
 - T066, T067, T068 (procedures) can run in parallel
 
-**Phase 8 (Polish)**:
-- T071, T072, T073, T074, T075 (documentation) can run in parallel
-- T079-T084 (manual QA) can run in any order after implementation complete
+**Phase 7 (Polish)**:
+- T075, T076, T077, T078, T079 (documentation) can run in parallel
+- T083-T088 (manual QA) can run in any order after implementation complete
 
 **Team Parallel Strategy**:
 Once Phase 2 completes:
 - Developer A: US1 (MVP core)
-- Developer B: US4 (MVP check-in)
-- Developer C: US2 or US3 (enhancements)
+- Developer B: US2 (Custom fields)
+- Developer C: US3 (Buyer dashboard)
 
 ---
 
@@ -293,30 +266,31 @@ Batch 3 (Components - can start with Batch 2):
 
 ## Implementation Strategy
 
-### MVP First (User Stories 1 + 4 Only)
+### MVP First (User Story 1 Only)
 
 **Recommended approach for fastest value delivery**:
 
-1. Complete Phase 1: Setup (T001-T012)
+1. Complete Phase 1: Setup (T001-T008)
 2. Complete Phase 2: Foundational (T013-T017) - CRITICAL
 3. Complete Phase 3: User Story 1 (T018-T035) - Core ticket purchase/assignment
-4. Complete Phase 6: User Story 4 (T056-T065) - Check-in functionality
-5. **STOP and VALIDATE**: Manual QA of ticket purchase → assignment → check-in flow end-to-end
-6. Run Phase 8 validation tasks (T076-T084)
-7. Deploy MVP with US1 + US4
+4. **STOP and VALIDATE**: Manual QA of ticket purchase → assignment flow end-to-end
+5. Run Phase 7 validation tasks (T076-T084)
+6. Deploy MVP with US1
 
-**MVP delivers**: Multi-ticket purchase, individual assignment, unique QR codes, check-in tracking
+**MVP delivers**: Multi-ticket purchase, individual assignment, unique QR codes, email notifications
+
+**Note**: Check-in tracking (original US4) deferred to separate sprint/specification
 
 ### Incremental Delivery (Add Stories Progressively)
 
-After MVP (US1 + US4):
+After MVP (US1):
 
-8. Add Phase 4: User Story 2 (T036-T046) - Custom registration fields
-9. Test independently → Deploy (now supports custom attendee data)
-10. Add Phase 5: User Story 3 (T047-T055) - Enhanced buyer dashboard
-11. Test independently → Deploy (better buyer UX)
-12. Add Phase 7: User Story 5 (T066-T074) - Attendee communications
-13. Test independently → Deploy (complete feature)
+7. Add Phase 4: User Story 2 (T036-T046) - Custom registration fields
+8. Test independently → Deploy (now supports custom attendee data)
+9. Add Phase 5: User Story 3 (T047-T055) - Enhanced buyer dashboard
+10. Test independently → Deploy (better buyer UX)
+11. Add Phase 6: User Story 5 (T066-T074) - Attendee communications
+12. Test independently → Deploy (complete feature without check-in)
 
 **Each increment adds value without breaking previous functionality**
 
@@ -326,13 +300,13 @@ After MVP (US1 + US4):
 
 **Week 2-3** (after foundation complete):
 - **Dev A**: Phase 3 (US1) - T018-T035
-- **Dev B**: Phase 6 (US4) - T056-T065
-- **Dev C**: Phase 4 (US2) - T036-T046
+- **Dev B**: Phase 4 (US2) - T036-T046
+- **Dev C**: Phase 5 (US3) - T047-T055
 
 **Week 4**:
-- **Dev A**: Phase 5 (US3) - T047-T055
-- **Dev B**: Phase 7 (US5) - T066-T074
-- **Dev C**: Phase 8 (Polish) - T075-T095
+- **Dev A**: Phase 6 (US5) - T066-T074
+- **Dev B**: Phase 7 (Polish) - T071-T084
+- **Dev C**: Documentation and final QA
 
 **Integration**: Stories merge independently, no blocking conflicts
 
@@ -342,18 +316,17 @@ After MVP (US1 + US4):
 
 - **Phase 1 (Setup)**: 8 tasks
 - **Phase 2 (Foundational)**: 5 tasks (BLOCKING)
-- **Phase 3 (US1 - P1 MVP)**: 18 tasks
+- **Phase 3 (US1 - P1 MVP)**: 20 tasks (includes T035a, T035b)
 - **Phase 4 (US2 - P2)**: 11 tasks
 - **Phase 5 (US3 - P2)**: 9 tasks
-- **Phase 6 (US4 - P1 MVP)**: 10 tasks
-- **Phase 7 (US5 - P3)**: 9 tasks
-- **Phase 8 (Polish)**: 14 tasks
+- **Phase 6 (US5 - P3)**: 9 tasks
+- **Phase 7 (Polish)**: 14 tasks (T075-T088)
 
-**Total**: 84 tasks
+**Total**: 76 tasks
 
-**MVP Scope** (US1 + US4): 40 tasks (Setup + Foundational + US1 + US4 + minimal Polish)
+**MVP Scope** (US1 only): 32 tasks (Setup + Foundational + US1 + minimal Polish)
 
-**Parallel Opportunities**: 30+ tasks marked [P] can run in parallel
+**Parallel Opportunities**: 25+ tasks marked [P] can run in parallel
 
 ---
 
@@ -362,11 +335,11 @@ After MVP (US1 + US4):
 After implementation, verify these outcomes from spec.md:
 
 - [ ] SC-001: Buyers can purchase multiple tickets (up to configurable limit) and receive confirmation <5s
-- [ ] SC-002: Each ticket has unique QR code scannable by standard readers
+- [ ] SC-002: Each ticket has unique QR code (encoding Ticket.id+eventId) scannable by standard readers
 - [ ] SC-003: Attendees complete assignment + custom fields in <3 minutes
-- [ ] SC-004: Check-in staff scan and validate tickets in <3 seconds
-- [ ] SC-005: System prevents duplicate check-ins with 100% reliability
-- [ ] SC-006: Organizers view real-time metrics updating within 2 seconds
+- [ ] SC-004: Check-in staff scan and validate tickets in <3 seconds (DEFERRED - US4 not in scope)
+- [ ] SC-005: System prevents duplicate check-ins with 100% reliability (DEFERRED - US4 not in scope)
+- [ ] SC-006: Organizers view real-time metrics updating within 2 seconds (DEFERRED - US4 not in scope)
 - [ ] SC-007: 100% of assigned attendees receive emails at individual addresses
 - [ ] SC-008: Ticket reassignments reflect in system within 5 seconds
 - [ ] SC-009: 100% data integrity maintained (no orphaned tickets)
@@ -388,6 +361,7 @@ After implementation, verify these outcomes from spec.md:
 - [Story] label maps to spec.md user stories for traceability
 - Stop at checkpoints to validate story completeness
 - Automated testing excluded; manual QA required for validation
+- User Story 4 (Check-in Tracking) deferred to separate specification/sprint
 
 ---
 
