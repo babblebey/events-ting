@@ -11,7 +11,6 @@ import {
 } from "@/server/api/trpc";
 import {
   createRegistrationSchema,
-  eventIdSchema,
   listRegistrationsSchema,
   exportRegistrationsSchema,
 } from "@/lib/validators";
@@ -19,6 +18,7 @@ import { z } from "zod";
 import { sendEmail } from "@/server/services/email";
 import { RegistrationConfirmation } from "../../../../emails/registration-confirmation";
 import { randomBytes } from "crypto";
+import { generateTicketNumber } from "@/lib/tickets/generate-ticket-number";
 
 /**
  * Generate unique registration code
@@ -174,6 +174,7 @@ export const registrationRouter = createTRPCRouter({
         // Create registration (atomic with lock)
         const registrationCode = generateRegistrationCode();
         const userId = ctx.session?.user?.id;
+        const quantity = 1; // Fixed to 1 ticket per registration for MVP
 
         const registration = await tx.registration.create({
           data: {
@@ -182,19 +183,35 @@ export const registrationRouter = createTRPCRouter({
             email: input.email,
             name: input.name,
             userId,
+            quantity,
             paymentStatus: "free",
-            emailStatus: "active",
-            // Store registration code in customData
-            customData: {
-              ...(input.customData as Record<string, unknown> | undefined),
-              registrationCode,
-            },
           },
         });
 
+        // Create individual ticket instances for this registration
+        const tickets = [];
+        for (let i = 0; i < quantity; i++) {
+          const ticketNumber = generateTicketNumber();
+          const ticket = await tx.ticket.create({
+            data: {
+              registrationId: registration.id,
+              eventId: event.id,
+              ticketTypeId: input.ticketTypeId,
+              ticketNumber,
+              qrCodeData: ticketNumber, // QR code contains the ticket number
+              isAssigned: false,
+              isCheckedIn: false,
+            },
+          });
+          tickets.push(ticket);
+        }
+
+        // Use first ticket number as registration reference (for backward compatibility)
+        const referenceTicketNumber = tickets[0]?.ticketNumber ?? registrationCode;
+
         return {
           registrationId: registration.id,
-          registrationCode,
+          registrationCode: referenceTicketNumber, // Use ticket number as registration code
           eventName: event.name,
           eventSlug: event.slug,
           eventStartDate: event.startDate,
@@ -320,7 +337,6 @@ export const registrationRouter = createTRPCRouter({
           name: reg.name,
           ticketType: reg.ticketType,
           paymentStatus: reg.paymentStatus,
-          emailStatus: reg.emailStatus,
           registeredAt: reg.registeredAt,
         })),
         nextCursor,
@@ -368,11 +384,6 @@ export const registrationRouter = createTRPCRouter({
         ticketType: registration.ticketType,
         paymentStatus: registration.paymentStatus,
         paymentIntentId: registration.paymentIntentId,
-        emailStatus: registration.emailStatus,
-        customData: registration.customData as Record<string, unknown> | null,
-        registrationCode:
-          (registration.customData as { registrationCode?: string })
-            ?.registrationCode ?? "",
         registeredAt: registration.registeredAt,
       };
     }),
@@ -430,27 +441,44 @@ export const registrationRouter = createTRPCRouter({
       }
 
       // Create registration (bypass availability check - organizer override)
-      const registrationCode = generateRegistrationCode();
+      const quantity = 1; // Default to 1 ticket when manually added
 
-      const registration = await ctx.db.registration.create({
-        data: {
-          eventId: input.eventId,
-          ticketTypeId: input.ticketTypeId,
-          email: input.email,
-          name: input.name,
-          paymentStatus: "free",
-          emailStatus: "active",
-          customData: {
-            registrationCode,
-            addedManually: true,
+      const result = await ctx.db.$transaction(async (tx) => {
+        const reg = await tx.registration.create({
+          data: {
+            eventId: input.eventId,
+            ticketTypeId: input.ticketTypeId,
+            email: input.email,
+            name: input.name,
+            quantity,
+            paymentStatus: "free",
           },
-        },
-        include: {
-          ticketType: {
-            select: { name: true },
+          include: {
+            ticketType: {
+              select: { name: true },
+            },
           },
-        },
+        });
+
+        // Create ticket instance for manually added registration
+        const ticketNumber = generateTicketNumber();
+        await tx.ticket.create({
+          data: {
+            registrationId: reg.id,
+            eventId: input.eventId,
+            ticketTypeId: input.ticketTypeId,
+            ticketNumber,
+            qrCodeData: ticketNumber,
+            isAssigned: false,
+            isCheckedIn: false,
+          },
+        });
+
+        return { registration: reg, ticketNumber };
       });
+
+      const registration = result.registration;
+      const registrationCode = result.ticketNumber; // Use ticket number as registration code
 
       // Send confirmation email if requested
       if (input.sendConfirmation) {
@@ -629,6 +657,10 @@ export const registrationRouter = createTRPCRouter({
           ticketType: {
             select: { name: true },
           },
+          tickets: {
+            take: 1,
+            select: { ticketNumber: true },
+          },
         },
       });
 
@@ -648,9 +680,8 @@ export const registrationRouter = createTRPCRouter({
         });
       }
 
-      const registrationCode =
-        (registration.customData as { registrationCode?: string })
-          ?.registrationCode ?? "N/A";
+      // Use first ticket number as registration code for backward compatibility
+      const registrationCode = registration.tickets[0]?.ticketNumber ?? "N/A";
 
       // Send confirmation email
       await sendEmail({
@@ -678,6 +709,7 @@ export const registrationRouter = createTRPCRouter({
 
   /**
    * Update email status (called by webhook)
+   * Note: Email status is now tracked on Attendee model, not Registration
    */
   updateEmailStatus: publicProcedure
     .input(
@@ -687,8 +719,8 @@ export const registrationRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // Update all registrations with matching email
-      const result = await ctx.db.registration.updateMany({
+      // Update all attendees with matching email
+      const result = await ctx.db.attendee.updateMany({
         where: { email: input.email },
         data: { emailStatus: input.status },
       });
@@ -696,5 +728,60 @@ export const registrationRouter = createTRPCRouter({
       return {
         updated: result.count,
       };
+    }),
+
+  /**
+   * Lookup registrations by email for a specific event (public)
+   * Used by buyers to access their ticket management dashboard
+   */
+  lookupByEmail: publicProcedure
+    .input(
+      z.object({
+        eventId: z.string().cuid(),
+        email: z.string().email(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      // Find all registrations for this email and event
+      const registrations = await ctx.db.registration.findMany({
+        where: {
+          eventId: input.eventId,
+          email: input.email,
+        },
+        include: {
+          ticketType: {
+            select: {
+              name: true,
+            },
+          },
+          tickets: {
+            select: {
+              id: true,
+              ticketNumber: true,
+              isAssigned: true,
+              assignedAt: true,
+              attendee: {
+                select: {
+                  name: true,
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          registeredAt: "desc",
+        },
+      });
+
+      return registrations.map((reg) => ({
+        id: reg.id,
+        email: reg.email,
+        name: reg.name,
+        quantity: reg.quantity,
+        ticketType: reg.ticketType,
+        registeredAt: reg.registeredAt,
+        tickets: reg.tickets,
+      }));
     }),
 });

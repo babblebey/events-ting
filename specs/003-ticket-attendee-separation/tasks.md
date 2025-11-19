@@ -80,10 +80,10 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 - [X] T026 [P] [US1] Create TicketCard component in src/components/tickets/ticket-card.tsx
 - [X] T027 [P] [US1] Create QRCodeDisplay component in src/components/tickets/qr-code-display.tsx
 - [X] T028 [P] [US1] Create AssignmentForm component in src/components/tickets/assignment-form.tsx
-- [ ] T029 [US1] Update registration creation logic to create ticket instances in src/app/(public)/events/[slug]/register/page.tsx
-- [ ] T030 [US1] Create buyer registration lookup page (by email) in src/app/(public)/events/[slug]/registrations/page.tsx
-- [ ] T031 [US1] Create individual ticket view page in src/app/(public)/tickets/[ticketId]/page.tsx
-- [ ] T032 [US1] Create ticket assignment page in src/app/(public)/tickets/assign/page.tsx
+- [X] T029 [US1] Update registration creation logic to create ticket instances in src/app/events/[slug]/register/page.tsx
+- [X] T030 [US1] Create buyer registration lookup page (by email) in src/app/events/[slug]/registrations/page.tsx
+- [ ] T031 [US1] Create individual ticket view page in src/app/tickets/[ticketId]/page.tsx
+- [ ] T032 [US1] Create ticket assignment page in src/app/tickets/assign/page.tsx
 - [ ] T033 [US1] Create ticket-assigned email template in emails/ticket-assigned.tsx
 - [ ] T034 [US1] Integrate email sending in tickets.assign procedure in src/server/api/routers/tickets.ts
 - [ ] T035 [US1] Update buyer registration confirmation email to reference ticket assignments in emails/registration-confirmation.tsx
