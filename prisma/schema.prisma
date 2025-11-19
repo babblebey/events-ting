@@ -67,6 +67,7 @@ model User {
     posts         Post[]
     events        Event[] // Events created by this user (organizer)
     registrations Registration[] // Attendee registrations
+    attendees     Attendee[] // Individual attendee records
     
     // Team Collaboration
     teamMemberships  TeamMember[]   @relation("TeamMemberUser")
@@ -117,6 +118,7 @@ model Event {
     // Relations
     ticketTypes      TicketType[]
     registrations    Registration[]
+    tickets  Ticket[]
     scheduleEntries  ScheduleEntry[]
     callForPapers    CallForPapers?
     speakers         Speaker[]
@@ -158,6 +160,7 @@ model TicketType {
     
     // Relations
     registrations Registration[]
+    tickets Ticket[]
     
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
@@ -174,19 +177,125 @@ model Registration {
     ticketTypeId String
     ticketType   TicketType @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
     
-    // Attendee Info
+    // Buyer Info (person who made the purchase)
     email       String
     name        String
     userId      String? // Optional: link to authenticated user
     user        User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+    
+    // Quantity of tickets purchased
+    quantity    Int     @default(1)
     
     // Payment (future-ready fields)
     paymentStatus     String  @default("free") // 'free' | 'pending' | 'paid' | 'failed' | 'refunded'
     paymentIntentId   String? // Stripe/Paystack intent ID
     paymentProcessor  String? // 'stripe' | 'paystack' | null
     
-    // Email Status
+    // Relations
+    tickets Ticket[] // Individual tickets created from this purchase
+    
+    registeredAt DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+    
+    @@index([eventId])
+    @@index([ticketTypeId])
+    @@index([email])
+    @@index([userId])
+    @@index([eventId, ticketTypeId]) // For filtering by event and ticket type
+    @@index([registeredAt]) // For sorting by registration date
+}
+
+model Ticket {
+    id              String   @id @default(cuid())
+    
+    // Link to purchase order (buyer)
+    registrationId  String
+    registration    Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+    
+    // Link to event and ticket type
+    eventId         String
+    event           Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+    
+    ticketTypeId    String
+    ticketType      TicketType @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
+    
+    // Unique ticket identifier (for QR code)
+    ticketNumber    String   @unique // e.g., "EVT-2025-ABC123"
+    qrCodeData      String   @unique // Data to encode in QR code
+    
+    // Assignment status
+    isAssigned      Boolean  @default(false)
+    assignedAt      DateTime?
+    
+    // Link to actual attendee
+    attendeeId      String?  @unique
+    attendee        Attendee? @relation(fields: [attendeeId], references: [id], onDelete: SetNull)
+    
+    // Check-in tracking
+    isCheckedIn     Boolean  @default(false)
+    checkedInAt     DateTime?
+    checkedInBy     String?  // Staff member or device ID
+    
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+    
+    @@index([registrationId])
+    @@index([eventId])
+    @@index([ticketTypeId])
+    @@index([attendeeId])
+    @@index([eventId, isCheckedIn]) // For check-in metrics
+    @@index([eventId, isAssigned]) // For tracking assignment status
+    @@index([ticketNumber]) // For quick lookup during check-in
+}
+
+model Attendee {
+    id          String   @id @default(cuid())
+    
+    // Personal information
+    name        String
+    email       String
+    
+    // Custom registration form responses
+    customData  Json? // Stores answers to event-specific questions
+    
+    // Email delivery status
     emailStatus String  @default("active") // 'active' | 'bounced' | 'unsubscribed'
+    
+    // Link to ticket
+    ticket Ticket?
+    
+    // Optional link to user account
+    userId      String?
+    user        User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+    
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    
+    @@index([email])
+    @@index([userId])
+    @@index([emailStatus]) // For filtering active recipients
+}
+
+// Legacy support - keeping for backward compatibility during migration
+// TODO: Remove after data migration to new Ticket/Attendee model
+model LegacyRegistration {
+    id          String   @id @default(cuid())
+    eventId     String
+    
+    ticketTypeId String
+    
+    // Attendee Info (this was mixed buyer/attendee data)
+    email       String
+    name        String
+    userId      String?
+    
+    // Payment
+    paymentStatus     String  @default("free")
+    paymentIntentId   String?
+    paymentProcessor  String?
+    
+    // Email Status
+    emailStatus String  @default("active")
     
     // Custom Fields
     customData  Json?
@@ -197,10 +306,6 @@ model Registration {
     @@index([eventId])
     @@index([ticketTypeId])
     @@index([email])
-    @@index([userId])
-    @@index([eventId, ticketTypeId]) // For filtering by event and ticket type
-    @@index([eventId, emailStatus]) // For filtering active recipients
-    @@index([registeredAt]) // For sorting by registration date
 }
 
 model ScheduleEntry {
