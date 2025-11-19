@@ -5,6 +5,7 @@
  */
 
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -157,6 +158,112 @@ export const ticketsRouter = createTRPCRouter({
       return {
         tickets: transformedTickets,
         nextCursor,
+      };
+    }),
+
+  /**
+   * Get ticket by ID
+   * Public procedure - anyone with ticket ID can view
+   */
+  getById: publicProcedure
+    .input(z.object({ ticketId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { ticketId } = input;
+
+      // Fetch ticket with all relations
+      const ticket = await ctx.db.ticket.findUnique({
+        where: { id: ticketId },
+        include: {
+          event: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              startDate: true,
+              endDate: true,
+              locationType: true,
+              locationAddress: true,
+              timezone: true,
+            },
+          },
+          ticketType: {
+            select: {
+              id: true,
+              name: true,
+              description: true,
+              price: true,
+            },
+          },
+          attendee: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              customData: true,
+            },
+          },
+          registration: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            },
+          },
+        },
+      });
+
+      if (!ticket) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Ticket not found",
+        });
+      }
+
+      // Transform to output format
+      return {
+        id: ticket.id,
+        ticketNumber: ticket.ticketNumber,
+        qrCodeData: ticket.qrCodeData,
+        isAssigned: ticket.isAssigned,
+        assignedAt: ticket.assignedAt,
+        isCheckedIn: ticket.isCheckedIn,
+        checkedInAt: ticket.checkedInAt,
+        checkedInBy: ticket.checkedInBy,
+        event: {
+          id: ticket.event.id,
+          name: ticket.event.name,
+          slug: ticket.event.slug,
+          startDate: ticket.event.startDate,
+          endDate: ticket.event.endDate,
+          locationType: ticket.event.locationType,
+          locationAddress: ticket.event.locationAddress,
+          timezone: ticket.event.timezone,
+        },
+        ticketType: {
+          id: ticket.ticketType.id,
+          name: ticket.ticketType.name,
+          description: ticket.ticketType.description,
+          price: ticket.ticketType.price.toNumber(),
+        },
+        attendee: ticket.attendee
+          ? {
+              id: ticket.attendee.id,
+              name: ticket.attendee.name,
+              email: ticket.attendee.email,
+              customData: ticket.attendee.customData as Record<
+                string,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                any
+              > | null,
+            }
+          : null,
+        registration: {
+          id: ticket.registration.id,
+          email: ticket.registration.email,
+          name: ticket.registration.name,
+        },
+        createdAt: ticket.createdAt,
+        updatedAt: ticket.updatedAt,
       };
     }),
 
