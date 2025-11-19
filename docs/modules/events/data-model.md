@@ -104,60 +104,77 @@ The `customFields` field stores an array of field definitions that attendees mus
 
 ```typescript
 interface CustomFieldDefinition {
-  id: string;              // Unique identifier (e.g., "dietary", "tshirt")
+  id: string;              // Unique identifier (e.g., "dietary_restrictions", "tshirt_size")
   label: string;           // Display label (e.g., "Dietary Restrictions")
   type: 'text' | 'textarea' | 'select' | 'checkbox' | 'radio';
   required: boolean;       // Whether response is mandatory
-  placeholder?: string;    // Placeholder text (for text/textarea)
-  options?: string[];      // Options array (for select/radio/checkbox)
-  pattern?: string;        // Validation regex pattern (for text/textarea)
-  minLength?: number;      // Minimum length (for text/textarea)
-  maxLength?: number;      // Maximum length (for text/textarea)
-  minSelections?: number;  // Minimum selections (for checkbox)
-  maxSelections?: number;  // Maximum selections (for checkbox)
-  helpText?: string;       // Help text displayed below field
+  placeholder?: string;    // Placeholder text (for text/textarea only)
+  options?: string[];      // Options array (required for select/radio/checkbox)
 }
 ```
+
+**Validation Rules**:
+- Field `id` must be unique within the array, alphanumeric + underscore only
+- Field `options` is required for select/radio/checkbox types (min 1 option)
+- Field `options` is not allowed for text/textarea types
+- Field `placeholder` is only valid for text/textarea types
 
 **Example Configuration**:
 ```json
 [
   {
-    "id": "dietary",
+    "id": "dietary_restrictions",
     "label": "Dietary Restrictions",
     "type": "select",
     "required": false,
-    "options": ["None", "Vegetarian", "Vegan", "Gluten-Free", "Other"],
-    "helpText": "Let us know if you have any dietary requirements"
+    "options": ["None", "Vegetarian", "Vegan", "Gluten-Free", "Halal", "Kosher"]
   },
   {
-    "id": "tshirt",
+    "id": "tshirt_size",
     "label": "T-Shirt Size",
     "type": "select",
     "required": true,
     "options": ["XS", "S", "M", "L", "XL", "XXL"]
   },
   {
-    "id": "accessibility",
-    "label": "Accessibility Needs",
+    "id": "accessibility_needs",
+    "label": "Accessibility Requirements",
     "type": "textarea",
     "required": false,
-    "maxLength": 500,
-    "helpText": "Please describe any accessibility accommodations you need"
+    "placeholder": "Please describe any accessibility requirements"
   },
   {
-    "id": "sessionPreferences",
+    "id": "session_interests",
     "label": "Session Interests",
     "type": "checkbox",
     "required": false,
-    "options": ["Web Development", "AI/ML", "DevOps", "Mobile", "Security"],
-    "minSelections": 1,
-    "maxSelections": 3
+    "options": ["Web Development", "Mobile Development", "AI/ML", "DevOps", "Security"]
+  },
+  {
+    "id": "experience_level",
+    "label": "Experience Level",
+    "type": "radio",
+    "required": true,
+    "options": ["Beginner", "Intermediate", "Advanced", "Expert"]
   }
 ]
 ```
 
-**Usage**: Custom field responses are collected during ticket assignment and stored in `Attendee.customData`. The system validates responses against these definitions before saving.
+**Usage**: 
+- **Event.customFields**: Stores the field definitions (what questions to ask)
+- **Attendee.customData**: Stores the actual responses from each attendee
+- Example response stored in `Attendee.customData`:
+  ```json
+  {
+    "dietary_restrictions": "Vegan",
+    "tshirt_size": "M",
+    "accessibility_needs": "Wheelchair access needed",
+    "session_interests": ["Web Development", "AI/ML"],
+    "experience_level": "Intermediate"
+  }
+  ```
+- The system validates attendee responses against the field definitions before saving
+- Field IDs should remain stable; changing a field ID will orphan existing response data
 
 ### Audit Fields
 

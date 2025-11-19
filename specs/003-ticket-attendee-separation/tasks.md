@@ -110,9 +110,9 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 - [X] T041 [US2] Implement attendees.list procedure in src/server/api/routers/attendees.ts
 - [X] T042 [US2] Implement attendees.getById procedure in src/server/api/routers/attendees.ts
 - [X] T043 [US2] Implement attendees.getCustomFieldResponses procedure in src/server/api/routers/attendees.ts
-- [ ] T044 [US2] Create event settings page for custom field configuration in src/app/(dashboard)/events/[eventId]/settings/registration/page.tsx
-- [ ] T045 [US2] Create CustomFieldBuilder component in src/components/events/custom-field-builder.tsx
-- [ ] T046 [US2] Create attendee detail view showing custom responses in src/app/(dashboard)/events/[eventId]/attendees/[attendeeId]/page.tsx
+- [X] T044 [US2] Create event settings page for custom field configuration in src/app/(dashboard)/events/[eventId]/settings/registration/page.tsx
+- [X] T045 [US2] Create CustomFieldBuilder component in src/components/events/custom-field-builder.tsx
+- [X] T046 [US2] Create attendee detail view showing custom responses in src/app/(dashboard)/events/[eventId]/attendees/[attendeeId]/page.tsx
 
 **Checkpoint**: User Story 2 complete - organizers can create custom registration questions and view attendee responses
 

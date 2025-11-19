@@ -41,13 +41,13 @@ export function AssignmentForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [emailWarning, setEmailWarning] = useState<string | null>(null);
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+   
   const assignMutation = api.tickets.assign.useMutation({
     onSuccess: (data) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+       
       if (onSuccess && data?.attendee?.id) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        onSuccess(data.attendee.id as string);
+         
+        onSuccess(data.attendee.id);
       }
     },
     onError: (error: TRPCClientErrorLike<AppRouter>) => {
@@ -169,7 +169,7 @@ export function AssignmentForm({
     const sanitizedCustomData = sanitizeCustomFieldResponses(customData);
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+       
       await assignMutation.mutateAsync({
         ticketId,
         attendee: {
@@ -507,7 +507,7 @@ export function AssignmentForm({
             type="button"
             color="gray"
             onClick={onCancel}
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+             
             disabled={assignMutation.isPending}
             className="flex-1"
           >
@@ -516,11 +516,11 @@ export function AssignmentForm({
         )}
         <Button
           type="submit"
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+           
           disabled={assignMutation.isPending}
           className="flex-1"
         >
-          {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access */}
+          { }
           {assignMutation.isPending ? "Assigning..." : "Assign Ticket"}
         </Button>
       </div>
