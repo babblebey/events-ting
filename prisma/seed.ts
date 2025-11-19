@@ -168,7 +168,7 @@ async function main() {
   });
 
   // TypeScript Summit Ticket
-  const tsSummitEarlyBird = await prisma.ticketType.create({
+  const _tsSummitEarlyBird = await prisma.ticketType.create({
     data: {
       eventId: tsSummit.id,
       name: "Early Bird",
@@ -369,7 +369,7 @@ async function main() {
     },
   });
 
-  const lunchBreak = await prisma.scheduleEntry.create({
+  const _lunchBreak = await prisma.scheduleEntry.create({
     data: {
       eventId: nextjsConf.id,
       title: "Lunch & Networking",
@@ -494,7 +494,7 @@ Submit your proposal by the deadline. We'll review all submissions and notify yo
   // Create CFP Submissions
   console.log("📄 Creating CFP submissions...");
 
-  const submission1 = await prisma.cfpSubmission.create({
+  const _submission1 = await prisma.cfpSubmission.create({
     data: {
       eventId: nextjsConf.id,
       cfpId: nextjsCfp.id,
@@ -517,7 +517,7 @@ Submit your proposal by the deadline. We'll review all submissions and notify yo
     },
   });
 
-  const submission2 = await prisma.cfpSubmission.create({
+  const _submission2 = await prisma.cfpSubmission.create({
     data: {
       eventId: nextjsConf.id,
       cfpId: nextjsCfp.id,
@@ -544,7 +544,7 @@ Submit your proposal by the deadline. We'll review all submissions and notify yo
     },
   });
 
-  const submission3 = await prisma.cfpSubmission.create({
+  const _submission3 = await prisma.cfpSubmission.create({
     data: {
       eventId: nextjsConf.id,
       cfpId: nextjsCfp.id,
@@ -573,7 +573,7 @@ Submit your proposal by the deadline. We'll review all submissions and notify yo
   // Create Email Campaigns
   console.log("📧 Creating email campaigns...");
 
-  const welcomeCampaign = await prisma.emailCampaign.create({
+  const _welcomeCampaign = await prisma.emailCampaign.create({
     data: {
       eventId: nextjsConf.id,
       subject: "Welcome to Next.js Conf 2025! 🎉",
@@ -608,7 +608,7 @@ The Next.js Conf Team`,
     },
   });
 
-  const reminderCampaign = await prisma.emailCampaign.create({
+  const _reminderCampaign = await prisma.emailCampaign.create({
     data: {
       eventId: nextjsConf.id,
       subject: "Next.js Conf 2025 - One Week Away! ⏰",
@@ -651,7 +651,7 @@ The Next.js Conf Team`,
     },
   });
 
-  const vipCampaign = await prisma.emailCampaign.create({
+  const _vipCampaign = await prisma.emailCampaign.create({
     data: {
       eventId: nextjsConf.id,
       subject: "VIP Experience at Next.js Conf 2025 ⭐",

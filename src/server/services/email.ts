@@ -154,7 +154,7 @@ export async function sendBatchEmails(
 
           // Mark all emails in batch as failed
           results.push(
-            ...batch.map((to) => ({
+            ...batch.map((_to) => ({
               id: "",
               success: false,
               error: batchResult.error?.message,
@@ -165,7 +165,7 @@ export async function sendBatchEmails(
 
         // Mark all emails in batch as successful
         results.push(
-          ...batch.map((to, index) => ({
+          ...batch.map((_to, index) => ({
             id:
               (batchResult.data as unknown as Array<{ id: string }>)?.[index]
                 ?.id ?? "",

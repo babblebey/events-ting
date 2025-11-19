@@ -208,7 +208,6 @@ export const scheduleRouter = createTRPCRouter({
       const {
         id,
         updatedAt,
-        eventId,
         title,
         description,
         date,

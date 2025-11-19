@@ -27,7 +27,7 @@ export default async function SpeakersPage({ params }: SpeakersPageProps) {
   let speakers;
   try {
     speakers = await api.speaker.getByEvent({ eventId: event.id });
-  } catch (error) {
+  } catch {
     return (
       <div className="container mx-auto px-4 py-12">
         <Alert color="failure" icon={LuCircleAlert}>

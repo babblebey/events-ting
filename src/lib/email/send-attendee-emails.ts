@@ -6,7 +6,9 @@
 
 import { sendBatchEmailsWithRetry, type EmailResult } from "@/server/services/email";
 import type { ReactElement } from "react";
-import type { PrismaClient } from "@prisma/client";
+import type { db } from "@/server/db";
+
+type DbType = typeof db;
 
 /**
  * Attendee email filter options
@@ -44,7 +46,7 @@ export interface AttendeeEmailResult {
  * Fetch attendees matching filter criteria
  */
 async function fetchAttendees(
-  db: PrismaClient,
+  db: DbType,
   filter: AttendeeEmailFilter,
 ): Promise<Array<{ email: string; name: string }>> {
   const where = {
@@ -99,7 +101,7 @@ async function fetchAttendees(
  * ```
  */
 export async function sendAttendeeEmails(
-  db: PrismaClient,
+  db: DbType,
   options: AttendeeEmailOptions,
 ): Promise<AttendeeEmailResult> {
   // Fetch attendees matching filter
@@ -158,7 +160,7 @@ export async function sendAttendeeEmails(
  * @returns Result with counts and individual email results
  */
 export async function sendToAllActiveAttendees(
-  db: PrismaClient,
+  db: DbType,
   eventId: string,
   subject: string,
   emailContent: { html?: string; react?: ReactElement },
@@ -188,7 +190,7 @@ export async function sendToAllActiveAttendees(
  * @returns Result with counts and individual email results
  */
 export async function sendToTicketType(
-  db: PrismaClient,
+  db: DbType,
   eventId: string,
   ticketTypeId: string,
   subject: string,
@@ -219,7 +221,7 @@ export async function sendToTicketType(
  * @returns Validation result with error message if validation fails
  */
 export async function validateEmailCampaign(
-  db: PrismaClient,
+  db: DbType,
   eventId: string,
 ): Promise<{ valid: boolean; error?: string; attendeeCount: number }> {
   // Check if event exists
@@ -277,7 +279,7 @@ export async function validateEmailCampaign(
  * @returns Count of matching attendees
  */
 export async function getAttendeeEmailCount(
-  db: PrismaClient,
+  db: DbType,
   filter: AttendeeEmailFilter,
 ): Promise<number> {
   const where = {

@@ -59,7 +59,7 @@ export async function createAuditLog(
         userEmail: entry.userEmail,
         eventId: entry.eventId,
         metadata: entry.metadata
-          ? JSON.parse(JSON.stringify(entry.metadata))
+          ? (JSON.parse(JSON.stringify(entry.metadata)) as Record<string, unknown>)
           : undefined,
         ipAddress: entry.ipAddress,
         userAgent: entry.userAgent,

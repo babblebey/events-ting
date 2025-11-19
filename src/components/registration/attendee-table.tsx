@@ -41,7 +41,7 @@ export function AttendeeTable({
   const debouncedSearch = useDebounce(search, 500);
 
   // Fetch registrations with filters
-  const { data, isLoading, fetchNextPage, hasNextPage, refetch: _refetch } =
+  const { data, isLoading, fetchNextPage, hasNextPage } =
     api.registration.list.useInfiniteQuery(
       {
         eventId,
@@ -209,13 +209,17 @@ export function AttendeeTable({
                     {getPaymentStatusBadge(registration.paymentStatus)}
                   </TableCell>
                   <TableCell>
-                    {getEmailStatusBadge(registration.emailStatus)}
+                    {getEmailStatusBadge(registration.emailStatus as string)}
                   </TableCell>
                   <TableCell>
                     {new Intl.DateTimeFormat("en-US", {
                       dateStyle: "medium",
                       timeStyle: "short",
-                    }).format(new Date(registration.registeredAt))}
+                    }).format(
+                      registration.registeredAt instanceof Date
+                        ? registration.registeredAt
+                        : new Date(registration.registeredAt)
+                    )}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">

@@ -9,7 +9,7 @@ import { api } from "@/trpc/server";
 import { Button, Card } from "flowbite-react";
 import { HiOutlineUsers } from "react-icons/hi2";
 import { IoSettingsOutline } from "react-icons/io5";
-import { formatDate, formatDateRange } from "@/lib/utils/date";
+import { formatDateRange } from "@/lib/utils/date";
 import {
   EventMetrics,
   EventMetricsSkeleton,

@@ -137,7 +137,7 @@ export const userRouter = createTRPCRouter({
           .describe("Must type 'DELETE' to confirm"),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx }) => {
       // Check if user has active events
       const activeEvents = await ctx.db.event.count({
         where: {

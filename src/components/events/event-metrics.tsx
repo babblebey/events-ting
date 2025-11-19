@@ -173,7 +173,7 @@ function MetricCard({ metric }: { metric: Metric }) {
 export function EventMetricsSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-      {[...Array(5)].map((_, i) => (
+      {[...Array<undefined>(5)].map((_, i) => (
         <Card key={i} className="animate-pulse">
           <div className="flex items-start justify-between">
             <div className="flex-1 space-y-2">

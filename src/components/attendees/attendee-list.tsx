@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+
 /**
  * AttendeeList Component
  * Displays attendees (assigned tickets) with email status filtering
@@ -53,7 +55,7 @@ export function AttendeeList({ eventId }: AttendeeListProps) {
 
   // Export mutation
   const exportMutation = api.attendees.exportList.useMutation({
-    onSuccess: (data) => {
+    onSuccess: (data: { csv: string; filename: string }) => {
       // Create a blob and download the CSV
       const blob = new Blob([data.csv], { type: "text/csv" });
       const url = window.URL.createObjectURL(blob);
@@ -142,10 +144,10 @@ export function AttendeeList({ eventId }: AttendeeListProps) {
           <Button
             color="gray"
             onClick={handleExport}
-            disabled={exportMutation.isPending}
+            disabled={exportMutation.status === "pending"}
           >
             <HiDownload className="mr-2 h-5 w-5" />
-            {exportMutation.isPending ? "Exporting..." : "Export CSV"}
+            {exportMutation.status === "pending" ? "Exporting..." : "Export CSV"}
           </Button>
 
           <Link href={`/${eventId}/communications`}>

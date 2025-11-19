@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+
 /**
  * Attendee Export Form Component
  * Form with export options for attendee CSV export
@@ -29,7 +31,7 @@ export function AttendeeExportForm({
 
   // Export mutation
   const exportMutation = api.attendees.exportList.useMutation({
-    onSuccess: (data) => {
+    onSuccess: (data: { csv: string; filename: string }) => {
       // Create a blob and download the CSV
       const blob = new Blob([data.csv], { type: "text/csv;charset=utf-8;" });
       const url = window.URL.createObjectURL(blob);
@@ -196,14 +198,14 @@ export function AttendeeExportForm({
       </Card>
 
       {/* Export Success/Error Messages */}
-      {exportMutation.isSuccess && (
+      {exportMutation.status === "success" && (
         <Alert color="success" icon={HiInformationCircle}>
           <span className="font-medium">Export successful!</span> Your CSV file
           has been downloaded. Check your Downloads folder.
         </Alert>
       )}
 
-      {exportMutation.isError && (
+      {exportMutation.status === "error" && (
         <Alert color="failure" icon={HiInformationCircle}>
           <span className="font-medium">Export failed!</span>{" "}
           {exportMutation.error.message}
@@ -216,10 +218,10 @@ export function AttendeeExportForm({
           color="blue"
           size="lg"
           onClick={handleExport}
-          disabled={exportMutation.isPending || totalAttendees === 0}
+          disabled={exportMutation.status === "pending" || totalAttendees === 0}
         >
           <HiDownload className="mr-2 h-5 w-5" />
-          {exportMutation.isPending
+          {exportMutation.status === "pending"
             ? "Exporting..."
             : `Export ${totalAttendees === 0 ? "Attendees" : `${totalAttendees.toLocaleString()} Attendee${totalAttendees === 1 ? "" : "s"}`}`}
         </Button>

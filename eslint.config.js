@@ -7,7 +7,7 @@ const compat = new FlatCompat({
 
 export default tseslint.config(
   {
-    ignores: [".next", "generated"],
+    ignores: [".next", "generated", ".flowbite-react", "next-env.d.ts"],
   },
   ...compat.extends("next/core-web-vitals"),
   {
@@ -43,6 +43,21 @@ export default tseslint.config(
       parserOptions: {
         projectService: true,
       },
+    },
+  },
+  {
+    files: ["prisma/seed.ts"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+    },
+  },
+  {
+    files: ["postcss.config.js", "prettier.config.js"],
+    rules: {
+      "import/no-anonymous-default-export": "off",
     },
   },
 );

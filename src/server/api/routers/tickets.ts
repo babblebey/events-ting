@@ -458,7 +458,6 @@ export const ticketsRouter = createTRPCRouter({
 
       // Verify user is buyer or event organizer
       const isBuyer = ticket.registration.userId === ctx.session.user.id;
-      let isOrganizer = false;
 
       if (!isBuyer) {
         try {
@@ -468,7 +467,6 @@ export const ticketsRouter = createTRPCRouter({
             userId: ctx.session.user.id,
             requiredModule: "TICKETS",
           });
-          // isOrganizer = true; // Unused variable
         } catch {
           throw new TRPCError({
             code: "FORBIDDEN",

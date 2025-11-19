@@ -322,9 +322,9 @@ export function ValidationStep({
           <Button
             color="blue"
             onClick={handleNext}
-            disabled={!canProceed || validateImport.isPending}
+            disabled={!canProceed ?? validateImport.isPending}
           >
-            Import {validationResult?.validRows || 0} Attendees
+            Import {validationResult?.validRows ?? 0} Attendees
           </Button>
         </div>
       </div>

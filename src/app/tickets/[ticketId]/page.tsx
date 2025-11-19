@@ -306,21 +306,28 @@ export default function IndividualTicketViewPage() {
             </div>
 
             {/* Check-in Information */}
-            {ticket.isCheckedIn && ticket.checkedInAt && (
-              <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
-                <div className="flex items-center gap-2">
-                  <HiCheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  <div>
-                    <p className="font-semibold text-green-900 dark:text-green-300">
-                      Checked In
-                    </p>
-                    <p className="text-sm text-green-700 dark:text-green-400">
-                      {formatDate(ticket.checkedInAt, timezone, "PPp")}
-                    </p>
+            {ticket.isCheckedIn && ticket.checkedInAt && (() => {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              const checkedInDate = ticket.checkedInAt instanceof Date
+                ? ticket.checkedInAt
+                : new Date(String(ticket.checkedInAt));
+              return (
+                <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
+                  <div className="flex items-center gap-2">
+                    <HiCheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    <div>
+                      <p className="font-semibold text-green-900 dark:text-green-300">
+                        Checked In
+                      </p>
+                      <p className="text-sm text-green-700 dark:text-green-400">
+                        {/* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */}
+                        {formatDate(checkedInDate, timezone, "PPp")}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
           </Card>
         </div>
 
