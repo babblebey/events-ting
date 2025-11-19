@@ -6,14 +6,15 @@
  */
 
 import { useState } from "react";
-import { Button, Label, TextInput, Textarea, Checkbox } from "flowbite-react";
+import { Button, Label, TextInput, Textarea, Checkbox, Alert } from "flowbite-react";
 import { FormField, FormError } from "@/components/ui/form-field";
 import { api } from "@/trpc/react";
-import { HiCheckCircle, HiExclamationCircle } from "react-icons/hi";
+import { HiCheckCircle, HiExclamationCircle, HiClock } from "react-icons/hi";
 import type { TRPCClientErrorLike } from "@trpc/client";
 import type { AppRouter } from "@/server/api/root";
 import type { CustomFieldDefinition, CustomFieldValue } from "@/lib/validators";
 import { sanitizeCustomFieldResponses } from "@/lib/validators";
+import { formatDate } from "@/lib/utils/date";
 
 interface AssignmentFormProps {
   ticketId: string;
@@ -21,6 +22,10 @@ interface AssignmentFormProps {
   expectedUpdatedAt: Date;
   customFields?: CustomFieldDefinition[];
   eventName?: string;
+  eventStartDate?: Date;
+  assignmentCutoffType?: string;
+  assignmentCutoffTime?: Date | null;
+  timezone?: string;
   onSuccess?: (attendeeId: string) => void;
   onCancel?: () => void;
 }
@@ -31,6 +36,10 @@ export function AssignmentForm({
   expectedUpdatedAt,
   customFields = [],
   eventName,
+  eventStartDate,
+  assignmentCutoffType,
+  assignmentCutoffTime,
+  timezone = "UTC",
   onSuccess,
   onCancel,
 }: AssignmentFormProps) {
@@ -40,6 +49,43 @@ export function AssignmentForm({
   const [buyerConsent, setBuyerConsent] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [emailWarning, setEmailWarning] = useState<string | null>(null);
+
+  // Calculate assignment cutoff time for display
+  const getAssignmentCutoffDisplay = (): { date: Date; label: string } | null => {
+    if (!eventStartDate) return null;
+
+    switch (assignmentCutoffType) {
+      case "event_start":
+        return {
+          date: eventStartDate,
+          label: "Event start time",
+        };
+      case "1h_before":
+        return {
+          date: new Date(eventStartDate.getTime() - 60 * 60 * 1000),
+          label: "1 hour before event",
+        };
+      case "24h_before":
+        return {
+          date: new Date(eventStartDate.getTime() - 24 * 60 * 60 * 1000),
+          label: "24 hours before event",
+        };
+      case "custom":
+        return assignmentCutoffTime
+          ? {
+              date: assignmentCutoffTime,
+              label: "Custom deadline",
+            }
+          : null;
+      default:
+        return {
+          date: eventStartDate,
+          label: "Event start time",
+        };
+    }
+  };
+
+  const cutoffDisplay = getAssignmentCutoffDisplay();
 
    
   const assignMutation = api.tickets.assign.useMutation({
@@ -392,6 +438,26 @@ export function AssignmentForm({
           Ticket Number: <span className="font-mono">{ticketNumber}</span>
         </p>
       </div>
+
+      {/* Assignment Cutoff Time Display (UI only, no validation) */}
+      {cutoffDisplay && (
+        <Alert color="info" icon={HiClock}>
+          <div className="text-sm">
+            <p className="font-medium">Assignment Deadline</p>
+            <p className="mt-1">
+              You can assign or reassign this ticket until{" "}
+              <strong>
+                {formatDate(cutoffDisplay.date, timezone, "PPp")}
+              </strong>{" "}
+              ({cutoffDisplay.label})
+            </p>
+            <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+              Note: Cutoff enforcement will be added in a future update. For now,
+              this is informational only.
+            </p>
+          </div>
+        </Alert>
+      )}
 
       {/* General Errors */}
       {errors.general && <FormError message={errors.general} />}

@@ -784,4 +784,73 @@ export const registrationRouter = createTRPCRouter({
         tickets: reg.tickets,
       }));
     }),
+
+  /**
+   * Get registration by ID (public - for buyer self-service)
+   * Allows buyers to access their registration details via direct link
+   */
+  getByIdPublic: publicProcedure
+    .input(z.object({ id: z.string().cuid() }))
+    .query(async ({ ctx, input }) => {
+      const registration = await ctx.db.registration.findUnique({
+        where: { id: input.id },
+        include: {
+          event: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              startDate: true,
+              endDate: true,
+              timezone: true,
+              assignmentCutoffType: true,
+              assignmentCutoffTime: true,
+            },
+          },
+          ticketType: {
+            select: {
+              id: true,
+              name: true,
+              price: true,
+            },
+          },
+          tickets: {
+            select: {
+              id: true,
+              ticketNumber: true,
+              isAssigned: true,
+              assignedAt: true,
+              isCheckedIn: true,
+              checkedInAt: true,
+              attendee: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!registration) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Registration not found",
+        });
+      }
+
+      return {
+        id: registration.id,
+        name: registration.name,
+        email: registration.email,
+        quantity: registration.quantity,
+        paymentStatus: registration.paymentStatus,
+        registeredAt: registration.registeredAt,
+        event: registration.event,
+        ticketType: registration.ticketType,
+        tickets: registration.tickets,
+      };
+    }),
 });

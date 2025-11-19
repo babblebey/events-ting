@@ -126,12 +126,12 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 
 ### Implementation for User Story 3
 
-- [ ] T047 [P] [US3] Create TicketList component with assignment status in src/components/tickets/ticket-list.tsx
-- [ ] T048 [P] [US3] Create RegistrationSummary component showing all tickets in src/components/tickets/registration-summary.tsx
-- [ ] T049 [US3] Add filtering and search to registration management page in src/app/(public)/events/[slug]/registrations/[registrationId]/page.tsx
-- [ ] T050 [US3] Create ticket reassignment modal component in src/components/tickets/reassignment-modal.tsx
-- [ ] T051 [US3] Add cutoff time display (UI only, no validation) to AssignmentForm in src/components/tickets/assignment-form.tsx (TODO: Add cutoff enforcement validation in future sprint)
-- [ ] T052 [US3] Create ticket-reassigned email template in emails/ticket-reassigned.tsx
+- [X] T047 [P] [US3] Create TicketList component with assignment status in src/components/tickets/ticket-list.tsx
+- [X] T048 [P] [US3] Create RegistrationSummary component showing all tickets in src/components/tickets/registration-summary.tsx
+- [X] T049 [US3] Add filtering and search to registration management page in src/app/(public)/events/[slug]/registrations/[registrationId]/page.tsx
+- [X] T050 [US3] Create ticket reassignment modal component in src/components/tickets/reassignment-modal.tsx
+- [X] T051 [US3] Add cutoff time display (UI only, no validation) to AssignmentForm in src/components/tickets/assignment-form.tsx (TODO: Add cutoff enforcement validation in future sprint)
+- [X] T052 [US3] Create ticket-reassigned email template in emails/ticket-reassigned.tsx
 - [ ] T053 [US3] Add email notification for reassignments in tickets.assign procedure in src/server/api/routers/tickets.ts
 - [ ] T054 [US3] Implement registration management page accessible via email link in src/app/(public)/events/[slug]/registrations/[registrationId]/page.tsx
 - [ ] T055 [US3] Add unassigned ticket warning/reminder UI in src/components/tickets/unassigned-reminder.tsx
