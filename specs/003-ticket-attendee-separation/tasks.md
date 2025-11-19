@@ -166,11 +166,11 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 
 **Purpose**: Quality improvements, documentation, and final validation
 
-- [ ] T075 [P] Add database indexes for ticket lookup performance (ticketNumber, eventId+isCheckedIn) in prisma/schema.prisma
-- [ ] T076 [P] Create ticket management documentation in docs/modules/tickets/
-- [ ] T077 [P] Create attendee management documentation in docs/modules/attendees/
-- [ ] T078 [P] Update API documentation with new routers in docs/api/routers.md
-- [ ] T079 [P] Add error handling documentation in docs/api/error-handling.md
+- [X] T075 [P] Add database indexes for ticket lookup performance (ticketNumber, eventId+isCheckedIn) in prisma/schema.prisma
+- [X] T076 [P] Create ticket management documentation in docs/modules/tickets/
+- [X] T077 [P] Create attendee management documentation in docs/modules/attendees/
+- [X] T078 [P] Update API documentation with new routers in docs/api/routers.md
+- [X] T079 [P] Add error handling documentation in docs/api/error-handling.md
 - [ ] T080 Run ESLint and Prettier checks: `pnpm run check`
 - [ ] T081 Fix any linting or type errors identified
 - [ ] T082 Validate all email templates using script: `pnpm run validate:emails`

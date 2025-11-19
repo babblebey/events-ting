@@ -251,9 +251,10 @@ model Ticket {
   @@index([eventId])
   @@index([ticketTypeId])
   @@index([attendeeId])
-  @@index([eventId, isCheckedIn]) // For check-in metrics
+  @@index([ticketNumber]) // For quick lookup during check-in (unique constraint already provides index)
+  @@index([eventId, isCheckedIn]) // For check-in metrics and filtering
   @@index([eventId, isAssigned]) // For tracking assignment status
-  @@index([ticketNumber]) // For quick lookup during check-in
+  @@index([qrCodeData]) // For QR code validation lookups
 }
 
 model Attendee {

@@ -4,7 +4,7 @@
 
 This document provides a comprehensive reference of all tRPC routers and their procedures in the Events-Ting platform. Each router is organized by domain feature.
 
-**Total Routers**: 9  
+**Total Routers**: 11  
 **Location**: `src/server/api/routers/`
 
 **Note**: The Dashboard module primarily uses the existing `event.list` procedure with organizer filtering. No separate dashboard router is needed for the MVP.
@@ -16,8 +16,10 @@ This document provides a comprehensive reference of all tRPC routers and their p
 | Router | File | Procedures | Auth | Purpose |
 |--------|------|------------|------|---------|
 | **event** | `event.ts` | 10 | Mixed | Event CRUD, publishing, archival |
-| **ticket** | `ticket.ts` | 6 | Protected | Ticket type management |
-| **registration** | `registration.ts` | 7 | Mixed | Registration & attendee management |
+| **ticket** | `ticket.ts` | 6 | Protected | Ticket type management (legacy) |
+| **tickets** | `tickets.ts` | 7 | Mixed | Ticket instance assignment & QR codes |
+| **attendees** | `attendees.ts` | 6 | Mixed | Attendee management & communications |
+| **registration** | `registration.ts` | 7 | Mixed | Registration & buyer management |
 | **schedule** | `schedule.ts` | 9 | Mixed | Schedule entries & timeline |
 | **speaker** | `speaker.ts` | 7 | Mixed | Speaker profiles & sessions |
 | **cfp** | `cfp.ts` | 9 | Mixed | CFP management & submissions |
@@ -157,7 +159,145 @@ This document provides a comprehensive reference of all tRPC routers and their p
 
 ---
 
-## 3. Registration Router
+## 3A. Tickets Router (NEW)
+
+**File**: `src/server/api/routers/tickets.ts`  
+**Purpose**: Individual ticket instance management, assignment, and QR code generation
+
+**Note**: This is different from the legacy `ticket.ts` router which manages ticket types (templates). This router manages individual ticket instances created from purchases.
+
+### Procedures
+
+#### `tickets.list`
+- **Type**: Query
+- **Auth**: Public (filtered by context)
+- **Input**: `ListTicketsInput` (registrationId?, eventId?, isAssigned?, isCheckedIn?, pagination)
+- **Output**: Array of `Ticket` objects with attendee details
+- **Purpose**: List ticket instances for a registration (buyer view) or event (organizer view)
+
+#### `tickets.getByNumber`
+- **Type**: Query
+- **Auth**: Public
+- **Input**: `{ ticketNumber: string }` (e.g., "TKT-L8Z9K3-A7B2C5D8E9")
+- **Output**: `Ticket` object with full event and attendee details
+- **Purpose**: Retrieve ticket by ticket number (for attendee ticket view page)
+
+#### `tickets.assign`
+- **Type**: Mutation
+- **Auth**: Protected (buyer or event organizer)
+- **Input**: `AssignTicketInput` (ticketId, attendee details, expectedUpdatedAt for optimistic locking)
+- **Output**: `{ ticket, attendee }` objects
+- **Purpose**: Assign ticket to an attendee (creates Attendee record, sends email)
+- **Business Logic**:
+  - Validates assignment cutoff time
+  - Performs optimistic lock check
+  - Deletes old attendee if reassigning (GDPR compliance)
+  - Creates new Attendee record
+  - Sends ticket email to attendee
+
+#### `tickets.unassign`
+- **Type**: Mutation
+- **Auth**: Protected (buyer or event organizer)
+- **Input**: `{ ticketId, expectedUpdatedAt }`
+- **Output**: Updated `Ticket` object (attendee = null)
+- **Purpose**: Remove attendee assignment (before cutoff only)
+- **Business Logic**:
+  - Verifies cutoff not passed
+  - Prevents unassigning checked-in tickets
+  - Deletes Attendee record
+
+#### `tickets.generateQRCode`
+- **Type**: Query
+- **Auth**: Public
+- **Input**: `{ ticketId, format: 'svg' | 'dataUrl', size? }`
+- **Output**: `{ qrCode: string, ticketNumber: string }`
+- **Purpose**: Generate QR code image for ticket
+- **Format**: Encodes `{ ticketId, eventId, ticketNumber }` as JSON
+
+#### `tickets.checkIn`
+- **Type**: Mutation
+- **Auth**: Protected (event organizer or staff)
+- **Input**: `{ ticketNumber, staffId? }`
+- **Output**: `{ ticket, attendee, checkInTime, message }`
+- **Purpose**: Check in attendee at event entrance (deferred to future sprint)
+- **Status**: Placeholder implementation - full check-in UI deferred
+
+#### `tickets.getCheckInMetrics`
+- **Type**: Query
+- **Auth**: Protected (event organizer)
+- **Input**: `{ eventId }`
+- **Output**: Check-in statistics (total, assigned, checked-in, by ticket type)
+- **Purpose**: Real-time check-in dashboard metrics (deferred to future sprint)
+- **Status**: Placeholder - full metrics deferred
+
+**Related Documentation**: [Tickets Module](../modules/tickets/)
+
+---
+
+## 3B. Attendees Router (NEW)
+
+**File**: `src/server/api/routers/attendees.ts`  
+**Purpose**: Attendee information management and email communication
+
+### Procedures
+
+#### `attendees.list`
+- **Type**: Query
+- **Auth**: Protected (event organizer)
+- **Input**: `ListAttendeesInput` (eventId, emailStatus?, search?, pagination)
+- **Output**: Array of `Attendee` objects with ticket details
+- **Purpose**: List all attendees for an event with filtering
+- **Filters**: Email status (active/bounced/unsubscribed), search by name/email
+
+#### `attendees.getById`
+- **Type**: Query
+- **Auth**: Public (attendee can view own record)
+- **Input**: `{ attendeeId }`
+- **Output**: `Attendee` object with full ticket details
+- **Purpose**: Get attendee details (used for attendee self-service view)
+
+#### `attendees.update`
+- **Type**: Mutation
+- **Auth**: Protected (attendee or event organizer)
+- **Input**: `UpdateAttendeeInput` (attendeeId, name?, email?, customData?)
+- **Output**: Updated `Attendee` object
+- **Purpose**: Update attendee information
+- **Business Logic**:
+  - Validates custom data against event schema
+  - If email changed, sends confirmation to new address
+
+#### `attendees.exportList`
+- **Type**: Query
+- **Auth**: Protected (event organizer)
+- **Input**: `ExportAttendeesInput` (eventId, filters, options)
+- **Output**: `{ csv: string, filename: string, rowCount: number }`
+- **Purpose**: Export attendee list as CSV for event logistics
+- **Format**: Includes name, email, ticket info, custom fields, check-in status
+
+#### `attendees.getCustomFieldResponses`
+- **Type**: Query
+- **Auth**: Protected (event organizer)
+- **Input**: `{ eventId, fieldId }`
+- **Output**: Aggregated responses (value, count) for a custom field
+- **Purpose**: Get summary of custom field responses (e.g., dietary restrictions count)
+- **Use Case**: Event planning (catering, t-shirt orders)
+
+#### `attendees.updateEmailStatus`
+- **Type**: Mutation
+- **Auth**: System/Internal (webhook from Resend)
+- **Input**: `{ email, eventId, status, reason? }`
+- **Output**: `{ updated: number, attendeeIds: string[] }`
+- **Purpose**: Update email delivery status from webhooks
+- **Business Logic**:
+  - Verifies webhook signature
+  - Updates all attendees with matching email for event
+  - Tracks bounces and unsubscribes
+
+**Related Documentation**: [Attendees Module](../modules/attendees/)
+
+---
+
+## 4. Registration Router
 
 **File**: `src/server/api/routers/registration.ts`  
 **Purpose**: Attendee registration and management
@@ -215,7 +355,7 @@ This document provides a comprehensive reference of all tRPC routers and their p
 
 ---
 
-## 4. Schedule Router
+## 5. Schedule Router
 
 **File**: `src/server/api/routers/schedule.ts`  
 **Purpose**: Event schedule and session management
@@ -287,7 +427,7 @@ This document provides a comprehensive reference of all tRPC routers and their p
 
 ---
 
-## 5. Speaker Router
+## 6. Speaker Router
 
 **File**: `src/server/api/routers/speaker.ts`  
 **Purpose**: Speaker profile management and session assignments
@@ -345,7 +485,7 @@ This document provides a comprehensive reference of all tRPC routers and their p
 
 ---
 
-## 6. CFP Router
+## 7. CFP Router
 
 **File**: `src/server/api/routers/cfp.ts`  
 **Purpose**: Call for Papers management and submission review
@@ -417,7 +557,7 @@ This document provides a comprehensive reference of all tRPC routers and their p
 
 ---
 
-## 7. Communication Router
+## 8. Communication Router
 
 **File**: `src/server/api/routers/communication.ts`  
 **Purpose**: Email campaign management and bulk sending
@@ -454,7 +594,7 @@ This document provides a comprehensive reference of all tRPC routers and their p
 
 ---
 
-## 8. User Router
+## 9. User Router
 
 **File**: `src/server/api/routers/user.ts`  
 **Purpose**: User profile and account management
@@ -484,7 +624,7 @@ This document provides a comprehensive reference of all tRPC routers and their p
 
 ---
 
-## 9. Post Router (Demo)
+## 10. Post Router (Demo)
 
 **File**: `src/server/api/routers/post.ts`  
 **Purpose**: Example router from T3 Stack template
