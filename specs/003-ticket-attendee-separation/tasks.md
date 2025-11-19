@@ -69,8 +69,8 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 
 ### Implementation for User Story 1
 
-- [ ] T018 [P] [US1] Create Zod input schemas for tickets.list procedure in src/server/api/routers/tickets.ts
-- [ ] T019 [P] [US1] Create Zod output schemas for ticket operations in src/server/api/routers/tickets.ts
+- [X] T018 [P] [US1] Create Zod input schemas for tickets.list procedure in src/server/api/routers/tickets.ts
+- [X] T019 [P] [US1] Create Zod output schemas for ticket operations in src/server/api/routers/tickets.ts
 - [ ] T020 [US1] Implement tickets.list procedure in src/server/api/routers/tickets.ts
 - [ ] T021 [US1] Implement tickets.getByNumber procedure in src/server/api/routers/tickets.ts
 - [ ] T022 [US1] Implement tickets.generateQRCode procedure in src/server/api/routers/tickets.ts
