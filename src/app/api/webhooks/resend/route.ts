@@ -153,10 +153,17 @@ async function handleEmailBounced(
 
     // Mark recipient email as bounced (for hard bounces)
     if (bounceType === "hard") {
-      await db.registration.updateMany({
-        where: { email: recipientEmail },
-        data: { emailStatus: "bounced" },
-      });
+      // Update both Registration and Attendee models
+      await Promise.all([
+        db.registration.updateMany({
+          where: { email: recipientEmail },
+          data: { emailStatus: "bounced" },
+        }),
+        db.attendee.updateMany({
+          where: { email: recipientEmail },
+          data: { emailStatus: "bounced" },
+        }),
+      ]);
 
       console.log("[Webhook] Marked email as bounced", {
         email: recipientEmail,
@@ -227,11 +234,17 @@ async function handleEmailComplained(event: ResendWebhookEvent) {
   const recipientEmail = event.data.to;
 
   try {
-    // Mark recipient as unsubscribed
-    await db.registration.updateMany({
-      where: { email: recipientEmail },
-      data: { emailStatus: "unsubscribed" },
-    });
+    // Mark recipient as unsubscribed in both Registration and Attendee models
+    await Promise.all([
+      db.registration.updateMany({
+        where: { email: recipientEmail },
+        data: { emailStatus: "unsubscribed" },
+      }),
+      db.attendee.updateMany({
+        where: { email: recipientEmail },
+        data: { emailStatus: "unsubscribed" },
+      }),
+    ]);
 
     console.log("[Webhook] Marked email as unsubscribed due to complaint", {
       email: recipientEmail,

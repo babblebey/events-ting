@@ -1,8 +1,8 @@
 import { api } from "@/trpc/server";
-import { AttendeeTable } from "@/components/registration/attendee-table";
+import { AttendeeList } from "@/components/attendees/attendee-list";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "flowbite-react";
-import { HiUpload } from "react-icons/hi";
+import { HiUpload, HiDownload } from "react-icons/hi";
 import Link from "next/link";
 
 interface AttendeesPageProps {
@@ -32,18 +32,26 @@ async function AttendeesPage({ params }: AttendeesPageProps) {
             Attendees
           </h1>
           <p className="mt-2 text-gray-600 dark:text-gray-400">
-            Manage registrations and export attendee data for {event.name}
+            View individual attendees, filter by email status, and export attendee data for {event.name}
           </p>
         </div>
-        <Link href={`/${eventId}/attendees/import`}>
-          <Button color="blue">
-            <HiUpload className="mr-2 h-5 w-5" />
-            Import Attendees
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href={`/${eventId}/attendees/export`}>
+            <Button color="gray">
+              <HiDownload className="mr-2 h-5 w-5" />
+              Export CSV
+            </Button>
+          </Link>
+          <Link href={`/${eventId}/attendees/import`}>
+            <Button color="blue">
+              <HiUpload className="mr-2 h-5 w-5" />
+              Import Attendees
+            </Button>
+          </Link>
+        </div>
       </div>
 
-      <AttendeeTable eventId={eventId} />
+      <AttendeeList eventId={eventId} />
     </div>
   );
 }

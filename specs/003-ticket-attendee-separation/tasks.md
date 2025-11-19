@@ -148,15 +148,15 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 
 ### Implementation for User Story 5
 
-- [ ] T066 [P] [US5] Implement attendees.exportList procedure with CSV generation in src/server/api/routers/attendees.ts
-- [ ] T067 [P] [US5] Implement attendees.update procedure in src/server/api/routers/attendees.ts
-- [ ] T068 [P] [US5] Implement attendees.updateEmailStatus webhook procedure in src/server/api/routers/attendees.ts
-- [ ] T069 [US5] Create attendee list page with email status filtering in src/app/(dashboard)/events/[eventId]/attendees/page.tsx
-- [ ] T070 [US5] Create email campaign composer component in src/components/communications/email-composer.tsx
-- [ ] T071 [US5] Update email sending utilities to support batch sending in src/lib/email/send-attendee-emails.ts
-- [ ] T072 [US5] Create event-reminder email template for attendees in emails/event-reminder.tsx
-- [ ] T073 [US5] Add Resend webhook handler for email status updates in src/app/api/webhooks/resend/route.ts
-- [ ] T074 [US5] Create attendee export functionality with CSV download in src/app/(dashboard)/events/[eventId]/attendees/export/page.tsx
+- [X] T066 [P] [US5] Implement attendees.exportList procedure with CSV generation in src/server/api/routers/attendees.ts
+- [X] T067 [P] [US5] Implement attendees.update procedure in src/server/api/routers/attendees.ts
+- [X] T068 [P] [US5] Implement attendees.updateEmailStatus webhook procedure in src/server/api/routers/attendees.ts
+- [X] T069 [US5] Create attendee list page with email status filtering in src/app/(dashboard)/[id]/attendees/page.tsx
+- [X] T070 [US5] Create email campaign composer component in src/components/communications/email-composer.tsx
+- [X] T071 [US5] Update email sending utilities to support batch sending in src/lib/email/send-attendee-emails.ts
+- [X] T072 [US5] Create event-reminder email template for attendees in emails/event-reminder.tsx
+- [X] T073 [US5] Add Resend webhook handler for email status updates in src/app/api/webhooks/resend/route.ts
+- [X] T074 [US5] Create attendee export functionality with CSV download in src/app/(dashboard)/events/[eventId]/attendees/export/page.tsx
 
 **Checkpoint**: User Story 5 complete - organizers can communicate directly with individual attendees
 
