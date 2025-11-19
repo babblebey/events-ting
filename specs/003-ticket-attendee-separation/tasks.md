@@ -77,9 +77,9 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 - [X] T023 [US1] Implement tickets.assign procedure with optimistic locking in src/server/api/routers/tickets.ts
 - [X] T024 [US1] Implement tickets.unassign procedure in src/server/api/routers/tickets.ts
 - [X] T025 [US1] Add tickets and attendees routers to root router in src/server/api/root.ts
-- [ ] T026 [P] [US1] Create TicketCard component in src/components/tickets/ticket-card.tsx
-- [ ] T027 [P] [US1] Create QRCodeDisplay component in src/components/tickets/qr-code-display.tsx
-- [ ] T028 [P] [US1] Create AssignmentForm component in src/components/tickets/assignment-form.tsx
+- [X] T026 [P] [US1] Create TicketCard component in src/components/tickets/ticket-card.tsx
+- [X] T027 [P] [US1] Create QRCodeDisplay component in src/components/tickets/qr-code-display.tsx
+- [X] T028 [P] [US1] Create AssignmentForm component in src/components/tickets/assignment-form.tsx
 - [ ] T029 [US1] Update registration creation logic to create ticket instances in src/app/(public)/events/[slug]/register/page.tsx
 - [ ] T030 [US1] Create buyer registration lookup page (by email) in src/app/(public)/events/[slug]/registrations/page.tsx
 - [ ] T031 [US1] Create individual ticket view page in src/app/(public)/tickets/[ticketId]/page.tsx
