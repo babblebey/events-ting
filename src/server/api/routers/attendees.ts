@@ -1,16 +1,21 @@
 /**
  * Attendees Router
- * Handles attendee import operations for event organizers
+ * Handles attendee import operations and attendee management for event organizers
  */
 
 import { TRPCError } from "@trpc/server";
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
 import { z } from "zod";
 import { checkModuleAccess } from "@/server/api/permissions";
 import Papa from "papaparse";
 import { randomBytes } from "crypto";
 import { sendEmail } from "@/server/services/email";
 import { RegistrationConfirmation } from "../../../../emails/registration-confirmation";
+import {
+  listAttendeesInputSchema,
+  getAttendeeByIdInputSchema,
+  getCustomFieldResponsesInputSchema,
+} from "@/lib/validators";
 
 /**
  * Input schema for CSV parsing
@@ -427,6 +432,343 @@ function detectInFileDuplicates(rows: MappedRow[]): ValidationError[] {
 }
 
 export const attendeesRouter = createTRPCRouter({
+  
+  /**
+   * List attendees for an event
+   * Protected procedure - event organizer only
+   */
+  list: protectedProcedure
+    .input(listAttendeesInputSchema)
+    .query(async ({ ctx, input }) => {
+      const { eventId, emailStatus, search, limit, cursor } = input;
+
+      // Verify user is event organizer
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "ATTENDEES",
+      });
+
+      // Build where clause
+      const where = {
+        ticket: {
+          eventId,
+          isAssigned: true, // Only show attendees with assigned tickets
+        },
+        ...(emailStatus && { emailStatus }),
+        ...(search && {
+          OR: [
+            { name: { contains: search, mode: "insensitive" as const } },
+            { email: { contains: search, mode: "insensitive" as const } },
+          ],
+        }),
+        ...(cursor && { id: { gt: cursor } }),
+      };
+
+      // Get total count (for pagination UI)
+      const total = await ctx.db.attendee.count({
+        where: {
+          ticket: {
+            eventId,
+            isAssigned: true,
+          },
+          ...(emailStatus && { emailStatus }),
+          ...(search && {
+            OR: [
+              { name: { contains: search, mode: "insensitive" as const } },
+              { email: { contains: search, mode: "insensitive" as const } },
+            ],
+          }),
+        },
+      });
+
+      // Fetch attendees with pagination
+      const attendees = await ctx.db.attendee.findMany({
+        where,
+        take: limit + 1, // Fetch one extra to determine if there's a next page
+        orderBy: { createdAt: "asc" },
+        include: {
+          ticket: {
+            select: {
+              id: true,
+              ticketNumber: true,
+              isCheckedIn: true,
+              checkedInAt: true,
+              ticketType: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // Determine if there's a next page
+      let nextCursor: string | null = null;
+      if (attendees.length > limit) {
+        const nextItem = attendees.pop();
+        nextCursor = nextItem?.id ?? null;
+      }
+
+      // Transform to output format
+      const transformedAttendees = attendees.map((attendee) => {
+        if (!attendee.ticket) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Attendee has no associated ticket",
+          });
+        }
+
+        return {
+          id: attendee.id,
+          name: attendee.name,
+          email: attendee.email,
+          emailStatus: attendee.emailStatus as "active" | "bounced" | "unsubscribed",
+          customData: attendee.customData as Record<string, unknown> | null,
+          ticket: {
+            id: attendee.ticket.id,
+            ticketNumber: attendee.ticket.ticketNumber,
+            isCheckedIn: attendee.ticket.isCheckedIn,
+            checkedInAt: attendee.ticket.checkedInAt,
+            ticketType: {
+              id: attendee.ticket.ticketType.id,
+              name: attendee.ticket.ticketType.name,
+            },
+          },
+          createdAt: attendee.createdAt,
+          updatedAt: attendee.updatedAt,
+        };
+      });
+
+      return {
+        attendees: transformedAttendees,
+        nextCursor,
+        total,
+      };
+    }),
+
+  /**
+   * Get attendee by ID
+   * Public procedure - attendee can view own record, organizer can view all
+   */
+  getById: publicProcedure
+    .input(getAttendeeByIdInputSchema)
+    .query(async ({ ctx, input }) => {
+      const { attendeeId } = input;
+
+      // Fetch attendee with ticket info
+      const attendee = await ctx.db.attendee.findUnique({
+        where: { id: attendeeId },
+        include: {
+          ticket: {
+            select: {
+              id: true,
+              ticketNumber: true,
+              isCheckedIn: true,
+              checkedInAt: true,
+              eventId: true,
+              ticketType: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!attendee) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Attendee not found",
+        });
+      }
+
+      if (!attendee.ticket) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Attendee has no associated ticket",
+        });
+      }
+
+      // Check authorization
+      // Allow if: user is the attendee, or user is event organizer
+      if (ctx.session?.user) {
+        const isAttendee = attendee.userId === ctx.session.user.id;
+
+        if (!isAttendee) {
+          try {
+            await checkModuleAccess({
+              db: ctx.db,
+              eventId: attendee.ticket.eventId,
+              userId: ctx.session.user.id,
+              requiredModule: "ATTENDEES",
+            });
+          } catch {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: "You do not have permission to view this attendee",
+            });
+          }
+        }
+      }
+
+      // Transform to output format
+      return {
+        id: attendee.id,
+        name: attendee.name,
+        email: attendee.email,
+        emailStatus: attendee.emailStatus as "active" | "bounced" | "unsubscribed",
+        customData: attendee.customData as Record<string, unknown> | null,
+        ticket: {
+          id: attendee.ticket.id,
+          ticketNumber: attendee.ticket.ticketNumber,
+          isCheckedIn: attendee.ticket.isCheckedIn,
+          checkedInAt: attendee.ticket.checkedInAt,
+          ticketType: {
+            id: attendee.ticket.ticketType.id,
+            name: attendee.ticket.ticketType.name,
+          },
+        },
+        createdAt: attendee.createdAt,
+        updatedAt: attendee.updatedAt,
+      };
+    }),
+
+  /**
+   * Get aggregated custom field responses for an event
+   * Protected procedure - event organizer only
+   */
+  getCustomFieldResponses: protectedProcedure
+    .input(getCustomFieldResponsesInputSchema)
+    .query(async ({ ctx, input }) => {
+      const { eventId, fieldId } = input;
+
+      // Verify user is event organizer
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "ATTENDEES",
+      });
+
+      // Get event to access custom field definitions
+      const event = await ctx.db.event.findUnique({
+        where: { id: eventId },
+        select: {
+          // TODO: Add customFields to Event schema (will be done in T044)
+          // customFields: true,
+          name: true,
+        },
+      });
+
+      if (!event) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Event not found",
+        });
+      }
+
+      // TODO: Enable this validation once Event.customFields is added to the schema (T044)
+      /*
+      if (!event.customFields) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Event has no custom fields configured",
+        });
+      }
+
+      // Parse custom field definitions
+      let customFieldDefinitions: CustomFieldDefinition[];
+      try {
+        customFieldDefinitions = customFieldDefinitionsSchema.parse(
+          event.customFields
+        ) as CustomFieldDefinition[];
+      } catch (error) {
+        console.error("[Attendees] Invalid custom fields schema in event", {
+          eventId,
+          error,
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Event has invalid custom field configuration",
+        });
+      }
+
+      // Find the field definition
+      const fieldDef = customFieldDefinitions.find((f) => f.id === fieldId);
+      if (!fieldDef) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Custom field not found in event configuration",
+        });
+      }
+      */
+
+      // For now, return mock data since Event.customFields doesn't exist yet
+      // This will be replaced with actual implementation in T044
+      const fieldDef = {
+        id: fieldId,
+        label: "Sample Field",
+        type: "text" as const,
+      };
+
+      // Fetch all attendees for this event
+      const attendees = await ctx.db.attendee.findMany({
+        where: {
+          ticket: {
+            eventId,
+            isAssigned: true,
+          },
+        },
+        select: {
+          customData: true,
+        },
+      });
+
+      // Aggregate responses
+      const responseCounts = new Map<string, number>();
+      let totalResponses = 0;
+
+      for (const attendee of attendees) {
+        if (!attendee.customData) continue;
+
+        const customData = attendee.customData as Record<string, unknown>;
+        const response = customData[fieldId];
+
+        if (response !== undefined && response !== null && response !== "") {
+          // Convert response to string, handling arrays and objects
+          const responseStr = Array.isArray(response)
+            ? response.join(", ")
+            : typeof response === "object"
+              ? JSON.stringify(response)
+              : String(response);
+          responseCounts.set(
+            responseStr,
+            (responseCounts.get(responseStr) ?? 0) + 1
+          );
+          totalResponses++;
+        }
+      }
+
+      // Convert to output format
+      const responses = Array.from(responseCounts.entries())
+        .map(([value, count]) => ({ value, count }))
+        .sort((a, b) => b.count - a.count); // Sort by count descending
+
+      return {
+        fieldId,
+        fieldLabel: fieldDef.label,
+        fieldType: fieldDef.type,
+        responses,
+        totalResponses,
+      };
+    }),
+  
   /**
    * Parse CSV file and return preview with suggested field mappings
    */

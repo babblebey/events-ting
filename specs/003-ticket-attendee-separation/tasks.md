@@ -106,10 +106,10 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 - [X] T037 [P] [US2] Create custom field schema types in src/lib/validators/custom-fields.ts
 - [X] T038 [US2] Update AssignmentForm to render custom fields dynamically in src/components/tickets/assignment-form.tsx
 - [X] T039 [US2] Add custom field validation to tickets.assign procedure in src/server/api/routers/tickets.ts
-- [ ] T040 [P] [US2] Create Zod schemas for attendees router in src/server/api/routers/attendees.ts
-- [ ] T041 [US2] Implement attendees.list procedure in src/server/api/routers/attendees.ts
-- [ ] T042 [US2] Implement attendees.getById procedure in src/server/api/routers/attendees.ts
-- [ ] T043 [US2] Implement attendees.getCustomFieldResponses procedure in src/server/api/routers/attendees.ts
+- [X] T040 [P] [US2] Create Zod schemas for attendees router in src/server/api/routers/attendees.ts
+- [X] T041 [US2] Implement attendees.list procedure in src/server/api/routers/attendees.ts
+- [X] T042 [US2] Implement attendees.getById procedure in src/server/api/routers/attendees.ts
+- [X] T043 [US2] Implement attendees.getCustomFieldResponses procedure in src/server/api/routers/attendees.ts
 - [ ] T044 [US2] Create event settings page for custom field configuration in src/app/(dashboard)/events/[eventId]/settings/registration/page.tsx
 - [ ] T045 [US2] Create CustomFieldBuilder component in src/components/events/custom-field-builder.tsx
 - [ ] T046 [US2] Create attendee detail view showing custom responses in src/app/(dashboard)/events/[eventId]/attendees/[attendeeId]/page.tsx
