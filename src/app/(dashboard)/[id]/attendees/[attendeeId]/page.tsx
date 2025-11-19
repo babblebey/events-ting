@@ -28,25 +28,18 @@ export default async function AttendeeDetailPage({
     api.attendees.getById({ attendeeId }),
   ]);
 
-  // Parse custom fields from event.customData if exists
-  // TODO: Once Event.customFields is added to schema, use that instead
+  // Parse custom fields from event.customFields
   const customFieldDefinitions: Array<{
     id: string;
     label: string;
     type: string;
-  }> = [];
-  
-  // Temporarily disabled until Event schema has customData field
-  // if (event.customData && typeof event.customData === 'object') {
-  //   const customData = event.customData as Record<string, unknown>;
-  //   if (Array.isArray(customData.customFields)) {
-  //     customFieldDefinitions = customData.customFields as Array<{
-  //       id: string;
-  //       label: string;
-  //       type: string;
-  //     }>;
-  //   }
-  // }
+  }> = Array.isArray(event.customFields)
+    ? (event.customFields as Array<{
+        id: string;
+        label: string;
+        type: string;
+      }>)
+    : [];
 
   // Format custom field responses
   const customResponses = customFieldDefinitions.map((field) => {

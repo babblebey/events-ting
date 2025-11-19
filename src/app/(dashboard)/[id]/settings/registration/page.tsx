@@ -18,16 +18,10 @@ export default async function RegistrationSettingsPage({
 }: RegistrationSettingsPageProps) {
   const event = await api.event.getById({ id: params.id });
 
-  // Parse custom fields from event.customData if exists
-  // TODO: Once Event.customFields is added to schema, use that instead
-  const existingCustomFields: unknown[] = [];
-  // Temporarily disabled until Event schema has customData field
-  // if (event.customData && typeof event.customData === 'object') {
-  //   const customData = event.customData as Record<string, unknown>;
-  //   if (Array.isArray(customData.customFields)) {
-  //     existingCustomFields = customData.customFields;
-  //   }
-  // }
+  // Parse custom fields from event.customFields
+  const existingCustomFields: unknown[] = Array.isArray(event.customFields)
+    ? event.customFields
+    : [];
 
   return (
     <div className="space-y-8">

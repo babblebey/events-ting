@@ -59,18 +59,10 @@ export function CustomFieldBuilder({ eventId: _eventId, initialFields }: CustomF
   });
 
   const handleSaveFields = () => {
-    // TODO: Once Event.customFields is added to schema, implement this
-    // For now, this is a placeholder
-    alert('Custom field saving will be implemented once the Event schema is updated with customData/customFields field.');
-    console.log('Fields to save:', fields);
-    
-    // Uncomment when Event schema has customData field:
-    // updateMutation.mutate({
-    //   id: _eventId,
-    //   customData: {
-    //     customFields: fields,
-    //   } as never,
-    // });
+    updateMutation.mutate({
+      id: _eventId,
+      customFields: fields as never,
+    });
   };
 
   const handleAddField = () => {
