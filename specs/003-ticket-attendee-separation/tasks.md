@@ -132,9 +132,9 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 - [X] T050 [US3] Create ticket reassignment modal component in src/components/tickets/reassignment-modal.tsx
 - [X] T051 [US3] Add cutoff time display (UI only, no validation) to AssignmentForm in src/components/tickets/assignment-form.tsx (TODO: Add cutoff enforcement validation in future sprint)
 - [X] T052 [US3] Create ticket-reassigned email template in emails/ticket-reassigned.tsx
-- [ ] T053 [US3] Add email notification for reassignments in tickets.assign procedure in src/server/api/routers/tickets.ts
-- [ ] T054 [US3] Implement registration management page accessible via email link in src/app/(public)/events/[slug]/registrations/[registrationId]/page.tsx
-- [ ] T055 [US3] Add unassigned ticket warning/reminder UI in src/components/tickets/unassigned-reminder.tsx
+- [X] T053 [US3] Add email notification for reassignments in tickets.assign procedure in src/server/api/routers/tickets.ts
+- [X] T054 [US3] Implement registration management page accessible via email link in src/app/(public)/events/[slug]/registrations/[registrationId]/page.tsx
+- [X] T055 [US3] Add unassigned ticket warning/reminder UI in src/components/tickets/unassigned-reminder.tsx
 
 **Checkpoint**: User Story 3 complete - buyers can fully manage their tickets through self-service dashboard
 

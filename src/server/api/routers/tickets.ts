@@ -22,6 +22,7 @@ import { generateTicketQRCode, generateTicketQRCodeSVG } from "@/lib/qr-code/gen
 import { isValidTicketNumberFormat } from "@/lib/tickets/generate-ticket-number";
 import { sendEmail } from "@/server/services/email";
 import { TicketAssigned } from "emails/ticket-assigned";
+import { TicketReassignedEmail } from "emails/ticket-reassigned";
 
 export const ticketsRouter = createTRPCRouter({
   /**
@@ -583,6 +584,10 @@ export const ticketsRouter = createTRPCRouter({
       */
 
       // If ticket already assigned, delete old attendee record (privacy)
+      const wasReassignment = !!ticket.attendee;
+      const previousAttendeeName = ticket.attendee?.name;
+      const previousAttendeeEmail = ticket.attendee?.email;
+
       if (ticket.attendee) {
         await ctx.db.attendee.delete({
           where: { id: ticket.attendee.id },
@@ -658,42 +663,77 @@ export const ticketsRouter = createTRPCRouter({
 
       // Send email to attendee with ticket details
       try {
+        const emailSubject = wasReassignment
+          ? `Your ticket for ${result.updatedTicket.event.name} has been updated 🎟️`
+          : `Your ticket for ${result.updatedTicket.event.name} is ready! 🎟️`;
+
         await sendEmail({
           to: result.newAttendee.email,
-          subject: `Your ticket for ${result.updatedTicket.event.name} is ready! 🎟️`,
-          react: TicketAssigned({
-            attendeeName: result.newAttendee.name,
-            eventName: result.updatedTicket.event.name,
-            eventDate: result.updatedTicket.event.startDate,
-            eventEndDate: result.updatedTicket.event.endDate ?? undefined,
-            eventLocationType: result.updatedTicket.event.locationType as "virtual" | "hybrid" | "physical",
-            eventLocationAddress: result.updatedTicket.event.locationAddress ?? undefined,
-            ticketType: result.updatedTicket.ticketType.name,
-            ticketNumber: result.updatedTicket.ticketNumber,
-            ticketPrice: result.updatedTicket.ticketType.price.toNumber(),
-            buyerName: result.updatedTicket.registration.name,
-            buyerEmail: result.updatedTicket.registration.email,
-            ticketUrl,
-            qrCodeDataUrl,
-            customData: result.newAttendee.customData as Record<string, unknown> | undefined,
-          }),
+          subject: emailSubject,
+          react: wasReassignment
+            ? TicketReassignedEmail({
+                attendeeName: result.newAttendee.name,
+                eventName: result.updatedTicket.event.name,
+                eventDate: result.updatedTicket.event.startDate,
+                eventLocation:
+                  result.updatedTicket.event.locationType === "virtual"
+                    ? "Virtual Event"
+                    : result.updatedTicket.event.locationAddress ?? "Location TBA",
+                ticketNumber: result.updatedTicket.ticketNumber,
+                ticketTypeName: result.updatedTicket.ticketType.name,
+                qrCodeDataUrl,
+                ticketUrl,
+                buyerName: result.updatedTicket.registration.name,
+                buyerEmail: result.updatedTicket.registration.email,
+              })
+            : TicketAssigned({
+                attendeeName: result.newAttendee.name,
+                eventName: result.updatedTicket.event.name,
+                eventDate: result.updatedTicket.event.startDate,
+                eventEndDate: result.updatedTicket.event.endDate ?? undefined,
+                eventLocationType: result.updatedTicket.event
+                  .locationType as "virtual" | "hybrid" | "physical",
+                eventLocationAddress:
+                  result.updatedTicket.event.locationAddress ?? undefined,
+                ticketType: result.updatedTicket.ticketType.name,
+                ticketNumber: result.updatedTicket.ticketNumber,
+                ticketPrice: result.updatedTicket.ticketType.price.toNumber(),
+                buyerName: result.updatedTicket.registration.name,
+                buyerEmail: result.updatedTicket.registration.email,
+                ticketUrl,
+                qrCodeDataUrl,
+                customData:
+                  (result.newAttendee.customData as Record<string, unknown>) ??
+                  undefined,
+              }),
           tags: [
-            { name: "category", value: "ticket-assigned" },
+            {
+              name: "category",
+              value: wasReassignment ? "ticket-reassigned" : "ticket-assigned",
+            },
             { name: "eventId", value: result.updatedTicket.event.id },
           ],
         });
 
-        console.log("[Tickets] Sent ticket assignment email", {
-          ticketId: result.updatedTicket.id,
-          attendeeEmail: result.newAttendee.email,
-        });
+        console.log(
+          `[Tickets] Sent ticket ${wasReassignment ? "reassignment" : "assignment"} email`,
+          {
+            ticketId: result.updatedTicket.id,
+            attendeeEmail: result.newAttendee.email,
+            wasReassignment,
+          },
+        );
       } catch (error) {
         // Log error but don't fail the assignment
-        console.error("[Tickets] Failed to send ticket assignment email", {
-          ticketId: result.updatedTicket.id,
-          attendeeEmail: result.newAttendee.email,
-          error,
-        });
+        console.error(
+          `[Tickets] Failed to send ticket ${wasReassignment ? "reassignment" : "assignment"} email`,
+          {
+            ticketId: result.updatedTicket.id,
+            attendeeEmail: result.newAttendee.email,
+            wasReassignment,
+            error,
+          },
+        );
       }
 
       return {

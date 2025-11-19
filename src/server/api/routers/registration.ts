@@ -822,11 +822,13 @@ export const registrationRouter = createTRPCRouter({
               assignedAt: true,
               isCheckedIn: true,
               checkedInAt: true,
+              updatedAt: true,
               attendee: {
                 select: {
                   id: true,
                   name: true,
                   email: true,
+                  customData: true,
                 },
               },
             },
@@ -849,8 +851,31 @@ export const registrationRouter = createTRPCRouter({
         paymentStatus: registration.paymentStatus,
         registeredAt: registration.registeredAt,
         event: registration.event,
-        ticketType: registration.ticketType,
-        tickets: registration.tickets,
+        ticketType: {
+          id: registration.ticketType.id,
+          name: registration.ticketType.name,
+          price: registration.ticketType.price.toNumber(),
+        },
+        tickets: registration.tickets.map((ticket) => ({
+          id: ticket.id,
+          ticketNumber: ticket.ticketNumber,
+          isAssigned: ticket.isAssigned,
+          assignedAt: ticket.assignedAt,
+          isCheckedIn: ticket.isCheckedIn,
+          checkedInAt: ticket.checkedInAt,
+          updatedAt: ticket.updatedAt,
+          attendee: ticket.attendee
+            ? {
+                id: ticket.attendee.id,
+                name: ticket.attendee.name,
+                email: ticket.attendee.email,
+                customData: ticket.attendee.customData as Record<
+                  string,
+                  unknown
+                > | null,
+              }
+            : null,
+        })),
       };
     }),
 });

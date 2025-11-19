@@ -29,6 +29,7 @@ interface Ticket {
     customData: Record<string, unknown> | null;
   } | null;
   createdAt: Date;
+  updatedAt?: Date;
 }
 
 interface TicketListProps {
