@@ -36,12 +36,12 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 
 - [X] T001 Update Prisma schema with Ticket and Attendee models in prisma/schema.prisma
 - [X] T002 Add assignmentCutoffType, assignmentCutoffTime, maxTicketsPerPurchase fields to Event model in prisma/schema.prisma
-- [ ] T003 [P] Add tickets relation to Registration model in prisma/schema.prisma
-- [ ] T004 [P] Add tickets relation to TicketType model in prisma/schema.prisma
-- [ ] T005 Generate Prisma migration for new models using `pnpm db:migrate dev --name ticket-attendee-separation`
-- [ ] T006 [P] Install QR code generation dependencies: `pnpm add qrcode nanoid`
-- [ ] T007 [P] Install QR code scanner dependency: `pnpm add html5-qrcode`
-- [ ] T008 [P] Install QR code type definitions: `pnpm add -D @types/qrcode`
+- [X] T003 [P] Add tickets relation to Registration model in prisma/schema.prisma
+- [X] T004 [P] Add tickets relation to TicketType model in prisma/schema.prisma
+- [X] T005 Generate Prisma migration for new models using `pnpm db:migrate dev --name ticket-attendee-separation`
+- [X] T006 [P] Install QR code generation dependencies: `pnpm add qrcode nanoid`
+- [ ] ~~T007 [P] SKIP - Install QR code scanner dependency: `pnpm add html5-qrcode`~~
+- [X] T008 [P] Install QR code type definitions: `pnpm add -D @types/qrcode`
 
 ---
 
