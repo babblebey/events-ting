@@ -40,10 +40,10 @@ The Attendees module provides organizers with comprehensive attendee management 
 ## Module Dependencies
 
 **This module depends on:**
-- **Events Module**: Attendees belong to events
-- **Tickets Module**: Attendees have ticket types
-- **Registration Module**: **Core dependency** - Uses registration router procedures
-- **Communications Module**: Sends emails (confirmation resends)
+- **[Events Module](../events/)**: Attendees belong to events, accessed via event dashboard
+- **[Tickets Module](../tickets/)**: Attendees have ticket types for filtering
+- **[Registration Module](../registration/)**: **Core dependency** - Uses registration router procedures ([see backend](../registration/backend.md))
+- **[Communications Module](../communications/)**: Sends emails (confirmation resends, campaigns)
 
 **This module is required by:**
 - **Communications Module**: Targets attendees for email campaigns
@@ -52,14 +52,14 @@ The Attendees module provides organizers with comprehensive attendee management 
 ## Relationship to Registration Module
 
 The Attendees module is **not a separate backend router**. It:
-- Uses the same `registrationRouter` procedures
+- Uses the same `registrationRouter` procedures ([see all procedures](../registration/backend.md))
 - Provides a different UI/UX focused on management (vs. sign-up)
-- Adds filtering and export capabilities
+- Adds filtering and export capabilities ([see export details](../registration/exports.md))
 - Focuses on organizer workflows (vs. public registration)
 
 **Key Difference**:
-- **Registration Module**: Public sign-up forms + basic organizer list
-- **Attendees Module**: Advanced management dashboard for organizers
+- **[Registration Module](../registration/)**: Public sign-up forms + basic organizer list ([see workflows](../registration/workflows.md))
+- **Attendees Module**: Advanced management dashboard for organizers with import/export features
 
 ## Quick Links
 - [Backend Documentation](./backend.md) - Registration router procedures
@@ -169,17 +169,18 @@ This module provides organizer capabilities for:
 ## Integration Points
 
 ### With Registration Module
-- Uses same backend procedures
-- Shares `Registration` model
+- Uses same backend procedures ([see backend documentation](../registration/backend.md))
+- Shares `Registration` model ([see data model](../registration/data-model.md))
 - Different UI focus (management vs sign-up)
+- Resend confirmation uses `registration.resendConfirmation` ([see workflow](../registration/workflows.md#workflow-4-resend-confirmation-email))
 
 ### With Communications Module
 - Attendees are campaign recipients
-- Email status tracked and updated
+- Email status tracked and updated via webhooks ([see email templates](../registration/email-templates.md))
 - Filters applied to target specific attendees
 
 ### With Tickets Module
-- Filter attendees by ticket type
+- Filter attendees by ticket type ([see ticket module](../tickets/))
 - Shows ticket availability impact
 
 ## Future Enhancements

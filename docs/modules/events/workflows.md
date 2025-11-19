@@ -343,7 +343,7 @@ stateDiagram-v2
 ## Integration Points
 
 This workflow integrates with:
-- **Tickets Module**: After creating event, add ticket types
-- **Registration Module**: Public users register for published events
-- **Schedule Module**: Add schedule entries to published events
-- **Communications Module**: Send emails to event registrants
+- **[Tickets Module](../tickets/)**: After creating event, add ticket types ([see ticket workflows](../tickets/workflows.md))
+- **[Registration Module](../registration/)**: Public users register for published events ([see registration workflows](../registration/workflows.md))
+- **[Schedule Module](../schedule/)**: Add schedule entries to published events
+- **[Communications Module](../communications/)**: Send emails to event registrants
