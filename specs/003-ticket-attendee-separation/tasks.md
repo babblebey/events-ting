@@ -51,11 +51,11 @@ description: "Task list for Ticket Instance and Attendee Separation feature"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T013 [P] Create ticket number generator utility (human-readable unique ID) in src/lib/tickets/generate-ticket-number.ts
-- [ ] T014 [P] Create QR code generator utilities (data URL and SVG, encoding Ticket.id+eventId) in src/lib/qr-code/generator.ts
-- [ ] T015 [P] Create assignment cutoff helper functions (display only, validation deferred) in src/lib/events/assignment-cutoff.ts
-- [ ] T016 [P] Create email validation helper with soft warnings in src/lib/validators/email.ts
-- [ ] T017 [P] Create custom field validation utilities in src/lib/validators/custom-fields.ts
+- [X] T013 [P] Create ticket number generator utility (human-readable unique ID) in src/lib/tickets/generate-ticket-number.ts
+- [X] T014 [P] Create QR code generator utilities (data URL and SVG, encoding Ticket.id+eventId) in src/lib/qr-code/generator.ts
+- [X] T015 [P] Create assignment cutoff helper functions (display only, validation deferred) in src/lib/events/assignment-cutoff.ts
+- [X] T016 [P] Create email validation helper with soft warnings in src/lib/validators/email.ts
+- [X] T017 [P] Create custom field validation utilities in src/lib/validators/custom-fields.ts
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
