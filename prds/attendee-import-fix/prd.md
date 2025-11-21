@@ -222,6 +222,27 @@ const result = await ctx.db.$transaction(async (tx) => {
 - Event not found
 - Permission check failure
 
+### Duplicate Submission Prevention
+
+**Idempotency Key Protection**:
+- Frontend generates unique key on component mount: `import-{timestamp}-{random}`
+- Key sent with every import request
+- Backend caches results for 5 minutes keyed by idempotency key
+- Duplicate requests within 5 minutes return cached result (no database writes)
+- Cache automatically cleaned up after expiry
+
+**Frontend Protection**:
+- `hasStarted` state flag prevents useEffect re-execution
+- Import button shows "Starting Import..." and disables during transition
+- Mutation state prevents re-submission while pending
+- Proper useEffect dependencies prevent accidental re-renders
+
+**Use Cases Protected**:
+- User double-clicks "Import" button → Second click ignored (button disabled)
+- Component re-mounts due to navigation → useEffect won't re-run (hasStarted flag)
+- User refreshes browser during import → New idempotency key, treated as new import
+- Backend receives duplicate request (race condition) → Cached result returned
+
 ### Backward Compatibility
 
 **Impact**: None. This is a bug fix, not a breaking change.
@@ -234,7 +255,7 @@ const result = await ctx.db.$transaction(async (tx) => {
 
 ## Implementation Plan
 
-### Phase 1: Core Fix (2 hours)
+### Phase 1: Core Fix (2 hours) - ✅ DONE 
 
 **Task 1.1**: Update `executeImport` transaction logic
 - Replace `registration.create()` with full transaction

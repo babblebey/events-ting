@@ -47,6 +47,9 @@ export function ImportProgressStep({
   const toast = useToast();
   const utils = api.useUtils();
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  // Generate idempotency key once on mount to prevent duplicate imports
+  const [idempotencyKey] = useState(() => `import-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+  const [hasStarted, setHasStarted] = useState(false);
 
   const executeImport = api.attendees.executeImport.useMutation({
     onSuccess: (result) => {
@@ -85,16 +88,20 @@ export function ImportProgressStep({
     },
   });
 
-  // Start import on mount
+  // Start import on mount (only once)
   useEffect(() => {
-    executeImport.mutate({
-      eventId,
-      fileContent: parsedData.fileContent,
-      fieldMapping,
-      duplicateStrategy,
-      sendConfirmationEmails,
-    });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!hasStarted && !executeImport.isPending && !importResult) {
+      setHasStarted(true);
+      executeImport.mutate({
+        eventId,
+        fileContent: parsedData.fileContent,
+        fieldMapping,
+        duplicateStrategy,
+        sendConfirmationEmails,
+        idempotencyKey,
+      });
+    }
+  }, [hasStarted, executeImport, importResult, eventId, parsedData.fileContent, fieldMapping, duplicateStrategy, sendConfirmationEmails, idempotencyKey]);
 
   const handleDownloadFailedRows = () => {
     if (!importResult || importResult.errors.length === 0) return;

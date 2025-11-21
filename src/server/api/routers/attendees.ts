@@ -11,6 +11,7 @@ import Papa from "papaparse";
 import { randomBytes } from "crypto";
 import { sendEmail } from "@/server/services/email";
 import { RegistrationConfirmation } from "../../../../emails/registration-confirmation";
+import { generateTicketNumber } from "@/lib/tickets/generate-ticket-number";
 import {
   listAttendeesInputSchema,
   getAttendeeByIdInputSchema,
@@ -47,7 +48,22 @@ const executeImportSchema = z.object({
   fieldMapping: z.record(z.string()), // CSV column -> system field
   duplicateStrategy: z.enum(["skip", "create"]).default("skip"),
   sendConfirmationEmails: z.boolean().default(false),
+  idempotencyKey: z.string().optional(), // Prevent duplicate submissions
 });
+
+// In-memory cache to track recent imports (expires after 5 minutes)
+const importCache = new Map<string, { timestamp: number; result: any }>();
+const CACHE_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
+
+// Clean up expired cache entries periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of importCache.entries()) {
+    if (now - value.timestamp > CACHE_EXPIRY_MS) {
+      importCache.delete(key);
+    }
+  }
+}, 60 * 1000); // Run cleanup every minute
 
 /**
  * Validation error structure
@@ -1439,6 +1455,17 @@ export const attendeesRouter = createTRPCRouter({
   executeImport: protectedProcedure
     .input(executeImportSchema)
     .mutation(async ({ ctx, input }) => {
+      // Check idempotency key to prevent duplicate submissions
+      if (input.idempotencyKey) {
+        const cached = importCache.get(input.idempotencyKey);
+        if (cached && Date.now() - cached.timestamp < CACHE_EXPIRY_MS) {
+          console.log(
+            `[Import] Returning cached result for idempotency key: ${input.idempotencyKey}`,
+          );
+          return cached.result;
+        }
+      }
+
       // Verify user has access to ATTENDEES module
       await checkModuleAccess({
         db: ctx.db,
@@ -1621,15 +1648,6 @@ export const attendeesRouter = createTRPCRouter({
             continue;
           }
 
-          // Generate unique registration code
-          const registrationCode = generateRegistrationCode();
-
-          // Prepare custom data with registration code and unmapped fields
-          const customData = {
-            registrationCode,
-            ...row.customData,
-          };
-
           // Parse registeredAt if provided, otherwise use current time
           let registeredAt = new Date();
           if (row.registeredAt) {
@@ -1639,26 +1657,71 @@ export const attendeesRouter = createTRPCRouter({
             }
           }
 
-          // Create registration
-          await ctx.db.registration.create({
-            data: {
-              eventId: input.eventId,
-              ticketTypeId,
-              email: row.email!,
-              name: row.name!,
-              paymentStatus:
-                (row.paymentStatus as
-                  | "free"
-                  | "pending"
-                  | "paid"
-                  | "failed"
-                  | "refunded") ?? "free",
-              emailStatus:
-                (row.emailStatus as "active" | "bounced" | "unsubscribed") ??
-                "active",
-              customData,
-              registeredAt,
-            },
+          // Generate unique ticket number for this import
+          const ticketNumber = generateTicketNumber();
+
+          // Prepare custom data with ticket number and unmapped fields
+          const customData = {
+            registrationCode: ticketNumber, // Use ticket number as registration code
+            ...row.customData,
+          };
+
+          // Create registration, ticket, and attendee in a transaction
+          await ctx.db.$transaction(async (tx) => {
+            // 1. Create Registration record (buyer)
+            const registration = await tx.registration.create({
+              data: {
+                eventId: input.eventId,
+                ticketTypeId,
+                email: row.email!,
+                name: row.name!,
+                quantity: 1, // Each import row = 1 ticket
+                paymentStatus:
+                  (row.paymentStatus as
+                    | "free"
+                    | "pending"
+                    | "paid"
+                    | "failed"
+                    | "refunded") ?? "free",
+                registeredAt,
+              },
+            });
+
+            // 2. Create Ticket record with ticket number and QR code
+            const ticket = await tx.ticket.create({
+              data: {
+                registrationId: registration.id,
+                eventId: input.eventId,
+                ticketTypeId,
+                ticketNumber,
+                qrCodeData: ticketNumber, // QR code contains the ticket number
+                isAssigned: false, // Will be set to true after attendee creation
+                isCheckedIn: false,
+              },
+            });
+
+            // 3. Create Attendee record with attendee details
+            const attendee = await tx.attendee.create({
+              data: {
+                name: row.name!,
+                email: row.email!.toLowerCase(),
+                emailStatus:
+                  (row.emailStatus as "active" | "bounced" | "unsubscribed") ??
+                  "active",
+                customData,
+                userId: ctx.session?.user?.id,
+              },
+            });
+
+            // 4. Update Ticket to link attendee and mark as assigned
+            await tx.ticket.update({
+              where: { id: ticket.id },
+              data: {
+                attendeeId: attendee.id,
+                isAssigned: true,
+                assignedAt: new Date(),
+              },
+            });
           });
 
           importResults.push({
@@ -1684,7 +1747,7 @@ export const attendeesRouter = createTRPCRouter({
                 eventName: event.name,
                 eventDate: event.startDate,
                 ticketType: ticketTypeName,
-                registrationCode,
+                registrationCode: ticketNumber, // Use ticket number as registration code
                 eventUrl: `${process.env.NEXT_PUBLIC_APP_URL}/events/${event.slug}`,
               }),
               tags: [
@@ -1727,7 +1790,7 @@ export const attendeesRouter = createTRPCRouter({
         }
       }
 
-      return {
+      const result = {
         successCount,
         failureCount,
         duplicateCount,
@@ -1739,5 +1802,15 @@ export const attendeesRouter = createTRPCRouter({
               ? "failed"
               : "completed",
       };
+
+      // Cache result for idempotency
+      if (input.idempotencyKey) {
+        importCache.set(input.idempotencyKey, {
+          timestamp: Date.now(),
+          result,
+        });
+      }
+
+      return result;
     }),
 });
