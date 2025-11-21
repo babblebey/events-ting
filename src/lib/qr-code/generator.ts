@@ -12,7 +12,7 @@
  * can be scanned even if partially damaged or obscured.
  */
 
-import * as QRCode from 'qrcode';
+import QRCode from 'qrcode';
 
 /**
  * QR code generation options

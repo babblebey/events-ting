@@ -345,6 +345,7 @@ export default function IndividualTicketViewPage() {
                     qrCodeDataUrl={qrCodeData.qrCode}
                     ticketNumber={ticket.ticketNumber}
                     size="large"
+                    showActions={false}
                   />
                   <p className="mt-3 text-center text-sm text-gray-600 dark:text-gray-400">
                     Show this QR code at check-in

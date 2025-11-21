@@ -12,10 +12,11 @@ import { HiDownload, HiPrinter } from "react-icons/hi";
 import { api } from "@/trpc/react";
 
 interface QRCodeDisplayProps {
-  ticketId: string;
+  ticketId?: string;
   ticketNumber: string;
+  qrCodeDataUrl?: string; // Pre-generated QR code data URL (bypasses API fetch)
   format?: "svg" | "dataUrl";
-  size?: number;
+  size?: number | "small" | "medium" | "large";
   showActions?: boolean;
   attendeeName?: string;
   eventName?: string;
@@ -24,26 +25,39 @@ interface QRCodeDisplayProps {
 export function QRCodeDisplay({
   ticketId,
   ticketNumber,
+  qrCodeDataUrl,
   format = "dataUrl",
   size = 300,
   showActions = true,
   attendeeName,
   eventName,
 }: QRCodeDisplayProps) {
-  const [qrCodeData, setQrCodeData] = useState<string | null>(null);
+  const [qrCodeData, setQrCodeData] = useState<string | null>(qrCodeDataUrl ?? null);
   const qrCodeRef = useRef<HTMLDivElement>(null);
 
-  const { data, isLoading, error } = api.tickets.generateQRCode.useQuery({
-    ticketId,
-    format,
-    size,
-  });
+  // Convert size string to number
+  const numericSize = typeof size === "string" 
+    ? size === "small" ? 200 : size === "medium" ? 300 : 400
+    : size;
+
+  const { data, isLoading, error } = api.tickets.generateQRCode.useQuery(
+    {
+      ticketId: ticketId!,
+      format,
+      size: numericSize,
+    },
+    {
+      enabled: !!ticketId && !qrCodeDataUrl, // Only fetch if no direct QR code provided
+    }
+  );
 
   useEffect(() => {
-    if (data?.qrCode) {
+    if (qrCodeDataUrl) {
+      setQrCodeData(qrCodeDataUrl);
+    } else if (data?.qrCode) {
       setQrCodeData(data.qrCode);
     }
-  }, [data]);
+  }, [data, qrCodeDataUrl]);
 
   const handleDownload = () => {
     if (!qrCodeData) return;
