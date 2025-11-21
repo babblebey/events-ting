@@ -1753,6 +1753,11 @@ export const attendeesRouter = createTRPCRouter({
               },
             });
 
+            // Generate QR code data URL during ticket creation
+            const qrCodeData = await generateTicketQRCode(ticketNumber, {
+              width: 400,
+            });
+            
             // 2. Create Ticket record with ticket number and QR code
             const ticket = await tx.ticket.create({
               data: {
@@ -1760,7 +1765,7 @@ export const attendeesRouter = createTRPCRouter({
                 eventId: input.eventId,
                 ticketTypeId,
                 ticketNumber,
-                qrCodeData: ticketNumber, // QR code contains the ticket number
+                qrCodeData, // Store PNG data URL
                 isAssigned: false, // Will be set to true after attendee creation
                 isCheckedIn: false,
               },

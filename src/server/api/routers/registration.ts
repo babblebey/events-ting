@@ -19,6 +19,7 @@ import { sendEmail } from "@/server/services/email";
 import { RegistrationConfirmation } from "../../../../emails/registration-confirmation";
 import { randomBytes } from "crypto";
 import { generateTicketNumber } from "@/lib/tickets/generate-ticket-number";
+import { generateTicketQRCode } from "@/lib/qr-code/generator";
 
 /**
  * Generate unique registration code
@@ -192,13 +193,19 @@ export const registrationRouter = createTRPCRouter({
         const tickets = [];
         for (let i = 0; i < quantity; i++) {
           const ticketNumber = generateTicketNumber();
+          
+          // Generate QR code data URL during ticket creation
+          const qrCodeData = await generateTicketQRCode(ticketNumber, {
+            width: 400,
+          });
+          
           const ticket = await tx.ticket.create({
             data: {
               registrationId: registration.id,
               eventId: event.id,
               ticketTypeId: input.ticketTypeId,
               ticketNumber,
-              qrCodeData: ticketNumber, // QR code contains the ticket number
+              qrCodeData, // Store PNG data URL
               isAssigned: false,
               isCheckedIn: false,
             },
@@ -463,13 +470,19 @@ export const registrationRouter = createTRPCRouter({
 
         // Create ticket instance for manually added registration
         const ticketNumber = generateTicketNumber();
+        
+        // Generate QR code data URL during ticket creation
+        const qrCodeData = await generateTicketQRCode(ticketNumber, {
+          width: 400,
+        });
+        
         await tx.ticket.create({
           data: {
             registrationId: reg.id,
             eventId: input.eventId,
             ticketTypeId: input.ticketTypeId,
             ticketNumber,
-            qrCodeData: ticketNumber,
+            qrCodeData, // Store PNG data URL
             isAssigned: false,
             isCheckedIn: false,
           },
