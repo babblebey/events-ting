@@ -1630,6 +1630,9 @@ export const attendeesRouter = createTRPCRouter({
       );
 
       // Execute import with partial commit strategy
+      // Each row is processed in its own transaction (atomicity per row)
+      // Successful rows commit immediately, failed rows are logged and skipped
+      // This ensures valid data is saved even if some rows fail
       const importResults: ImportRowResult[] = [];
       let successCount = 0;
       let failureCount = 0;
@@ -1644,6 +1647,7 @@ export const attendeesRouter = createTRPCRouter({
         customData?: Record<string, unknown>;
       }> = [];
 
+      // Process each CSV row individually
       for (const row of validRows) {
         try {
           // Get ticket type ID
@@ -1670,17 +1674,34 @@ export const attendeesRouter = createTRPCRouter({
           }
 
           // Generate unique ticket number for this import
+          // Format: EVT-{YEAR}-{RANDOM8} (e.g., EVT-2025-ABC12345)
+          // This number serves triple purpose:
+          // 1. Ticket.ticketNumber - Unique identifier for the ticket
+          // 2. Ticket.qrCodeData - QR code payload for check-in scanning
+          // 3. Attendee.customData.registrationCode - Legacy registration reference
           const ticketNumber = generateTicketNumber();
 
-          // Prepare custom data with ticket number and unmapped fields
+          // Prepare custom data for attendee record
+          // Includes ticket number as registrationCode + all unmapped CSV columns
           const customData = {
             registrationCode: ticketNumber, // Use ticket number as registration code
             ...row.customData,
           };
 
-          // Create registration, ticket, and attendee in a transaction
+          // ========================================
+          // Transaction: Create Registration + Ticket + Attendee
+          // ========================================
+          // This transaction creates all required records for a complete import:
+          // 1. Registration - Buyer/purchase record (quantity=1)
+          // 2. Ticket - Ticket instance with unique number and QR code
+          // 3. Attendee - Person attending with details and custom fields
+          // 4. Ticket Update - Link attendee and mark as assigned
+          //
+          // All 4 operations must succeed or none (atomicity)
+          // Follows data model from Spec 003: Ticket/Attendee Separation
+          // ========================================
           await ctx.db.$transaction(async (tx) => {
-            // 1. Create Registration record (buyer)
+            // 1. Create Registration record (buyer = imported attendee)
             const registration = await tx.registration.create({
               data: {
                 eventId: input.eventId,
@@ -1713,28 +1734,35 @@ export const attendeesRouter = createTRPCRouter({
             });
 
             // 3. Create Attendee record with attendee details
+            // NOTE: emailStatus and customData moved from Registration to Attendee
+            // This aligns with data model where:
+            // - Registration = Purchase/buyer info
+            // - Attendee = Person details + email status + custom fields
             const attendee = await tx.attendee.create({
               data: {
                 name: row.name!,
-                email: row.email!.toLowerCase(),
+                email: row.email!.toLowerCase(), // Normalized to lowercase
                 emailStatus:
                   (row.emailStatus as "active" | "bounced" | "unsubscribed") ??
-                  "active",
-                customData,
+                  "active", // Default to 'active' if not provided in CSV
+                customData, // Contains registrationCode + unmapped CSV columns
                 userId: ctx.session?.user?.id,
               },
             });
 
             // 4. Update Ticket to link attendee and mark as assigned
+            // Links the ticket to the attendee and sets assignment metadata
+            // This completes the Registration → Ticket → Attendee chain
             await tx.ticket.update({
               where: { id: ticket.id },
               data: {
-                attendeeId: attendee.id,
-                isAssigned: true,
-                assignedAt: new Date(),
+                attendeeId: attendee.id, // Link to attendee
+                isAssigned: true, // Mark as assigned
+                assignedAt: new Date(), // Record assignment timestamp
               },
             });
           });
+          // Transaction complete - all records committed atomically
 
           importResults.push({
             row: row.rowNumber,
