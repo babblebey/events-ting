@@ -13,10 +13,6 @@ import {
   assignTicketInputSchema,
   unassignTicketInputSchema,
 } from "@/lib/validators";
-import {
-  generateTicketQRCode,
-  generateTicketQRCodeSVG,
-} from "@/lib/qr-code/generator";
 import { isValidTicketNumberFormat } from "@/lib/tickets/generate-ticket-number";
 import { sendEmail } from "@/server/services/email";
 import { TicketAssigned } from "emails/ticket-assigned";
@@ -383,11 +379,18 @@ export const ticketsRouter = createTRPCRouter({
   /**
    * Generate QR code for a ticket
    * Public procedure - anyone with ticket ID can generate QR code
+   *
+   * @deprecated This procedure is deprecated as QR codes are now pre-generated
+   * and stored during ticket creation. This endpoint is kept for historic reasons
+   * and backward compatibility. It now returns the stored QR code from the database
+   * instead of generating it on-the-fly. The format and size parameters are ignored.
+   *
+   * For new implementations, use ticket.qrCodeData directly from the ticket record.
    */
   generateQRCode: publicProcedure
     .input(generateQRCodeInputSchema)
     .query(async ({ ctx, input }) => {
-      const { ticketId, format, size } = input;
+      const { ticketId } = input;
 
       // Fetch ticket
       const ticket = await ctx.db.ticket.findUnique({
@@ -405,16 +408,10 @@ export const ticketsRouter = createTRPCRouter({
         });
       }
 
-      // Generate QR code in requested format
-      let qrCode: string;
-      if (format === "svg") {
-        qrCode = await generateTicketQRCodeSVG(ticket.qrCodeData);
-      } else {
-        qrCode = await generateTicketQRCode(ticket.qrCodeData, { width: size });
-      }
-
+      // Return stored QR code (format and size parameters are ignored)
+      // QR codes are now pre-generated as 400px PNG data URLs during ticket creation
       return {
-        qrCode,
+        qrCode: ticket.qrCodeData,
         ticketNumber: ticket.ticketNumber,
       };
     }),
