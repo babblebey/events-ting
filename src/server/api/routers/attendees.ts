@@ -1675,6 +1675,7 @@ export const attendeesRouter = createTRPCRouter({
         email: string;
         name: string;
         ticketNumber: string;
+        qrCodeData: string; // Pre-generated QR code data URL
         ticketType: string;
         ticketPrice: number;
         customData?: Record<string, unknown>;
@@ -1733,7 +1734,7 @@ export const attendeesRouter = createTRPCRouter({
           // All 4 operations must succeed or none (atomicity)
           // Follows data model from Spec 003: Ticket/Attendee Separation
           // ========================================
-          await ctx.db.$transaction(async (tx) => {
+          const createdTicket = await ctx.db.$transaction(async (tx) => {
             // 1. Create Registration record (buyer = imported attendee)
             const registration = await tx.registration.create({
               data: {
@@ -1799,6 +1800,9 @@ export const attendeesRouter = createTRPCRouter({
                 assignedAt: new Date(), // Record assignment timestamp
               },
             });
+
+            // Return ticket with qrCodeData for email sending
+            return ticket;
           });
           // Transaction complete - all records committed atomically
 
@@ -1822,6 +1826,7 @@ export const attendeesRouter = createTRPCRouter({
               email: row.email!,
               name: row.name!,
               ticketNumber,
+              qrCodeData: createdTicket.qrCodeData, // Include pre-generated QR code
               ticketType: ticketTypeName,
               ticketPrice,
               customData: row.customData,
@@ -1883,11 +1888,8 @@ export const attendeesRouter = createTRPCRouter({
 
           for (const task of emailTasks) {
             try {
-              // Generate QR code
-              const qrCodeDataUrl = await generateTicketQRCode(
-                task.ticketNumber,
-                { width: 400 },
-              );
+              // Use pre-generated QR code from ticket
+              const qrCodeDataUrl = task.qrCodeData;
 
               // Send email
               await sendEmail({

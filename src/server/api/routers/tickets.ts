@@ -654,13 +654,8 @@ export const ticketsRouter = createTRPCRouter({
         return { updatedTicket, newAttendee };
       });
 
-      // Generate QR code for email
-      const qrCodeDataUrl = await generateTicketQRCode(
-        result.updatedTicket.qrCodeData,
-        {
-          width: 400,
-        },
-      );
+      // Use pre-generated QR code from ticket
+      const qrCodeDataUrl = result.updatedTicket.qrCodeData;
 
       // Build ticket URL
       const ticketUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/tickets/${result.updatedTicket.id}`;
