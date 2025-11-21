@@ -278,7 +278,7 @@ export default async function AttendeeDetailPage({
               No custom registration fields configured for this event.
             </p>
             <Link href={`/${eventId}/settings/registration`}>
-              <Button color="blue" size="sm" className="mt-4">
+              <Button color="blue" size="sm" className="mx-auto mt-4">
                 Configure Registration Fields
               </Button>
             </Link>
