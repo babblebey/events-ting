@@ -10,8 +10,9 @@ import { checkModuleAccess } from "@/server/api/permissions";
 import Papa from "papaparse";
 import { randomBytes } from "crypto";
 import { sendEmail } from "@/server/services/email";
-import { RegistrationConfirmation } from "../../../../emails/registration-confirmation";
+import { TicketAssigned } from "../../../../emails/ticket-assigned";
 import { generateTicketNumber } from "@/lib/tickets/generate-ticket-number";
+import { generateTicketQRCode } from "@/lib/qr-code/generator";
 import {
   listAttendeesInputSchema,
   getAttendeeByIdInputSchema,
@@ -1490,6 +1491,7 @@ export const attendeesRouter = createTRPCRouter({
             select: {
               id: true,
               name: true,
+              price: true,
             },
           },
         },
@@ -1632,6 +1634,16 @@ export const attendeesRouter = createTRPCRouter({
       let successCount = 0;
       let failureCount = 0;
 
+      // Collect email tasks to send after import (with rate limiting)
+      const emailTasks: Array<{
+        email: string;
+        name: string;
+        ticketNumber: string;
+        ticketType: string;
+        ticketPrice: number;
+        customData?: Record<string, unknown>;
+      }> = [];
+
       for (const row of validRows) {
         try {
           // Get ticket type ID
@@ -1731,35 +1743,22 @@ export const attendeesRouter = createTRPCRouter({
           });
           successCount++;
 
-          // Send confirmation email if enabled
+          // Queue email task if enabled
           if (input.sendConfirmationEmails) {
-            // Get ticket type name for email
-            const ticketTypeName =
-              event.ticketTypes.find((tt) => tt.id === ticketTypeId)?.name ??
-              "General Admission";
+            // Get ticket type details for email
+            const ticketType = event.ticketTypes.find(
+              (tt) => tt.id === ticketTypeId,
+            );
+            const ticketTypeName = ticketType?.name ?? "General Admission";
+            const ticketPrice = ticketType?.price.toNumber() ?? 0;
 
-            // Fire and forget - don't block import on email failures
-            sendEmail({
-              to: row.email!,
-              subject: `Registration Confirmed: ${event.name}`,
-              react: RegistrationConfirmation({
-                attendeeName: row.name!,
-                eventName: event.name,
-                eventDate: event.startDate,
-                ticketType: ticketTypeName,
-                registrationCode: ticketNumber, // Use ticket number as registration code
-                eventUrl: `${process.env.NEXT_PUBLIC_APP_URL}/events/${event.slug}`,
-              }),
-              tags: [
-                { name: "type", value: "registration-confirmation" },
-                { name: "event", value: event.id },
-              ],
-            }).catch((error) => {
-              // Log error but don't fail import
-              console.error(
-                `[Import] Failed to send confirmation email to ${row.email}:`,
-                error,
-              );
+            emailTasks.push({
+              email: row.email!,
+              name: row.name!,
+              ticketNumber,
+              ticketType: ticketTypeName,
+              ticketPrice,
+              customData: row.customData,
             });
           }
         } catch (error) {
@@ -1802,6 +1801,76 @@ export const attendeesRouter = createTRPCRouter({
               ? "failed"
               : "completed",
       };
+
+      // Send queued emails sequentially with rate limiting (500ms delay between emails)
+      // This respects Resend's 2 req/sec rate limit
+      if (emailTasks.length > 0) {
+        console.log(
+          `[Import] Sending ${emailTasks.length} confirmation emails with rate limiting...`,
+        );
+
+        // Fire and forget - don't block the response
+        (async () => {
+          const appUrl =
+            process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+          const ticketUrl = `${appUrl}/events/${event.slug}/tickets`;
+
+          for (const task of emailTasks) {
+            try {
+              // Generate QR code
+              const qrCodeDataUrl = await generateTicketQRCode(
+                task.ticketNumber,
+                { width: 400 },
+              );
+
+              // Send email
+              await sendEmail({
+                to: task.email,
+                subject: `Your ticket for ${event.name} is ready! 🎟️`,
+                react: TicketAssigned({
+                  attendeeName: task.name,
+                  eventName: event.name,
+                  eventDate: event.startDate,
+                  eventEndDate: event.endDate ?? undefined,
+                  eventLocationType: event.locationType as
+                    | "virtual"
+                    | "hybrid"
+                    | "physical",
+                  eventLocationAddress: event.locationAddress ?? undefined,
+                  ticketType: task.ticketType,
+                  ticketNumber: task.ticketNumber,
+                  ticketPrice: task.ticketPrice,
+                  buyerName: task.name, // For imports, buyer = attendee
+                  buyerEmail: task.email,
+                  ticketUrl,
+                  qrCodeDataUrl,
+                  customData: task.customData,
+                }),
+                tags: [
+                  { name: "category", value: "ticket-assigned" },
+                  { name: "eventId", value: event.id },
+                ],
+              });
+
+              console.log(
+                `[Import] Sent ticket assignment email to ${task.email}`,
+              );
+
+              // Rate limiting: Wait 500ms between emails (2 per second)
+              await new Promise((resolve) => setTimeout(resolve, 500));
+            } catch (error) {
+              console.error(
+                `[Import] Failed to send ticket assignment email to ${task.email}:`,
+                error,
+              );
+            }
+          }
+
+          console.log(`[Import] Finished sending all confirmation emails`);
+        })().catch((error) => {
+          console.error("[Import] Email sending task failed:", error);
+        });
+      }
 
       // Cache result for idempotency
       if (input.idempotencyKey) {

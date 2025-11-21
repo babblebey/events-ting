@@ -11,7 +11,7 @@ import type { ReactElement } from "react";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Default sender email (should be verified domain in Resend)
-const DEFAULT_FROM = process.env.EMAIL_FROM ?? "events@yourdomain.com";
+const DEFAULT_FROM = process.env.RESEND_EMAIL_FROM ?? "events@yourdomain.com";
 
 /**
  * Email service interface
