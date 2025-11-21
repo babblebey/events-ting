@@ -3,68 +3,36 @@
 /**
  * QRCodeDisplay Component
  * Displays QR code for a ticket with download and print options
+ * Uses pre-generated QR codes stored in the database
  */
 
-import { useState, useEffect, useRef } from "react";
+import { useRef } from "react";
 import Image from "next/image";
-import { Button, Card, Spinner } from "flowbite-react";
+import { Button, Card } from "flowbite-react";
 import { HiDownload, HiPrinter } from "react-icons/hi";
-import { api } from "@/trpc/react";
 
 interface QRCodeDisplayProps {
-  ticketId?: string;
   ticketNumber: string;
-  qrCodeDataUrl?: string; // Pre-generated QR code data URL (bypasses API fetch)
-  format?: "svg" | "dataUrl";
-  size?: number | "small" | "medium" | "large";
+  qrCodeData: string; // Pre-generated QR code data URL from database
+  size?: "small" | "medium" | "large";
   showActions?: boolean;
   attendeeName?: string;
   eventName?: string;
 }
 
 export function QRCodeDisplay({
-  ticketId,
   ticketNumber,
-  qrCodeDataUrl,
-  format = "dataUrl",
-  size = 300,
+  qrCodeData,
+  size = "medium",
   showActions = true,
   attendeeName,
   eventName,
 }: QRCodeDisplayProps) {
-  const [qrCodeData, setQrCodeData] = useState<string | null>(
-    qrCodeDataUrl ?? null,
-  );
   const qrCodeRef = useRef<HTMLDivElement>(null);
 
-  // Convert size string to number
-  const numericSize =
-    typeof size === "string"
-      ? size === "small"
-        ? 200
-        : size === "medium"
-          ? 300
-          : 400
-      : size;
-
-  const { data, isLoading, error } = api.tickets.generateQRCode.useQuery(
-    {
-      ticketId: ticketId!,
-      format,
-      size: numericSize,
-    },
-    {
-      enabled: !!ticketId && !qrCodeDataUrl, // Only fetch if no direct QR code provided
-    },
-  );
-
-  useEffect(() => {
-    if (qrCodeDataUrl) {
-      setQrCodeData(qrCodeDataUrl);
-    } else if (data?.qrCode) {
-      setQrCodeData(data.qrCode);
-    }
-  }, [data, qrCodeDataUrl]);
+  // Convert size string to pixel width for display
+  const displaySize =
+    size === "small" ? 200 : size === "medium" ? 300 : 400;
 
   const handleDownload = () => {
     if (!qrCodeData) return;
@@ -135,7 +103,7 @@ export function QRCodeDisplay({
             ${eventName ? `<h1>${eventName}</h1>` : ""}
             ${attendeeName ? `<h2>${attendeeName}</h2>` : ""}
             <div class="qr-code">
-              ${format === "svg" ? qrCodeData : `<img src="${qrCodeData}" alt="Ticket QR Code" />`}
+              <img src="${qrCodeData}" alt="Ticket QR Code" />
             </div>
             <p class="ticket-number">${ticketNumber}</p>
           </div>
@@ -153,35 +121,6 @@ export function QRCodeDisplay({
       printWindow.close();
     }, 250);
   };
-
-  if (isLoading) {
-    return (
-      <Card>
-        <div className="flex flex-col items-center justify-center gap-4 p-8">
-          <Spinner size="xl" />
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Generating QR code...
-          </p>
-        </div>
-      </Card>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <div className="flex flex-col items-center justify-center gap-4 p-8">
-          <div className="rounded-lg bg-red-50 p-4 text-sm text-red-800 dark:bg-gray-800 dark:text-red-400">
-            <p>Failed to generate QR code: {error.message}</p>
-          </div>
-        </div>
-      </Card>
-    );
-  }
-
-  if (!qrCodeData) {
-    return null;
-  }
 
   return (
     <Card>
@@ -207,20 +146,13 @@ export function QRCodeDisplay({
           ref={qrCodeRef}
           className="flex flex-col items-center gap-4 rounded-lg border-2 border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
         >
-          {format === "svg" ? (
-            <div
-              dangerouslySetInnerHTML={{ __html: qrCodeData }}
-              className="qr-code-svg"
-            />
-          ) : (
-            <Image
-              src={qrCodeData}
-              alt="Ticket QR Code"
-              width={300}
-              height={300}
-              className="h-auto w-full max-w-xs"
-            />
-          )}
+          <Image
+            src={qrCodeData}
+            alt="Ticket QR Code"
+            width={displaySize}
+            height={displaySize}
+            className="h-auto w-full max-w-xs"
+          />
 
           {/* Ticket Number */}
           <div className="text-center">

@@ -46,11 +46,14 @@ type TicketData = {
     customData?: unknown;
   } | null;
   registration: {
+    name?: string | null;
     email: string;
   };
   ticketNumber: string;
+  qrCodeData: string;
   isAssigned: boolean;
   isCheckedIn: boolean;
+  checkedInAt?: Date | string | null;
   assignedAt?: Date | string | null;
 };
 
@@ -77,25 +80,13 @@ export default function IndividualTicketViewPage() {
 
   const ticket = ticketData as TicketData | undefined;
 
-  // Generate QR code
-  const { data: qrCodeData } = api.tickets.generateQRCode.useQuery(
-    {
-      ticketId,
-      format: "dataUrl",
-      size: 400,
-    },
-    {
-      enabled: !!ticketId && !!ticket,
-    },
-  );
-
   const handleDownloadQRCode = () => {
-    if (!qrCodeData?.qrCode) return;
+    if (!ticket?.qrCodeData) return;
 
     // Create a link element and trigger download
     const link = document.createElement("a");
-    link.href = qrCodeData.qrCode;
-    link.download = `ticket-${ticket?.ticketNumber ?? "qr-code"}.png`;
+    link.href = ticket.qrCodeData;
+    link.download = `ticket-${ticket.ticketNumber}.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -337,13 +328,13 @@ export default function IndividualTicketViewPage() {
           <Card>
             <div className="space-y-6">
               {/* QR Code */}
-              {qrCodeData && (
+              {ticket.qrCodeData && (
                 <div>
                   <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
                     Your QR Code
                   </h3>
                   <QRCodeDisplay
-                    qrCodeDataUrl={qrCodeData.qrCode}
+                    qrCodeData={ticket.qrCodeData}
                     ticketNumber={ticket.ticketNumber}
                     size="large"
                     showActions={false}
@@ -358,7 +349,7 @@ export default function IndividualTicketViewPage() {
               <Button
                 color="light"
                 onClick={handleDownloadQRCode}
-                disabled={!qrCodeData}
+                disabled={!ticket.qrCodeData}
                 className="w-full"
               >
                 <HiDownload className="mr-2 h-4 w-4" />
