@@ -4,7 +4,11 @@
  */
 
 import { TRPCError } from "@trpc/server";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
 import { z } from "zod";
 import { checkModuleAccess } from "@/server/api/permissions";
 import Papa from "papaparse";
@@ -452,7 +456,6 @@ function detectInFileDuplicates(rows: MappedRow[]): ValidationError[] {
 }
 
 export const attendeesRouter = createTRPCRouter({
-  
   /**
    * List attendees for an event
    * Protected procedure - event organizer only
@@ -546,7 +549,10 @@ export const attendeesRouter = createTRPCRouter({
           id: attendee.id,
           name: attendee.name,
           email: attendee.email,
-          emailStatus: attendee.emailStatus as "active" | "bounced" | "unsubscribed",
+          emailStatus: attendee.emailStatus as
+            | "active"
+            | "bounced"
+            | "unsubscribed",
           customData: attendee.customData as Record<string, unknown> | null,
           ticket: {
             id: attendee.ticket.id,
@@ -642,7 +648,10 @@ export const attendeesRouter = createTRPCRouter({
         id: attendee.id,
         name: attendee.name,
         email: attendee.email,
-        emailStatus: attendee.emailStatus as "active" | "bounced" | "unsubscribed",
+        emailStatus: attendee.emailStatus as
+          | "active"
+          | "bounced"
+          | "unsubscribed",
         customData: attendee.customData as Record<string, unknown> | null,
         ticket: {
           id: attendee.ticket.id,
@@ -764,23 +773,28 @@ export const attendeesRouter = createTRPCRouter({
           // Convert response to string, handling arrays and objects
           let responseStr: string;
           if (Array.isArray(response)) {
-            responseStr = response.map(item => 
-              typeof item === "string" ? item : JSON.stringify(item)
-            ).join(", ");
+            responseStr = response
+              .map((item) =>
+                typeof item === "string" ? item : JSON.stringify(item),
+              )
+              .join(", ");
           } else if (typeof response === "object") {
             responseStr = JSON.stringify(response);
           } else if (typeof response === "string") {
             responseStr = response;
-          } else if (typeof response === "number" || typeof response === "boolean") {
+          } else if (
+            typeof response === "number" ||
+            typeof response === "boolean"
+          ) {
             responseStr = String(response);
           } else {
             responseStr = "";
           }
-          
+
           if (responseStr) {
             responseCounts.set(
               responseStr,
-              (responseCounts.get(responseStr) ?? 0) + 1
+              (responseCounts.get(responseStr) ?? 0) + 1,
             );
             totalResponses++;
           }
@@ -808,7 +822,12 @@ export const attendeesRouter = createTRPCRouter({
   exportList: protectedProcedure
     .input(exportAttendeesInputSchema)
     .query(async ({ ctx, input }) => {
-      const { eventId, emailStatus, includeCustomFields, includeCheckInStatus } = input;
+      const {
+        eventId,
+        emailStatus,
+        includeCustomFields,
+        includeCheckInStatus,
+      } = input;
 
       // Verify user is event organizer
       await checkModuleAccess({
@@ -861,7 +880,7 @@ export const attendeesRouter = createTRPCRouter({
 
       // Build CSV headers
       const headers = ["Name", "Email", "Ticket Number", "Ticket Type"];
-      
+
       if (includeCheckInStatus) {
         headers.push("Check-In Status", "Check-In Time");
       }
@@ -885,7 +904,7 @@ export const attendeesRouter = createTRPCRouter({
 
       // Build CSV rows
       const rows: string[][] = [];
-      
+
       for (const attendee of attendees) {
         if (!attendee.ticket) continue;
 
@@ -897,30 +916,38 @@ export const attendeesRouter = createTRPCRouter({
         ];
 
         if (includeCheckInStatus) {
-          row.push(attendee.ticket.isCheckedIn ? "Checked In" : "Not Checked In");
+          row.push(
+            attendee.ticket.isCheckedIn ? "Checked In" : "Not Checked In",
+          );
           row.push(
             attendee.ticket.checkedInAt
               ? attendee.ticket.checkedInAt.toISOString()
-              : ""
+              : "",
           );
         }
 
         // Add custom field values (if includeCustomFields)
         if (includeCustomFields) {
-          const customData = (attendee.customData as Record<string, unknown>) ?? {};
+          const customData =
+            (attendee.customData as Record<string, unknown>) ?? {};
           for (const fieldName of Array.from(customFieldNames).sort()) {
             const value = customData[fieldName];
             let valueStr = "";
             if (value !== undefined && value !== null) {
               if (Array.isArray(value)) {
-                valueStr = value.map(item => 
-                  typeof item === "string" ? item : JSON.stringify(item)
-                ).join("; ");
+                valueStr = value
+                  .map((item) =>
+                    typeof item === "string" ? item : JSON.stringify(item),
+                  )
+                  .join("; ");
               } else if (typeof value === "object") {
                 valueStr = JSON.stringify(value);
               } else if (typeof value === "string") {
                 valueStr = value;
-              } else if (typeof value === "number" || typeof value === "boolean") {
+              } else if (
+                typeof value === "number" ||
+                typeof value === "boolean"
+              ) {
                 valueStr = String(value);
               }
             }
@@ -1065,8 +1092,14 @@ export const attendeesRouter = createTRPCRouter({
           id: updatedAttendee.id,
           name: updatedAttendee.name,
           email: updatedAttendee.email,
-          emailStatus: updatedAttendee.emailStatus as "active" | "bounced" | "unsubscribed",
-          customData: updatedAttendee.customData as Record<string, unknown> | null,
+          emailStatus: updatedAttendee.emailStatus as
+            | "active"
+            | "bounced"
+            | "unsubscribed",
+          customData: updatedAttendee.customData as Record<
+            string,
+            unknown
+          > | null,
           ticket: {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
             id: ticket.id,
@@ -1100,7 +1133,7 @@ export const attendeesRouter = createTRPCRouter({
 
       // TODO: Add webhook signature validation when implementing Resend webhook endpoint
       // For now, this is a protected procedure that requires authentication
-      
+
       // Find all attendees with this email for the event
       const attendees = await ctx.db.attendee.findMany({
         where: {
@@ -1124,7 +1157,7 @@ export const attendeesRouter = createTRPCRouter({
 
       // Update email status for all matching attendees
       const attendeeIds = attendees.map((a) => a.id);
-      
+
       await ctx.db.attendee.updateMany({
         where: {
           id: {
@@ -1145,7 +1178,7 @@ export const attendeesRouter = createTRPCRouter({
           status,
           reason,
           attendeeIds,
-        }
+        },
       );
 
       return {
@@ -1153,7 +1186,7 @@ export const attendeesRouter = createTRPCRouter({
         attendeeIds,
       };
     }),
-  
+
   /**
    * Parse CSV file and return preview with suggested field mappings
    */

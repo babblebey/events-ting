@@ -62,11 +62,13 @@ export function RegistrationSummary({
 }: RegistrationSummaryProps) {
   // Calculate summary statistics
   const totalTickets = registration.tickets.length;
-  const assignedTickets = registration.tickets.filter((t) => t.isAssigned)
-    .length;
+  const assignedTickets = registration.tickets.filter(
+    (t) => t.isAssigned,
+  ).length;
   const unassignedTickets = totalTickets - assignedTickets;
-  const checkedInTickets = registration.tickets.filter((t) => t.isCheckedIn)
-    .length;
+  const checkedInTickets = registration.tickets.filter(
+    (t) => t.isCheckedIn,
+  ).length;
 
   // Calculate total price
   const totalPrice = registration.ticketType.price * registration.quantity;
@@ -201,7 +203,9 @@ export function RegistrationSummary({
                     Price per Ticket:
                   </span>
                   <span className="font-medium text-gray-900 dark:text-white">
-                    {isFree ? "FREE" : `$${registration.ticketType.price.toFixed(2)}`}
+                    {isFree
+                      ? "FREE"
+                      : `$${registration.ticketType.price.toFixed(2)}`}
                   </span>
                 </div>
                 <div className="flex justify-between border-t pt-2">
@@ -236,7 +240,7 @@ export function RegistrationSummary({
           {/* Progress Bar */}
           <div className="w-full rounded-full bg-gray-200 dark:bg-gray-700">
             <div
-              className="rounded-full bg-blue-600 py-1 text-center text-xs font-medium leading-none text-white"
+              className="rounded-full bg-blue-600 py-1 text-center text-xs leading-none font-medium text-white"
               style={{
                 width: `${totalTickets > 0 ? (assignedTickets / totalTickets) * 100 : 0}%`,
               }}

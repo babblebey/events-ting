@@ -201,7 +201,8 @@ export function ValidationStep({
                 }
               >
                 <option value="skip">
-                  Skip duplicates (recommended) - Don&apos;t import duplicate emails
+                  Skip duplicates (recommended) - Don&apos;t import duplicate
+                  emails
                 </option>
                 <option value="create">
                   Create duplicates - Import all rows even if email exists
@@ -326,7 +327,9 @@ export function ValidationStep({
             onClick={handleNext}
             disabled={!canProceed || validateImport.isPending || isImporting}
           >
-            {isImporting ? "Starting Import..." : `Import ${validationResult?.validRows ?? 0} Attendees`}
+            {isImporting
+              ? "Starting Import..."
+              : `Import ${validationResult?.validRows ?? 0} Attendees`}
           </Button>
         </div>
       </div>

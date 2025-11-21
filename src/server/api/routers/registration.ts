@@ -207,7 +207,8 @@ export const registrationRouter = createTRPCRouter({
         }
 
         // Use first ticket number as registration reference (for backward compatibility)
-        const referenceTicketNumber = tickets[0]?.ticketNumber ?? registrationCode;
+        const referenceTicketNumber =
+          tickets[0]?.ticketNumber ?? registrationCode;
 
         return {
           registrationId: registration.id,

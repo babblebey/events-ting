@@ -6,7 +6,15 @@
  */
 
 import { useState, useEffect } from "react";
-import { Modal, ModalHeader, ModalBody, Button, Label, TextInput, Alert } from "flowbite-react";
+import {
+  Modal,
+  ModalHeader,
+  ModalBody,
+  Button,
+  Label,
+  TextInput,
+  Alert,
+} from "flowbite-react";
 import {
   HiExclamationCircle,
   HiInformationCircle,
@@ -130,17 +138,20 @@ export function ReassignmentModal({
           >
             <div>
               <span className="font-medium">
-                {showConfirmation ? "Confirm Reassignment:" : "Current Assignment:"}
+                {showConfirmation
+                  ? "Confirm Reassignment:"
+                  : "Current Assignment:"}
               </span>
               <p className="mt-2 text-sm">
                 This ticket is currently assigned to{" "}
-                <strong>{ticket.attendee.name}</strong> ({ticket.attendee.email}).
+                <strong>{ticket.attendee.name}</strong> ({ticket.attendee.email}
+                ).
               </p>
               {showConfirmation && (
                 <p className="mt-2 text-sm">
-                  ⚠️ Reassigning this ticket will permanently delete the previous
-                  attendee&apos;s information for privacy reasons. This action cannot be
-                  undone.
+                  ⚠️ Reassigning this ticket will permanently delete the
+                  previous attendee&apos;s information for privacy reasons. This
+                  action cannot be undone.
                 </p>
               )}
             </div>
@@ -153,8 +164,9 @@ export function ReassignmentModal({
             <div className="text-sm">
               <p className="font-medium">Privacy Notice:</p>
               <p className="mt-1">
-                If you reassign this ticket, the previous attendee&apos;s information
-                will be permanently deleted for privacy compliance (GDPR).
+                If you reassign this ticket, the previous attendee&apos;s
+                information will be permanently deleted for privacy compliance
+                (GDPR).
               </p>
             </div>
           </Alert>
@@ -232,7 +244,10 @@ export function ReassignmentModal({
                     type="text"
                     value={(customData[field.id] as string) || ""}
                     onChange={(e) =>
-                      setCustomData({ ...customData, [field.id]: e.target.value })
+                      setCustomData({
+                        ...customData,
+                        [field.id]: e.target.value,
+                      })
                     }
                     required={field.required}
                     disabled={assignMutation.isPending}
@@ -244,7 +259,10 @@ export function ReassignmentModal({
                     id={field.id}
                     value={(customData[field.id] as string) || ""}
                     onChange={(e) =>
-                      setCustomData({ ...customData, [field.id]: e.target.value })
+                      setCustomData({
+                        ...customData,
+                        [field.id]: e.target.value,
+                      })
                     }
                     required={field.required}
                     disabled={assignMutation.isPending}
@@ -295,30 +313,34 @@ export function ReassignmentModal({
             </div>
 
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Are you sure you want to reassign this ticket? The previous attendee
-              data will be permanently deleted.
+              Are you sure you want to reassign this ticket? The previous
+              attendee data will be permanently deleted.
             </p>
           </div>
         )}
       </ModalBody>
 
       <div className="flex justify-end gap-3 border-t border-gray-200 p-6 dark:border-gray-700">
-          <Button color="gray" onClick={handleCancel} disabled={assignMutation.isPending}>
-            {showConfirmation ? "Back" : "Cancel"}
-          </Button>
-          <Button
-            color={showConfirmation ? "failure" : "blue"}
-            onClick={handleSubmit}
-            disabled={assignMutation.isPending ?? (!name ?? !email)}
-          >
-            {assignMutation.isPending
-              ? "Assigning..."
-              : showConfirmation
-                ? "Confirm Reassignment"
-                : ticket.attendee
-                  ? "Continue"
-                  : "Assign Ticket"}
-          </Button>
+        <Button
+          color="gray"
+          onClick={handleCancel}
+          disabled={assignMutation.isPending}
+        >
+          {showConfirmation ? "Back" : "Cancel"}
+        </Button>
+        <Button
+          color={showConfirmation ? "failure" : "blue"}
+          onClick={handleSubmit}
+          disabled={assignMutation.isPending ?? !name ?? !email}
+        >
+          {assignMutation.isPending
+            ? "Assigning..."
+            : showConfirmation
+              ? "Confirm Reassignment"
+              : ticket.attendee
+                ? "Continue"
+                : "Assign Ticket"}
+        </Button>
       </div>
     </Modal>
   );

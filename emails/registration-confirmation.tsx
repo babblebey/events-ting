@@ -79,16 +79,20 @@ export const RegistrationConfirmation = ({
             {/* Ticket Assignment Notice */}
             {hasMultipleTickets && manageTicketsUrl && (
               <Section style={ticketNoticeBox}>
-                <Text style={ticketNoticeTitle}>📋 Next Step: Assign Your Tickets</Text>
+                <Text style={ticketNoticeTitle}>
+                  📋 Next Step: Assign Your Tickets
+                </Text>
                 <Text style={ticketNoticeText}>
-                  You purchased {ticketCount} tickets. Please assign each ticket to an attendee 
-                  (including yourself) so they can receive their individual ticket with QR code.
+                  You purchased {ticketCount} tickets. Please assign each ticket
+                  to an attendee (including yourself) so they can receive their
+                  individual ticket with QR code.
                 </Text>
                 <Button style={manageButton} href={manageTicketsUrl}>
                   Manage Your Tickets
                 </Button>
                 <Text style={ticketNoticeHelp}>
-                  Each attendee will receive their own ticket via email with a unique QR code for check-in.
+                  Each attendee will receive their own ticket via email with a
+                  unique QR code for check-in.
                 </Text>
               </Section>
             )}
@@ -107,8 +111,8 @@ export const RegistrationConfirmation = ({
             <Hr style={hr} />
 
             <Text style={footer}>
-              If you have any questions, please don&apos;t hesitate to reach out to
-              the event organizer.
+              If you have any questions, please don&apos;t hesitate to reach out
+              to the event organizer.
             </Text>
 
             <Text style={footer}>See you at the event! 🚀</Text>

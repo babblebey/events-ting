@@ -5,11 +5,7 @@
  */
 
 import { formatInTimeZone, toZonedTime } from "date-fns-tz";
-import {
-  differenceInMinutes,
-  addMinutes,
-  toDate,
-} from "date-fns";
+import { differenceInMinutes, addMinutes, toDate } from "date-fns";
 
 /**
  * Format a UTC date in the specified timezone

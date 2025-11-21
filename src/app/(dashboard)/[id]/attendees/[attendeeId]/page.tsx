@@ -6,7 +6,14 @@
 import { api } from "@/trpc/server";
 import { Card, Badge, Button } from "flowbite-react";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { HiArrowLeft, HiMail, HiTicket, HiCheckCircle, HiXCircle, HiClock } from "react-icons/hi";
+import {
+  HiArrowLeft,
+  HiMail,
+  HiTicket,
+  HiCheckCircle,
+  HiXCircle,
+  HiClock,
+} from "react-icons/hi";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 
@@ -44,21 +51,26 @@ export default async function AttendeeDetailPage({
   // Format custom field responses
   const customResponses = customFieldDefinitions.map((field) => {
     const response = attendee.customData?.[field.id];
-    let displayValue = 'Not provided';
-    const hasValue = response !== undefined && response !== null && response !== '';
-    
+    let displayValue = "Not provided";
+    const hasValue =
+      response !== undefined && response !== null && response !== "";
+
     if (hasValue) {
       if (Array.isArray(response)) {
-        displayValue = response.join(', ');
-      } else if (typeof response === 'object') {
+        displayValue = response.join(", ");
+      } else if (typeof response === "object") {
         displayValue = JSON.stringify(response);
-      } else if (typeof response === 'string' || typeof response === 'number' || typeof response === 'boolean') {
+      } else if (
+        typeof response === "string" ||
+        typeof response === "number" ||
+        typeof response === "boolean"
+      ) {
         displayValue = String(response);
       } else {
-        displayValue = 'Invalid response format';
+        displayValue = "Invalid response format";
       }
     }
-    
+
     return {
       label: field.label,
       value: displayValue,
@@ -67,9 +79,9 @@ export default async function AttendeeDetailPage({
   });
 
   const emailStatusColor = {
-    active: 'success' as const,
-    bounced: 'failure' as const,
-    unsubscribed: 'warning' as const,
+    active: "success" as const,
+    bounced: "failure" as const,
+    unsubscribed: "warning" as const,
   };
 
   return (
@@ -141,7 +153,8 @@ export default async function AttendeeDetailPage({
               </dt>
               <dd className="mt-1">
                 <Badge color={emailStatusColor[attendee.emailStatus]} size="sm">
-                  {attendee.emailStatus.charAt(0).toUpperCase() + attendee.emailStatus.slice(1)}
+                  {attendee.emailStatus.charAt(0).toUpperCase() +
+                    attendee.emailStatus.slice(1)}
                 </Badge>
               </dd>
             </div>
@@ -171,7 +184,7 @@ export default async function AttendeeDetailPage({
               </dt>
               <dd className="mt-1 flex items-center gap-2">
                 <HiTicket className="h-5 w-5 text-gray-400" />
-                <code className="rounded bg-gray-100 px-2 py-1 text-sm font-mono text-gray-900 dark:bg-gray-800 dark:text-white">
+                <code className="rounded bg-gray-100 px-2 py-1 font-mono text-sm text-gray-900 dark:bg-gray-800 dark:text-white">
                   {attendee.ticket.ticketNumber}
                 </code>
               </dd>
@@ -196,7 +209,11 @@ export default async function AttendeeDetailPage({
                       Checked in
                       {attendee.ticket.checkedInAt && (
                         <span className="ml-1 text-sm text-gray-500">
-                          ({formatDistanceToNow(attendee.ticket.checkedInAt, { addSuffix: true })})
+                          (
+                          {formatDistanceToNow(attendee.ticket.checkedInAt, {
+                            addSuffix: true,
+                          })}
+                          )
                         </span>
                       )}
                     </span>
@@ -204,7 +221,9 @@ export default async function AttendeeDetailPage({
                 ) : (
                   <>
                     <HiXCircle className="h-5 w-5 text-gray-400" />
-                    <span className="text-base text-gray-500">Not checked in</span>
+                    <span className="text-base text-gray-500">
+                      Not checked in
+                    </span>
                   </>
                 )}
               </dd>
@@ -240,7 +259,9 @@ export default async function AttendeeDetailPage({
                 <dt className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {response.label}
                 </dt>
-                <dd className={`mt-2 text-base ${response.hasValue ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 italic'}`}>
+                <dd
+                  className={`mt-2 text-base ${response.hasValue ? "text-gray-900 dark:text-white" : "text-gray-500 italic dark:text-gray-400"}`}
+                >
                   {response.value}
                 </dd>
               </div>
@@ -252,7 +273,7 @@ export default async function AttendeeDetailPage({
       {/* No Custom Fields Message */}
       {customResponses.length === 0 && (
         <Card>
-          <div className="text-center py-8">
+          <div className="py-8 text-center">
             <p className="text-gray-600 dark:text-gray-400">
               No custom registration fields configured for this event.
             </p>
@@ -296,7 +317,9 @@ export default async function AttendeeDetailPage({
                   Checked In
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {formatDistanceToNow(attendee.ticket.checkedInAt, { addSuffix: true })}
+                  {formatDistanceToNow(attendee.ticket.checkedInAt, {
+                    addSuffix: true,
+                  })}
                 </p>
               </div>
             </div>

@@ -271,29 +271,30 @@ export default function TicketAssignmentPage() {
           </div>
 
           {/* Assignment Cutoff Warning */}
-          {event?.assignmentCutoffType && event.assignmentCutoffType !== "event_start" && (
-            <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-800 dark:bg-yellow-900/20">
-              <div className="flex items-start gap-2">
-                <HiInformationCircle className="mt-0.5 h-5 w-5 shrink-0 text-yellow-600 dark:text-yellow-400" />
-                <div className="text-sm text-yellow-800 dark:text-yellow-300">
-                  <p className="font-medium">Assignment Deadline</p>
-                  <p className="mt-1">
-                    {event.assignmentCutoffType === "1h_before" &&
-                      "Tickets must be assigned at least 1 hour before the event starts."}
-                    {event.assignmentCutoffType === "24h_before" &&
-                      "Tickets must be assigned at least 24 hours before the event starts."}
-                    {event.assignmentCutoffType === "custom" &&
-                      event.assignmentCutoffTime &&
-                      `Tickets must be assigned by ${formatDate(
-                        event.assignmentCutoffTime,
-                        timezone,
-                        "PPp",
-                      )}.`}
-                  </p>
+          {event?.assignmentCutoffType &&
+            event.assignmentCutoffType !== "event_start" && (
+              <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-800 dark:bg-yellow-900/20">
+                <div className="flex items-start gap-2">
+                  <HiInformationCircle className="mt-0.5 h-5 w-5 shrink-0 text-yellow-600 dark:text-yellow-400" />
+                  <div className="text-sm text-yellow-800 dark:text-yellow-300">
+                    <p className="font-medium">Assignment Deadline</p>
+                    <p className="mt-1">
+                      {event.assignmentCutoffType === "1h_before" &&
+                        "Tickets must be assigned at least 1 hour before the event starts."}
+                      {event.assignmentCutoffType === "24h_before" &&
+                        "Tickets must be assigned at least 24 hours before the event starts."}
+                      {event.assignmentCutoffType === "custom" &&
+                        event.assignmentCutoffTime &&
+                        `Tickets must be assigned by ${formatDate(
+                          event.assignmentCutoffTime,
+                          timezone,
+                          "PPp",
+                        )}.`}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
       </Card>
 
@@ -319,12 +320,13 @@ export default function TicketAssignmentPage() {
           <div className="text-sm text-blue-800 dark:text-blue-300">
             <p className="font-medium">What happens next?</p>
             <ul className="mt-2 list-inside list-disc space-y-1">
-              <li>The attendee will receive an email with their ticket details</li>
               <li>
-                They&apos;ll get a unique QR code for event check-in
+                The attendee will receive an email with their ticket details
               </li>
+              <li>They&apos;ll get a unique QR code for event check-in</li>
               <li>
-                All event communications will be sent to the attendee&apos;s email
+                All event communications will be sent to the attendee&apos;s
+                email
               </li>
               <li>
                 You can reassign the ticket anytime before the event (unless

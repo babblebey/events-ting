@@ -735,7 +735,7 @@ export type {
   CustomFieldResponses,
   FieldValidationResult,
   FormValidationResult,
-} from './validators/custom-fields';
+} from "./validators/custom-fields";
 
 export {
   CUSTOM_FIELD_TYPES,
@@ -746,7 +746,7 @@ export {
   validateCustomFieldResponses,
   createCustomFieldSchema,
   sanitizeCustomFieldResponses,
-} from './validators/custom-fields';
+} from "./validators/custom-fields";
 
 // ============================================================================
 // ATTENDEE VALIDATION (Ticket Separation Feature - User Story 2)
@@ -757,7 +757,7 @@ export {
  */
 export const listAttendeesInputSchema = z.object({
   eventId: z.string().cuid(),
-  emailStatus: z.enum(['active', 'bounced', 'unsubscribed']).optional(),
+  emailStatus: z.enum(["active", "bounced", "unsubscribed"]).optional(),
   search: z.string().optional(),
   limit: z.number().min(1).max(100).default(20),
   cursor: z.string().optional(),
@@ -785,7 +785,7 @@ export const updateAttendeeInputSchema = z.object({
  */
 export const exportAttendeesInputSchema = z.object({
   eventId: z.string().cuid(),
-  emailStatus: z.enum(['active', 'bounced', 'unsubscribed']).optional(),
+  emailStatus: z.enum(["active", "bounced", "unsubscribed"]).optional(),
   includeCustomFields: z.boolean().default(true),
   includeCheckInStatus: z.boolean().default(true),
 });
@@ -804,7 +804,7 @@ export const getCustomFieldResponsesInputSchema = z.object({
 export const updateEmailStatusInputSchema = z.object({
   email: z.string().email(),
   eventId: z.string().cuid(),
-  status: z.enum(['active', 'bounced', 'unsubscribed']),
+  status: z.enum(["active", "bounced", "unsubscribed"]),
   reason: z.string().optional(),
 });
 
@@ -815,7 +815,7 @@ export const attendeeOutputSchema = z.object({
   id: z.string(),
   name: z.string(),
   email: z.string(),
-  emailStatus: z.enum(['active', 'bounced', 'unsubscribed']),
+  emailStatus: z.enum(["active", "bounced", "unsubscribed"]),
   customData: z.record(z.any()).nullable(),
   ticket: z.object({
     id: z.string(),
@@ -868,10 +868,12 @@ export const getCustomFieldResponsesOutputSchema = z.object({
   fieldId: z.string(),
   fieldLabel: z.string(),
   fieldType: z.string(),
-  responses: z.array(z.object({
-    value: z.string(),
-    count: z.number(),
-  })),
+  responses: z.array(
+    z.object({
+      value: z.string(),
+      count: z.number(),
+    }),
+  ),
   totalResponses: z.number(),
 });
 
@@ -888,12 +890,20 @@ export type ListAttendeesInput = z.infer<typeof listAttendeesInputSchema>;
 export type GetAttendeeByIdInput = z.infer<typeof getAttendeeByIdInputSchema>;
 export type UpdateAttendeeInput = z.infer<typeof updateAttendeeInputSchema>;
 export type ExportAttendeesInput = z.infer<typeof exportAttendeesInputSchema>;
-export type GetCustomFieldResponsesInput = z.infer<typeof getCustomFieldResponsesInputSchema>;
-export type UpdateEmailStatusInput = z.infer<typeof updateEmailStatusInputSchema>;
+export type GetCustomFieldResponsesInput = z.infer<
+  typeof getCustomFieldResponsesInputSchema
+>;
+export type UpdateEmailStatusInput = z.infer<
+  typeof updateEmailStatusInputSchema
+>;
 export type AttendeeOutput = z.infer<typeof attendeeOutputSchema>;
 export type ListAttendeesOutput = z.infer<typeof listAttendeesOutputSchema>;
 export type GetAttendeeByIdOutput = z.infer<typeof getAttendeeByIdOutputSchema>;
 export type UpdateAttendeeOutput = z.infer<typeof updateAttendeeOutputSchema>;
 export type ExportAttendeesOutput = z.infer<typeof exportAttendeesOutputSchema>;
-export type GetCustomFieldResponsesOutput = z.infer<typeof getCustomFieldResponsesOutputSchema>;
-export type UpdateEmailStatusOutput = z.infer<typeof updateEmailStatusOutputSchema>;
+export type GetCustomFieldResponsesOutput = z.infer<
+  typeof getCustomFieldResponsesOutputSchema
+>;
+export type UpdateEmailStatusOutput = z.infer<
+  typeof updateEmailStatusOutputSchema
+>;

@@ -81,7 +81,8 @@ async function AttendeeExportPage({ params }: AttendeeExportPageProps) {
                 <li>Custom registration fields (if enabled)</li>
               </ul>
               <p className="mt-2">
-                <strong>Total Attendees:</strong> {totalAttendees.toLocaleString()}
+                <strong>Total Attendees:</strong>{" "}
+                {totalAttendees.toLocaleString()}
               </p>
             </div>
           </div>
@@ -98,16 +99,14 @@ async function AttendeeExportPage({ params }: AttendeeExportPageProps) {
         </h3>
         <ul className="mt-2 space-y-1 text-sm text-gray-600 dark:text-gray-400">
           <li>
-            • Use the exported CSV in Excel, Google Sheets, or other
-            spreadsheet applications
+            • Use the exported CSV in Excel, Google Sheets, or other spreadsheet
+            applications
           </li>
           <li>
             • Filter by email status to identify bounced or unsubscribed
             contacts
           </li>
-          <li>
-            • Include check-in status to track attendance and no-shows
-          </li>
+          <li>• Include check-in status to track attendance and no-shows</li>
           <li>
             • Include custom fields to analyze attendee demographics or dietary
             restrictions

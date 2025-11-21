@@ -149,9 +149,7 @@ export default function IndividualTicketViewPage() {
         <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
           Your Event Ticket
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          {ticket.event.name}
-        </p>
+        <p className="text-gray-600 dark:text-gray-400">{ticket.event.name}</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -268,7 +266,7 @@ export default function IndividualTicketViewPage() {
                         {Object.entries(ticket.attendee.customData).map(
                           ([key, value]) => (
                             <div key={key} className="flex justify-between">
-                              <span className="text-sm capitalize text-gray-600 dark:text-gray-400">
+                              <span className="text-sm text-gray-600 capitalize dark:text-gray-400">
                                 {key.replace(/([A-Z])/g, " $1").trim()}:
                               </span>
                               <span className="text-sm font-medium text-gray-900 dark:text-white">
@@ -306,28 +304,31 @@ export default function IndividualTicketViewPage() {
             </div>
 
             {/* Check-in Information */}
-            {ticket.isCheckedIn && ticket.checkedInAt && (() => {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              const checkedInDate = ticket.checkedInAt instanceof Date
-                ? ticket.checkedInAt
-                : new Date(String(ticket.checkedInAt));
-              return (
-                <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
-                  <div className="flex items-center gap-2">
-                    <HiCheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
-                    <div>
-                      <p className="font-semibold text-green-900 dark:text-green-300">
-                        Checked In
-                      </p>
-                      <p className="text-sm text-green-700 dark:text-green-400">
-                        {/* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */}
-                        {formatDate(checkedInDate, timezone, "PPp")}
-                      </p>
+            {ticket.isCheckedIn &&
+              ticket.checkedInAt &&
+              (() => {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                const checkedInDate =
+                  ticket.checkedInAt instanceof Date
+                    ? ticket.checkedInAt
+                    : new Date(String(ticket.checkedInAt));
+                return (
+                  <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
+                    <div className="flex items-center gap-2">
+                      <HiCheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                      <div>
+                        <p className="font-semibold text-green-900 dark:text-green-300">
+                          Checked In
+                        </p>
+                        <p className="text-sm text-green-700 dark:text-green-400">
+                          {/* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */}
+                          {formatDate(checkedInDate, timezone, "PPp")}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })()}
+                );
+              })()}
           </Card>
         </div>
 
@@ -410,9 +411,9 @@ export default function IndividualTicketViewPage() {
                     Event Terms and Conditions
                   </h3>
                   <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                    By attending this event, you agree to the event organizer&apos;s
-                    terms and conditions, including their privacy policy and
-                    code of conduct.
+                    By attending this event, you agree to the event
+                    organizer&apos;s terms and conditions, including their
+                    privacy policy and code of conduct.
                   </p>
                   <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
                     <p className="mb-2 font-medium">You agree to:</p>
@@ -422,7 +423,9 @@ export default function IndividualTicketViewPage() {
                         Allow the organizer to use your information for event
                         communications
                       </li>
-                      <li>Understand that photography may occur at the event</li>
+                      <li>
+                        Understand that photography may occur at the event
+                      </li>
                       <li>
                         Comply with all venue rules and safety requirements
                       </li>
@@ -432,9 +435,7 @@ export default function IndividualTicketViewPage() {
               </div>
 
               <div className="flex justify-end">
-                <Button onClick={handleAcceptTerms}>
-                  I Accept the Terms
-                </Button>
+                <Button onClick={handleAcceptTerms}>I Accept the Terms</Button>
               </div>
             </div>
           </Card>
@@ -444,8 +445,8 @@ export default function IndividualTicketViewPage() {
       {termsAccepted && (
         <div className="mt-4">
           <Alert color="success" icon={HiCheckCircle}>
-            <span className="font-medium">Terms Accepted</span> - You&apos;re all
-            set for the event!
+            <span className="font-medium">Terms Accepted</span> - You&apos;re
+            all set for the event!
           </Alert>
         </div>
       )}

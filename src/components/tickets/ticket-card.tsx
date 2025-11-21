@@ -112,9 +112,7 @@ export function TicketCard({
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">
-                  Email:
-                </span>
+                <span className="text-gray-600 dark:text-gray-400">Email:</span>
                 <span className="font-medium text-gray-900 dark:text-white">
                   {ticket.attendee.email}
                 </span>

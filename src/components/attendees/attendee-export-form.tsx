@@ -116,8 +116,8 @@ export function AttendeeExportForm({
                 Include Custom Registration Fields
               </Label>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Add columns for custom fields collected during ticket
-                assignment (dietary restrictions, t-shirt size, etc.)
+                Add columns for custom fields collected during ticket assignment
+                (dietary restrictions, t-shirt size, etc.)
               </p>
             </div>
           </div>
@@ -151,9 +151,7 @@ export function AttendeeExportForm({
 
         <div className="space-y-3">
           <div className="flex justify-between border-b border-gray-200 pb-2 dark:border-gray-700">
-            <span className="text-gray-600 dark:text-gray-400">
-              Format:
-            </span>
+            <span className="text-gray-600 dark:text-gray-400">Format:</span>
             <span className="font-medium text-gray-900 dark:text-white">
               CSV (Comma-Separated Values)
             </span>

@@ -32,13 +32,20 @@ export function QRCodeDisplay({
   attendeeName,
   eventName,
 }: QRCodeDisplayProps) {
-  const [qrCodeData, setQrCodeData] = useState<string | null>(qrCodeDataUrl ?? null);
+  const [qrCodeData, setQrCodeData] = useState<string | null>(
+    qrCodeDataUrl ?? null,
+  );
   const qrCodeRef = useRef<HTMLDivElement>(null);
 
   // Convert size string to number
-  const numericSize = typeof size === "string" 
-    ? size === "small" ? 200 : size === "medium" ? 300 : 400
-    : size;
+  const numericSize =
+    typeof size === "string"
+      ? size === "small"
+        ? 200
+        : size === "medium"
+          ? 300
+          : 400
+      : size;
 
   const { data, isLoading, error } = api.tickets.generateQRCode.useQuery(
     {
@@ -48,7 +55,7 @@ export function QRCodeDisplay({
     },
     {
       enabled: !!ticketId && !qrCodeDataUrl, // Only fetch if no direct QR code provided
-    }
+    },
   );
 
   useEffect(() => {

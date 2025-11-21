@@ -13,7 +13,10 @@ import {
   assignTicketInputSchema,
   unassignTicketInputSchema,
 } from "@/lib/validators";
-import { generateTicketQRCode, generateTicketQRCodeSVG } from "@/lib/qr-code/generator";
+import {
+  generateTicketQRCode,
+  generateTicketQRCodeSVG,
+} from "@/lib/qr-code/generator";
 import { isValidTicketNumberFormat } from "@/lib/tickets/generate-ticket-number";
 import { sendEmail } from "@/server/services/email";
 import { TicketAssigned } from "emails/ticket-assigned";
@@ -484,10 +487,14 @@ export const ticketsRouter = createTRPCRouter({
           cutoffTime = ticket.event.startDate;
           break;
         case "1h_before":
-          cutoffTime = new Date(ticket.event.startDate.getTime() - 60 * 60 * 1000);
+          cutoffTime = new Date(
+            ticket.event.startDate.getTime() - 60 * 60 * 1000,
+          );
           break;
         case "24h_before":
-          cutoffTime = new Date(ticket.event.startDate.getTime() - 24 * 60 * 60 * 1000);
+          cutoffTime = new Date(
+            ticket.event.startDate.getTime() - 24 * 60 * 60 * 1000,
+          );
           break;
         case "custom":
           if (!ticket.event.assignmentCutoffTime) {
@@ -513,7 +520,8 @@ export const ticketsRouter = createTRPCRouter({
       if (ticket.updatedAt.getTime() !== expectedUpdatedAt.getTime()) {
         throw new TRPCError({
           code: "CONFLICT",
-          message: "Ticket was modified by another user. Please refresh and try again.",
+          message:
+            "Ticket was modified by another user. Please refresh and try again.",
         });
       }
 
@@ -647,9 +655,12 @@ export const ticketsRouter = createTRPCRouter({
       });
 
       // Generate QR code for email
-      const qrCodeDataUrl = await generateTicketQRCode(result.updatedTicket.qrCodeData, {
-        width: 400,
-      });
+      const qrCodeDataUrl = await generateTicketQRCode(
+        result.updatedTicket.qrCodeData,
+        {
+          width: 400,
+        },
+      );
 
       // Build ticket URL
       const ticketUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/tickets/${result.updatedTicket.id}`;
@@ -671,7 +682,8 @@ export const ticketsRouter = createTRPCRouter({
                 eventLocation:
                   result.updatedTicket.event.locationType === "virtual"
                     ? "Virtual Event"
-                    : result.updatedTicket.event.locationAddress ?? "Location TBA",
+                    : (result.updatedTicket.event.locationAddress ??
+                      "Location TBA"),
                 ticketNumber: result.updatedTicket.ticketNumber,
                 ticketTypeName: result.updatedTicket.ticketType.name,
                 qrCodeDataUrl,
@@ -684,8 +696,10 @@ export const ticketsRouter = createTRPCRouter({
                 eventName: result.updatedTicket.event.name,
                 eventDate: result.updatedTicket.event.startDate,
                 eventEndDate: result.updatedTicket.event.endDate ?? undefined,
-                eventLocationType: result.updatedTicket.event
-                  .locationType as "virtual" | "hybrid" | "physical",
+                eventLocationType: result.updatedTicket.event.locationType as
+                  | "virtual"
+                  | "hybrid"
+                  | "physical",
                 eventLocationAddress:
                   result.updatedTicket.event.locationAddress ?? undefined,
                 ticketType: result.updatedTicket.ticketType.name,
@@ -852,10 +866,14 @@ export const ticketsRouter = createTRPCRouter({
           cutoffTime = ticket.event.startDate;
           break;
         case "1h_before":
-          cutoffTime = new Date(ticket.event.startDate.getTime() - 60 * 60 * 1000);
+          cutoffTime = new Date(
+            ticket.event.startDate.getTime() - 60 * 60 * 1000,
+          );
           break;
         case "24h_before":
-          cutoffTime = new Date(ticket.event.startDate.getTime() - 24 * 60 * 60 * 1000);
+          cutoffTime = new Date(
+            ticket.event.startDate.getTime() - 24 * 60 * 60 * 1000,
+          );
           break;
         case "custom":
           if (!ticket.event.assignmentCutoffTime) {
@@ -881,7 +899,8 @@ export const ticketsRouter = createTRPCRouter({
       if (ticket.updatedAt.getTime() !== expectedUpdatedAt.getTime()) {
         throw new TRPCError({
           code: "CONFLICT",
-          message: "Ticket was modified by another user. Please refresh and try again.",
+          message:
+            "Ticket was modified by another user. Please refresh and try again.",
         });
       }
 

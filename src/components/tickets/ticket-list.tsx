@@ -155,7 +155,7 @@ export function TicketList({
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800 md:flex-row">
+      <div className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-white p-4 md:flex-row dark:border-gray-700 dark:bg-gray-800">
         {/* Search */}
         <div className="flex-1">
           <TextInput

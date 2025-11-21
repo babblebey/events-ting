@@ -48,7 +48,9 @@ export function ImportProgressStep({
   const utils = api.useUtils();
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   // Generate idempotency key once on mount to prevent duplicate imports
-  const [idempotencyKey] = useState(() => `import-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+  const [idempotencyKey] = useState(
+    () => `import-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+  );
   const [hasStarted, setHasStarted] = useState(false);
 
   const executeImport = api.attendees.executeImport.useMutation({
@@ -101,7 +103,17 @@ export function ImportProgressStep({
         idempotencyKey,
       });
     }
-  }, [hasStarted, executeImport, importResult, eventId, parsedData.fileContent, fieldMapping, duplicateStrategy, sendConfirmationEmails, idempotencyKey]);
+  }, [
+    hasStarted,
+    executeImport,
+    importResult,
+    eventId,
+    parsedData.fileContent,
+    fieldMapping,
+    duplicateStrategy,
+    sendConfirmationEmails,
+    idempotencyKey,
+  ]);
 
   const handleDownloadFailedRows = () => {
     if (!importResult || importResult.errors.length === 0) return;
@@ -163,7 +175,9 @@ export function ImportProgressStep({
           </div>
 
           <Alert color="info">
-            <span className="font-medium">Please don&apos;t close this window.</span>{" "}
+            <span className="font-medium">
+              Please don&apos;t close this window.
+            </span>{" "}
             The import process is running and will complete shortly.
           </Alert>
         </>

@@ -53,9 +53,10 @@ export default async function RegistrationSettingsPage({
               About Custom Fields
             </h3>
             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              Custom fields allow you to collect specific information from attendees during
-              ticket assignment. Examples include dietary restrictions, t-shirt sizes,
-              accessibility needs, or session preferences.
+              Custom fields allow you to collect specific information from
+              attendees during ticket assignment. Examples include dietary
+              restrictions, t-shirt sizes, accessibility needs, or session
+              preferences.
             </p>
             <ul className="mt-3 list-inside list-disc space-y-1 text-sm text-gray-600 dark:text-gray-400">
               <li>Fields are shown when buyers assign tickets to attendees</li>
@@ -96,7 +97,8 @@ export default async function RegistrationSettingsPage({
               Short Text
             </h4>
             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              Single-line text input for brief responses (e.g., company name, job title)
+              Single-line text input for brief responses (e.g., company name,
+              job title)
             </p>
           </div>
           <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
@@ -104,7 +106,8 @@ export default async function RegistrationSettingsPage({
               Long Text
             </h4>
             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              Multi-line text area for detailed responses (e.g., special requests, bio)
+              Multi-line text area for detailed responses (e.g., special
+              requests, bio)
             </p>
           </div>
           <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
@@ -112,7 +115,8 @@ export default async function RegistrationSettingsPage({
               Dropdown
             </h4>
             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              Select one option from a predefined list (e.g., dietary restrictions, t-shirt size)
+              Select one option from a predefined list (e.g., dietary
+              restrictions, t-shirt size)
             </p>
           </div>
           <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
@@ -120,7 +124,8 @@ export default async function RegistrationSettingsPage({
               Radio Buttons
             </h4>
             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              Choose one option from visible list (e.g., yes/no, experience level)
+              Choose one option from visible list (e.g., yes/no, experience
+              level)
             </p>
           </div>
           <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
@@ -128,7 +133,8 @@ export default async function RegistrationSettingsPage({
               Checkboxes
             </h4>
             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              Select multiple options from a list (e.g., session interests, accessibility needs)
+              Select multiple options from a list (e.g., session interests,
+              accessibility needs)
             </p>
           </div>
         </div>

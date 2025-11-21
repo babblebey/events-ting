@@ -29,11 +29,16 @@ export default function RegistrationManagementPage() {
   const utils = api.useUtils();
 
   // Fetch registration with tickets
-  const { data: registration, isLoading, error, refetch } = api.registration.getByIdPublic.useQuery(
+  const {
+    data: registration,
+    isLoading,
+    error,
+    refetch,
+  } = api.registration.getByIdPublic.useQuery(
     { id: registrationId },
     {
       refetchOnWindowFocus: false,
-    }
+    },
   );
 
   if (isLoading) {
@@ -54,7 +59,8 @@ export default function RegistrationManagementPage() {
       <div className="container mx-auto max-w-7xl px-4 py-8">
         <Alert color="failure" icon={HiInformationCircle}>
           <span className="font-medium">Registration not found!</span> The
-          registration you&apos;re looking for doesn&apos;t exist or the link is invalid.
+          registration you&apos;re looking for doesn&apos;t exist or the link is
+          invalid.
         </Alert>
         <div className="mt-6 text-center">
           <Link href={`/events/${slug}/registrations`}>
@@ -89,7 +95,9 @@ export default function RegistrationManagementPage() {
   }
 
   // Get selected ticket for modal
-  const selectedTicket = registration.tickets.find((t) => t.id === selectedTicketId);
+  const selectedTicket = registration.tickets.find(
+    (t) => t.id === selectedTicketId,
+  );
 
   // Handler functions
   const handleAssign = (ticketId: string) => {
@@ -106,7 +114,11 @@ export default function RegistrationManagementPage() {
     const ticket = registration.tickets.find((t) => t.id === ticketId);
     if (!ticket) return;
 
-    if (confirm("Are you sure you want to unassign this ticket? The attendee information will be permanently deleted.")) {
+    if (
+      confirm(
+        "Are you sure you want to unassign this ticket? The attendee information will be permanently deleted.",
+      )
+    ) {
       try {
         await utils.client.tickets.unassign.mutate({
           ticketId,
@@ -154,7 +166,10 @@ export default function RegistrationManagementPage() {
 
       {/* Registration Summary */}
       <div className="mb-8">
-        <RegistrationSummary registration={registration} showManageLink={false} />
+        <RegistrationSummary
+          registration={registration}
+          showManageLink={false}
+        />
       </div>
 
       {/* Instructions */}
@@ -168,10 +183,20 @@ export default function RegistrationManagementPage() {
               How to manage your tickets:
             </h3>
             <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-blue-700 dark:text-blue-400">
-              <li>Use the search and filter tools below to find specific tickets</li>
-              <li>Click &quot;Assign&quot; on unassigned tickets to enter attendee information</li>
-              <li>Click &quot;View QR Code&quot; to download tickets for event check-in</li>
-              <li>Click &quot;Reassign&quot; to change the attendee for a ticket</li>
+              <li>
+                Use the search and filter tools below to find specific tickets
+              </li>
+              <li>
+                Click &quot;Assign&quot; on unassigned tickets to enter attendee
+                information
+              </li>
+              <li>
+                Click &quot;View QR Code&quot; to download tickets for event
+                check-in
+              </li>
+              <li>
+                Click &quot;Reassign&quot; to change the attendee for a ticket
+              </li>
             </ul>
           </div>
         </div>

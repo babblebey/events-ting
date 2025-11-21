@@ -32,7 +32,8 @@ async function AttendeesPage({ params }: AttendeesPageProps) {
             Attendees
           </h1>
           <p className="mt-2 text-gray-600 dark:text-gray-400">
-            View individual attendees, filter by email status, and export attendee data for {event.name}
+            View individual attendees, filter by email status, and export
+            attendee data for {event.name}
           </p>
         </div>
         <div className="flex gap-2">

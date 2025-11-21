@@ -85,12 +85,12 @@ export function EmailComposer({
       // TODO: Implement actual email sending via tRPC procedure
       // This will be implemented in T073 (webhook handler) and integrated here
       // For now, we'll show a success message
-      
+
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       setSendingStatus("sent");
-      
+
       // Reset form after delay
       setTimeout(() => {
         setSubject("");
@@ -209,7 +209,8 @@ export function EmailComposer({
               Recipients
             </h4>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {recipientFilter === "active" && "Attendees with active email status"}
+              {recipientFilter === "active" &&
+                "Attendees with active email status"}
               {recipientFilter === "all" && "All attendees"}
               {recipientFilter === "ticket_type" &&
                 selectedTicketTypeId &&
@@ -283,7 +284,12 @@ export function EmailComposer({
           )}
         </Button>
         {onCancel && (
-          <Button color="gray" type="button" onClick={onCancel} disabled={isLoading}>
+          <Button
+            color="gray"
+            type="button"
+            onClick={onCancel}
+            disabled={isLoading}
+          >
             Cancel
           </Button>
         )}
@@ -293,12 +299,11 @@ export function EmailComposer({
       <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800 dark:border-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
         <p className="font-semibold">⚠️ Important Notes</p>
         <ul className="mt-2 list-inside list-disc space-y-1">
+          <li>Emails are sent to individual attendees, not ticket buyers</li>
           <li>
-            Emails are sent to individual attendees, not ticket buyers
-          </li>
-          <li>
-            Attendees with &quot;bounced&quot; or &quot;unsubscribed&quot; email status will be
-            excluded when using &quot;Active Attendees&quot; filter
+            Attendees with &quot;bounced&quot; or &quot;unsubscribed&quot; email
+            status will be excluded when using &quot;Active Attendees&quot;
+            filter
           </li>
           <li>
             This action cannot be undone - review your message carefully before

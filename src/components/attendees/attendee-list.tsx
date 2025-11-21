@@ -147,7 +147,9 @@ export function AttendeeList({ eventId }: AttendeeListProps) {
             disabled={exportMutation.status === "pending"}
           >
             <HiDownload className="mr-2 h-5 w-5" />
-            {exportMutation.status === "pending" ? "Exporting..." : "Export CSV"}
+            {exportMutation.status === "pending"
+              ? "Exporting..."
+              : "Export CSV"}
           </Button>
 
           <Link href={`/${eventId}/communications`}>
@@ -218,7 +220,9 @@ export function AttendeeList({ eventId }: AttendeeListProps) {
                       {attendee.ticket.ticketType.name}
                     </Badge>
                   </TableCell>
-                  <TableCell>{getEmailStatusBadge(attendee.emailStatus)}</TableCell>
+                  <TableCell>
+                    {getEmailStatusBadge(attendee.emailStatus)}
+                  </TableCell>
                   <TableCell>
                     {getCheckInStatusBadge(attendee.ticket.isCheckedIn)}
                   </TableCell>

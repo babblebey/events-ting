@@ -72,9 +72,7 @@ export const TicketAssigned = ({
   return (
     <Html>
       <Head />
-      <Preview>
-        Your ticket for {eventName} is ready! 🎟️
-      </Preview>
+      <Preview>Your ticket for {eventName} is ready! 🎟️</Preview>
       <Body style={main}>
         <Container style={container}>
           <Section style={box}>

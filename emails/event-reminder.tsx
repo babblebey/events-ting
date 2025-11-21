@@ -46,7 +46,7 @@ export const EventReminderEmail = ({
   const now = new Date();
   const eventDateObj = new Date(eventDate);
   const daysUntilEvent = Math.ceil(
-    (eventDateObj.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    (eventDateObj.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
   );
 
   // Format dates
@@ -97,8 +97,8 @@ export const EventReminderEmail = ({
 
             {daysUntilEvent <= 0 ? (
               <Text style={paragraph}>
-                <strong>{eventName}</strong> is happening today! We&apos;re excited
-                to see you there.
+                <strong>{eventName}</strong> is happening today! We&apos;re
+                excited to see you there.
               </Text>
             ) : daysUntilEvent === 1 ? (
               <Text style={paragraph}>
@@ -225,8 +225,8 @@ export const EventReminderEmail = ({
                   </li>
                 )}
                 <li style={listItem}>
-                  <strong>Contact info</strong> - Save the organizer&apos;s contact
-                  information in case you need assistance
+                  <strong>Contact info</strong> - Save the organizer&apos;s
+                  contact information in case you need assistance
                 </li>
               </ul>
             </Section>
@@ -234,7 +234,8 @@ export const EventReminderEmail = ({
             {/* Footer */}
             <Text style={footer}>
               We can&apos;t wait to see you at {eventName}! If you have any
-              questions or need assistance, please don&apos;t hesitate to reach out.
+              questions or need assistance, please don&apos;t hesitate to reach
+              out.
             </Text>
 
             <Text style={footer}>See you soon! 🚀</Text>
@@ -246,7 +247,6 @@ export const EventReminderEmail = ({
 };
 
 export default EventReminderEmail;
-
 
 const main = {
   backgroundColor: "#f6f9fc",

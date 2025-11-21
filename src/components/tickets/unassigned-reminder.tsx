@@ -6,11 +6,7 @@
  */
 
 import { Alert, Button } from "flowbite-react";
-import {
-  HiExclamationCircle,
-  HiClock,
-  HiCheckCircle,
-} from "react-icons/hi";
+import { HiExclamationCircle, HiClock, HiCheckCircle } from "react-icons/hi";
 import { formatDate } from "@/lib/utils/date";
 import Link from "next/link";
 
@@ -68,7 +64,9 @@ export function UnassignedReminder({
     const hours = Math.floor(
       (timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
     );
-    const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+    const minutes = Math.floor(
+      (timeRemaining % (1000 * 60 * 60)) / (1000 * 60),
+    );
 
     if (days > 0) {
       return `${days} day${days !== 1 ? "s" : ""} ${hours} hour${hours !== 1 ? "s" : ""}`;
@@ -107,7 +105,11 @@ export function UnassignedReminder({
 
   // Critical alert color mapping
   const alertColor =
-    urgency === "critical" ? "failure" : urgency === "warning" ? "warning" : "info";
+    urgency === "critical"
+      ? "failure"
+      : urgency === "warning"
+        ? "warning"
+        : "info";
 
   return (
     <Alert color={alertColor} icon={HiExclamationCircle} className="border-l-4">

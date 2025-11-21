@@ -218,7 +218,7 @@ export function AttendeeTable({
                     }).format(
                       registration.registeredAt instanceof Date
                         ? registration.registeredAt
-                        : new Date(registration.registeredAt)
+                        : new Date(registration.registeredAt),
                     )}
                   </TableCell>
                   <TableCell>

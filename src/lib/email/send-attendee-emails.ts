@@ -4,7 +4,10 @@
  * Part of User Story 5: Buyer vs Attendee Communication
  */
 
-import { sendBatchEmailsWithRetry, type EmailResult } from "@/server/services/email";
+import {
+  sendBatchEmailsWithRetry,
+  type EmailResult,
+} from "@/server/services/email";
 import type { ReactElement } from "react";
 import type { db } from "@/server/db";
 
@@ -77,11 +80,11 @@ async function fetchAttendees(
 
 /**
  * Send batch emails to attendees matching filter criteria
- * 
+ *
  * @param db - Prisma database client
  * @param options - Email options with attendee filter
  * @returns Result with counts and individual email results
- * 
+ *
  * @example
  * ```typescript
  * const result = await sendAttendeeEmails(db, {
@@ -96,7 +99,7 @@ async function fetchAttendees(
  *     { name: 'event', value: 'event123' },
  *   ],
  * });
- * 
+ *
  * console.log(`Sent ${result.emailsSent} emails to ${result.totalAttendees} attendees`);
  * ```
  */
@@ -152,7 +155,7 @@ export async function sendAttendeeEmails(
 /**
  * Send batch emails to all active attendees
  * Convenience function for common use case
- * 
+ *
  * @param db - Prisma database client
  * @param eventId - Event ID
  * @param subject - Email subject
@@ -181,7 +184,7 @@ export async function sendToAllActiveAttendees(
 
 /**
  * Send batch emails to attendees of a specific ticket type
- * 
+ *
  * @param db - Prisma database client
  * @param eventId - Event ID
  * @param ticketTypeId - Ticket type ID
@@ -215,7 +218,7 @@ export async function sendToTicketType(
 /**
  * Validate email sending prerequisites
  * Check if event has attendees and email service is configured
- * 
+ *
  * @param db - Prisma database client
  * @param eventId - Event ID
  * @returns Validation result with error message if validation fails
@@ -273,7 +276,7 @@ export async function validateEmailCampaign(
 /**
  * Get count of attendees matching filter criteria
  * Useful for showing recipient count before sending
- * 
+ *
  * @param db - Prisma database client
  * @param filter - Attendee filter
  * @returns Count of matching attendees
@@ -296,7 +299,7 @@ export async function getAttendeeEmailCount(
 
 /**
  * Build email tags for tracking and analytics
- * 
+ *
  * @param eventId - Event ID
  * @param campaignType - Type of campaign
  * @returns Array of email tags

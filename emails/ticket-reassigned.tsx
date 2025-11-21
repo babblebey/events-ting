@@ -151,16 +151,17 @@ export const TicketReassignedEmail = ({
           <Section style={privacyBox}>
             <Text style={privacyText}>
               <strong>Privacy Notice:</strong> Your ticket was reassigned to you
-              by the original buyer. The previous attendee&apos;s information has been
-              permanently deleted in compliance with privacy regulations.
+              by the original buyer. The previous attendee&apos;s information
+              has been permanently deleted in compliance with privacy
+              regulations.
             </Text>
           </Section>
 
           {/* Footer */}
           <Hr style={hr} />
           <Text style={footer}>
-            If you didn&apos;t expect this ticket or have questions, please contact
-            the event organizer or reply to this email.
+            If you didn&apos;t expect this ticket or have questions, please
+            contact the event organizer or reply to this email.
           </Text>
           <Text style={footer}>
             This is an automated message from Events-Ting. Please do not reply

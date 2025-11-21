@@ -6,7 +6,14 @@
  */
 
 import { useState } from "react";
-import { Button, Label, TextInput, Textarea, Checkbox, Alert } from "flowbite-react";
+import {
+  Button,
+  Label,
+  TextInput,
+  Textarea,
+  Checkbox,
+  Alert,
+} from "flowbite-react";
 import { FormField, FormError } from "@/components/ui/form-field";
 import { api } from "@/trpc/react";
 import { HiCheckCircle, HiExclamationCircle, HiClock } from "react-icons/hi";
@@ -45,13 +52,18 @@ export function AssignmentForm({
 }: AssignmentFormProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [customData, setCustomData] = useState<Record<string, CustomFieldValue>>({});
+  const [customData, setCustomData] = useState<
+    Record<string, CustomFieldValue>
+  >({});
   const [buyerConsent, setBuyerConsent] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [emailWarning, setEmailWarning] = useState<string | null>(null);
 
   // Calculate assignment cutoff time for display
-  const getAssignmentCutoffDisplay = (): { date: Date; label: string } | null => {
+  const getAssignmentCutoffDisplay = (): {
+    date: Date;
+    label: string;
+  } | null => {
     if (!eventStartDate) return null;
 
     switch (assignmentCutoffType) {
@@ -87,12 +99,9 @@ export function AssignmentForm({
 
   const cutoffDisplay = getAssignmentCutoffDisplay();
 
-   
   const assignMutation = api.tickets.assign.useMutation({
     onSuccess: (data) => {
-       
       if (onSuccess && data?.attendee?.id) {
-         
         onSuccess(data.attendee.id);
       }
     },
@@ -131,7 +140,9 @@ export function AssignmentForm({
 
     for (const typo of commonTypos) {
       if (value.toLowerCase().includes(typo.wrong)) {
-        setEmailWarning(`Did you mean ${value.replace(new RegExp(typo.wrong, "i"), typo.correct)}?`);
+        setEmailWarning(
+          `Did you mean ${value.replace(new RegExp(typo.wrong, "i"), typo.correct)}?`,
+        );
         return;
       }
     }
@@ -154,7 +165,10 @@ export function AssignmentForm({
     }
   };
 
-  const handleCustomFieldChange = (fieldId: string, value: CustomFieldValue) => {
+  const handleCustomFieldChange = (
+    fieldId: string,
+    value: CustomFieldValue,
+  ) => {
     setCustomData((prev) => ({
       ...prev,
       [fieldId]: value,
@@ -215,13 +229,15 @@ export function AssignmentForm({
     const sanitizedCustomData = sanitizeCustomFieldResponses(customData);
 
     try {
-       
       await assignMutation.mutateAsync({
         ticketId,
         attendee: {
           name: name.trim(),
           email: email.trim(),
-          customData: Object.keys(sanitizedCustomData).length > 0 ? sanitizedCustomData : undefined,
+          customData:
+            Object.keys(sanitizedCustomData).length > 0
+              ? sanitizedCustomData
+              : undefined,
         },
         expectedUpdatedAt,
       });
@@ -322,13 +338,15 @@ export function AssignmentForm({
         // For checkbox type, support multi-select with options array
         if (field.options && field.options.length > 0) {
           const selectedValues = (value as string[]) ?? [];
-          
+
           return (
             <div key={field.id} className="mb-4">
               <div className="mb-2 block">
                 <Label>
                   {field.label}
-                  {field.required && <span className="ml-1 text-red-500">*</span>}
+                  {field.required && (
+                    <span className="ml-1 text-red-500">*</span>
+                  )}
                 </Label>
               </div>
               <div className="space-y-2">
@@ -358,7 +376,7 @@ export function AssignmentForm({
             </div>
           );
         }
-        
+
         // Single checkbox (boolean value)
         return (
           <div key={field.id} className="mb-4">
@@ -446,14 +464,12 @@ export function AssignmentForm({
             <p className="font-medium">Assignment Deadline</p>
             <p className="mt-1">
               You can assign or reassign this ticket until{" "}
-              <strong>
-                {formatDate(cutoffDisplay.date, timezone, "PPp")}
-              </strong>{" "}
+              <strong>{formatDate(cutoffDisplay.date, timezone, "PPp")}</strong>{" "}
               ({cutoffDisplay.label})
             </p>
             <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">
-              Note: Cutoff enforcement will be added in a future update. For now,
-              this is informational only.
+              Note: Cutoff enforcement will be added in a future update. For
+              now, this is informational only.
             </p>
           </div>
         </Alert>
@@ -573,7 +589,6 @@ export function AssignmentForm({
             type="button"
             color="gray"
             onClick={onCancel}
-             
             disabled={assignMutation.isPending}
             className="flex-1"
           >
@@ -582,11 +597,10 @@ export function AssignmentForm({
         )}
         <Button
           type="submit"
-           
           disabled={assignMutation.isPending}
           className="flex-1"
         >
-          { }
+          {}
           {assignMutation.isPending ? "Assigning..." : "Assign Ticket"}
         </Button>
       </div>
