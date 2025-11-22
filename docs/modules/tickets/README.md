@@ -109,17 +109,29 @@ Example: `TKT-L8Z9K3-A7B2C5D8E9`
 
 ### QR Code Data
 
-Each ticket's QR code encodes a JSON payload:
+Each ticket has a **pre-generated QR code** stored as a PNG data URL in the `qrCodeData` field. QR codes are generated once during ticket creation and stored in the database for immediate use.
 
-```json
-{
-  "ticketId": "cm3abc123xyz",
-  "eventId": "cm3event456",
-  "ticketNumber": "TKT-L8Z9K3-A7B2C5D8E9"
-}
+**Storage Format**: PNG data URL (~8-12KB)
+```typescript
+qrCodeData: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQ..."
 ```
 
-Error correction level: **H** (30% recovery) for damaged codes.
+**QR Code Payload**: Encodes the ticket number only
+```
+"TKT-L8Z9K3-A7B2C5D8E9"
+```
+
+**QR Code Settings**:
+- **Format**: PNG data URL
+- **Size**: 400x400 pixels
+- **Error correction level**: H (30% recovery for damaged codes)
+- **Encoding**: Ticket number (simple string for maximum compatibility)
+
+**Performance Benefits**:
+- ✅ QR codes load instantly (no generation API call needed)
+- ✅ Email sending is faster (no QR generation during send)
+- ✅ Offline support (QR codes cached with page)
+- ✅ Consistent across all views (web, email, mobile)
 
 ### Ticket Lifecycle
 

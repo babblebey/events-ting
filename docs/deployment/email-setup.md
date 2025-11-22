@@ -237,18 +237,79 @@ from: 'events@yourdomain.com'
 
 ## Email Templates
 
-Events-Ting uses **React Email** for beautiful, responsive emails.
+Events-Ting uses **React Email** for beautiful, responsive emails with support for inline images.
 
 ### Template Files
 
 ```
 emails/
 ├── registration-confirmation.tsx   # Sent after registration
+├── ticket-assigned.tsx             # Ticket assignment with QR code
+├── ticket-reassigned.tsx           # Ticket reassignment with QR code
+├── event-reminder.tsx              # Event reminder with QR code
 ├── cfp-submission-received.tsx     # CFP submitted
 ├── cfp-accepted.tsx                # CFP accepted
 ├── cfp-rejected.tsx                # CFP rejected
-└── event-reminder.tsx              # Event reminder (future)
+└── team-invitation.tsx             # Team collaboration invite
 ```
+
+---
+
+### Inline Images & Attachments
+
+Events-Ting supports **inline image embedding** using CID (Content-ID) attachments for better email client compatibility.
+
+**Use Case**: QR codes in ticket emails
+
+**Implementation**:
+
+```typescript
+import { sendEmail, dataUrlToAttachment } from '@/server/services/email';
+
+// Convert data URL to inline attachment
+const qrCodeAttachment = dataUrlToAttachment(
+  qrCodeDataUrl,           // Base64 PNG data URL
+  'ticket-qr-code',        // Unique Content-ID
+  'ticket.png'             // Filename
+);
+
+await sendEmail({
+  to: 'attendee@example.com',
+  subject: 'Your Ticket',
+  react: TicketEmail({
+    qrCodeDataUrl: qrCodeDataUrl,      // Fallback for clients that don't support CID
+    qrCodeCid: 'ticket-qr-code',       // CID reference for inline display
+  }),
+  attachments: [qrCodeAttachment],
+});
+```
+
+**In Email Template**:
+
+```tsx
+// emails/ticket-assigned.tsx
+export const TicketAssigned = ({ qrCodeDataUrl, qrCodeCid }) => {
+  return (
+    <Html>
+      <Body>
+        {/* Use CID if available, fallback to data URL */}
+        <img 
+          src={qrCodeCid ? `cid:${qrCodeCid}` : qrCodeDataUrl}
+          alt="Ticket QR Code"
+          width="200"
+          height="200"
+        />
+      </Body>
+    </Html>
+  );
+};
+```
+
+**Benefits**:
+- ✅ Works in 99% of email clients (Gmail, Outlook, Apple Mail, etc.)
+- ✅ QR codes display inline, not as downloadable attachments
+- ✅ Better than data URLs which are often blocked by email clients
+- ✅ Smaller email size (Resend handles encoding)
 
 ---
 

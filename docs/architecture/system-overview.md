@@ -507,6 +507,8 @@ The team collaboration system implements **defense-in-depth** security:
 - **Database**: Connection pooling (Prisma)
 - **Static Pages**: Public event pages (ISR future)
 
+**Note**: QR code caching is no longer needed as QR codes are pre-generated and stored in the database (see QR Code Storage Optimization migration).
+
 ### Code Splitting
 
 - **Dynamic Imports**: Load heavy components on demand

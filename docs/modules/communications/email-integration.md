@@ -47,6 +47,32 @@ await sendEmail({
 });
 ```
 
+#### Send Email with Inline Images
+
+```typescript
+import { sendEmail, dataUrlToAttachment } from '@/server/services/email';
+
+// Convert data URL to inline attachment
+const qrCodeAttachment = dataUrlToAttachment(
+  qrCodeDataUrl,           // Base64 PNG data URL
+  'ticket-qr-code',        // Unique Content-ID
+  'ticket.png'             // Filename
+);
+
+await sendEmail({
+  to: 'attendee@example.com',
+  subject: 'Your Ticket',
+  react: <TicketEmail qrCodeCid="ticket-qr-code" />,
+  attachments: [qrCodeAttachment],
+});
+```
+
+**In Email Template**:
+```tsx
+// Reference inline image using cid:
+<img src="cid:ticket-qr-code" alt="QR Code" width="200" />
+```
+
 #### Send Batch Emails with Retry
 
 ```typescript

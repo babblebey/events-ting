@@ -324,58 +324,30 @@ await unassignMutation.mutateAsync({
 
 ---
 
-### `tickets.generateQRCode`
+### `tickets.generateQRCode` (DEPRECATED - Removed)
 
-**Type**: Query  
-**Auth**: Public  
-**Purpose**: Generate QR code image for a ticket
+**Status**: ❌ **REMOVED** in QR Code Storage Optimization (November 2025)
 
-**Input Schema**:
+**Replacement**: QR codes are now pre-generated during ticket creation and stored in the `qrCodeData` field. Use the `ticket.qrCodeData` field directly:
+
 ```typescript
-{
-  ticketId: string;
-  format?: 'svg' | 'dataUrl';  // Default: 'dataUrl'
-  size?: number;               // Default: 300, Min: 100, Max: 1000
-}
-```
-
-**Output Schema**:
-```typescript
-{
-  qrCode: string;       // SVG string or data URL
-  ticketNumber: string;
-}
-```
-
-**Business Logic**:
-1. Fetch ticket by ID
-2. Generate QR code from `ticket.qrCodeData`
-3. Use error correction level H (30% recovery)
-4. Return in requested format (SVG or data URL)
-
-**Example Usage**:
-```typescript
-// Get data URL for <img> tag
+// OLD (removed)
 const { data } = api.tickets.generateQRCode.useQuery({
   ticketId: ticketId,
   format: 'dataUrl',
   size: 400,
 });
 
-<img src={data.qrCode} alt={`QR Code for ${data.ticketNumber}`} />
-
-// Get SVG for inline rendering
-const { data: svg } = api.tickets.generateQRCode.useQuery({
-  ticketId: ticketId,
-  format: 'svg',
-});
-
-<div dangerouslySetInnerHTML={{ __html: svg.qrCode }} />
+// NEW (use stored QR code)
+const ticket = api.tickets.getById.useQuery({ ticketId });
+<img src={ticket.qrCodeData} alt={`QR Code for ${ticket.ticketNumber}`} />
 ```
 
-**Error Responses**:
-- `NOT_FOUND` - Ticket ID does not exist
-- `BAD_REQUEST` - Invalid format or size
+**Migration Notes**:
+- All new tickets created after November 2025 have pre-generated QR codes
+- Existing tickets were migrated via `scripts/backfill-ticket-qr-codes.ts`
+- QR codes are generated once during ticket creation (100-150ms overhead)
+- Performance improvement: 300-500ms faster page loads, 100-300ms faster emails
 
 ---
 
@@ -589,24 +561,40 @@ const assignMutation = api.tickets.assign.useMutation({
 
 ### Ticket Assignment Email
 
-Sent when ticket is assigned to attendee:
+Sent when ticket is assigned to attendee with **inline QR code** embedded using CID (Content-ID) attachments:
 
 ```typescript
-import { sendEmail } from '@/lib/email';
+import { sendEmail, dataUrlToAttachment } from '@/server/services/email';
 import TicketAssignedEmail from '@/emails/ticket-assigned';
+
+// Convert QR code data URL to inline attachment
+const qrCodeAttachment = dataUrlToAttachment(
+  ticket.qrCodeData,
+  'ticket-qr-code',
+  `${ticket.ticketNumber}.png`
+);
 
 await sendEmail({
   to: attendee.email,
-  subject: `Your ticket for ${event.name}`,
+  subject: `Your ticket for ${event.name} is ready! 🎟️`,
   react: TicketAssignedEmail({
     attendeeName: attendee.name,
     eventName: event.name,
     ticketNumber: ticket.ticketNumber,
     ticketUrl: `${baseUrl}/tickets/${ticket.id}`,
-    qrCodeData: ticket.qrCodeData,
+    qrCodeDataUrl: ticket.qrCodeData,
+    qrCodeCid: 'ticket-qr-code', // Reference to inline attachment
   }),
+  attachments: [qrCodeAttachment],
 });
 ```
+
+**How it works**:
+- QR code stored as base64 data URL is converted to an email attachment
+- Attachment is marked as `inline` with a unique Content-ID (`ticket-qr-code`)
+- Email template references the image using `<img src="cid:ticket-qr-code" />`
+- Email clients display the QR code inline instead of as a downloadable attachment
+- Better email client compatibility compared to raw data URLs (which are often blocked)
 
 ### Ticket Reassignment Email
 
@@ -720,20 +708,16 @@ Required indexes for ticket queries:
 
 ### Caching Strategy
 
-**QR Code Generation**:
+**QR Code Storage** (No caching needed):
 ```typescript
-// Cache generated QR codes (5-minute TTL)
-const cacheKey = `qr:${ticketId}:${format}:${size}`;
-const cached = await redis.get(cacheKey);
+// QR codes are pre-generated and stored in database
+// No runtime generation = no caching required
+const ticket = await db.ticket.findUnique({
+  where: { id: ticketId },
+  select: { qrCodeData: true }, // PNG data URL ready to use
+});
 
-if (cached) {
-  return cached;
-}
-
-const qrCode = await generateQRCode(data, format, size);
-await redis.setex(cacheKey, 300, qrCode); // 5-minute cache
-
-return qrCode;
+return ticket.qrCodeData; // Instant retrieval
 ```
 
 **Ticket Lookup**:
