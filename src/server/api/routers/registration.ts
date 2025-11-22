@@ -193,12 +193,12 @@ export const registrationRouter = createTRPCRouter({
         const tickets = [];
         for (let i = 0; i < quantity; i++) {
           const ticketNumber = generateTicketNumber();
-          
+
           // Generate QR code data URL during ticket creation
           const qrCodeData = await generateTicketQRCode(ticketNumber, {
             width: 400,
           });
-          
+
           const ticket = await tx.ticket.create({
             data: {
               registrationId: registration.id,
@@ -470,12 +470,12 @@ export const registrationRouter = createTRPCRouter({
 
         // Create ticket instance for manually added registration
         const ticketNumber = generateTicketNumber();
-        
+
         // Generate QR code data URL during ticket creation
         const qrCodeData = await generateTicketQRCode(ticketNumber, {
           width: 400,
         });
-        
+
         await tx.ticket.create({
           data: {
             registrationId: reg.id,
