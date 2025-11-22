@@ -600,7 +600,6 @@ export function AssignmentForm({
           disabled={assignMutation.isPending}
           className="flex-1"
         >
-          {}
           {assignMutation.isPending ? "Assigning..." : "Assign Ticket"}
         </Button>
       </div>

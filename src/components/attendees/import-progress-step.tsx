@@ -14,6 +14,7 @@ import {
   HiArrowLeft,
 } from "react-icons/hi";
 import { useRouter } from "next/navigation";
+import { nanoid } from "nanoid";
 import { api } from "@/trpc/react";
 import { useToast } from "@/hooks/use-toast";
 import type {
@@ -48,9 +49,7 @@ export function ImportProgressStep({
   const utils = api.useUtils();
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   // Generate idempotency key once on mount to prevent duplicate imports
-  const [idempotencyKey] = useState(
-    () => `import-${Date.now()}-${Math.random().toString(36).substring(7)}`,
-  );
+  const [idempotencyKey] = useState(() => `import-${Date.now()}-${nanoid()}`);
   const [hasStarted, setHasStarted] = useState(false);
 
   const executeImport = api.attendees.executeImport.useMutation({
