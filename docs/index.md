@@ -33,8 +33,9 @@ Feature-specific documentation organized by domain:
 #### Core Modules
 - **[Dashboard](./modules/dashboard/)** - User events dashboard and portfolio management
 - **[Events](./modules/events/)** - Event creation, publishing, and management
-- **[Tickets](./modules/tickets/)** - Ticket types and availability management
-- **[Registration](./modules/registration/)** - Attendee registration and check-in
+- **[Registration](./modules/registration/)** - Ticket purchasing and transaction management
+- **[Tickets](./modules/tickets/)** - Ticket assignment and management
+- **[Attendees](./modules/attendees/)** - Event participant management and tracking
 
 #### Advanced Modules
 - **[Schedule](./modules/schedule/)** - Event schedules, sessions, and tracks
@@ -42,7 +43,6 @@ Feature-specific documentation organized by domain:
 - **[CFP (Call for Papers)](./modules/cfp/)** - Proposal submission and review workflow
 - **[Team](./modules/team/)** - Team collaboration and module-based permissions
 - **[Communications](./modules/communications/)** - Email campaigns and messaging
-- **[Attendees](./modules/attendees/)** - Attendee management and tracking
 
 ### API Documentation
 

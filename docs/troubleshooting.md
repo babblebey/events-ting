@@ -9,6 +9,7 @@ This guide covers common issues you might encounter when setting up and running 
 - [Setup Issues](#setup-issues)
 - [Database Connection Errors](#database-connection-errors)
 - [Email Sending Failures](#email-sending-failures)
+- [Registration vs Attendees Confusion](#registration-vs-attendees-confusion)
 - [Build Errors](#build-errors)
 - [Type Errors](#type-errors)
 - [Runtime Errors](#runtime-errors)
@@ -310,6 +311,136 @@ Error: 429 Too Many Requests - Rate limit exceeded
 2. Check for unsupported React features in email templates
 3. Use `@react-email/components` instead of regular React components
 4. Ensure all styles are inline or using `@react-email` style components
+
+---
+
+## Registration vs Attendees Confusion
+
+### Problem: Can't Find Attendee Information in Registration Export
+
+**Symptoms**:
+- Exported registration CSV
+- Expected to see all attendees
+- Only showing buyers who made purchases
+
+**Explanation**:
+**Registration** and **Attendees** are separate concepts:
+
+- **Registration** = Ticket purchase (buyer data)
+  - Who purchased tickets
+  - How many tickets
+  - Payment information
+  
+- **Attendees** = Event participants (attendee data)
+  - Who is actually attending
+  - Ticket assignments
+  - Custom field answers
+
+**Solution**:
+
+For attendee data:
+1. Navigate to **Attendees Module** → View attendees tab
+2. Click **"Export Attendees"** → Get attendee CSV (includes custom fields)
+
+For buyer/purchase data:
+1. Navigate to **Registration Module** → View purchases
+2. Click **"Export Registrations"** → Get buyer CSV
+
+**Example Scenario**:
+Alice purchases 5 tickets:
+- **Registration export** shows: 1 row (Alice as buyer)
+- **Attendees export** shows: 5 rows (Bob, Carol, Dave, Eve, Alice as attendees)
+
+---
+
+### Problem: Where Do I Assign Tickets to Attendees?
+
+**Answer**:
+Ticket assignment happens in the **Tickets Module**, not Registration.
+
+**Flow**:
+1. Buyer purchases tickets (Registration module)
+2. Buyer receives confirmation email
+3. Buyer clicks "Manage Tickets" link
+4. Buyer assigns each ticket (Tickets module)
+5. Each assignment creates Attendee record
+6. Attendee receives ticket email
+
+**For Organizers**:
+- Cannot directly assign tickets
+- Buyers must do this via their ticket management dashboard
+- Can view assignment status in Tickets or Attendees module
+
+---
+
+### Problem: Expected Attendee Names but Seeing Buyer Names
+
+**Symptoms**:
+- Looking at registration list
+- All names are the same (buyer who purchased)
+- Expected to see individual attendee names
+
+**Explanation**:
+You're viewing the **Registration (Purchase) list**, which shows:
+- Buyer name and email
+- Number of tickets purchased
+- Purchase date
+
+To see **attendee names**:
+1. Go to **Attendees** tab (not Registrations)
+2. View full list of people attending
+3. Each row = one attendee (person with ticket)
+
+**Or** view in **Tickets** module:
+- See individual tickets
+- Assignment status
+- Linked attendee for each ticket
+
+---
+
+### Problem: Attendee Count Doesn't Match Registration Count
+
+**Symptoms**:
+- 50 registrations (purchases)
+- 120 attendees shown
+- Numbers don't match
+
+**Explanation**:
+This is expected behavior:
+- **Registrations** = Number of purchases (transactions)
+- **Attendees** = Number of people attending (ticket assignments)
+
+**Example**:
+- 50 purchases
+- Average 2.4 tickets per purchase
+- = 120 attendees total
+
+**To verify**:
+1. Check average tickets per purchase
+2. Multiply: purchases × avg tickets ≈ attendees
+3. Unassigned tickets won't have attendees yet
+
+---
+
+### Problem: Can't Export Custom Field Answers from Registration
+
+**Symptoms**:
+- Registration export doesn't include custom fields
+- Looking for dietary restrictions, t-shirt sizes
+
+**Explanation**:
+Custom field answers are stored with **Attendees**, not Registrations.
+
+**Solution**:
+1. Go to **Attendees** module
+2. Click **"Export Attendees"**
+3. CSV includes:
+   - Attendee name and email
+   - Custom field answers
+   - Ticket type
+   - Assignment date
+
+**Why**: Custom fields are filled out during ticket assignment (by attendees), not during purchase (by buyer).
 
 ---
 

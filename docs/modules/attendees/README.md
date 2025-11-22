@@ -2,88 +2,154 @@
 
 ## Overview
 
-The Attendees module provides organizers with comprehensive attendee management capabilities. It's essentially a specialized view of the Registration module, focused on managing and exporting attendee data. The module enables organizers to view, search, filter, and export their event registrations for operational purposes.
+The Attendees module manages the **actual event participants** - the people who receive tickets and attend the event. This is distinct from the Registration module which handles ticket purchases.
+
+### Critical Distinction
+
+**Registration Module** = Ticket purchasing (buyer data)  
+**Attendees Module** = Event participation (who actually attends)
+
+**Example Flow**:
+1. Alice (buyer) purchases 5 tickets → Creates Registration
+2. System creates 5 Ticket instances
+3. Alice assigns tickets to: Bob, Carol, Dave, Eve, and herself
+4. 5 Attendee records created → Attendees module manages them
+
+## Key Concepts
+
+### Attendee vs Buyer vs Ticket
+
+| Entity | Represents | Example |
+|--------|-----------|---------|
+| **Registration** | Purchase transaction | Alice buys 5 tickets |
+| **Ticket** | Individual ticket instance | Ticket #001, #002, #003... |
+| **Attendee** | Person using a ticket | Bob, Carol, Dave, Eve, Alice |
+
+**One Registration** (Alice's purchase)  
+→ **Five Tickets** (individual instances)  
+→ **Five Attendees** (the people attending)
+
+### Attendee Data Model
+
+```prisma
+model Attendee {
+  id          String  @id
+  name        String  // ATTENDEE name (not buyer)
+  email       String  // ATTENDEE email (not buyer)
+  customData  Json?   // Registration form answers
+  emailStatus String  // Bounce/unsubscribe tracking
+  ticket      Ticket? // One-to-one relationship
+}
+```
 
 ## Features
 
-- **Attendee List View**: Comprehensive table of all registrations
-- **Real-time Search**: Debounced search by name or email
-- **Ticket Type Filtering**: Filter attendees by ticket type
-- **Email Status Tracking**: Monitor email bounces and unsubscribes
-- **CSV Export**: Download attendee data for offline use
-- **CSV Import**: Bulk import attendees from CSV files with validation
-- **Resend Confirmations**: Re-send confirmation emails to attendees
-- **Registration Cancellation**: Cancel registrations (frees up tickets)
-- **Pagination**: Infinite scroll for large attendee lists
-- **Status Badges**: Visual indicators for payment and email status
+- **Attendee List View**: All people attending event (not who purchased)
+- **Real-time Search**: Find attendees by name or email
+- **Ticket Type Filtering**: Filter by ticket tier
+- **Email Status Tracking**: Monitor bounces and unsubscribes
+- **CSV Export**: Download attendee data (with custom field answers)
+- **CSV Import**: Bulk import attendees with validation
+- **Resend Tickets**: Re-send ticket emails to attendees
+- **Assignment Management**: View ticket assignments
+- **Custom Field Data**: View attendee responses to custom questions
 
 ## User Roles
 
 ### Organizers
-- View all attendees for their events
+- View all attendees (people attending, not buyers)
 - Search and filter attendee list
-- Export attendee data to CSV
-- Resend confirmation emails
-- Cancel registrations
+- Export attendee data with custom fields
+- Resend ticket emails
 - Monitor email delivery status
 - **Full control** over attendee management
 
 ### Attendees
-- No direct access to this module
-- Receive confirmation emails via Registration module
-- Can view their own registration details (not covered in this module)
-
-### Public Users
-- No access to attendee data
+- Receive ticket via email (assigned by buyer)
+- View their ticket details and QR code
+- No direct access to attendee list
 - Privacy protected
+
+### Buyers
+- Assign tickets to create attendees (Tickets module)
+- Cannot directly view attendee list (privacy)
+- Can only see attendees for tickets they purchased
 
 ## Module Dependencies
 
 **This module depends on:**
-- **[Events Module](../events/)**: Attendees belong to events, accessed via event dashboard
-- **[Tickets Module](../tickets/)**: Attendees have ticket types for filtering
-- **[Registration Module](../registration/)**: **Core dependency** - Uses registration router procedures ([see backend](../registration/backend.md))
-- **[Communications Module](../communications/)**: Sends emails (confirmation resends, campaigns)
+- **[Tickets Module](../tickets/)**: Attendees are created via ticket assignment
+- **[Events Module](../events/)**: Attendees belong to events
+- **[Communications Module](../communications/)**: Email delivery to attendees
 
 **This module is required by:**
-- **Communications Module**: Targets attendees for email campaigns
-- **Analytics/Reporting** (future): Attendee metrics and insights
+- **Communications Module**: Target recipients for email campaigns
+- **Check-in Module** (future): Attendee check-in at event
 
-## Relationship to Registration Module
+## Module Scope
 
-The Attendees module is **not a separate backend router**. It:
-- Uses the same `registrationRouter` procedures ([see all procedures](../registration/backend.md))
-- Provides a different UI/UX focused on management (vs. sign-up)
-- Adds filtering and export capabilities ([see export details](../registration/exports.md))
-- Focuses on organizer workflows (vs. public registration)
+### This Module Handles:
+- ✅ Viewing who is attending the event
+- ✅ Exporting attendee data (names, emails, custom fields)
+- ✅ Searching and filtering attendees
+- ✅ Resending ticket emails
+- ✅ Monitoring email delivery status
+- ✅ Importing attendees in bulk
 
-**Key Difference**:
-- **[Registration Module](../registration/)**: Public sign-up forms + basic organizer list ([see workflows](../registration/workflows.md))
-- **Attendees Module**: Advanced management dashboard for organizers with import/export features
+### This Module Does NOT Handle:
+- ❌ Ticket purchasing (see Registration module)
+- ❌ Ticket assignment (see Tickets module)
+- ❌ Buyer information management (see Registration module)
+- ❌ Payment processing (see Registration module)
+
+## Relationship to Other Modules
+
+### vs Registration Module
+- **Registration**: Who **purchased** tickets (buyer data)
+- **Attendees**: Who is **attending** event (participant data)
+- Often different people (group purchases)
+
+### vs Tickets Module
+- **Tickets**: Individual ticket instances (QR codes, assignment status)
+- **Attendees**: The people assigned to tickets
+- One ticket → One attendee (after assignment)
+
+### Backend Implementation Note
+
+The Attendees module uses data from the `Attendee` model, which is:
+- **Created during ticket assignment** (Tickets module)
+- **Managed and viewed** (Attendees module)
+- **Used for communications** (Communications module)
+
+It does NOT use the Registration model directly.
 
 ## Quick Links
-- [Backend Documentation](./backend.md) - Registration router procedures
+
+- [Backend Documentation](./backend.md) - Attendee-focused procedures
 - [Frontend Documentation](./frontend.md) - AttendeeTable component
-- [Data Model](./data-model.md) - Registration model reference
+- [Data Model](./data-model.md) - Attendee model schema
 - [Workflows](./workflows.md) - Management workflows
 
 ## Related Files
 
 ### Backend
-- `src/server/api/routers/registration.ts` - Registration router (shared)
+- `src/server/api/routers/attendees.ts` - Attendees router (if separate)
+- `src/server/api/routers/registration.ts` - Shares some procedures
 
 ### Frontend
 - `src/app/(dashboard)/[id]/attendees/page.tsx` - Attendees page
 - `src/components/registration/attendee-table.tsx` - Main table component
 
 ### Database Model
-- `Registration` - Core attendee data model (shared with Registration module)
+- `Attendee` - Core attendee data model
+- `Ticket` - Links attendee to purchase
+- `Registration` - Buyer information (separate)
 
 ## Feature Coverage
 
 This module provides organizer capabilities for:
 
-- **Attendee List** (FR-016): View all registrations with filtering
+- **Attendee List** (FR-016): View all attendees with filtering
 - **Search Functionality**: Real-time search by name/email
 - **Ticket Type Filter**: Filter by specific ticket types
 - **CSV Export** (FR-018): Download attendee data
@@ -94,10 +160,10 @@ This module provides organizer capabilities for:
   - Partial commit strategy for error handling
   - CSV template download
 - **Email Management**:
-  - Resend confirmations
+  - Resend ticket emails
   - Track email status (active/bounced/unsubscribed)
   - Update email status from webhooks
-- **Registration Cancellation**: Free up ticket inventory
+- **Ticket Resend**: Re-send ticket to attendees
 
 ## Getting Started
 
@@ -109,21 +175,24 @@ This module provides organizer capabilities for:
    - Route: `/(dashboard)/[eventId]/attendees`
 
 2. **View Attendee List**
-   - See all registrations in a table
-   - Columns: Name, Email, Ticket Type, Payment Status, Email Status, Registered Date, Actions
+   - See all attendees in a table
+   - Columns: Name, Email, Ticket Type, Email Status, Assignment Date, Actions
+   - **Note**: Shows attendees, not buyers
 
 3. **Search Attendees**
    - Type in search box to find by name or email
    - Search is debounced (500ms) to reduce API calls
+   - Searches attendee information only
 
 4. **Filter by Ticket Type**
    - Use dropdown to show only specific ticket types
    - Helps organize attendees by access level
 
-5. **Export Data**
+5. **Export Attendee Data**
    - Click "Export CSV" button
    - Download CSV file with all attendee data
-   - Use for badge printing, email lists, etc.
+   - Includes custom field answers
+   - Use for badge printing, catering, etc.
 
 6. **Import Attendees**
    - Click "Import Attendees" button
@@ -133,17 +202,17 @@ This module provides organizer capabilities for:
    - Execute import with progress feedback
 
 7. **Manage Individual Attendees**
-   - **Resend Confirmation**: Re-send confirmation email
-   - **Cancel Registration**: Cancel and free up ticket
+   - **Resend Ticket**: Re-send ticket email to attendee
+   - **View Assignment**: See which buyer purchased this ticket
 
 ## Best Practices
 
 ### For Organizers
-1. **Regular Monitoring**: Check attendee list regularly for bounced emails
-2. **CSV Exports**: Export before event for badge printing
-3. **Search Efficiently**: Use search instead of scrolling through large lists
-4. **Email Status**: Monitor bounces and unsubscribes
-5. **Data Privacy**: Respect attendee privacy, only export when necessary
+1. **Regular Monitoring**: Check attendee list regularly for email issues
+2. **CSV Exports**: Export before event for operational needs
+3. **Search Efficiently**: Use search instead of scrolling
+4. **Email Status**: Monitor bounces and act on undeliverable emails
+5. **Data Privacy**: Respect attendee privacy, export only when necessary
 
 ### For Developers
 1. **Debounced Search**: Always debounce search inputs (500ms standard)
@@ -156,8 +225,8 @@ This module provides organizer capabilities for:
 
 **Exported Data** includes:
 - Name, Email (PII - handle carefully)
-- Ticket type, registration date
-- Payment status (if applicable)
+- Custom field responses (may include dietary/medical info)
+- Ticket type, assignment date
 
 **Best Practices**:
 - Only export when needed
@@ -165,33 +234,119 @@ This module provides organizer capabilities for:
 - Delete after event if not needed for records
 - Comply with GDPR/data protection laws
 - Provide attendee opt-out mechanisms
+- Respect email preferences (unsubscribe)
 
 ## Integration Points
 
-### With Registration Module
-- Uses same backend procedures ([see backend documentation](../registration/backend.md))
-- Shares `Registration` model ([see data model](../registration/data-model.md))
-- Different UI focus (management vs sign-up)
-- Resend confirmation uses `registration.resendConfirmation` ([see workflow](../registration/workflows.md#workflow-4-resend-confirmation-email))
+### With Tickets Module
+- Attendee records created during ticket assignment ([see assignment workflow](../tickets/workflows.md))
+- One-to-one relationship with tickets
+- Attendee deleted when ticket unassigned (GDPR)
 
 ### With Communications Module
-- Attendees are campaign recipients
-- Email status tracked and updated via webhooks ([see email templates](../registration/email-templates.md))
+- Attendees are email campaign recipients
+- Email status tracked and updated via webhooks
 - Filters applied to target specific attendees
+- Ticket emails sent to attendee addresses
 
-### With Tickets Module
-- Filter attendees by ticket type ([see ticket module](../tickets/))
-- Shows ticket availability impact
+### With Registration Module
+- Different data models (Attendee vs Registration)
+- Registration = buyer, Attendee = participant
+- Often different people in group purchases
+- Separate export functions for each
 
 ## Future Enhancements
 
-- **Check-in System**: QR code scanning at event entrance
+- **Check-in System**: QR code scanning integration
 - **Attendee Details Page**: Detailed view of individual attendee
-- **Bulk Actions**: Bulk resend, bulk cancel
-- **Advanced Filters**: By registration date, payment status, custom fields
+- **Bulk Actions**: Bulk resend, bulk operations
+- **Advanced Filters**: By assignment date, custom fields, email status
 - **Excel Export**: Alternative to CSV with formatting
 - **Excel Import**: Support .xlsx files in addition to CSV
 - **Update Existing Records**: Update attendees via import instead of create only
 - **Import API Endpoint**: Programmatic imports via REST API
 - **Attendee Notes**: Internal organizer notes on attendees
 - **Badge Printing**: Direct integration with badge printers
+- **Communication Preferences**: Attendee-specific email preferences
+
+## Common Scenarios
+
+### Viewing Event Attendees
+
+**Scenario**: Organizer wants to see who's attending
+
+**Steps**:
+1. Navigate to Attendees tab
+2. View list of all attendees (not buyers)
+3. See 100 attendees from 50 purchases (average 2 tickets/purchase)
+
+### Exporting for Badge Printing
+
+**Scenario**: Print badges for event
+
+**Steps**:
+1. Export attendee CSV (includes all attendees)
+2. Get name, email, ticket type for each attendee
+3. Import to badge printing software
+4. Print badges
+
+**Don't use**: Registration export (shows buyers, not attendees)
+
+### Finding Specific Attendee
+
+**Scenario**: Attendee calls with question
+
+**Steps**:
+1. Search by attendee name or email
+2. View ticket details
+3. Resend ticket if needed
+4. See who purchased the ticket (buyer info)
+
+## Troubleshooting
+
+### Can't Find Attendee
+
+**Problem**: Searched but attendee not found
+
+**Common Causes**:
+1. **Ticket Not Assigned**: Buyer purchased but didn't assign
+2. **Different Name**: Attendee registered under different name
+3. **Typo in Search**: Check spelling
+
+**Solution**: 
+- Check Tickets module for unassigned tickets
+- Search by email instead of name
+- Check Registration module for buyer information
+
+### Export Missing Attendees
+
+**Problem**: Export shows fewer people than expected
+
+**Explanation**: 
+- Registration export shows **buyers** (who purchased)
+- Attendees export shows **attendees** (who's attending)
+- If 10 buyers purchased 50 tickets, Registration export = 10 rows, Attendees export = 50 rows (after assignment)
+
+**Solution**: Use Attendees module export for attendee data
+
+### Email Not Received
+
+**Problem**: Attendee didn't receive ticket email
+
+**Common Causes**:
+1. **Invalid Email**: Typo in email address
+2. **Spam Filter**: Email in spam folder
+3. **Email Status**: Marked as bounced
+
+**Solution**:
+- Check email status in attendee list
+- Resend ticket email
+- Verify email address with buyer
+
+## Related Documentation
+
+- [Registration Module](../registration/) - Ticket purchasing (buyer data)
+- [Tickets Module](../tickets/) - Ticket instances and assignment
+- [Communications Module](../communications/) - Email delivery
+- [Data Model](./data-model.md) - Attendee schema details
+- [Backend Documentation](./backend.md) - API procedures
