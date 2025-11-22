@@ -6,7 +6,6 @@ import {
   Heading,
   Hr,
   Html,
-  Img,
   Link,
   Preview,
   Section,
@@ -28,6 +27,7 @@ interface TicketAssignedProps {
   buyerEmail: string;
   ticketUrl: string;
   qrCodeDataUrl?: string;
+  qrCodeCid?: string; // Content ID for inline image (use when qrCodeDataUrl is sent as attachment)
   customData?: Record<string, unknown>;
 }
 
@@ -45,6 +45,7 @@ export const TicketAssigned = ({
   buyerEmail,
   ticketUrl,
   qrCodeDataUrl,
+  qrCodeCid,
   customData,
 }: TicketAssignedProps) => {
   const formattedDate = new Intl.DateTimeFormat("en-US", {
@@ -87,10 +88,10 @@ export const TicketAssigned = ({
             </Text>
 
             {/* QR Code */}
-            {qrCodeDataUrl && (
+            {(qrCodeDataUrl ?? qrCodeCid) && (
               <Section style={qrCodeSection}>
-                <Img
-                  src={qrCodeDataUrl}
+                <img
+                  src={qrCodeCid ? `cid:${qrCodeCid}` : qrCodeDataUrl}
                   alt="Ticket QR Code"
                   width="200"
                   height="200"

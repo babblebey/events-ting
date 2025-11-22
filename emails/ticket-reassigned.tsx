@@ -21,6 +21,7 @@ interface TicketReassignedEmailProps {
   ticketNumber: string;
   ticketTypeName: string;
   qrCodeDataUrl: string;
+  qrCodeCid?: string; // Content ID for inline image
   ticketUrl: string;
   buyerName?: string;
   buyerEmail?: string;
@@ -34,6 +35,7 @@ export const TicketReassignedEmail = ({
   ticketNumber = "TKT-L8Z9K3-A7B2C5D8E9",
   ticketTypeName = "General Admission",
   qrCodeDataUrl = "data:image/png;base64,...",
+  qrCodeCid,
   ticketUrl = "https://events-ting.com/tickets/TKT-L8Z9K3-A7B2C5D8E9",
   buyerName = "Jane Smith",
   buyerEmail = "jane@example.com",
@@ -110,7 +112,7 @@ export const TicketReassignedEmail = ({
             </Text>
             <div style={qrCodeContainer}>
               <img
-                src={qrCodeDataUrl}
+                src={qrCodeCid ? `cid:${qrCodeCid}` : qrCodeDataUrl}
                 alt="Ticket QR Code"
                 style={qrCodeImage}
               />

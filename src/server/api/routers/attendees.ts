@@ -13,7 +13,7 @@ import { z } from "zod";
 import { checkModuleAccess } from "@/server/api/permissions";
 import Papa from "papaparse";
 import { randomBytes } from "crypto";
-import { sendEmail } from "@/server/services/email";
+import { sendEmail, dataUrlToAttachment } from "@/server/services/email";
 import { TicketAssigned } from "../../../../emails/ticket-assigned";
 import { generateTicketNumber } from "@/lib/tickets/generate-ticket-number";
 import { generateTicketQRCode } from "@/lib/qr-code/generator";
@@ -1758,7 +1758,7 @@ export const attendeesRouter = createTRPCRouter({
             const qrCodeData = await generateTicketQRCode(ticketNumber, {
               width: 400,
             });
-            
+
             // 2. Create Ticket record with ticket number and QR code
             const ticket = await tx.ticket.create({
               data: {
@@ -1891,6 +1891,14 @@ export const attendeesRouter = createTRPCRouter({
               // Use pre-generated QR code from ticket
               const qrCodeDataUrl = task.qrCodeData;
 
+              // Convert QR code to inline attachment
+              const qrCodeCid = "ticket-qr-code";
+              const qrCodeAttachment = dataUrlToAttachment(
+                qrCodeDataUrl,
+                qrCodeCid,
+                `${task.ticketNumber}.png`,
+              );
+
               // Send email
               await sendEmail({
                 to: task.email,
@@ -1911,13 +1919,15 @@ export const attendeesRouter = createTRPCRouter({
                   buyerName: task.name, // For imports, buyer = attendee
                   buyerEmail: task.email,
                   ticketUrl,
-                  qrCodeDataUrl,
+                  qrCodeDataUrl, // Keep for backward compatibility/fallback
+                  qrCodeCid,
                   customData: task.customData,
                 }),
                 tags: [
                   { name: "category", value: "ticket-assigned" },
                   { name: "eventId", value: event.id },
                 ],
+                attachments: [qrCodeAttachment],
               });
 
               console.log(

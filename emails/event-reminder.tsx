@@ -6,7 +6,6 @@ import {
   Heading,
   Hr,
   Html,
-  Img,
   Preview,
   Section,
   Text,
@@ -25,6 +24,7 @@ interface EventReminderEmailProps {
   ticketType: string;
   eventUrl: string;
   qrCodeDataUrl?: string;
+  qrCodeCid?: string; // Content ID for inline image
   customMessage?: string;
 }
 
@@ -40,6 +40,7 @@ export const EventReminderEmail = ({
   ticketType,
   eventUrl,
   qrCodeDataUrl,
+  qrCodeCid,
   customMessage,
 }: EventReminderEmailProps) => {
   // Calculate days until event
@@ -123,10 +124,10 @@ export const EventReminderEmail = ({
             )}
 
             {/* QR Code */}
-            {qrCodeDataUrl && (
+            {(qrCodeDataUrl ?? qrCodeCid) && (
               <Section style={qrCodeSection}>
-                <Img
-                  src={qrCodeDataUrl}
+                <img
+                  src={qrCodeCid ? `cid:${qrCodeCid}` : qrCodeDataUrl}
                   alt="Ticket QR Code"
                   width="200"
                   height="200"

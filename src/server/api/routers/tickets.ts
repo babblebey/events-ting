@@ -14,7 +14,7 @@ import {
   unassignTicketInputSchema,
 } from "@/lib/validators";
 import { isValidTicketNumberFormat } from "@/lib/tickets/generate-ticket-number";
-import { sendEmail } from "@/server/services/email";
+import { sendEmail, dataUrlToAttachment } from "@/server/services/email";
 import { TicketAssigned } from "emails/ticket-assigned";
 import { TicketReassignedEmail } from "emails/ticket-reassigned";
 
@@ -654,8 +654,25 @@ export const ticketsRouter = createTRPCRouter({
       // Use pre-generated QR code from ticket
       const qrCodeDataUrl = result.updatedTicket.qrCodeData;
 
+      // Convert QR code to inline attachment
+      const qrCodeCid = "ticket-qr-code";
+      const qrCodeAttachment = dataUrlToAttachment(
+        qrCodeDataUrl,
+        qrCodeCid,
+        `${result.updatedTicket.ticketNumber}.png`,
+      );
+
       // Build ticket URL
       const ticketUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/tickets/${result.updatedTicket.id}`;
+
+      // Debug: Log attachment structure
+      console.log("[Tickets] QR Code attachment:", {
+        hasContent: !!qrCodeAttachment.content,
+        contentLength: qrCodeAttachment.content?.length,
+        content_id: qrCodeAttachment.content_id,
+        content_type: qrCodeAttachment.content_type,
+        filename: qrCodeAttachment.filename,
+      });
 
       // Send email to attendee with ticket details
       try {
@@ -678,7 +695,8 @@ export const ticketsRouter = createTRPCRouter({
                       "Location TBA"),
                 ticketNumber: result.updatedTicket.ticketNumber,
                 ticketTypeName: result.updatedTicket.ticketType.name,
-                qrCodeDataUrl,
+                qrCodeDataUrl, // Keep for backward compatibility/fallback
+                qrCodeCid,
                 ticketUrl,
                 buyerName: result.updatedTicket.registration.name,
                 buyerEmail: result.updatedTicket.registration.email,
@@ -700,7 +718,8 @@ export const ticketsRouter = createTRPCRouter({
                 buyerName: result.updatedTicket.registration.name,
                 buyerEmail: result.updatedTicket.registration.email,
                 ticketUrl,
-                qrCodeDataUrl,
+                qrCodeDataUrl, // Keep for backward compatibility/fallback
+                qrCodeCid,
                 customData:
                   (result.newAttendee.customData as Record<string, unknown>) ??
                   undefined,
@@ -712,6 +731,7 @@ export const ticketsRouter = createTRPCRouter({
             },
             { name: "eventId", value: result.updatedTicket.event.id },
           ],
+          attachments: [qrCodeAttachment],
         });
 
         console.log(

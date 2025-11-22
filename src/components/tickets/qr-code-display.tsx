@@ -31,8 +31,7 @@ export function QRCodeDisplay({
   const qrCodeRef = useRef<HTMLDivElement>(null);
 
   // Convert size string to pixel width for display
-  const displaySize =
-    size === "small" ? 200 : size === "medium" ? 300 : 400;
+  const displaySize = size === "small" ? 200 : size === "medium" ? 300 : 400;
 
   const handleDownload = () => {
     if (!qrCodeData) return;
