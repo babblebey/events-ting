@@ -118,11 +118,6 @@ export default function RegistrationManagementPage() {
     setIsUnassignModalOpen(true);
   };
 
-  const handleViewQR = (ticketId: string) => {
-    // Navigate to the individual ticket page which has the QR code
-    router.push(`/events/${slug}/tickets/${ticketId}`);
-  };
-
   const handleAssignmentSuccess = async () => {
     setIsAssignModalOpen(false);
     setSelectedTicketId(null);
@@ -212,6 +207,7 @@ export default function RegistrationManagementPage() {
           attendee: ticket.attendee,
           createdAt: registration.registeredAt,
           updatedAt: ticket.updatedAt,
+          ticketUrl: `/events/${slug}/tickets/${ticket.id}`,
         }))}
         loading={false}
         eventTimezone={registration.event.timezone}
@@ -219,7 +215,6 @@ export default function RegistrationManagementPage() {
         onAssign={handleAssign}
         onReassign={handleReassign}
         onUnassign={handleUnassign}
-        onViewQR={handleViewQR}
       />
 
       {/* Assignment/Reassignment Modal */}

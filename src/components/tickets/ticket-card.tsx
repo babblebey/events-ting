@@ -30,6 +30,7 @@ interface TicketCardProps {
       customData: Record<string, unknown> | null;
     } | null;
     createdAt: Date;
+    ticketUrl: string;
   };
   eventSlug?: string;
   eventTimezone?: string;
@@ -37,7 +38,6 @@ interface TicketCardProps {
   onAssign?: (ticketId: string) => void;
   onReassign?: (ticketId: string) => void;
   onUnassign?: (ticketId: string) => void;
-  onViewQR?: (ticketId: string) => void;
 }
 
 export function TicketCard({
@@ -48,7 +48,6 @@ export function TicketCard({
   onAssign,
   onReassign,
   onUnassign,
-  onViewQR,
 }: TicketCardProps) {
   const priceDisplay =
     ticket.ticketType.price === 0
@@ -184,14 +183,15 @@ export function TicketCard({
                     </Button>
                   </>
                 )}
-                <Button
-                  size="sm"
-                  color="light"
-                  onClick={() => onViewQR?.(ticket.id)}
-                  // className="flex-1"
-                >
-                  View QR Code
-                </Button>
+                <Link href={ticket.ticketUrl}>
+                  <Button
+                    size="sm"
+                    color="light"
+                    // className="flex-1"
+                  >
+                    View Ticket
+                  </Button>
+                </Link>
               </>
             )}
           </div>
