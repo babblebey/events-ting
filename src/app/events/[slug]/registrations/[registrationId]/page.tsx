@@ -14,7 +14,7 @@ import Link from "next/link";
 import { api } from "@/trpc/react";
 import { TicketList } from "@/components/tickets/ticket-list";
 import { RegistrationSummary } from "@/components/tickets/registration-summary";
-import { ReassignmentModal } from "@/components/tickets/reassignment-modal";
+import { AssignmentModal } from "@/components/tickets/assignment-modal";
 import { UnassignmentModal } from "@/components/tickets/unassignment-modal";
 
 export default function RegistrationManagementPage() {
@@ -25,10 +25,9 @@ export default function RegistrationManagementPage() {
 
   // Modal state
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const [assignmentMode, setAssignmentMode] = useState<"assign" | "reassign">("assign");
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [isUnassignModalOpen, setIsUnassignModalOpen] = useState(false);
-
-  const utils = api.useUtils();
 
   // Fetch registration with tickets
   const {
@@ -104,11 +103,13 @@ export default function RegistrationManagementPage() {
   // Handler functions
   const handleAssign = (ticketId: string) => {
     setSelectedTicketId(ticketId);
+    setAssignmentMode("assign");
     setIsAssignModalOpen(true);
   };
 
   const handleReassign = (ticketId: string) => {
     setSelectedTicketId(ticketId);
+    setAssignmentMode("reassign");
     setIsAssignModalOpen(true);
   };
 
@@ -220,10 +221,11 @@ export default function RegistrationManagementPage() {
         onViewQR={handleViewQR}
       />
 
-      {/* Reassignment/Assignment Modal */}
+      {/* Assignment/Reassignment Modal */}
       {selectedTicket && (
-        <ReassignmentModal
+        <AssignmentModal
           isOpen={isAssignModalOpen}
+          mode={assignmentMode}
           onClose={() => {
             setIsAssignModalOpen(false);
             setSelectedTicketId(null);

@@ -174,7 +174,7 @@ export function TicketCard({
                     </Button>
                     <Button
                       size="sm"
-                      color="failure"
+                      color="red"
                       onClick={() => onUnassign?.(ticket.id)}
                       className="flex-1"
                     >
@@ -186,7 +186,7 @@ export function TicketCard({
                   size="sm"
                   color="light"
                   onClick={() => onViewQR?.(ticket.id)}
-                  className="flex-1"
+                  // className="flex-1"
                 >
                   View QR Code
                 </Button>
