@@ -596,6 +596,11 @@ export const attendeesRouter = createTRPCRouter({
               isCheckedIn: true,
               checkedInAt: true,
               eventId: true,
+              event: {
+                select: {
+                  slug: true,
+                },
+              },
               ticketType: {
                 select: {
                   id: true,
@@ -658,6 +663,9 @@ export const attendeesRouter = createTRPCRouter({
           ticketNumber: attendee.ticket.ticketNumber,
           isCheckedIn: attendee.ticket.isCheckedIn,
           checkedInAt: attendee.ticket.checkedInAt,
+          event: {
+            slug: attendee.ticket.event.slug,
+          },
           ticketType: {
             id: attendee.ticket.ticketType.id,
             name: attendee.ticket.ticketType.name,

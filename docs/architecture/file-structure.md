@@ -147,12 +147,18 @@ events/
 │   │   └── page.tsx          # Public CFP submission form
 │   ├── register/
 │   │   └── page.tsx          # Public registration form
+│   ├── registrations/
+│   │   └── [registrationId]/
+│   │       └── page.tsx      # Buyer ticket dashboard
 │   ├── schedule/
 │   │   └── page.tsx          # Public schedule view
 │   ├── speakers/
 │   │   ├── [id]/
 │   │   │   └── page.tsx      # Speaker profile page
 │   │   └── page.tsx          # Speakers directory
+│   ├── tickets/
+│   │   └── [ticketId]/
+│   │       └── page.tsx      # Individual ticket view (attendee)
 │   └── page.tsx              # Event landing page
 └── page.tsx                  # All events list (public)
 ```

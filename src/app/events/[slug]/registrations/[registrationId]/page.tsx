@@ -120,7 +120,7 @@ export default function RegistrationManagementPage() {
 
   const handleViewQR = (ticketId: string) => {
     // Navigate to the individual ticket page which has the QR code
-    router.push(`/tickets/${ticketId}`);
+    router.push(`/events/${slug}/tickets/${ticketId}`);
   };
 
   const handleAssignmentSuccess = async () => {
@@ -196,6 +196,7 @@ export default function RegistrationManagementPage() {
 
       {/* Ticket List with Filtering and Search */}
       <TicketList
+        eventSlug={slug}
         tickets={registration.tickets.map((ticket) => ({
           id: ticket.id,
           ticketNumber: ticket.ticketNumber,
