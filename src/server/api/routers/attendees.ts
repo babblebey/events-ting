@@ -1,16 +1,30 @@
 /**
  * Attendees Router
- * Handles attendee import operations for event organizers
+ * Handles attendee import operations and attendee management for event organizers
  */
 
 import { TRPCError } from "@trpc/server";
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
 import { z } from "zod";
 import { checkModuleAccess } from "@/server/api/permissions";
 import Papa from "papaparse";
 import { randomBytes } from "crypto";
-import { sendEmail } from "@/server/services/email";
-import { RegistrationConfirmation } from "../../../../emails/registration-confirmation";
+import { sendEmail, dataUrlToAttachment } from "@/server/services/email";
+import { TicketAssigned } from "../../../../emails/ticket-assigned";
+import { generateTicketNumber } from "@/lib/tickets/generate-ticket-number";
+import { generateTicketQRCode } from "@/lib/qr-code/generator";
+import {
+  listAttendeesInputSchema,
+  getAttendeeByIdInputSchema,
+  getCustomFieldResponsesInputSchema,
+  exportAttendeesInputSchema,
+  updateAttendeeInputSchema,
+  updateEmailStatusInputSchema,
+} from "@/lib/validators";
 
 /**
  * Input schema for CSV parsing
@@ -39,7 +53,22 @@ const executeImportSchema = z.object({
   fieldMapping: z.record(z.string()), // CSV column -> system field
   duplicateStrategy: z.enum(["skip", "create"]).default("skip"),
   sendConfirmationEmails: z.boolean().default(false),
+  idempotencyKey: z.string().optional(), // Prevent duplicate submissions
 });
+
+// In-memory cache to track recent imports (expires after 5 minutes)
+const importCache = new Map<string, { timestamp: number; result: any }>();
+const CACHE_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
+
+// Clean up expired cache entries periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of importCache.entries()) {
+    if (now - value.timestamp > CACHE_EXPIRY_MS) {
+      importCache.delete(key);
+    }
+  }
+}, 60 * 1000); // Run cleanup every minute
 
 /**
  * Validation error structure
@@ -428,6 +457,737 @@ function detectInFileDuplicates(rows: MappedRow[]): ValidationError[] {
 
 export const attendeesRouter = createTRPCRouter({
   /**
+   * List attendees for an event
+   * Protected procedure - event organizer only
+   */
+  list: protectedProcedure
+    .input(listAttendeesInputSchema)
+    .query(async ({ ctx, input }) => {
+      const { eventId, emailStatus, search, limit, cursor } = input;
+
+      // Verify user is event organizer
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "ATTENDEES",
+      });
+
+      // Build where clause
+      const where = {
+        ticket: {
+          eventId,
+          isAssigned: true, // Only show attendees with assigned tickets
+        },
+        ...(emailStatus && { emailStatus }),
+        ...(search && {
+          OR: [
+            { name: { contains: search, mode: "insensitive" as const } },
+            { email: { contains: search, mode: "insensitive" as const } },
+          ],
+        }),
+        ...(cursor && { id: { gt: cursor } }),
+      };
+
+      // Get total count (for pagination UI)
+      const total = await ctx.db.attendee.count({
+        where: {
+          ticket: {
+            eventId,
+            isAssigned: true,
+          },
+          ...(emailStatus && { emailStatus }),
+          ...(search && {
+            OR: [
+              { name: { contains: search, mode: "insensitive" as const } },
+              { email: { contains: search, mode: "insensitive" as const } },
+            ],
+          }),
+        },
+      });
+
+      // Fetch attendees with pagination
+      const attendees = await ctx.db.attendee.findMany({
+        where,
+        take: limit + 1, // Fetch one extra to determine if there's a next page
+        orderBy: { createdAt: "asc" },
+        include: {
+          ticket: {
+            select: {
+              id: true,
+              ticketNumber: true,
+              isCheckedIn: true,
+              checkedInAt: true,
+              ticketType: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // Determine if there's a next page
+      let nextCursor: string | null = null;
+      if (attendees.length > limit) {
+        const nextItem = attendees.pop();
+        nextCursor = nextItem?.id ?? null;
+      }
+
+      // Transform to output format
+      const transformedAttendees = attendees.map((attendee) => {
+        if (!attendee.ticket) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Attendee has no associated ticket",
+          });
+        }
+
+        return {
+          id: attendee.id,
+          name: attendee.name,
+          email: attendee.email,
+          emailStatus: attendee.emailStatus as
+            | "active"
+            | "bounced"
+            | "unsubscribed",
+          customData: attendee.customData as Record<string, unknown> | null,
+          ticket: {
+            id: attendee.ticket.id,
+            ticketNumber: attendee.ticket.ticketNumber,
+            isCheckedIn: attendee.ticket.isCheckedIn,
+            checkedInAt: attendee.ticket.checkedInAt,
+            ticketType: {
+              id: attendee.ticket.ticketType.id,
+              name: attendee.ticket.ticketType.name,
+            },
+          },
+          createdAt: attendee.createdAt,
+          updatedAt: attendee.updatedAt,
+        };
+      });
+
+      return {
+        attendees: transformedAttendees,
+        nextCursor,
+        total,
+      };
+    }),
+
+  /**
+   * Get attendee by ID
+   * Public procedure - attendee can view own record, organizer can view all
+   */
+  getById: publicProcedure
+    .input(getAttendeeByIdInputSchema)
+    .query(async ({ ctx, input }) => {
+      const { attendeeId } = input;
+
+      // Fetch attendee with ticket info
+      const attendee = await ctx.db.attendee.findUnique({
+        where: { id: attendeeId },
+        include: {
+          ticket: {
+            select: {
+              id: true,
+              ticketNumber: true,
+              isCheckedIn: true,
+              checkedInAt: true,
+              eventId: true,
+              ticketType: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!attendee) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Attendee not found",
+        });
+      }
+
+      if (!attendee.ticket) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Attendee has no associated ticket",
+        });
+      }
+
+      // Check authorization
+      // Allow if: user is the attendee, or user is event organizer
+      if (ctx.session?.user) {
+        const isAttendee = attendee.userId === ctx.session.user.id;
+
+        if (!isAttendee) {
+          try {
+            await checkModuleAccess({
+              db: ctx.db,
+              eventId: attendee.ticket.eventId,
+              userId: ctx.session.user.id,
+              requiredModule: "ATTENDEES",
+            });
+          } catch {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: "You do not have permission to view this attendee",
+            });
+          }
+        }
+      }
+
+      // Transform to output format
+      return {
+        id: attendee.id,
+        name: attendee.name,
+        email: attendee.email,
+        emailStatus: attendee.emailStatus as
+          | "active"
+          | "bounced"
+          | "unsubscribed",
+        customData: attendee.customData as Record<string, unknown> | null,
+        ticket: {
+          id: attendee.ticket.id,
+          ticketNumber: attendee.ticket.ticketNumber,
+          isCheckedIn: attendee.ticket.isCheckedIn,
+          checkedInAt: attendee.ticket.checkedInAt,
+          ticketType: {
+            id: attendee.ticket.ticketType.id,
+            name: attendee.ticket.ticketType.name,
+          },
+        },
+        createdAt: attendee.createdAt,
+        updatedAt: attendee.updatedAt,
+      };
+    }),
+
+  /**
+   * Get aggregated custom field responses for an event
+   * Protected procedure - event organizer only
+   */
+  getCustomFieldResponses: protectedProcedure
+    .input(getCustomFieldResponsesInputSchema)
+    .query(async ({ ctx, input }) => {
+      const { eventId, fieldId } = input;
+
+      // Verify user is event organizer
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "ATTENDEES",
+      });
+
+      // Get event to access custom field definitions
+      const event = await ctx.db.event.findUnique({
+        where: { id: eventId },
+        select: {
+          // TODO: Add customFields to Event schema (will be done in T044)
+          // customFields: true,
+          name: true,
+        },
+      });
+
+      if (!event) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Event not found",
+        });
+      }
+
+      // TODO: Enable this validation once Event.customFields is added to the schema (T044)
+      /*
+      if (!event.customFields) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Event has no custom fields configured",
+        });
+      }
+
+      // Parse custom field definitions
+      let customFieldDefinitions: CustomFieldDefinition[];
+      try {
+        customFieldDefinitions = customFieldDefinitionsSchema.parse(
+          event.customFields
+        ) as CustomFieldDefinition[];
+      } catch (error) {
+        console.error("[Attendees] Invalid custom fields schema in event", {
+          eventId,
+          error,
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Event has invalid custom field configuration",
+        });
+      }
+
+      // Find the field definition
+      const fieldDef = customFieldDefinitions.find((f) => f.id === fieldId);
+      if (!fieldDef) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Custom field not found in event configuration",
+        });
+      }
+      */
+
+      // For now, return mock data since Event.customFields doesn't exist yet
+      // This will be replaced with actual implementation in T044
+      const fieldDef = {
+        id: fieldId,
+        label: "Sample Field",
+        type: "text" as const,
+      };
+
+      // Fetch all attendees for this event
+      const attendees = await ctx.db.attendee.findMany({
+        where: {
+          ticket: {
+            eventId,
+            isAssigned: true,
+          },
+        },
+        select: {
+          customData: true,
+        },
+      });
+
+      // Aggregate responses
+      const responseCounts = new Map<string, number>();
+      let totalResponses = 0;
+
+      for (const attendee of attendees) {
+        if (!attendee.customData) continue;
+
+        const customData = attendee.customData as Record<string, unknown>;
+        const response = customData[fieldId];
+
+        if (response !== undefined && response !== null && response !== "") {
+          // Convert response to string, handling arrays and objects
+          let responseStr: string;
+          if (Array.isArray(response)) {
+            responseStr = response
+              .map((item) =>
+                typeof item === "string" ? item : JSON.stringify(item),
+              )
+              .join(", ");
+          } else if (typeof response === "object") {
+            responseStr = JSON.stringify(response);
+          } else if (typeof response === "string") {
+            responseStr = response;
+          } else if (
+            typeof response === "number" ||
+            typeof response === "boolean"
+          ) {
+            responseStr = String(response);
+          } else {
+            responseStr = "";
+          }
+
+          if (responseStr) {
+            responseCounts.set(
+              responseStr,
+              (responseCounts.get(responseStr) ?? 0) + 1,
+            );
+            totalResponses++;
+          }
+        }
+      }
+
+      // Convert to output format
+      const responses = Array.from(responseCounts.entries())
+        .map(([value, count]) => ({ value, count }))
+        .sort((a, b) => b.count - a.count); // Sort by count descending
+
+      return {
+        fieldId,
+        fieldLabel: fieldDef.label,
+        fieldType: fieldDef.type,
+        responses,
+        totalResponses,
+      };
+    }),
+
+  /**
+   * Export attendee list as CSV for event logistics
+   * Protected procedure - event organizer only
+   */
+  exportList: protectedProcedure
+    .input(exportAttendeesInputSchema)
+    .query(async ({ ctx, input }) => {
+      const {
+        eventId,
+        emailStatus,
+        includeCustomFields,
+        includeCheckInStatus,
+      } = input;
+
+      // Verify user is event organizer
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "ATTENDEES",
+      });
+
+      // Fetch event details for filename
+      const event = await ctx.db.event.findUnique({
+        where: { id: eventId },
+        select: {
+          name: true,
+        },
+      });
+
+      if (!event) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Event not found",
+        });
+      }
+
+      // Fetch all attendees for the event (no pagination for export)
+      const attendees = await ctx.db.attendee.findMany({
+        where: {
+          ticket: {
+            eventId,
+            isAssigned: true,
+          },
+          ...(emailStatus && { emailStatus }),
+        },
+        orderBy: { createdAt: "asc" },
+        include: {
+          ticket: {
+            select: {
+              ticketNumber: true,
+              isCheckedIn: true,
+              checkedInAt: true,
+              ticketType: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // Build CSV headers
+      const headers = ["Name", "Email", "Ticket Number", "Ticket Type"];
+
+      if (includeCheckInStatus) {
+        headers.push("Check-In Status", "Check-In Time");
+      }
+
+      // Collect custom field names from all attendees (if includeCustomFields)
+      const customFieldNames = new Set<string>();
+      if (includeCustomFields) {
+        for (const attendee of attendees) {
+          if (attendee.customData) {
+            const customData = attendee.customData as Record<string, unknown>;
+            for (const fieldName of Object.keys(customData)) {
+              customFieldNames.add(fieldName);
+            }
+          }
+        }
+        // Add custom field columns
+        for (const fieldName of Array.from(customFieldNames).sort()) {
+          headers.push(fieldName);
+        }
+      }
+
+      // Build CSV rows
+      const rows: string[][] = [];
+
+      for (const attendee of attendees) {
+        if (!attendee.ticket) continue;
+
+        const row: string[] = [
+          sanitizeCell(attendee.name),
+          sanitizeCell(attendee.email),
+          sanitizeCell(attendee.ticket.ticketNumber),
+          sanitizeCell(attendee.ticket.ticketType.name),
+        ];
+
+        if (includeCheckInStatus) {
+          row.push(
+            attendee.ticket.isCheckedIn ? "Checked In" : "Not Checked In",
+          );
+          row.push(
+            attendee.ticket.checkedInAt
+              ? attendee.ticket.checkedInAt.toISOString()
+              : "",
+          );
+        }
+
+        // Add custom field values (if includeCustomFields)
+        if (includeCustomFields) {
+          const customData =
+            (attendee.customData as Record<string, unknown>) ?? {};
+          for (const fieldName of Array.from(customFieldNames).sort()) {
+            const value = customData[fieldName];
+            let valueStr = "";
+            if (value !== undefined && value !== null) {
+              if (Array.isArray(value)) {
+                valueStr = value
+                  .map((item) =>
+                    typeof item === "string" ? item : JSON.stringify(item),
+                  )
+                  .join("; ");
+              } else if (typeof value === "object") {
+                valueStr = JSON.stringify(value);
+              } else if (typeof value === "string") {
+                valueStr = value;
+              } else if (
+                typeof value === "number" ||
+                typeof value === "boolean"
+              ) {
+                valueStr = String(value);
+              }
+            }
+            row.push(sanitizeCell(valueStr));
+          }
+        }
+
+        rows.push(row);
+      }
+
+      // Generate CSV string using papaparse
+      const csv = Papa.unparse({
+        fields: headers,
+        data: rows,
+      });
+
+      // Generate filename with event name and date
+      const dateStr = new Date().toISOString().split("T")[0];
+      const sanitizedEventName = event.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
+      const filename = `attendees-${sanitizedEventName}-${dateStr}.csv`;
+
+      return {
+        csv,
+        filename,
+        rowCount: attendees.length,
+      };
+    }),
+
+  /**
+   * Update attendee information
+   * Protected procedure - attendee themselves or event organizer
+   */
+  update: protectedProcedure
+    .input(updateAttendeeInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { attendeeId, name, email, customData } = input;
+
+      // Fetch attendee with ticket info
+      const attendee = await ctx.db.attendee.findUnique({
+        where: { id: attendeeId },
+        include: {
+          ticket: {
+            select: {
+              eventId: true,
+            },
+          },
+        },
+      });
+
+      if (!attendee || !attendee.ticket) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Attendee not found",
+        });
+      }
+
+      // Check authorization: user is attendee or event organizer
+      const isAttendee = attendee.userId === ctx.session.user.id;
+
+      if (!isAttendee) {
+        try {
+          await checkModuleAccess({
+            db: ctx.db,
+            eventId: attendee.ticket.eventId,
+            userId: ctx.session.user.id,
+            requiredModule: "ATTENDEES",
+          });
+        } catch {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You do not have permission to update this attendee",
+          });
+        }
+      }
+
+      // Validate custom data if provided (TODO: validate against event schema when T044 is complete)
+      if (customData !== undefined) {
+        // For now, just accept any record structure
+        // In T044, we'll add validation against event.customFields schema
+      }
+
+      // Build update data object
+      const updateData: {
+        name?: string;
+        email?: string;
+        customData?: Record<string, unknown>;
+      } = {};
+
+      if (name !== undefined) updateData.name = name;
+      if (email !== undefined) updateData.email = email.toLowerCase();
+      if (customData !== undefined) updateData.customData = customData;
+
+      // Update attendee
+      const updatedAttendee = await ctx.db.attendee.update({
+        where: { id: attendeeId },
+        data: updateData,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          emailStatus: true,
+          customData: true,
+          createdAt: true,
+          updatedAt: true,
+          ticket: {
+            select: {
+              id: true,
+              ticketNumber: true,
+              isCheckedIn: true,
+              checkedInAt: true,
+              ticketType: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!updatedAttendee.ticket) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Attendee has no associated ticket",
+        });
+      }
+
+      // Type assertion - we've verified ticket exists above
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const ticket = updatedAttendee.ticket;
+
+      // TODO: If email changed, send confirmation email to new address
+      // This will be implemented as part of email notification system enhancement
+
+      // Transform to output format
+      return {
+        attendee: {
+          id: updatedAttendee.id,
+          name: updatedAttendee.name,
+          email: updatedAttendee.email,
+          emailStatus: updatedAttendee.emailStatus as
+            | "active"
+            | "bounced"
+            | "unsubscribed",
+          customData: updatedAttendee.customData as Record<
+            string,
+            unknown
+          > | null,
+          ticket: {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+            id: ticket.id,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+            ticketNumber: ticket.ticketNumber,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+            isCheckedIn: ticket.isCheckedIn,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+            checkedInAt: ticket.checkedInAt,
+            ticketType: {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+              id: ticket.ticketType.id,
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+              name: ticket.ticketType.name,
+            },
+          },
+          createdAt: updatedAttendee.createdAt,
+          updatedAt: updatedAttendee.updatedAt,
+        },
+      };
+    }),
+
+  /**
+   * Update email delivery status (webhook from Resend)
+   * System/Internal procedure - webhook authentication required
+   */
+  updateEmailStatus: protectedProcedure
+    .input(updateEmailStatusInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { email, eventId, status, reason } = input;
+
+      // TODO: Add webhook signature validation when implementing Resend webhook endpoint
+      // For now, this is a protected procedure that requires authentication
+
+      // Find all attendees with this email for the event
+      const attendees = await ctx.db.attendee.findMany({
+        where: {
+          email: email.toLowerCase(),
+          ticket: {
+            eventId,
+            isAssigned: true,
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (attendees.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No attendees found with this email for the event",
+        });
+      }
+
+      // Update email status for all matching attendees
+      const attendeeIds = attendees.map((a) => a.id);
+
+      await ctx.db.attendee.updateMany({
+        where: {
+          id: {
+            in: attendeeIds,
+          },
+        },
+        data: {
+          emailStatus: status,
+        },
+      });
+
+      // Log the update for debugging
+      console.log(
+        `[Attendees] Updated email status for ${attendeeIds.length} attendee(s):`,
+        {
+          email,
+          eventId,
+          status,
+          reason,
+          attendeeIds,
+        },
+      );
+
+      return {
+        updated: attendeeIds.length,
+        attendeeIds,
+      };
+    }),
+
+  /**
    * Parse CSV file and return preview with suggested field mappings
    */
   parseCSV: protectedProcedure
@@ -729,6 +1489,17 @@ export const attendeesRouter = createTRPCRouter({
   executeImport: protectedProcedure
     .input(executeImportSchema)
     .mutation(async ({ ctx, input }) => {
+      // Check idempotency key to prevent duplicate submissions
+      if (input.idempotencyKey) {
+        const cached = importCache.get(input.idempotencyKey);
+        if (cached && Date.now() - cached.timestamp < CACHE_EXPIRY_MS) {
+          console.log(
+            `[Import] Returning cached result for idempotency key: ${input.idempotencyKey}`,
+          );
+          return cached.result;
+        }
+      }
+
       // Verify user has access to ATTENDEES module
       await checkModuleAccess({
         db: ctx.db,
@@ -753,6 +1524,7 @@ export const attendeesRouter = createTRPCRouter({
             select: {
               id: true,
               name: true,
+              price: true,
             },
           },
         },
@@ -891,10 +1663,25 @@ export const attendeesRouter = createTRPCRouter({
       );
 
       // Execute import with partial commit strategy
+      // Each row is processed in its own transaction (atomicity per row)
+      // Successful rows commit immediately, failed rows are logged and skipped
+      // This ensures valid data is saved even if some rows fail
       const importResults: ImportRowResult[] = [];
       let successCount = 0;
       let failureCount = 0;
 
+      // Collect email tasks to send after import (with rate limiting)
+      const emailTasks: Array<{
+        email: string;
+        name: string;
+        ticketNumber: string;
+        qrCodeData: string; // Pre-generated QR code data URL
+        ticketType: string;
+        ticketPrice: number;
+        customData?: Record<string, unknown>;
+      }> = [];
+
+      // Process each CSV row individually
       for (const row of validRows) {
         try {
           // Get ticket type ID
@@ -911,15 +1698,6 @@ export const attendeesRouter = createTRPCRouter({
             continue;
           }
 
-          // Generate unique registration code
-          const registrationCode = generateRegistrationCode();
-
-          // Prepare custom data with registration code and unmapped fields
-          const customData = {
-            registrationCode,
-            ...row.customData,
-          };
-
           // Parse registeredAt if provided, otherwise use current time
           let registeredAt = new Date();
           if (row.registeredAt) {
@@ -929,27 +1707,104 @@ export const attendeesRouter = createTRPCRouter({
             }
           }
 
-          // Create registration
-          await ctx.db.registration.create({
-            data: {
-              eventId: input.eventId,
-              ticketTypeId,
-              email: row.email!,
-              name: row.name!,
-              paymentStatus:
-                (row.paymentStatus as
-                  | "free"
-                  | "pending"
-                  | "paid"
-                  | "failed"
-                  | "refunded") ?? "free",
-              emailStatus:
-                (row.emailStatus as "active" | "bounced" | "unsubscribed") ??
-                "active",
-              customData,
-              registeredAt,
-            },
+          // Generate unique ticket number for this import
+          // Format: EVT-{YEAR}-{RANDOM8} (e.g., EVT-2025-ABC12345)
+          // This number serves triple purpose:
+          // 1. Ticket.ticketNumber - Unique identifier for the ticket
+          // 2. Ticket.qrCodeData - QR code payload for check-in scanning
+          // 3. Attendee.customData.registrationCode - Legacy registration reference
+          const ticketNumber = generateTicketNumber();
+
+          // Prepare custom data for attendee record
+          // Includes ticket number as registrationCode + all unmapped CSV columns
+          const customData = {
+            registrationCode: ticketNumber, // Use ticket number as registration code
+            ...row.customData,
+          };
+
+          // ========================================
+          // Transaction: Create Registration + Ticket + Attendee
+          // ========================================
+          // This transaction creates all required records for a complete import:
+          // 1. Registration - Buyer/purchase record (quantity=1)
+          // 2. Ticket - Ticket instance with unique number and QR code
+          // 3. Attendee - Person attending with details and custom fields
+          // 4. Ticket Update - Link attendee and mark as assigned
+          //
+          // All 4 operations must succeed or none (atomicity)
+          // Follows data model from Spec 003: Ticket/Attendee Separation
+          // ========================================
+          const createdTicket = await ctx.db.$transaction(async (tx) => {
+            // 1. Create Registration record (buyer = imported attendee)
+            const registration = await tx.registration.create({
+              data: {
+                eventId: input.eventId,
+                ticketTypeId,
+                email: row.email!,
+                name: row.name!,
+                quantity: 1, // Each import row = 1 ticket
+                paymentStatus:
+                  (row.paymentStatus as
+                    | "free"
+                    | "pending"
+                    | "paid"
+                    | "failed"
+                    | "refunded") ?? "free",
+                registeredAt,
+              },
+            });
+
+            // Generate QR code data URL during ticket creation
+            const qrCodeData = await generateTicketQRCode(ticketNumber, {
+              width: 400,
+            });
+
+            // 2. Create Ticket record with ticket number and QR code
+            const ticket = await tx.ticket.create({
+              data: {
+                registrationId: registration.id,
+                eventId: input.eventId,
+                ticketTypeId,
+                ticketNumber,
+                qrCodeData, // Store PNG data URL
+                isAssigned: false, // Will be set to true after attendee creation
+                isCheckedIn: false,
+              },
+            });
+
+            // 3. Create Attendee record with attendee details
+            // NOTE: emailStatus and customData moved from Registration to Attendee
+            // This aligns with data model where:
+            // - Registration = Purchase/buyer info
+            // - Attendee = Person details + email status + custom fields
+            const attendee = await tx.attendee.create({
+              data: {
+                name: row.name!,
+                email: row.email!.toLowerCase(), // Normalized to lowercase
+                emailStatus:
+                  (row.emailStatus as "active" | "bounced" | "unsubscribed") ??
+                  "active", // Default to 'active' if not provided in CSV
+                customData, // Contains registrationCode + unmapped CSV columns
+                userId: ctx.session?.user?.id,
+              },
+            });
+
+            // 4. Update Ticket to link attendee and mark as assigned
+            // Links the ticket to the attendee and sets assignment metadata
+            // This completes the Registration → Ticket → Attendee chain
+            await tx.ticket.update({
+              where: { id: ticket.id },
+              data: {
+                attendeeId: attendee.id, // Link to attendee
+                isAssigned: true, // Mark as assigned
+                assignedAt: new Date(), // Record assignment timestamp
+              },
+            });
+
+            // Return ticket with qrCodeData for email sending
+            return ticket;
           });
+          // Transaction complete - all records committed atomically
 
           importResults.push({
             row: row.rowNumber,
@@ -958,35 +1813,23 @@ export const attendeesRouter = createTRPCRouter({
           });
           successCount++;
 
-          // Send confirmation email if enabled
+          // Queue email task if enabled
           if (input.sendConfirmationEmails) {
-            // Get ticket type name for email
-            const ticketTypeName =
-              event.ticketTypes.find((tt) => tt.id === ticketTypeId)?.name ??
-              "General Admission";
+            // Get ticket type details for email
+            const ticketType = event.ticketTypes.find(
+              (tt) => tt.id === ticketTypeId,
+            );
+            const ticketTypeName = ticketType?.name ?? "General Admission";
+            const ticketPrice = ticketType?.price.toNumber() ?? 0;
 
-            // Fire and forget - don't block import on email failures
-            sendEmail({
-              to: row.email!,
-              subject: `Registration Confirmed: ${event.name}`,
-              react: RegistrationConfirmation({
-                attendeeName: row.name!,
-                eventName: event.name,
-                eventDate: event.startDate,
-                ticketType: ticketTypeName,
-                registrationCode,
-                eventUrl: `${process.env.NEXT_PUBLIC_APP_URL}/events/${event.slug}`,
-              }),
-              tags: [
-                { name: "type", value: "registration-confirmation" },
-                { name: "event", value: event.id },
-              ],
-            }).catch((error) => {
-              // Log error but don't fail import
-              console.error(
-                `[Import] Failed to send confirmation email to ${row.email}:`,
-                error,
-              );
+            emailTasks.push({
+              email: row.email!,
+              name: row.name!,
+              ticketNumber,
+              qrCodeData: createdTicket.qrCodeData, // Include pre-generated QR code
+              ticketType: ticketTypeName,
+              ticketPrice,
+              customData: row.customData,
             });
           }
         } catch (error) {
@@ -1017,7 +1860,7 @@ export const attendeesRouter = createTRPCRouter({
         }
       }
 
-      return {
+      const result = {
         successCount,
         failureCount,
         duplicateCount,
@@ -1029,5 +1872,92 @@ export const attendeesRouter = createTRPCRouter({
               ? "failed"
               : "completed",
       };
+
+      // Send queued emails sequentially with rate limiting (500ms delay between emails)
+      // This respects Resend's 2 req/sec rate limit
+      if (emailTasks.length > 0) {
+        console.log(
+          `[Import] Sending ${emailTasks.length} confirmation emails with rate limiting...`,
+        );
+
+        // Fire and forget - don't block the response
+        (async () => {
+          const appUrl =
+            process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+          const ticketUrl = `${appUrl}/events/${event.slug}/tickets`;
+
+          for (const task of emailTasks) {
+            try {
+              // Use pre-generated QR code from ticket
+              const qrCodeDataUrl = task.qrCodeData;
+
+              // Convert QR code to inline attachment
+              const qrCodeCid = "ticket-qr-code";
+              const qrCodeAttachment = dataUrlToAttachment(
+                qrCodeDataUrl,
+                qrCodeCid,
+                `${task.ticketNumber}.png`,
+              );
+
+              // Send email
+              await sendEmail({
+                to: task.email,
+                subject: `Your ticket for ${event.name} is ready! 🎟️`,
+                react: TicketAssigned({
+                  attendeeName: task.name,
+                  eventName: event.name,
+                  eventDate: event.startDate,
+                  eventEndDate: event.endDate ?? undefined,
+                  eventLocationType: event.locationType as
+                    | "virtual"
+                    | "hybrid"
+                    | "physical",
+                  eventLocationAddress: event.locationAddress ?? undefined,
+                  ticketType: task.ticketType,
+                  ticketNumber: task.ticketNumber,
+                  ticketPrice: task.ticketPrice,
+                  buyerName: task.name, // For imports, buyer = attendee
+                  buyerEmail: task.email,
+                  ticketUrl,
+                  qrCodeDataUrl, // Keep for backward compatibility/fallback
+                  qrCodeCid,
+                  customData: task.customData,
+                }),
+                tags: [
+                  { name: "category", value: "ticket-assigned" },
+                  { name: "eventId", value: event.id },
+                ],
+                attachments: [qrCodeAttachment],
+              });
+
+              console.log(
+                `[Import] Sent ticket assignment email to ${task.email}`,
+              );
+
+              // Rate limiting: Wait 500ms between emails (2 per second)
+              await new Promise((resolve) => setTimeout(resolve, 500));
+            } catch (error) {
+              console.error(
+                `[Import] Failed to send ticket assignment email to ${task.email}:`,
+                error,
+              );
+            }
+          }
+
+          console.log(`[Import] Finished sending all confirmation emails`);
+        })().catch((error) => {
+          console.error("[Import] Email sending task failed:", error);
+        });
+      }
+
+      // Cache result for idempotency
+      if (input.idempotencyKey) {
+        importCache.set(input.idempotencyKey, {
+          timestamp: Date.now(),
+          result,
+        });
+      }
+
+      return result;
     }),
 });

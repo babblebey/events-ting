@@ -1,295 +1,443 @@
 # Attendees Data Model
 
-## Overview
-
-The Attendees module uses the `Registration` model from the Registration module. There is no separate "Attendee" model - attendees are simply registrations viewed from an organizer management perspective.
-
-## Primary Model: Registration
-
-**File**: `prisma/schema.prisma`
+## Primary Model: Attendee
 
 ```prisma
-model Registration {
-  id          String   @id @default(cuid())
-  eventId     String
-  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+model Attendee {
+  id String @id @default(cuid())
+
+  // Attendee Personal Information
+  name  String  // Person attending event
+  email String  // Their email address
   
-  ticketTypeId String
-  ticketType   TicketType @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
+  // Custom registration form responses
+  customData Json? // Answers to event-specific questions
   
-  // Attendee Info
-  email       String
-  name        String
-  userId      String? // Optional: link to authenticated user
-  user        User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  // Email delivery status
+  emailStatus String @default("active") // 'active' | 'bounced' | 'unsubscribed'
   
-  // Payment (future-ready fields)
-  paymentStatus     String  @default("free") // 'free' | 'pending' | 'paid' | 'failed' | 'refunded'
-  paymentIntentId   String? // Stripe/Paystack intent ID
-  paymentProcessor  String? // 'stripe' | 'paystack' | null
+  // Relations
+  ticket Ticket? // One-to-one with ticket
   
-  // Email Status
-  emailStatus String  @default("active") // 'active' | 'bounced' | 'unsubscribed'
+  // Optional user account link
+  userId String?
+  user   User?   @relation(...)
   
-  // Custom Fields
-  customData  Json?
-  
-  registeredAt DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  
-  @@index([eventId])
-  @@index([ticketTypeId])
-  @@index([email])
-  @@index([userId])
-  @@index([eventId, ticketTypeId])
-  @@index([eventId, emailStatus])
-  @@index([registeredAt])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 ```
 
 ## Field Descriptions
 
-| Field | Type | Description | Attendee Context |
-|-------|------|-------------|------------------|
-| `id` | String | Unique identifier (CUID) | Registration ID |
-| `eventId` | String | Foreign key to Event | Event attendee belongs to |
-| `ticketTypeId` | String | Foreign key to TicketType | Attendee's ticket type/access level |
-| `email` | String | Attendee email (required) | Contact email, search field |
-| `name` | String | Attendee full name (required) | Display name, search field |
-| `userId` | String? | Optional link to User account | For authenticated registrations |
-| `paymentStatus` | String | Payment state (default: 'free') | Currently all free, future: paid events |
-| `emailStatus` | String | Email deliverability (default: 'active') | Track bounces/unsubscribes |
-| `customData` | Json? | Additional registration data | Includes registrationCode |
-| `registeredAt` | DateTime | Registration timestamp | Sort by date, display in list |
+### Personal Information
 
-## Email Status Values
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | String | Attendee's full name (person using the ticket) |
+| `email` | String | Attendee's email (where ticket is sent) |
 
-| Status | Description | Display | Actions |
-|--------|-------------|---------|---------|
-| `active` | Email is deliverable | Green badge | Can send emails |
-| `bounced` | Email hard bounced | Red badge | Do not send emails |
-| `unsubscribed` | User opted out | Gray badge | Do not send emails |
+**Important**:
+- These are **attendee details**, not buyer details
+- Buyer information is in Registration model
+- One buyer can create multiple attendees
 
-**Updated By**: Resend webhooks via `updateEmailStatus` procedure
+### Custom Data (JSON)
 
-## Payment Status Values
+Stores attendee responses to event-specific custom fields:
 
-| Status | Description | Display | Current Use |
-|--------|-------------|---------|-------------|
-| `free` | Free ticket | Blue badge | All registrations (MVP) |
-| `pending` | Payment pending | Yellow badge | Future: paid events |
-| `paid` | Payment completed | Green badge | Future: paid events |
-| `failed` | Payment failed | Red badge | Future: paid events |
-| `refunded` | Payment refunded | Gray badge | Future: refunds |
+```typescript
+// Example customData structure
+{
+  "dietary_restrictions": "vegetarian",
+  "t_shirt_size": "M",
+  "arrival_time": "morning",
+  "special_needs": "wheelchair access"
+}
+```
+
+**Use Cases**:
+- Dietary preferences for catering
+- T-shirt sizes for swag
+- Workshop preferences
+- Accessibility needs
+- Any event-specific questions
+
+### Email Status
+
+| Value | Meaning | Impact |
+|-------|---------|--------|
+| `active` | Can receive emails | ✅ Sent all communications |
+| `bounced` | Email delivery failed | ❌ Excluded from email sends |
+| `unsubscribed` | Opted out | ❌ Excluded from email sends |
+
+**Updated via**: Email service webhooks (Resend, SendGrid, etc.)
 
 ## Relationships
 
-### Event ← Registration (One-to-Many)
+### Belongs To: Ticket (One-to-One)
 
 ```prisma
-model Event {
-  // ...
-  registrations Registration[]
-  // ...
-}
+ticket Ticket? @relation(...)
 ```
 
-Each event can have multiple attendees (registrations).
+- Each attendee linked to exactly one ticket
+- Ticket can exist without attendee (unassigned)
+- When ticket assigned → Attendee record created
+- When ticket unassigned → Attendee record deleted (GDPR)
 
-### TicketType ← Registration (One-to-Many)
+### Optional: User Account
 
 ```prisma
-model TicketType {
-  // ...
-  registrations Registration[]
-  // ...
-}
+userId String?
+user   User?   @relation(...)
 ```
 
-Each ticket type can be assigned to multiple attendees.
+- Attendee can be linked to registered user
+- Allows users to view their upcoming events
+- Not required - supports guest attendees
 
-### User ← Registration (One-to-Many, Optional)
+## Lifecycle
 
-```prisma
-model User {
-  // ...
-  registrations Registration[]
-  // ...
-}
-```
-
-Optional link for authenticated users who register.
-
-## Indexes for Attendee Management
-
-### Primary Indexes
-
-- `[eventId]` - List all attendees for an event
-- `[eventId, ticketTypeId]` - Filter by ticket type
-- `[eventId, emailStatus]` - Filter by email status (for campaigns)
-
-### Search Indexes
-
-- `[email]` - Search by email (contains query)
-- `[registeredAt]` - Sort by registration date
-
-## Query Patterns
-
-### List Attendees with Filters
-
+### Creation
 ```typescript
-const attendees = await db.registration.findMany({
+// Created during ticket assignment
+const attendee = await db.attendee.create({
+  data: {
+    name: "Bob Smith",
+    email: "bob@example.com",
+    customData: {
+      dietary_restrictions: "vegan",
+      t_shirt_size: "L"
+    }
+  }
+});
+
+await db.ticket.update({
+  where: { id: ticketId },
+  data: { 
+    attendeeId: attendee.id,
+    isAssigned: true
+  }
+});
+```
+
+### Reassignment (GDPR Compliant)
+```typescript
+// Old attendee deleted, new one created
+await db.attendee.delete({
+  where: { id: oldAttendeeId }  // Removes personal data
+});
+
+const newAttendee = await db.attendee.create({
+  data: {...}
+});
+
+await db.ticket.update({
+  where: { id: ticketId },
+  data: { attendeeId: newAttendee.id }
+});
+```
+
+### Deletion
+- Deleted when ticket unassigned
+- Deleted when ticket deleted (cascade)
+- Deleted when event deleted (cascade via ticket)
+
+## Common Queries
+
+### List All Attendees for Event
+```typescript
+const attendees = await db.attendee.findMany({
   where: {
-    eventId,
-    ticketTypeId: selectedTicketType, // Optional filter
-    OR: search ? [
-      { name: { contains: search, mode: 'insensitive' } },
-      { email: { contains: search, mode: 'insensitive' } }
-    ] : undefined
-  },
-  include: {
-    ticketType: {
-      select: { id: true, name: true }
+    ticket: {
+      eventId: eventId
     }
   },
-  orderBy: { registeredAt: 'desc' },
-  take: limit + 1,
-  cursor: cursor ? { id: cursor } : undefined,
-  skip: cursor ? 1 : 0
-});
-```
-
-### Export All Attendees
-
-```typescript
-const registrations = await db.registration.findMany({
-  where: { eventId },
   include: {
-    ticketType: { select: { name: true } }
-  },
-  orderBy: { registeredAt: 'desc' }
+    ticket: {
+      include: {
+        ticketType: true,
+        registration: true  // Can see buyer info
+      }
+    }
+  }
 });
 ```
 
-### Get Active Email Recipients
-
+### Export Attendee Data
 ```typescript
-const activeAttendees = await db.registration.findMany({
+const attendees = await db.attendee.findMany({
   where: {
-    eventId,
-    emailStatus: 'active'
+    ticket: { eventId },
+    emailStatus: "active"  // Only active emails
   },
   select: {
+    name: true,
     email: true,
-    name: true
+    customData: true,
+    ticket: {
+      select: {
+        ticketNumber: true,
+        ticketType: { select: { name: true } },
+        isCheckedIn: true
+      }
+    }
   }
 });
 ```
 
-## Custom Data Format
-
-The `customData` JSON field stores additional registration information including registration codes and custom import fields:
-
-### Standard Structure
-```json
-{
-  "registrationCode": "ABC123DEF",
-  "additionalFields": {
-    "company": "Tech Corp",
-    "dietaryRestrictions": "Vegetarian"
+### Search Attendees
+```typescript
+const results = await db.attendee.findMany({
+  where: {
+    ticket: { eventId },
+    OR: [
+      { name: { contains: search, mode: 'insensitive' } },
+      { email: { contains: search, mode: 'insensitive' } }
+    ]
   }
-}
+});
 ```
 
-### CSV Import Mapping
+### Get Attendee with Purchase Info
+```typescript
+const attendee = await db.attendee.findUnique({
+  where: { id: attendeeId },
+  include: {
+    ticket: {
+      include: {
+        registration: {
+          select: {
+            name: true,     // Buyer name
+            email: true,    // Buyer email
+            registeredAt: true
+          }
+        },
+        ticketType: {
+          select: { name: true }
+        }
+      }
+    }
+  }
+});
 
-When importing attendees via CSV, unmapped columns are automatically stored in `customData`:
-
-**Example CSV**:
-```csv
-name,email,ticketType,company,role,dietary
-John Doe,john@example.com,General Admission,Acme Corp,Developer,Vegetarian
+// attendee.email = attendee email
+// attendee.ticket.registration.email = buyer email (who purchased)
+// These can be different people!
 ```
 
-**Field Mapping**:
-- `name` → Registration.name
-- `email` → Registration.email
-- `ticketType` → Registration.ticketTypeId (resolved by name)
-- `company` → customData.company (unmapped)
-- `role` → customData.role (unmapped)
-- `dietary` → customData.dietary (unmapped)
+## Data Privacy (GDPR)
 
-**Resulting customData**:
-```json
-{
-  "registrationCode": "ABC123DEF",
-  "company": "Acme Corp",
-  "role": "Developer",
-  "dietary": "Vegetarian"
-}
+### Personal Data Stored
+- ✅ Name (PII)
+- ✅ Email (PII)
+- ✅ Custom field answers (potentially sensitive)
+
+### Privacy Safeguards
+
+**Deletion on Reassignment**:
+- Old attendee data immediately deleted
+- No historical record of previous assignments
+- Complies with "right to be forgotten"
+
+**Access Control**:
+- Only event organizers can view attendee list
+- Buyers cannot see other attendees (only their own tickets)
+- Attendees cannot see other attendees
+
+**Email Preferences**:
+- Unsubscribe respected (emailStatus tracking)
+- Bounced emails not sent (waste prevention)
+
+### Export Considerations
+- Organizers responsible for secure storage
+- Delete exports after event if not needed
+- Comply with local data protection laws
+- Provide opt-out mechanisms
+
+## Indexes
+
+```prisma
+@@index([email])         // Search by email
+@@index([emailStatus])   // Filter active recipients
+@@index([userId])        // User's attended events
 ```
 
-**Important Notes**:
-- Column names stored as-is (no `custom_` prefix in JSON)
-- All unmapped columns become custom fields
-- Custom field names are case-sensitive
-- Nested JSON structures not supported in CSV import (flat key-value only)
+## Validation
 
-### Validation Constraints for Imported Data
+**Application-Level Rules**:
+- Name: 2-100 characters
+- Email: Valid email format
+- Custom data: Matches event's custom field schema
+- Email status: Must be 'active' | 'bounced' | 'unsubscribed'
 
-**CSV Import Validation Rules**:
+## Data Flow Diagram
 
-| Field | Import Validation | Notes |
-|-------|------------------|-------|
-| `name` | Required, 2-255 chars | Must be mapped |
-| `email` | Required, valid format, max 255 chars | Must be mapped, format validated |
-| `ticketType` | Required, must exist in event | Matched by name (case-insensitive) |
-| `paymentStatus` | Optional, enum validation | Must be: 'free', 'pending', 'paid', 'failed', 'refunded' |
-| `emailStatus` | Optional, enum validation | Must be: 'active', 'bounced', 'unsubscribed' |
-| Custom fields | No validation | Stored as-is in customData JSON |
+```mermaid
+sequenceDiagram
+    participant Buyer
+    participant Registration
+    participant Ticket
+    participant Attendee
 
-**Registration Code Generation**: 
-- Format: 9-character alphanumeric (e.g., ABC123DEF)
-- Auto-generated for all imported attendees
-- Unique per registration
-- Used for check-in and confirmation emails
+    Buyer->>Registration: Purchase 3 tickets
+    Note over Registration: Stores buyer info<br/>email, name
+    
+    Registration->>Ticket: Create 3 instances
+    Note over Ticket: Each has unique<br/>ticketNumber, QR code
+    
+    Buyer->>Ticket: Assign Ticket 1 to Alice
+    Ticket->>Attendee: Create record for Alice
+    Note over Attendee: Stores Alice's<br/>email, name
+    
+    Buyer->>Ticket: Assign Ticket 2 to Bob
+    Ticket->>Attendee: Create record for Bob
+    
+    Note over Ticket: Ticket 3 remains<br/>unassigned
+```
 
-**Note**: No schema changes required - CSV import uses existing Registration model structure.
+## Comparison: Registration vs Attendee
 
-**Registration Code**: Unique code for check-in and confirmation emails.
+| Aspect | Registration | Attendee |
+|--------|-------------|----------|
+| **Represents** | Purchase transaction | Event participant |
+| **Who** | Buyer (who paid) | Person attending |
+| **Created when** | Ticket purchased | Ticket assigned |
+| **Email field** | Buyer's email | Attendee's email |
+| **Name field** | Buyer's name | Attendee's name |
+| **Quantity** | Can purchase multiple | Always 1 person |
+| **Custom data** | Purchase metadata | Form responses |
+| **Relationship** | Has many tickets | Belongs to one ticket |
+| **Export use** | Financial records | Event operations |
 
-## Data Privacy
+## Common Mistakes
 
-**PII Fields**:
-- `email` - Personal email address
-- `name` - Full name
-- `customData` - May contain sensitive data
+### Mistake 1: Expecting Buyer Data in Attendee
+```typescript
+// ❌ WRONG: Attendee doesn't have purchase info directly
+const attendee = await db.attendee.findUnique({
+  where: { email: "buyer@example.com" }  // This is attendee email!
+});
 
-**Best Practices**:
-- Only export when necessary
-- Store exports securely
-- Comply with GDPR/data protection laws
-- Provide opt-out mechanisms (unsubscribe)
-- Delete data after event if not needed for records
+// ✅ RIGHT: Access buyer via ticket → registration
+const attendee = await db.attendee.findUnique({
+  where: { id: attendeeId },
+  include: {
+    ticket: {
+      include: {
+        registration: true  // Buyer information here
+      }
+    }
+  }
+});
+```
+
+### Mistake 2: Counting Attendees as Registrations
+```typescript
+// ❌ WRONG: Counts purchases, not attendees
+const count = await db.registration.count({
+  where: { eventId }
+});
+
+// ✅ RIGHT: Count attendees
+const count = await db.attendee.count({
+  where: {
+    ticket: { eventId }
+  }
+});
+```
+
+### Mistake 3: Updating Attendee Instead of Deleting on Reassignment
+```typescript
+// ❌ WRONG: Violates GDPR (keeps old data)
+await db.attendee.update({
+  where: { id: oldAttendeeId },
+  data: { name: "New Person", email: "new@example.com" }
+});
+
+// ✅ RIGHT: Delete old, create new
+await db.attendee.delete({ where: { id: oldAttendeeId } });
+const newAttendee = await db.attendee.create({ data: {...} });
+```
+
+## Related Models
+
+### Ticket
+**Module**: [Tickets Module](../tickets/)  
+**Relationship**: Parent (one-to-one)  
+**Usage**: Every attendee belongs to exactly one ticket
+
+### Registration
+**Module**: [Registration Module](../registration/)  
+**Relationship**: Indirect (via Ticket)  
+**Usage**: Attendee can trace back to buyer via ticket.registration
+
+### Event
+**Module**: [Events Module](../events/)  
+**Relationship**: Indirect (via Ticket)  
+**Usage**: Attendee belongs to event via ticket.event
+
+## Future Enhancements
+
+### Model Extensions
+
+**Additional Fields**:
+```prisma
+// Future additions
+checkedIn       Boolean?  // Check-in status
+checkedInAt     DateTime? // Check-in timestamp
+checkInLocation String?   // Where they checked in
+badges          Badge[]   // Printed badges
+```
+
+### Relationships
+- Check-in logs (new model)
+- Session attendance (new model)
+- Networking connections (new model)
+
+### Audit Trail
+Consider adding audit log for:
+- Attendee creation
+- Email status changes
+- Ticket reassignments
+- Check-in events
 
 ## Performance Considerations
 
-### Large Events (>5000 Attendees)
+### Index Strategy
+All indexes support common query patterns:
+- Event attendee listings: Composite index on ticket.eventId
+- Search: `[email]`, `[name]`
+- Email filtering: `[emailStatus]`
+- User events: `[userId]`
 
-1. **Pagination**: Always use cursor-based pagination
-2. **Indexes**: Ensure all query filters use indexed fields
-3. **Select Optimization**: Only select needed fields in exports
-4. **Background Jobs**: Consider background processing for large exports
+### Query Optimization
+- Use `include` for related data (single query)
+- Filter at database level when possible
+- Aggregate functions for counts
 
-### Search Performance
+### Scaling Considerations
+- Partition by event year for large events
+- Archive old attendees after event
+- Consider read replicas for exports
 
-- **Database**: Use indexed fields for contains queries
-- **Frontend**: Debounce search input (500ms)
-- **Optimization**: Consider full-text search for very large events
+## Security Considerations
 
-## Related Documentation
+### Data Access
+- ✅ Only event organizers can view attendees
+- ✅ Attendees can view their own ticket
+- ❌ No public access to attendee list
+- ❌ Buyers cannot see other attendees
 
-- [Backend Documentation](./backend.md) - Query procedures
-- [Registration Module Data Model](../registration/data-model.md) - Complete model documentation
-- [Frontend Documentation](./frontend.md) - UI components
-- [Architecture: Data Model](../../architecture/data-model.md) - Full schema
+### PII Protection
+- Email and name are sensitive data
+- Custom data may contain dietary/medical info
+- Exports should be encrypted
+- Delete exports securely after use
+
+### GDPR Compliance
+- Right to access: Attendees can request their data
+- Right to erasure: Ticket unassignment deletes attendee
+- Right to rectification: Support ticket reassignment
+- Data minimization: Only collect necessary fields

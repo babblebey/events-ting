@@ -654,6 +654,268 @@ try {
 
 ---
 
+### Pattern 4: Optimistic Locking (Ticket Assignment)
+
+```typescript
+// Prevent concurrent ticket assignment conflicts
+const ticket = await ctx.db.ticket.findUnique({
+  where: { id: input.ticketId },
+});
+
+if (!ticket) {
+  throw new TRPCError({
+    code: "NOT_FOUND",
+    message: "Ticket not found",
+  });
+}
+
+// Check optimistic lock
+if (ticket.updatedAt.getTime() !== input.expectedUpdatedAt.getTime()) {
+  throw new TRPCError({
+    code: "CONFLICT",
+    message: "This ticket was modified by another user. Please refresh and try again.",
+  });
+}
+
+// Proceed with update
+await ctx.db.ticket.update({
+  where: { id: input.ticketId },
+  data: { /* ... */ },
+});
+```
+
+**Frontend Handling**:
+```typescript
+const assignMutation = api.tickets.assign.useMutation({
+  onError: (error) => {
+    if (error.data?.code === "CONFLICT") {
+      toast.error("Ticket was modified. Refreshing...");
+      queryClient.invalidateQueries(["tickets"]);
+    }
+  },
+});
+```
+
+---
+
+### Pattern 5: Assignment Cutoff Validation
+
+```typescript
+// Validate assignment cutoff time
+const event = await ctx.db.event.findUnique({
+  where: { id: ticket.eventId },
+  select: {
+    assignmentCutoffType: true,
+    assignmentCutoffTime: true,
+    startDate: true,
+  },
+});
+
+// Calculate cutoff time
+let cutoffTime: Date;
+switch (event.assignmentCutoffType) {
+  case 'event_start':
+    cutoffTime = event.startDate;
+    break;
+  case '1h_before':
+    cutoffTime = new Date(event.startDate.getTime() - 3600000);
+    break;
+  case '24h_before':
+    cutoffTime = new Date(event.startDate.getTime() - 86400000);
+    break;
+  case 'custom':
+    cutoffTime = event.assignmentCutoffTime!;
+    break;
+}
+
+// Check if cutoff passed
+if (new Date() > cutoffTime) {
+  throw new TRPCError({
+    code: "BAD_REQUEST",
+    message: "Assignment cutoff time has passed. Tickets can no longer be assigned or reassigned.",
+  });
+}
+```
+
+---
+
+### Pattern 6: Custom Field Validation
+
+```typescript
+// Validate attendee custom data against event schema
+try {
+  if (event.customFields && input.attendee.customData) {
+    // Build dynamic Zod schema from event.customFields
+    const customFieldSchema = buildCustomFieldSchema(event.customFields);
+    customFieldSchema.parse(input.attendee.customData);
+  }
+} catch (error) {
+  if (error instanceof ZodError) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Custom field validation failed",
+      cause: error,
+    });
+  }
+  throw error;
+}
+```
+
+---
+
+### Pattern 7: Email Status Updates (Webhook)
+
+```typescript
+// Verify webhook signature before processing
+const signature = req.headers.get("resend-signature");
+if (!verifyWebhookSignature(signature, req.body)) {
+  throw new TRPCError({
+    code: "UNAUTHORIZED",
+    message: "Invalid webhook signature",
+  });
+}
+
+// Update email status for all matching attendees
+const updated = await ctx.db.attendee.updateMany({
+  where: {
+    email: input.email,
+    ticket: {
+      eventId: input.eventId,
+    },
+  },
+  data: {
+    emailStatus: input.status,
+  },
+});
+
+if (updated.count === 0) {
+  throw new TRPCError({
+    code: "NOT_FOUND",
+    message: "No attendees found with this email for the event",
+  });
+}
+```
+
+---
+
+### Pattern 8: Checked-In Ticket Protection
+
+```typescript
+// Prevent modification of checked-in tickets
+if (ticket.isCheckedIn) {
+  throw new TRPCError({
+    code: "BAD_REQUEST",
+    message: "Cannot unassign or modify a ticket that has already been checked in. The ticket is locked after check-in.",
+  });
+}
+```
+
+---
+
+## Ticket/Attendee Module Errors
+
+### Assignment Errors
+
+**Cutoff Time Passed**:
+```typescript
+{
+  code: "BAD_REQUEST",
+  message: "Assignment cutoff time has passed"
+}
+```
+
+**Frontend**:
+```typescript
+if (error.data?.code === "BAD_REQUEST" && error.message.includes("cutoff")) {
+  return <Alert color="warning">
+    The assignment deadline has passed. Contact the event organizer if you need assistance.
+  </Alert>;
+}
+```
+
+---
+
+**Optimistic Lock Failure**:
+```typescript
+{
+  code: "CONFLICT",
+  message: "This ticket was modified by another user"
+}
+```
+
+**Frontend**:
+```typescript
+if (error.data?.code === "CONFLICT") {
+  // Refresh ticket data automatically
+  queryClient.invalidateQueries(["tickets", ticketId]);
+  toast.error("Ticket was modified. Please try again.");
+}
+```
+
+---
+
+**Custom Field Validation**:
+```typescript
+{
+  code: "BAD_REQUEST",
+  message: "Custom field validation failed",
+  data: {
+    zodError: {
+      fieldErrors: {
+        dietary: ["Required field"]
+      }
+    }
+  }
+}
+```
+
+**Frontend**:
+```typescript
+if (error.data?.zodError?.fieldErrors) {
+  setCustomFieldErrors(error.data.zodError.fieldErrors);
+}
+```
+
+---
+
+### Attendee Errors
+
+**Email Bounce/Unsubscribe**:
+```typescript
+{
+  code: "BAD_REQUEST",
+  message: "Cannot send email to unsubscribed attendee"
+}
+```
+
+**Frontend**:
+```typescript
+if (error.message.includes("unsubscribed")) {
+  return <Alert color="info">
+    This attendee has unsubscribed from event emails. They will not receive notifications.
+  </Alert>;
+}
+```
+
+---
+
+**Export Errors**:
+```typescript
+{
+  code: "FORBIDDEN",
+  message: "You are not authorized to export attendees for this event"
+}
+```
+
+**Frontend**:
+```typescript
+if (error.data?.code === "FORBIDDEN") {
+  return <ForbiddenPage message="Only event organizers can export attendee data" />;
+}
+```
+
+---
+
 ## Best Practices
 
 ### 1. **Use Appropriate Error Codes**

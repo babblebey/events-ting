@@ -512,6 +512,8 @@ Organizer maintains clean email list, respects attendee preferences.
 
 20. **Partial Commit Processing**
     - System processes rows one by one:
+      - **Each row in its own transaction** (atomicity per row)
+      - Transaction creates 4 records: Registration + Ticket + Attendee + Assignment
       - Successful rows committed immediately
       - Failed rows logged and skipped
       - Processing continues after failures
@@ -519,22 +521,36 @@ Organizer maintains clean email list, respects attendee preferences.
       - Valid data saved even if some rows fail
       - No need to fix all errors before getting results
 
-21. **Registration Code Generation**
-    - Each imported attendee receives unique code
-    - Format: 9-character alphanumeric (e.g., ABC123DEF)
-    - Stored in `customData.registrationCode`
-    - Used for check-in and confirmations
+21. **Record Creation Per Row**
+    - Each successful row creates:
+      1. **Registration** - Buyer/purchase record (quantity: 1)
+      2. **Ticket** - Ticket instance with unique ticketNumber and qrCodeData
+      3. **Attendee** - Person attending with name, email, customData, emailStatus
+      4. **Ticket Assignment** - Links ticket to attendee (isAssigned: true, assignedAt)
+    - All 4 operations occur in single transaction (all succeed or all rollback)
 
-22. **Confirmation Emails Sent** (if enabled in Step 5)
-    - Emails sent asynchronously
+22. **Ticket Number Generation**
+    - Each imported attendee receives unique ticket number
+    - Format: `EVT-{YEAR}-{RANDOM8}` (e.g., `EVT-2025-ABC12345`)
+    - Triple purpose:
+      1. `Ticket.ticketNumber` - Unique identifier
+      2. `Ticket.qrCodeData` - QR code payload for check-in
+      3. `Attendee.customData.registrationCode` - Legacy registration reference
+    - Stored in multiple places for compatibility
+
+23. **Confirmation Emails Sent** (if enabled in Step 5)
+    - Emails sent **after** transaction commits (asynchronous)
+    - Only sent if `sendConfirmationEmails` was enabled in Step 5
     - Contains:
       - Event name and details
-      - Ticket type
-      - Registration code
+      - Ticket type and price
+      - **Ticket number** (not registration code)
+      - QR code for check-in
       - Event URL
+    - Uses `TicketAssigned` email template pattern
     - Email failures logged but don't stop import
 
-23. **Import Completes**
+24. **Import Completes**
     - Spinner stops
     - Results screen displays:
       - ✓ Successful count (green badge)
@@ -546,19 +562,100 @@ Organizer maintains clean email list, respects attendee preferences.
       - **Partial**: Some valid rows failed
       - **Failed**: Import error occurred
 
-24. **Review Failed Rows** (if any)
+25. **Review Failed Rows** (if any)
     - Table shows failed rows with error details
     - Limited to first 10 failures in UI
     - Click "Download Failed Rows CSV" for complete list
     - CSV includes original data + error column
     - Fix errors in CSV and re-import
 
-25. **Complete Import**
+26. **Complete Import**
     - Click "View Attendees" to see imported attendees
     - OR click "Import Another File" to start new import
     - Attendees list automatically refreshes
+    - Imported attendees appear with:
+      - Correct ticket type
+      - Assigned ticket with unique ticket number
+      - QR code ready for check-in
+      - Custom fields populated
 
-### Best Practices
+### What Records Are Created
+
+**Per CSV Row (on successful import)**:
+
+Each imported row creates exactly **4 database records** in a single atomic transaction:
+
+1. **Registration** (Buyer/Purchase Record)
+   - Table: `Registration`
+   - Purpose: Represents the purchase/registration transaction
+   - Key fields:
+     - `email`, `name` - Buyer information (same as attendee for imports)
+     - `quantity` - Always `1` for imports (one ticket per row)
+     - `paymentStatus` - From CSV or default `'free'`
+     - `registeredAt` - From CSV or current timestamp
+
+2. **Ticket** (Ticket Instance)
+   - Table: `Ticket`
+   - Purpose: Represents the individual ticket
+   - Key fields:
+     - `ticketNumber` - Unique identifier (e.g., `EVT-2025-ABC12345`)
+     - `qrCodeData` - QR code payload (equals `ticketNumber`)
+     - `isAssigned` - Set to `true` after attendee link
+     - `assignedAt` - Timestamp of assignment
+     - `attendeeId` - Link to attendee record
+     - `isCheckedIn` - Default `false`
+
+3. **Attendee** (Person Attending)
+   - Table: `Attendee`
+   - Purpose: Represents the person attending the event
+   - Key fields:
+     - `name`, `email` - Attendee information
+     - `emailStatus` - From CSV or default `'active'` (MOVED from Registration)
+     - `customData` - Contains:
+       - `registrationCode` - Ticket number for legacy compatibility
+       - All unmapped CSV columns (e.g., `company`, `dietary`)
+     - `userId` - Link to user account (if authenticated)
+
+4. **Ticket Assignment** (Update Operation)
+   - Operation: Updates the Ticket record created in step 2
+   - Links the ticket to the attendee
+   - Marks ticket as assigned with timestamp
+
+**Transaction Flow**:
+
+```
+START TRANSACTION
+  INSERT Registration (buyer info)
+    ↓
+  INSERT Ticket (ticketNumber, qrCodeData, isAssigned:false)
+    ↓
+  INSERT Attendee (name, email, emailStatus, customData)
+    ↓
+  UPDATE Ticket (SET attendeeId, isAssigned:true, assignedAt)
+COMMIT TRANSACTION
+```
+
+**If Transaction Fails**:
+- All 4 operations rollback (nothing saved)
+- Row marked as failed in results
+- Error logged with details
+- Import continues to next row
+
+**Why This Matters**:
+
+- **Complete Records**: Each import creates a full, usable registration
+- **Immediate Availability**: Attendees appear in attendee list immediately
+- **QR Code Ready**: Tickets can be scanned at check-in right away
+- **Data Integrity**: Transaction ensures all-or-nothing per row
+
+**Example**:
+
+Import CSV with 100 rows:
+- **Success**: 95 rows × 4 records = **380 database records created**
+- **Failures**: 5 rows × 0 records = 0 records (transactions rolled back)
+- **Result**: 95 complete registrations with tickets and attendees ready to use
+
+### Troubleshooting
 
 #### CSV Preparation
 1. **Use the template**: Always start with downloaded template
@@ -660,9 +757,65 @@ Organizer maintains clean email list, respects attendee preferences.
 
 ### Troubleshooting
 
+**Problem**: Imported attendees don't appear in attendee list
+
+**Solution**: 
+1. Refresh the attendees page (browser refresh)
+2. Clear any active search filters or ticket type filters
+3. Check import completed successfully (status should be "Completed" or "Partial")
+4. Verify you're viewing the correct event
+5. Check browser console for errors
+
+**Technical Details**: Import creates Registration + Ticket + Attendee records. If attendees don't appear, the transaction may have failed. Check import results for errors.
+
+---
+
 **Problem**: Auto-mapping is incorrect
 
 **Solution**: Manually adjust mappings in Step 2. Mappings are saved for future imports.
+
+---
+
+**Problem**: Imported attendees don't have QR codes for check-in
+
+**Solution**: 
+- This should not happen with the current implementation
+- Each import creates a Ticket with `ticketNumber` and `qrCodeData`
+- If QR codes are missing:
+  1. Check the import results - were there any failures?
+  2. Verify in database that Ticket records exist for imported attendees
+  3. Check that `Ticket.qrCodeData` field is populated
+  4. Review import logs for transaction errors
+
+**Technical Details**: The ticket number (format: `EVT-2025-ABC12345`) is generated during import and stored in both `Ticket.ticketNumber` and `Ticket.qrCodeData`. The QR code scanner reads the `qrCodeData` field.
+
+---
+
+**Problem**: Confirmation emails sent, but missing ticket details
+
+**Solution**:
+- Current implementation uses `TicketAssigned` email template pattern
+- Email should include:
+  - Event name and date
+  - Ticket type and price
+  - Ticket number (not registration code)
+  - QR code image
+- If details are missing, check email template configuration
+- Verify email tasks include correct data (check import logs)
+
+**Technical Details**: Email is sent after transaction commits with `ticketNumber`, `ticketType`, and `ticketPrice`. Template should display these fields.
+
+---
+
+**Problem**: Import succeeds but some fields are missing in attendee list
+
+**Solution**:
+1. **Custom fields**: Check that unmapped CSV columns are stored in `Attendee.customData`
+2. **Email status**: Should be in `Attendee.emailStatus` (not `Registration.emailStatus`)
+3. **Ticket type**: Check that correct ticket type was mapped
+4. Verify the attendee table component displays custom fields from `customData`
+
+**Technical Details**: The import moved `emailStatus` and `customData` from Registration to Attendee model. Frontend components must read from correct location.
 
 ---
 

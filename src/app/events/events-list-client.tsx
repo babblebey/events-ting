@@ -69,7 +69,7 @@ export function EventsListClient() {
 function EventsListSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {[...Array(6)].map((_, i) => (
+      {[...Array<undefined>(6)].map((_, i) => (
         <div
           key={i}
           className="h-64 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"

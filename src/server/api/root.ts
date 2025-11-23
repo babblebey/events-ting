@@ -2,6 +2,7 @@ import { postRouter } from "@/server/api/routers/post";
 import { eventRouter } from "@/server/api/routers/event";
 import { userRouter } from "@/server/api/routers/user";
 import { ticketRouter } from "@/server/api/routers/ticket";
+import { ticketsRouter } from "@/server/api/routers/tickets";
 import { registrationRouter } from "@/server/api/routers/registration";
 import { scheduleRouter } from "@/server/api/routers/schedule";
 import { cfpRouter } from "@/server/api/routers/cfp";
@@ -21,6 +22,7 @@ export const appRouter = createTRPCRouter({
   event: eventRouter,
   user: userRouter,
   ticket: ticketRouter,
+  tickets: ticketsRouter,
   registration: registrationRouter,
   schedule: scheduleRouter,
   cfp: cfpRouter,

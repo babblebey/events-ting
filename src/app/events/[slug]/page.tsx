@@ -14,7 +14,7 @@ import {
   HiOutlineExternalLink,
   HiOutlineVideoCamera,
 } from "react-icons/hi";
-import { formatDate, formatDateRange } from "@/lib/utils/date";
+import { formatDateRange } from "@/lib/utils/date";
 import type { Metadata } from "next";
 
 interface EventPageProps {

@@ -18,7 +18,11 @@ export const env = createEnv({
 
     // Email service (Resend)
     RESEND_API_KEY: z.string().optional(), // Optional for development
-    EMAIL_FROM: z.string().email().optional().default("events@yourdomain.com"),
+    RESEND_EMAIL_FROM: z
+      .string()
+      .email()
+      .optional()
+      .default("events@yourdomain.com"),
 
     // OAuth providers (optional)
     AUTH_GITHUB_ID: z.string().optional(),
@@ -58,7 +62,7 @@ export const env = createEnv({
 
     // Email service
     RESEND_API_KEY: process.env.RESEND_API_KEY,
-    EMAIL_FROM: process.env.EMAIL_FROM,
+    RESEND_EMAIL_FROM: process.env.RESEND_EMAIL_FROM,
 
     // OAuth providers
     AUTH_GITHUB_ID: process.env.AUTH_GITHUB_ID,

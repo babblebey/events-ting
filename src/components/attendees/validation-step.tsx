@@ -48,6 +48,7 @@ export function ValidationStep({
   );
   const [validationResult, setValidationResult] =
     useState<ValidationResult | null>(null);
+  const [isImporting, setIsImporting] = useState(false); // Prevent double-click
 
   const validateImport = api.attendees.validateImport.useMutation({
     onSuccess: (result) => {
@@ -103,7 +104,8 @@ export function ValidationStep({
   };
 
   const handleNext = () => {
-    if (!validationResult) return;
+    if (!validationResult || isImporting) return;
+    setIsImporting(true); // Prevent double-click
     onComplete(validationResult, duplicateStrategy);
   };
 
@@ -199,7 +201,8 @@ export function ValidationStep({
                 }
               >
                 <option value="skip">
-                  Skip duplicates (recommended) - Don't import duplicate emails
+                  Skip duplicates (recommended) - Don&apos;t import duplicate
+                  emails
                 </option>
                 <option value="create">
                   Create duplicates - Import all rows even if email exists
@@ -322,9 +325,11 @@ export function ValidationStep({
           <Button
             color="blue"
             onClick={handleNext}
-            disabled={!canProceed || validateImport.isPending}
+            disabled={!canProceed || validateImport.isPending || isImporting}
           >
-            Import {validationResult?.validRows || 0} Attendees
+            {isImporting
+              ? "Starting Import..."
+              : `Import ${validationResult?.validRows ?? 0} Attendees`}
           </Button>
         </div>
       </div>

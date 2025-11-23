@@ -182,7 +182,7 @@ This document describes the procedures used for attendee management and import f
 
 ### 8. `attendees.executeImport` (Protected)
 
-**Purpose**: Execute validated CSV import with partial commit strategy  
+**Purpose**: Execute validated CSV import with partial commit strategy, creating Registration, Ticket, and Attendee records  
 **Type**: Mutation  
 **Authentication**: Required (organizer only)
 
@@ -218,15 +218,85 @@ This document describes the procedures used for attendee management and import f
 
 Unlike traditional all-or-nothing transactions, this import uses **partial commit**:
 1. Process rows one by one
-2. Commit successful rows immediately
-3. Continue processing after individual failures
-4. Return summary of successes and failures
+2. Each row processed in its own transaction (atomicity per row)
+3. Commit successful rows immediately
+4. Continue processing after individual failures
+5. Return summary of successes and failures
 
 **Benefits**:
 - Organizers get valid data immediately
 - Failed rows can be fixed and re-imported separately
 - Better UX for large imports with minor issues
 - No need to fix all errors before getting any results
+
+**Transaction Flow (Per Row)**:
+
+Each CSV row is processed in a **single database transaction** that creates all required records:
+
+```
+CSV Row → Transaction Start → {
+  1. Create Registration (buyer = imported attendee)
+  2. Create Ticket (with ticketNumber, qrCodeData)
+  3. Create Attendee (with name, email, customData, emailStatus)
+  4. Update Ticket (link attendeeId, set isAssigned, assignedAt)
+} → Transaction Commit → Email (optional) → Success
+```
+
+**Detailed Transaction Flow**:
+
+```typescript
+await ctx.db.$transaction(async (tx) => {
+  // 1. Create Registration record (buyer)
+  const registration = await tx.registration.create({
+    data: {
+      eventId: input.eventId,
+      ticketTypeId,
+      email: row.email,
+      name: row.name,
+      quantity: 1, // Each import row = 1 ticket
+      paymentStatus: row.paymentStatus ?? "free",
+      registeredAt: new Date(),
+    },
+  });
+
+  // 2. Create Ticket record with ticket number and QR code
+  const ticket = await tx.ticket.create({
+    data: {
+      registrationId: registration.id,
+      eventId: input.eventId,
+      ticketTypeId,
+      ticketNumber, // Generated using generateTicketNumber()
+      qrCodeData: ticketNumber, // QR code contains the ticket number
+      isAssigned: false, // Temporarily false, updated in step 4
+      isCheckedIn: false,
+    },
+  });
+
+  // 3. Create Attendee record with attendee details
+  const attendee = await tx.attendee.create({
+    data: {
+      name: row.name,
+      email: row.email.toLowerCase(),
+      emailStatus: row.emailStatus ?? "active", // Moved from Registration
+      customData: {
+        registrationCode: ticketNumber, // Ticket number as registration code
+        ...unmappedFields // Custom fields from CSV
+      },
+      userId: ctx.session?.user?.id,
+    },
+  });
+
+  // 4. Update Ticket to link attendee and mark as assigned
+  await tx.ticket.update({
+    where: { id: ticket.id },
+    data: {
+      attendeeId: attendee.id,
+      isAssigned: true,
+      assignedAt: new Date(),
+    },
+  });
+});
+```
 
 **Business Logic**:
 
@@ -235,68 +305,139 @@ Unlike traditional all-or-nothing transactions, this import uses **partial commi
    - Skip invalid rows
    - Apply duplicate strategy
 
-2. **Process Each Row**:
-   ```typescript
-   for (const row of validRows) {
-     try {
-       // Generate unique registration code
-       const registrationCode = generateRegistrationCode()
-       
-       // Map custom fields
-       const customData = {
-         registrationCode,
-         ...unmappedFields
-       }
-       
-       // Create registration
-       await db.registration.create({
-         data: {
-           eventId,
-           email: row.email,
-           name: row.name,
-           ticketTypeId: row.ticketTypeId,
-           paymentStatus: row.paymentStatus || 'free',
-           emailStatus: row.emailStatus || 'active',
-           customData
-         }
-       })
-       
-       // Send confirmation email if enabled
-       if (sendConfirmationEmails) {
-         await sendEmail({
-           to: row.email,
-           template: RegistrationConfirmation,
-           data: { registrationCode, eventName, ... }
-         })
-       }
-       
-       successCount++
-     } catch (error) {
-       failureCount++
-       errors.push({ row, error: error.message })
-       // Continue processing next row
-     }
-   }
-   ```
+2. **Process Each Row in Transaction**:
+   - Generate unique ticket number using `generateTicketNumber()`
+   - Create all 4 database operations in single transaction
+   - Ensures atomicity: all records created or none
+   - Continue to next row even if current row fails
 
-3. **Generate Registration Codes**:
-   - Unique 9-character alphanumeric code
-   - Stored in `customData.registrationCode`
-   - Used for check-in and confirmations
+3. **Generate Ticket Numbers**:
+   - Format: `EVT-{YEAR}-{RANDOM8}` (e.g., `EVT-2025-ABC12345`)
+   - Uses existing `generateTicketNumber()` helper from registration router
+   - Each ticket number is unique and used as:
+     - `Ticket.ticketNumber` - Unique identifier
+     - `Ticket.qrCodeData` - QR code payload for check-in
+     - `Attendee.customData.registrationCode` - Legacy reference code
 
 4. **Handle Custom Fields**:
-   - Unmapped CSV columns stored in `customData`
+   - Unmapped CSV columns stored in `Attendee.customData` (not Registration)
    - Column names used as-is (no `custom_` prefix in JSON)
-   - Example: CSV column "Company" → `customData.company`
+   - Example: CSV column "Company" → `attendee.customData.company`
+   - Registration code always included in customData
 
-5. **Send Confirmation Emails** (Optional):
+5. **Email Status Handling**:
+   - `emailStatus` stored in **Attendee** record (not Registration)
+   - Values: `'active'` | `'bounced'` | `'unsubscribed'`
+   - Default: `'active'` if not provided in CSV
+
+6. **Send Confirmation Emails** (Optional):
    - Only if `sendConfirmationEmails: true`
-   - Sent asynchronously (failures logged, not blocking)
-   - Uses same template as regular registration
+   - Sent **after** transaction commits (asynchronous)
+   - Includes ticket number and QR code
+   - Uses `TicketAssigned` email template pattern
+   - Email failures logged but don't fail import
 
 **Duplicate Handling**:
 - **Skip** (default): Skip duplicate rows, count as `skippedCount`
 - **Create**: Create duplicate registrations (with warning)
+
+**Data Model Alignment**:
+
+This implementation follows the architecture defined in [Spec 003: Ticket/Attendee Separation](../../../specs/003-ticket-attendee-separation/spec.md):
+
+- **Registration** = Buyer/purchase record
+  - Has `quantity` field (always 1 for imports)
+  - Links to Ticket(s) via `registrationId`
+  
+- **Ticket** = Individual ticket instance
+  - Has `ticketNumber` - Unique identifier (EVT-2025-ABC12345)
+  - Has `qrCodeData` - QR code payload for scanning
+  - Has `isAssigned` - Assignment status (true after import)
+  - Has `assignedAt` - Timestamp of assignment
+  - Links to Attendee via `attendeeId`
+  
+- **Attendee** = Person attending
+  - Has `name`, `email` - Attendee information
+  - Has `customData` - Custom fields + registrationCode
+  - Has `emailStatus` - Email deliverability status
+
+**Sequence Diagram**:
+
+```
+CSV Row Processing (Per Row):
+
+┌──────┐    ┌──────────┐    ┌──────────┐    ┌────────┐    ┌──────────┐
+│ CSV  │    │  tRPC    │    │   DB     │    │ Ticket │    │  Email   │
+│ Row  │    │ Handler  │    │  Trans   │    │  Gen   │    │ Service  │
+└──┬───┘    └────┬─────┘    └────┬─────┘    └───┬────┘    └────┬─────┘
+   │             │               │               │               │
+   │ Parse Row   │               │               │               │
+   ├────────────>│               │               │               │
+   │             │               │               │               │
+   │             │ Generate      │               │               │
+   │             │ Ticket Number │               │               │
+   │             ├──────────────────────────────>│               │
+   │             │<──────────────────────────────┤               │
+   │             │ EVT-2025-ABC12345             │               │
+   │             │               │               │               │
+   │             │ Start Transaction             │               │
+   │             ├──────────────>│               │               │
+   │             │               │               │               │
+   │             │ 1. Create Registration        │               │
+   │             │               │               │               │
+   │             │               │ INSERT registration           │
+   │             │               │ (name, email, quantity:1)     │
+   │             │               │               │               │
+   │             │ 2. Create Ticket              │               │
+   │             │               │               │               │
+   │             │               │ INSERT ticket                 │
+   │             │               │ (ticketNumber, qrCodeData,    │
+   │             │               │  isAssigned:false)            │
+   │             │               │               │               │
+   │             │ 3. Create Attendee            │               │
+   │             │               │               │               │
+   │             │               │ INSERT attendee               │
+   │             │               │ (name, email, customData,     │
+   │             │               │  emailStatus)                 │
+   │             │               │               │               │
+   │             │ 4. Update Ticket (Assign)     │               │
+   │             │               │               │               │
+   │             │               │ UPDATE ticket                 │
+   │             │               │ SET attendeeId, isAssigned:true│
+   │             │               │     assignedAt:NOW()          │
+   │             │               │               │               │
+   │             │ Commit Transaction            │               │
+   │             │<──────────────┤               │               │
+   │             │               │               │               │
+   │             │ Send Email (if enabled)       │               │
+   │             ├──────────────────────────────────────────────>│
+   │             │               │               │               │
+   │             │               │               │ Send confirmation
+   │             │               │               │ with ticket details
+   │             │               │               │ and QR code   │
+   │<────────────┤               │               │               │
+   │  Success    │               │               │               │
+   │             │               │               │               │
+
+Error Handling (Transaction Rollback):
+
+   │             │ Start Transaction             │               │
+   │             ├──────────────>│               │               │
+   │             │               │               │               │
+   │             │ 1-3. Create records...        │               │
+   │             │               │               │               │
+   │             │               X ERROR         │               │
+   │             │               │ (e.g., constraint violation)  │
+   │             │               │               │               │
+   │             │ Rollback Transaction          │               │
+   │             │<──────────────┤               │               │
+   │             │               │               │               │
+   │<────────────┤               │               │               │
+   │  Failure    │               │               │               │
+   │  (logged,   │               │               │               │
+   │   continue  │               │               │               │
+   │   next row) │               │               │               │
+```
 
 **Authorization**:
 - Verifies user owns the event

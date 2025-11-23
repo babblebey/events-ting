@@ -170,7 +170,7 @@ function AppSidebar({
                 ) : (
                   <SidebarItem
                     key={item.href ?? item.label}
-                    href={item.href!}
+                    href={item.href}
                     icon={IconComponent}
                     className={`flex justify-between ${isActive ? "bg-gray-100 dark:bg-gray-700" : ""}`}
                   >

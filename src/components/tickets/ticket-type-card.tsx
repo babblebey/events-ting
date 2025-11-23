@@ -123,7 +123,7 @@ export function TicketTypeCard({
         </div>
 
         {/* Sale Period */}
-        {(saleStart || saleEnd) && (
+        {(saleStart ?? saleEnd) && (
           <div className="space-y-1 border-t pt-3 text-sm text-gray-600">
             {saleStart && (
               <div className="flex items-center gap-2">

@@ -4,6 +4,7 @@
  */
 
 import { z } from "zod";
+import { customFieldDefinitionsSchema } from "./validators/custom-fields";
 
 // ============================================================================
 // EVENT VALIDATION
@@ -86,6 +87,7 @@ export const updateEventSchema = z.object({
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
   status: z.enum(["draft", "published", "archived"]).optional(),
+  customFields: customFieldDefinitionsSchema.optional(),
 });
 
 export const eventIdSchema = z.object({
@@ -458,6 +460,226 @@ export const getMyMembershipsSchema = z.object({
 });
 
 // ============================================================================
+// TICKET INSTANCE VALIDATION (Ticket Separation Feature)
+// ============================================================================
+
+/**
+ * Input schema for listing tickets
+ * Supports filtering by registration, event, assignment status, and check-in status
+ */
+export const listTicketsInputSchema = z.object({
+  registrationId: z.string().cuid().optional(),
+  eventId: z.string().cuid().optional(),
+  isAssigned: z.boolean().optional(),
+  isCheckedIn: z.boolean().optional(),
+  limit: z.number().min(1).max(100).default(20),
+  cursor: z.string().optional(),
+});
+
+/**
+ * Input schema for getting ticket by number (QR code lookup)
+ */
+export const getTicketByNumberInputSchema = z.object({
+  ticketNumber: z.string().min(1, "Ticket number is required"),
+});
+
+/**
+ * Input schema for assigning a ticket to an attendee
+ */
+export const assignTicketInputSchema = z.object({
+  ticketId: z.string().cuid(),
+  attendee: z.object({
+    name: z.string().min(1, "Attendee name is required"),
+    email: z.string().email("Invalid email address"),
+    customData: z.record(z.any()).optional(),
+  }),
+  expectedUpdatedAt: z.coerce.date(),
+});
+
+/**
+ * Input schema for unassigning a ticket
+ */
+export const unassignTicketInputSchema = z.object({
+  ticketId: z.string().cuid(),
+  expectedUpdatedAt: z.coerce.date(),
+});
+
+/**
+ * Input schema for checking in a ticket
+ */
+export const checkInTicketInputSchema = z.object({
+  ticketNumber: z.string().min(1, "Ticket number is required"),
+  staffId: z.string().optional(),
+});
+
+/**
+ * Input schema for generating QR code
+ */
+export const generateQRCodeInputSchema = z.object({
+  ticketId: z.string().cuid(),
+  format: z.enum(["svg", "dataUrl"]).default("dataUrl"),
+  size: z.number().min(100).max(1000).default(300),
+});
+
+/**
+ * Input schema for getting check-in metrics
+ */
+export const getCheckInMetricsInputSchema = z.object({
+  eventId: z.string().cuid(),
+});
+
+/**
+ * Output schema for ticket data
+ */
+export const ticketOutputSchema = z.object({
+  id: z.string(),
+  ticketNumber: z.string(),
+  qrCodeData: z.string(),
+  isAssigned: z.boolean(),
+  assignedAt: z.date().nullable(),
+  isCheckedIn: z.boolean(),
+  checkedInAt: z.date().nullable(),
+  ticketType: z.object({
+    id: z.string(),
+    name: z.string(),
+    price: z.number(),
+  }),
+  attendee: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+      email: z.string(),
+      customData: z.record(z.any()).nullable(),
+    })
+    .nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+/**
+ * Output schema for listing tickets
+ */
+export const listTicketsOutputSchema = z.object({
+  tickets: z.array(ticketOutputSchema),
+  nextCursor: z.string().nullable(),
+});
+
+/**
+ * Output schema for getting ticket by number
+ */
+export const getTicketByNumberOutputSchema = z.object({
+  id: z.string(),
+  ticketNumber: z.string(),
+  qrCodeData: z.string(),
+  isAssigned: z.boolean(),
+  assignedAt: z.date().nullable(),
+  isCheckedIn: z.boolean(),
+  checkedInAt: z.date().nullable(),
+  checkedInBy: z.string().nullable(),
+  event: z.object({
+    id: z.string(),
+    name: z.string(),
+    slug: z.string(),
+    startDate: z.date(),
+    endDate: z.date(),
+    locationType: z.string(),
+    locationAddress: z.string().nullable(),
+    timezone: z.string(),
+  }),
+  ticketType: z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    price: z.number(),
+  }),
+  attendee: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+      email: z.string(),
+      customData: z.record(z.any()).nullable(),
+    })
+    .nullable(),
+  registration: z.object({
+    id: z.string(),
+    email: z.string(),
+    name: z.string(),
+  }),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+/**
+ * Output schema for assigning a ticket
+ */
+export const assignTicketOutputSchema = z.object({
+  ticket: ticketOutputSchema,
+  attendee: z.object({
+    id: z.string(),
+    name: z.string(),
+    email: z.string(),
+    customData: z.record(z.any()).nullable(),
+  }),
+});
+
+/**
+ * Output schema for unassigning a ticket
+ */
+export const unassignTicketOutputSchema = z.object({
+  ticket: ticketOutputSchema,
+});
+
+/**
+ * Output schema for checking in a ticket
+ */
+export const checkInTicketOutputSchema = z.object({
+  ticket: ticketOutputSchema,
+  attendee: z.object({
+    id: z.string(),
+    name: z.string(),
+    email: z.string(),
+  }),
+  checkInTime: z.date(),
+  message: z.string(),
+});
+
+/**
+ * Output schema for generating QR code
+ */
+export const generateQRCodeOutputSchema = z.object({
+  qrCode: z.string(),
+  ticketNumber: z.string(),
+});
+
+/**
+ * Output schema for check-in metrics
+ */
+export const getCheckInMetricsOutputSchema = z.object({
+  eventId: z.string(),
+  totalTickets: z.number(),
+  assignedTickets: z.number(),
+  unassignedTickets: z.number(),
+  checkedInTickets: z.number(),
+  notCheckedInTickets: z.number(),
+  checkInPercentage: z.number(),
+  byTicketType: z.array(
+    z.object({
+      ticketTypeId: z.string(),
+      ticketTypeName: z.string(),
+      total: z.number(),
+      checkedIn: z.number(),
+    }),
+  ),
+  recentCheckIns: z.array(
+    z.object({
+      ticketNumber: z.string(),
+      attendeeName: z.string(),
+      checkedInAt: z.date(),
+    }),
+  ),
+});
+
+// ============================================================================
 // TYPE EXPORTS
 // ============================================================================
 
@@ -479,3 +701,209 @@ export type UpdateTeamMemberPermissionsInput = z.infer<
 >;
 export type AcceptInvitationInput = z.infer<typeof acceptInvitationSchema>;
 export type DeclineInvitationInput = z.infer<typeof declineInvitationSchema>;
+
+// Ticket Instance Types (Ticket Separation Feature)
+export type ListTicketsInput = z.infer<typeof listTicketsInputSchema>;
+export type GetTicketByNumberInput = z.infer<
+  typeof getTicketByNumberInputSchema
+>;
+export type AssignTicketInput = z.infer<typeof assignTicketInputSchema>;
+export type UnassignTicketInput = z.infer<typeof unassignTicketInputSchema>;
+export type CheckInTicketInput = z.infer<typeof checkInTicketInputSchema>;
+export type GenerateQRCodeInput = z.infer<typeof generateQRCodeInputSchema>;
+export type GetCheckInMetricsInput = z.infer<
+  typeof getCheckInMetricsInputSchema
+>;
+export type TicketOutput = z.infer<typeof ticketOutputSchema>;
+export type ListTicketsOutput = z.infer<typeof listTicketsOutputSchema>;
+export type GetTicketByNumberOutput = z.infer<
+  typeof getTicketByNumberOutputSchema
+>;
+export type AssignTicketOutput = z.infer<typeof assignTicketOutputSchema>;
+export type UnassignTicketOutput = z.infer<typeof unassignTicketOutputSchema>;
+export type CheckInTicketOutput = z.infer<typeof checkInTicketOutputSchema>;
+export type GenerateQRCodeOutput = z.infer<typeof generateQRCodeOutputSchema>;
+export type GetCheckInMetricsOutput = z.infer<
+  typeof getCheckInMetricsOutputSchema
+>;
+
+// Custom Field Types (Ticket Separation Feature - User Story 2)
+export type {
+  CustomFieldType,
+  CustomFieldDefinition,
+  CustomFieldValue,
+  CustomFieldResponses,
+  FieldValidationResult,
+  FormValidationResult,
+} from "./validators/custom-fields";
+
+export {
+  CUSTOM_FIELD_TYPES,
+  customFieldDefinitionSchema,
+  customFieldDefinitionsSchema,
+  validateFieldDefinition,
+  validateFieldResponse,
+  validateCustomFieldResponses,
+  createCustomFieldSchema,
+  sanitizeCustomFieldResponses,
+} from "./validators/custom-fields";
+
+// ============================================================================
+// ATTENDEE VALIDATION (Ticket Separation Feature - User Story 2)
+// ============================================================================
+
+/**
+ * Input schema for listing attendees
+ */
+export const listAttendeesInputSchema = z.object({
+  eventId: z.string().cuid(),
+  emailStatus: z.enum(["active", "bounced", "unsubscribed"]).optional(),
+  search: z.string().optional(),
+  limit: z.number().min(1).max(100).default(20),
+  cursor: z.string().optional(),
+});
+
+/**
+ * Input schema for getting attendee by ID
+ */
+export const getAttendeeByIdInputSchema = z.object({
+  attendeeId: z.string().cuid(),
+});
+
+/**
+ * Input schema for updating attendee
+ */
+export const updateAttendeeInputSchema = z.object({
+  attendeeId: z.string().cuid(),
+  name: z.string().min(1).optional(),
+  email: z.string().email().optional(),
+  customData: z.record(z.any()).optional(),
+});
+
+/**
+ * Input schema for exporting attendees
+ */
+export const exportAttendeesInputSchema = z.object({
+  eventId: z.string().cuid(),
+  emailStatus: z.enum(["active", "bounced", "unsubscribed"]).optional(),
+  includeCustomFields: z.boolean().default(true),
+  includeCheckInStatus: z.boolean().default(true),
+});
+
+/**
+ * Input schema for getting custom field responses
+ */
+export const getCustomFieldResponsesInputSchema = z.object({
+  eventId: z.string().cuid(),
+  fieldId: z.string(),
+});
+
+/**
+ * Input schema for updating email status (webhook)
+ */
+export const updateEmailStatusInputSchema = z.object({
+  email: z.string().email(),
+  eventId: z.string().cuid(),
+  status: z.enum(["active", "bounced", "unsubscribed"]),
+  reason: z.string().optional(),
+});
+
+/**
+ * Output schema for attendee data
+ */
+export const attendeeOutputSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  emailStatus: z.enum(["active", "bounced", "unsubscribed"]),
+  customData: z.record(z.any()).nullable(),
+  ticket: z.object({
+    id: z.string(),
+    ticketNumber: z.string(),
+    isCheckedIn: z.boolean(),
+    checkedInAt: z.date().nullable(),
+    ticketType: z.object({
+      id: z.string(),
+      name: z.string(),
+    }),
+  }),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+/**
+ * Output schema for list attendees
+ */
+export const listAttendeesOutputSchema = z.object({
+  attendees: z.array(attendeeOutputSchema),
+  nextCursor: z.string().nullable(),
+  total: z.number(),
+});
+
+/**
+ * Output schema for get attendee by ID
+ */
+export const getAttendeeByIdOutputSchema = attendeeOutputSchema;
+
+/**
+ * Output schema for update attendee
+ */
+export const updateAttendeeOutputSchema = z.object({
+  attendee: attendeeOutputSchema,
+});
+
+/**
+ * Output schema for export attendees
+ */
+export const exportAttendeesOutputSchema = z.object({
+  csv: z.string(),
+  filename: z.string(),
+  rowCount: z.number(),
+});
+
+/**
+ * Output schema for custom field responses
+ */
+export const getCustomFieldResponsesOutputSchema = z.object({
+  fieldId: z.string(),
+  fieldLabel: z.string(),
+  fieldType: z.string(),
+  responses: z.array(
+    z.object({
+      value: z.string(),
+      count: z.number(),
+    }),
+  ),
+  totalResponses: z.number(),
+});
+
+/**
+ * Output schema for update email status
+ */
+export const updateEmailStatusOutputSchema = z.object({
+  updated: z.number(),
+  attendeeIds: z.array(z.string()),
+});
+
+// Attendee Types
+export type ListAttendeesInput = z.infer<typeof listAttendeesInputSchema>;
+export type GetAttendeeByIdInput = z.infer<typeof getAttendeeByIdInputSchema>;
+export type UpdateAttendeeInput = z.infer<typeof updateAttendeeInputSchema>;
+export type ExportAttendeesInput = z.infer<typeof exportAttendeesInputSchema>;
+export type GetCustomFieldResponsesInput = z.infer<
+  typeof getCustomFieldResponsesInputSchema
+>;
+export type UpdateEmailStatusInput = z.infer<
+  typeof updateEmailStatusInputSchema
+>;
+export type AttendeeOutput = z.infer<typeof attendeeOutputSchema>;
+export type ListAttendeesOutput = z.infer<typeof listAttendeesOutputSchema>;
+export type GetAttendeeByIdOutput = z.infer<typeof getAttendeeByIdOutputSchema>;
+export type UpdateAttendeeOutput = z.infer<typeof updateAttendeeOutputSchema>;
+export type ExportAttendeesOutput = z.infer<typeof exportAttendeesOutputSchema>;
+export type GetCustomFieldResponsesOutput = z.infer<
+  typeof getCustomFieldResponsesOutputSchema
+>;
+export type UpdateEmailStatusOutput = z.infer<
+  typeof updateEmailStatusOutputSchema
+>;

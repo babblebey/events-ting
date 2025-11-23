@@ -11,7 +11,23 @@ import type { ReactElement } from "react";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Default sender email (should be verified domain in Resend)
-const DEFAULT_FROM = process.env.EMAIL_FROM ?? "events@yourdomain.com";
+const DEFAULT_FROM = process.env.RESEND_EMAIL_FROM!;
+
+/**
+ * Attachment for email
+ */
+export interface EmailAttachment {
+  /** Base64 encoded content or file path (URL) */
+  content?: string;
+  /** Remote file path (URL) */
+  path?: string;
+  /** Filename for the attachment */
+  filename?: string;
+  /** Content-ID for inline images (use cid:contentId in HTML) */
+  inlineContentId?: string;
+  /** Content type (e.g., image/png) */
+  contentType?: string;
+}
 
 /**
  * Email service interface
@@ -24,6 +40,7 @@ export interface EmailOptions {
   from?: string;
   replyTo?: string;
   tags?: Array<{ name: string; value: string }>;
+  attachments?: EmailAttachment[];
 }
 
 /**
@@ -71,6 +88,7 @@ export async function sendEmail(options: EmailOptions): Promise<EmailResult> {
       html,
       replyTo: options.replyTo,
       tags: options.tags,
+      attachments: options.attachments as any,
     });
 
     if (result.error) {
@@ -86,12 +104,6 @@ export async function sendEmail(options: EmailOptions): Promise<EmailResult> {
         error: result.error.message,
       };
     }
-
-    console.log("[Email] Sent email", {
-      to: options.to,
-      subject: options.subject,
-      messageId: result.data?.id,
-    });
 
     return {
       id: result.data?.id ?? "",
@@ -154,7 +166,7 @@ export async function sendBatchEmails(
 
           // Mark all emails in batch as failed
           results.push(
-            ...batch.map((to) => ({
+            ...batch.map((_to) => ({
               id: "",
               success: false,
               error: batchResult.error?.message,
@@ -165,7 +177,7 @@ export async function sendBatchEmails(
 
         // Mark all emails in batch as successful
         results.push(
-          ...batch.map((to, index) => ({
+          ...batch.map((_to, index) => ({
             id:
               (batchResult.data as unknown as Array<{ id: string }>)?.[index]
                 ?.id ?? "",
@@ -360,6 +372,37 @@ function delay(ms: number): Promise<void> {
 // ============================================================================
 // EMAIL TEMPLATE HELPERS
 // ============================================================================
+
+/**
+ * Convert a data URL to an email attachment for inline images
+ * @param dataUrl - Data URL (e.g., "data:image/png;base64,...")
+ * @param contentId - Content ID to reference in HTML (use cid:contentId)
+ * @param filename - Optional filename
+ * @returns Email attachment object
+ */
+export function dataUrlToAttachment(
+  dataUrl: string,
+  contentId: string,
+  filename = "image.png",
+): EmailAttachment {
+  // Extract base64 content and content type from data URL
+  const regex = /^data:(.+);base64,(.+)$/;
+  const matches = regex.exec(dataUrl);
+
+  if (!matches || matches.length < 3) {
+    throw new Error("Invalid data URL format");
+  }
+
+  const contentType = matches[1];
+  const base64Content = matches[2];
+
+  return {
+    content: base64Content,
+    filename,
+    inlineContentId: contentId,
+    contentType: contentType,
+  };
+}
 
 /**
  * Generate email preview text (fallback for email clients)

@@ -6,7 +6,7 @@
  */
 
 import { useState } from "react";
-import { Button, Label, Select, ToggleSwitch } from "flowbite-react";
+import { Button, Label, Select } from "flowbite-react";
 import { FormField, FormSection, FormError } from "@/components/ui/form-field";
 import { api } from "@/trpc/react";
 import { type CreateEventInput } from "@/lib/validators";

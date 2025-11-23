@@ -6,7 +6,6 @@ import {
   Heading,
   Hr,
   Html,
-  Link,
   Preview,
   Section,
   Text,
@@ -20,6 +19,8 @@ interface RegistrationConfirmationProps {
   ticketType: string;
   registrationCode: string;
   eventUrl: string;
+  ticketCount?: number;
+  manageTicketsUrl?: string;
 }
 
 export const RegistrationConfirmation = ({
@@ -29,16 +30,20 @@ export const RegistrationConfirmation = ({
   ticketType,
   registrationCode,
   eventUrl,
+  ticketCount = 1,
+  manageTicketsUrl,
 }: RegistrationConfirmationProps) => {
   const formattedDate = new Intl.DateTimeFormat("en-US", {
     dateStyle: "full",
     timeStyle: "short",
   }).format(new Date(eventDate));
 
+  const hasMultipleTickets = ticketCount > 1;
+
   return (
     <Html>
       <Head />
-      <Preview>You're registered for {eventName}! 🎉</Preview>
+      <Preview>You&apos;re registered for {eventName}! 🎉</Preview>
       <Body style={main}>
         <Container style={container}>
           <Section style={box}>
@@ -47,7 +52,7 @@ export const RegistrationConfirmation = ({
             <Text style={paragraph}>Hi {attendeeName},</Text>
 
             <Text style={paragraph}>
-              Great news! You're all set for <strong>{eventName}</strong>.
+              Great news! You&apos;re all set for <strong>{eventName}</strong>.
             </Text>
 
             <Section style={infoBox}>
@@ -62,12 +67,42 @@ export const RegistrationConfirmation = ({
 
               <Text style={infoLabel}>Registration Code:</Text>
               <Text style={codeValue}>{registrationCode}</Text>
+
+              {hasMultipleTickets && (
+                <>
+                  <Text style={infoLabel}>Tickets Purchased:</Text>
+                  <Text style={infoValue}>{ticketCount}</Text>
+                </>
+              )}
             </Section>
 
-            <Text style={paragraph}>
-              Keep this email handy! You may need your registration code for
-              check-in.
-            </Text>
+            {/* Ticket Assignment Notice */}
+            {hasMultipleTickets && manageTicketsUrl && (
+              <Section style={ticketNoticeBox}>
+                <Text style={ticketNoticeTitle}>
+                  📋 Next Step: Assign Your Tickets
+                </Text>
+                <Text style={ticketNoticeText}>
+                  You purchased {ticketCount} tickets. Please assign each ticket
+                  to an attendee (including yourself) so they can receive their
+                  individual ticket with QR code.
+                </Text>
+                <Button style={manageButton} href={manageTicketsUrl}>
+                  Manage Your Tickets
+                </Button>
+                <Text style={ticketNoticeHelp}>
+                  Each attendee will receive their own ticket via email with a
+                  unique QR code for check-in.
+                </Text>
+              </Section>
+            )}
+
+            {!hasMultipleTickets && (
+              <Text style={paragraph}>
+                Keep this email handy! You may need your registration code for
+                check-in.
+              </Text>
+            )}
 
             <Button style={button} href={eventUrl}>
               View Event Details
@@ -76,8 +111,8 @@ export const RegistrationConfirmation = ({
             <Hr style={hr} />
 
             <Text style={footer}>
-              If you have any questions, please don't hesitate to reach out to
-              the event organizer.
+              If you have any questions, please don&apos;t hesitate to reach out
+              to the event organizer.
             </Text>
 
             <Text style={footer}>See you at the event! 🚀</Text>
@@ -177,6 +212,53 @@ const button = {
 const hr = {
   borderColor: "#e5e7eb",
   margin: "32px 0",
+};
+
+const ticketNoticeBox = {
+  backgroundColor: "#eff6ff",
+  borderRadius: "8px",
+  padding: "24px",
+  marginTop: "24px",
+  marginBottom: "24px",
+  border: "2px solid #3b82f6",
+};
+
+const ticketNoticeTitle = {
+  fontSize: "18px",
+  fontWeight: "600",
+  color: "#1e40af",
+  marginTop: "0",
+  marginBottom: "12px",
+};
+
+const ticketNoticeText = {
+  fontSize: "15px",
+  lineHeight: "1.6",
+  color: "#1e40af",
+  marginBottom: "16px",
+  marginTop: "0",
+};
+
+const ticketNoticeHelp = {
+  fontSize: "13px",
+  lineHeight: "1.5",
+  color: "#3b82f6",
+  marginTop: "12px",
+  marginBottom: "0",
+  fontStyle: "italic" as const,
+};
+
+const manageButton = {
+  backgroundColor: "#3b82f6",
+  borderRadius: "8px",
+  color: "#fff",
+  fontSize: "16px",
+  fontWeight: "600",
+  textDecoration: "none",
+  textAlign: "center" as const,
+  display: "block",
+  width: "100%",
+  padding: "12px 20px",
 };
 
 const footer = {

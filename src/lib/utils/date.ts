@@ -5,13 +5,7 @@
  */
 
 import { formatInTimeZone, toZonedTime } from "date-fns-tz";
-import {
-  format,
-  parse,
-  differenceInMinutes,
-  addMinutes,
-  toDate,
-} from "date-fns";
+import { differenceInMinutes, addMinutes, toDate } from "date-fns";
 
 /**
  * Format a UTC date in the specified timezone
@@ -42,12 +36,12 @@ export function formatDate(
 /**
  * Parse a local date/time string in the event's timezone and convert to UTC
  * @param localDateString - ISO date string (e.g., "2023-04-29T09:30:00")
- * @param eventTimezone - IANA timezone identifier
+ * @param _eventTimezone - IANA timezone identifier
  * @returns Date object in UTC
  */
 export function parseEventTime(
   localDateString: string,
-  eventTimezone: string,
+  _eventTimezone: string,
 ): Date {
   // Parse the local date string and treat it as being in the event's timezone
   const localDate = new Date(localDateString);
@@ -178,10 +172,10 @@ export function formatTimeRange(
 
 /**
  * Get the current time in a specific timezone
- * @param timezone - IANA timezone identifier
+ * @param _timezone - IANA timezone identifier
  * @returns Date object representing current time in UTC
  */
-export function getCurrentTimeInTimezone(timezone: string): Date {
+export function getCurrentTimeInTimezone(_timezone: string): Date {
   return new Date();
 }
 
@@ -220,6 +214,19 @@ export function isValidTimezone(timezone: string): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * Ensure a value is a Date object
+ * Handles both Date objects and serialized date strings/values
+ * @param value - Date object or date string/value
+ * @returns Date object
+ */
+export function ensureDate(value: Date | string): Date {
+  if (value instanceof Date) {
+    return value;
+  }
+  return new Date(String(value));
 }
 
 /**

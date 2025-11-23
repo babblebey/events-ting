@@ -1,6 +1,6 @@
 # Registration Data Model
 
-## Primary Model: Registration
+## Primary Model: Registration (Purchase Transaction)
 
 ```prisma
 model Registration {
@@ -11,11 +11,16 @@ model Registration {
   ticketTypeId String
   ticketType   TicketType @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
   
-  // Attendee Info
-  email       String
-  name        String
-  userId      String? // Optional: link to authenticated user
+  // BUYER Information (person making the purchase)
+  email       String  // Buyer's email
+  name        String  // Buyer's name
+  userId      String? // Optional: link to buyer's account
   user        User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  // Purchase Details
+  quantity    Int @default(1)  // Number of tickets purchased
+  // Purchase Details
+  quantity    Int @default(1)  // Number of tickets purchased
   
   // Payment (future-ready fields)
   paymentStatus     String  @default("free") // 'free' | 'pending' | 'paid' | 'failed' | 'refunded'
@@ -27,6 +32,9 @@ model Registration {
   
   // Custom Fields
   customData  Json?
+  
+  // Relations
+  tickets Ticket[] // Individual ticket instances created from this purchase
   
   registeredAt DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -42,27 +50,30 @@ model Registration {
 
 ## Field Descriptions
 
-### Identity Fields
+### Buyer Information (NOT Attendee)
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | String (CUID) | Primary key, auto-generated |
-| `eventId` | String (CUID) | Foreign key to Event |
-| `ticketTypeId` | String (CUID) | Foreign key to TicketType |
+| `email` | String | **BUYER'S** email address (who made the purchase) |
+| `name` | String | **BUYER'S** full name (who paid for tickets) |
+| `userId` | String? | Optional link to buyer's User account |
 
-### Attendee Information
+**Critical Distinction**:
+- These fields store **buyer information** (who purchased)
+- They do NOT store attendee information (who attends)
+- Attendee information is in the separate `Attendee` model
+- One buyer can purchase tickets for multiple attendees
+
+### Purchase Details
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `email` | String | Attendee's email address (required) |
-| `name` | String | Attendee's full name (required) |
-| `userId` | String? | Optional link to User account if authenticated |
+| `quantity` | Int | Number of tickets purchased in this transaction |
 
-**Important Notes**:
-- Email and name are **always required**, even for authenticated users
-- `userId` is **optional** - allows both authenticated and guest registrations
-- Multiple registrations can share the same email (different events/tickets)
-- No unique constraint on email (allows multiple registrations)
+**How It Works**:
+- Buyer selects quantity during purchase (e.g., 5 tickets)
+- System creates 1 Registration record + 5 Ticket instances
+- Each Ticket can be assigned to a different Attendee
 
 ### Payment Fields (Future-Ready)
 
@@ -106,18 +117,18 @@ model Registration {
 **Common Data Stored**:
 ```typescript
 {
-  registrationCode: "AB12CD34EF56GH78",  // Unique 16-char code
+  registrationCode: "AB12CD34EF56GH78",  // Deprecated: Legacy field
   addedManually: true,                   // Flag for manual additions
-  // Future: Custom form fields, dietary restrictions, etc.
+  firstTicketNumber: "TKT-L8Z9K3-A7B2", // Reference ticket number
+  // Future: Notes, internal references
 }
 ```
 
-**Registration Code**:
-- Generated on registration creation
-- 16 uppercase hex characters (8 random bytes)
-- Stored in `customData.registrationCode`
-- Used for check-in (future feature)
-- Included in confirmation emails
+**Purchase Reference**:
+- First ticket number stored for easy reference
+- Used in purchase confirmation emails
+- Helps buyers identify their purchase
+- Legacy registration code field maintained for backward compatibility
 
 ### Audit Fields
 
@@ -135,28 +146,52 @@ model Registration {
 #### Event
 - **Relation**: Many registrations → One event
 - **Foreign Key**: `eventId`
-- **On Delete**: `Cascade` (deleting event deletes all registrations)
-- **Purpose**: Track which event the attendee registered for
+- **On Delete**: `Cascade` (deleting event deletes all purchases and tickets)
+- **Purpose**: Track which event the purchase is for
 
 #### TicketType
 - **Relation**: Many registrations → One ticket type
 - **Foreign Key**: `ticketTypeId`
-- **On Delete**: `Restrict` (cannot delete ticket type with registrations)
-- **Purpose**: Track which ticket tier the attendee selected
+- **On Delete**: `Restrict` (cannot delete ticket type with purchases)
+- **Purpose**: Track which ticket tier was purchased
 
-**Important**: `Restrict` prevents accidental deletion of ticket types that have registrations. Must delete registrations first or reassign them.
+**Important**: `Restrict` prevents accidental deletion of ticket types that have purchases. Must delete purchases first or reassign them.
 
 #### User (Optional)
 - **Relation**: Many registrations → One user (optional)
 - **Foreign Key**: `userId` (nullable)
-- **On Delete**: `SetNull` (if user deleted, registration remains but userId becomes null)
-- **Purpose**: Link registration to authenticated user account
+- **On Delete**: `SetNull` (if user deleted, purchase remains but userId becomes null)
+- **Purpose**: Link purchase to authenticated user account
 
 **Use Cases**:
-- User can view their registrations
-- User profile shows attended events
+- User can view their purchase history
+- User profile shows purchased events
 - Email pre-filling for returning users
-- Not required - supports guest registrations
+- Not required - supports guest purchases
+
+### Has Many: Tickets
+- **Relation**: One registration → Many tickets
+- **Cardinality**: 1:N (minimum 1, no maximum enforced by schema)
+- **Purpose**: Each purchased ticket gets its own Ticket instance
+
+**Example**:
+```typescript
+// Buyer purchases 3 tickets
+const registration = await db.registration.create({
+  data: {
+    email: "buyer@example.com",  // Buyer email
+    name: "John Buyer",           // Buyer name
+    quantity: 3,
+    tickets: {
+      create: [
+        { ticketNumber: "TKT-001", ... },  // Can assign to Attendee A
+        { ticketNumber: "TKT-002", ... },  // Can assign to Attendee B
+        { ticketNumber: "TKT-003", ... },  // Can assign to Attendee C
+      ]
+    }
+  }
+});
+```
 
 ---
 
@@ -267,27 +302,59 @@ ORDER BY "registeredAt" DESC
 
 ## Common Queries
 
-### Get All Registrations for Event
+### Get All Purchases for Event
 ```typescript
-const registrations = await db.registration.findMany({
+const purchases = await db.registration.findMany({
   where: { eventId: eventId },
   include: {
     ticketType: {
       select: { id: true, name: true },
+    },
+    tickets: {
+      select: {
+        id: true,
+        ticketNumber: true,
+        isAssigned: true,
+        attendee: {
+          select: { name: true, email: true },
+        },
+      },
     },
   },
   orderBy: { registeredAt: 'desc' },
 });
 ```
 
-### Count Tickets Sold by Type
+### Get Purchase with All Tickets
 ```typescript
-const soldCount = await db.registration.count({
-  where: { ticketTypeId: ticketTypeId },
+const purchase = await db.registration.findUnique({
+  where: { id: registrationId },
+  include: {
+    tickets: {
+      include: {
+        attendee: true,  // See who each ticket is assigned to
+      }
+    }
+  }
 });
+
+// purchase.email = buyer email
+// purchase.tickets[0].attendee?.email = first attendee email
+// These can be different people!
 ```
 
-### Search Registrations by Name or Email
+### Count Tickets Sold by Type
+```typescript
+const soldCount = await db.registration.aggregate({
+  where: { ticketTypeId: ticketTypeId },
+  _sum: {
+    quantity: true,  // Sum all quantities purchased
+  },
+});
+// Returns total tickets sold, not number of purchases
+```
+
+### Search Purchases by Name or Email
 ```typescript
 const results = await db.registration.findMany({
   where: {
@@ -298,11 +365,12 @@ const results = await db.registration.findMany({
     ],
   },
 });
+// Searches buyer information only
 ```
 
-### Get User's Registration History
+### Get User's Purchase History
 ```typescript
-const myRegistrations = await db.registration.findMany({
+const myPurchases = await db.registration.findMany({
   where: { userId: userId },
   include: {
     event: {
@@ -315,6 +383,15 @@ const myRegistrations = await db.registration.findMany({
     },
     ticketType: {
       select: { name: true },
+    },
+    tickets: {
+      select: {
+        id: true,
+        isAssigned: true,
+        attendee: {
+          select: { name: true, email: true },
+        },
+      },
     },
   },
   orderBy: { registeredAt: 'desc' },
@@ -366,7 +443,7 @@ const registration = await db.registration.findUnique({
 ## Data Integrity
 
 ### Ticket Availability
-Registration creation uses database transaction with row-level locking:
+Purchase creation uses database transaction with row-level locking:
 
 ```typescript
 await db.$transaction(async (tx) => {
@@ -377,13 +454,21 @@ await db.$transaction(async (tx) => {
     FOR UPDATE
   `;
   
-  // Check availability atomically
+  // Check availability atomically (quantity × count)
   if (soldCount >= quantity) {
     throw new Error("Sold out");
   }
   
-  // Create registration
-  await tx.registration.create({...});
+  // Create purchase
+  const registration = await tx.registration.create({...});
+  
+  // Create ticket instances
+  await tx.ticket.createMany({
+    data: Array.from({ length: input.quantity }).map(() => ({
+      registrationId: registration.id,
+      // ... ticket fields
+    })),
+  });
 });
 ```
 
@@ -391,19 +476,21 @@ await db.$transaction(async (tx) => {
 - ✅ No overselling (atomic check + create)
 - ✅ Works across multiple server instances
 - ✅ Database-level consistency
+- ✅ Each purchase creates correct number of tickets
 
 ### Email Uniqueness
 **No unique constraint** on email - by design:
 
 **Reasons**:
-- Users can register for multiple events
-- Users can buy multiple ticket types for same event
-- Users can register for someone else
-- Guest registrations allowed
+- Buyers can purchase for multiple events
+- Buyers can purchase multiple ticket types for same event
+- Buyers can purchase on behalf of others
+- Guest purchases allowed
 
 **Considerations**:
-- Search returns all matching emails
-- Email status update affects all registrations with that email
+- Search returns all matching buyer emails
+- Email status update affects all purchases with that buyer email
+- Buyer email ≠ Attendee email (attendees tracked separately)
 - No email verification required (future enhancement)
 
 ---

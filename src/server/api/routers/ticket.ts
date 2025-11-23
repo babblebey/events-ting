@@ -13,7 +13,6 @@ import { checkModuleAccess } from "@/server/api/permissions";
 import {
   createTicketTypeSchema,
   updateTicketTypeSchema,
-  eventIdSchema,
 } from "@/lib/validators";
 import { z } from "zod";
 

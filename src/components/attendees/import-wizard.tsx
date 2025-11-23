@@ -46,7 +46,7 @@ export type ImportResult = {
     value: string;
     error: string;
   }>;
-  status: "completed" | "failed" | string; // Allow string for compatibility
+  status: "completed" | "failed";
   errorMessage?: string;
 };
 
