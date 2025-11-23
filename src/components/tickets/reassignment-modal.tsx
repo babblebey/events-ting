@@ -331,7 +331,7 @@ export function ReassignmentModal({
         <Button
           color={showConfirmation ? "failure" : "blue"}
           onClick={handleSubmit}
-          disabled={assignMutation.isPending ?? !name ?? !email}
+          disabled={assignMutation.isPending || !name || !email}
         >
           {assignMutation.isPending
             ? "Assigning..."

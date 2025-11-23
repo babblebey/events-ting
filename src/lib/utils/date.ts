@@ -217,6 +217,19 @@ export function isValidTimezone(timezone: string): boolean {
 }
 
 /**
+ * Ensure a value is a Date object
+ * Handles both Date objects and serialized date strings/values
+ * @param value - Date object or date string/value
+ * @returns Date object
+ */
+export function ensureDate(value: Date | string): Date {
+  if (value instanceof Date) {
+    return value;
+  }
+  return new Date(String(value));
+}
+
+/**
  * Get a list of common timezones for dropdown selection
  * @returns Array of { value: string, label: string }
  */
