@@ -1,6 +1,6 @@
 # PRD: Ticket Route Migration to Event Context
 
-**Status**: 🟡 In Planning  
+**Status**: IMPLEMENTED ✅ - See https://github.com/babblebey/events-ting/commit/523710fc6b846ab2c5ec461d9d218e26efe79198
 **Priority**: Medium  
 **Created**: November 21, 2025  
 **Issue**: TBD  
