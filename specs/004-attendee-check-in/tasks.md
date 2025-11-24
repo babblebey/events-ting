@@ -38,11 +38,11 @@ description: "Task list for Attendee Check-In Service implementation"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Create check-in tRPC router file at src/server/api/routers/check-in.ts
-- [ ] T005 Export check-in router in main tRPC router at src/server/api/root.ts
-- [ ] T006 [P] Implement listAttendees query procedure with permission check in src/server/api/routers/check-in.ts
-- [ ] T007 [P] Implement checkInTicket mutation procedure with permission check in src/server/api/routers/check-in.ts
-- [ ] T008 [P] Implement getMetrics query procedure with permission check in src/server/api/routers/check-in.ts
+- [X] T004 Create check-in tRPC router file at src/server/api/routers/check-in.ts
+- [X] T005 Export check-in router in main tRPC router at src/server/api/root.ts
+- [X] T006 [P] Implement listAttendees query procedure with permission check in src/server/api/routers/check-in.ts
+- [X] T007 [P] Implement checkInTicket mutation procedure with permission check in src/server/api/routers/check-in.ts
+- [X] T008 [P] Implement getMetrics query procedure with permission check in src/server/api/routers/check-in.ts
 
 **Checkpoint**: Foundation ready - tRPC API is functional, user story implementation can now begin in parallel
 
