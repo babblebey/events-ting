@@ -1,6 +1,6 @@
 # PRD: CFP Data Fetching Gap - Missing getCfp Procedure
 
-**Status**: IMPLEMENTED ✅ 
+**Status**: 🔴 Blocking  
 **Priority**: High  
 **Created**: November 8, 2025  
 **Related Tasks**: T058 (CFP Router), T067 (CFP Management Page), T068 (Public CFP Page)  

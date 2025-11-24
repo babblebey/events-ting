@@ -28,10 +28,9 @@ import Link from "next/link";
 
 interface AttendeeListProps {
   eventId: string;
-  eventSlug: string;
 }
 
-export function AttendeeList({ eventId, eventSlug }: AttendeeListProps) {
+export function AttendeeList({ eventId }: AttendeeListProps) {
   const [search, setSearch] = useState("");
   const [emailStatus, setEmailStatus] = useState<
     "active" | "bounced" | "unsubscribed" | undefined
@@ -210,7 +209,7 @@ export function AttendeeList({ eventId, eventSlug }: AttendeeListProps) {
                   <TableCell>{attendee.email}</TableCell>
                   <TableCell>
                     <Link
-                      href={`/events/${eventSlug}/tickets/${attendee.ticket.id}`}
+                      href={`/tickets/${attendee.ticket.id}`}
                       className="font-mono text-sm text-blue-600 hover:underline dark:text-blue-400"
                     >
                       {attendee.ticket.ticketNumber}

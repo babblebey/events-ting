@@ -1,13 +1,12 @@
 "use client";
 
 /**
- * Individual Ticket View Page (Event-Scoped)
+ * Individual Ticket View Page
  * Displays ticket details, QR code, and attendee information
  * Accessible via email link sent to attendees
- * URL: /events/[slug]/tickets/[ticketId]
  */
 
-import { useParams, useRouter, notFound } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, Card, Badge, Alert, Spinner } from "flowbite-react";
 import {
@@ -27,12 +26,11 @@ import { formatDate, ensureDate } from "@/lib/utils/date";
 // Type guard for ticket data
 type TicketData = {
   event: {
-    slug: string;
     name: string;
     description?: string | null;
     timezone?: string | null;
-    startDate: Date;
-    endDate?: Date | null;
+    startDate: Date | string;
+    endDate?: Date | string | null;
     locationType?: string | null;
     locationAddress?: string | null;
     customData?: unknown;
@@ -45,7 +43,7 @@ type TicketData = {
   attendee?: {
     name: string;
     email: string;
-    customData?: Record<string, unknown> | null;
+    customData?: unknown;
   } | null;
   registration: {
     name?: string | null;
@@ -55,14 +53,13 @@ type TicketData = {
   qrCodeData: string;
   isAssigned: boolean;
   isCheckedIn: boolean;
-  checkedInAt?: Date | null;
-  assignedAt?: Date | null;
+  checkedInAt?: Date | string | null;
+  assignedAt?: Date | string | null;
 };
 
 export default function IndividualTicketViewPage() {
   const params = useParams();
   const router = useRouter();
-  const slug = params.slug as string;
   const ticketId = params.ticketId as string;
 
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -82,11 +79,6 @@ export default function IndividualTicketViewPage() {
   );
 
   const ticket = ticketData as TicketData | undefined;
-
-  // Validate event-ticket relationship
-  if (ticket && ticket.event.slug !== slug) {
-    notFound();
-  }
 
   const handleDownloadQRCode = () => {
     if (!ticket?.qrCodeData) return;
@@ -189,12 +181,12 @@ export default function IndividualTicketViewPage() {
                   <HiCalendar className="mt-1 h-5 w-5 shrink-0 text-gray-500 dark:text-gray-400" />
                   <div>
                     <p className="font-medium text-gray-900 dark:text-white">
-                      {formatDate(ensureDate(ticket.event.startDate), timezone, "PPPp")}
+                      {formatDate(ticket.event.startDate, timezone, "PPPp")}
                     </p>
                     {ticket.event.endDate && (
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         Ends:{" "}
-                        {formatDate(ensureDate(ticket.event.endDate), timezone, "PPPp")}
+                        {formatDate(ticket.event.endDate, timezone, "PPPp")}
                       </p>
                     )}
                   </div>
@@ -248,7 +240,7 @@ export default function IndividualTicketViewPage() {
                         Assigned:
                       </span>
                       <span className="text-sm text-gray-900 dark:text-white">
-                        {formatDate(ensureDate(ticket.assignedAt), timezone, "PPp")}
+                        {formatDate(ticket.assignedAt, timezone, "PPp")}
                       </span>
                     </div>
                   )}
@@ -269,13 +261,7 @@ export default function IndividualTicketViewPage() {
                                 {key.replace(/([A-Z])/g, " $1").trim()}:
                               </span>
                               <span className="text-sm font-medium text-gray-900 dark:text-white">
-                                {value !== null && value !== undefined 
-                                  ? (typeof value === "object" 
-                                      ? JSON.stringify(value) 
-                                      : typeof value === "string" || typeof value === "number" || typeof value === "boolean"
-                                        ? String(value)
-                                        : "Invalid type")
-                                  : "N/A"}
+                                {String(value)}
                               </span>
                             </div>
                           ),

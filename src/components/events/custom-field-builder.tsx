@@ -70,25 +70,6 @@ export function CustomFieldBuilder({
     },
   });
 
-  /**
-   * Convert a label to camelCase format for use as field ID
-   * e.g., "Dietary Restrictions" -> "dietaryRestrictions"
-   */
-  const generateFieldId = (label: string): string => {
-    return label
-      .trim()
-      .replace(/[^a-zA-Z0-9\s]/g, "") // Remove special characters
-      .split(/\s+/) // Split by whitespace
-      .map((word, index) => {
-        const lowerWord = word.toLowerCase();
-        // Capitalize first letter of all words except the first
-        return index === 0
-          ? lowerWord
-          : lowerWord.charAt(0).toUpperCase() + lowerWord.slice(1);
-      })
-      .join("");
-  };
-
   const handleSaveFields = () => {
     updateMutation.mutate({
       id: _eventId,
@@ -113,7 +94,7 @@ export function CustomFieldBuilder({
     }
 
     const newField: CustomFieldDefinition = {
-      id: generateFieldId(formData.label ?? ""),
+      id: `field_${Date.now()}`,
       label: formData.label ?? "",
       type: formData.type ?? "text",
       required: formData.required ?? false,

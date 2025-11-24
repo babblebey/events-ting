@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Ticket Assignment Modal Component
- * Allows buyers to assign or reassign tickets to attendees
+ * Ticket Reassignment Modal Component
+ * Allows buyers to reassign tickets to different attendees
  */
 
 import { useState, useEffect } from "react";
@@ -23,12 +23,9 @@ import {
 import { api } from "@/trpc/react";
 import { validateEmail } from "@/lib/validators/email";
 
-type AssignmentMode = "assign" | "reassign";
-
-interface AssignmentModalProps {
+interface ReassignmentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  mode: AssignmentMode;
   ticket: {
     id: string;
     ticketNumber: string;
@@ -50,15 +47,14 @@ interface AssignmentModalProps {
   onSuccess?: () => void;
 }
 
-export function AssignmentModal({
+export function ReassignmentModal({
   isOpen,
   onClose,
-  mode,
   ticket,
   eventName,
   customFields = [],
   onSuccess,
-}: AssignmentModalProps) {
+}: ReassignmentModalProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [emailWarning, setEmailWarning] = useState<string | null>(null);
@@ -91,7 +87,6 @@ export function AssignmentModal({
   const assignMutation = api.tickets.assign.useMutation({
     onSuccess: () => {
       void utils.registration.getById.invalidate();
-      void utils.registration.getByIdPublic.invalidate();
       void utils.tickets.list.invalidate();
       onSuccess?.();
       onClose();
@@ -130,7 +125,7 @@ export function AssignmentModal({
   return (
     <Modal show={isOpen} onClose={onClose} size="lg" dismissible>
       <ModalHeader>
-        {mode === "reassign" ? "Reassign Ticket" : "Assign Ticket"}
+        {ticket.attendee ? "Reassign Ticket" : "Assign Ticket"}
       </ModalHeader>
 
       <ModalBody>
@@ -167,13 +162,11 @@ export function AssignmentModal({
         {!showConfirmation && (
           <Alert color="info" icon={HiInformationCircle} className="mb-4">
             <div className="text-sm">
-              <p className="font-medium">
-                {mode === "reassign" ? "Privacy Notice:" : "Attendee Consent:"}
-              </p>
+              <p className="font-medium">Privacy Notice:</p>
               <p className="mt-1">
-                {mode === "reassign"
-                  ? "If you reassign this ticket, the previous attendee's information will be permanently deleted for privacy compliance (GDPR)."
-                  : "By assigning this ticket, you confirm that you have obtained the attendee's consent to provide their personal information and that they agree to receive event-related communications."}
+                If you reassign this ticket, the previous attendee&apos;s
+                information will be permanently deleted for privacy compliance
+                (GDPR).
               </p>
             </div>
           </Alert>
@@ -336,7 +329,7 @@ export function AssignmentModal({
           {showConfirmation ? "Back" : "Cancel"}
         </Button>
         <Button
-          color={showConfirmation ? "red" : "blue"}
+          color={showConfirmation ? "failure" : "blue"}
           onClick={handleSubmit}
           disabled={assignMutation.isPending || !name || !email}
         >
@@ -344,7 +337,7 @@ export function AssignmentModal({
             ? "Assigning..."
             : showConfirmation
               ? "Confirm Reassignment"
-              : mode === "reassign"
+              : ticket.attendee
                 ? "Continue"
                 : "Assign Ticket"}
         </Button>

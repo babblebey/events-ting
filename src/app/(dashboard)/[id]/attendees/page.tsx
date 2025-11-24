@@ -52,7 +52,7 @@ async function AttendeesPage({ params }: AttendeesPageProps) {
         </div>
       </div>
 
-      <AttendeeList eventId={eventId} eventSlug={event.slug} />
+      <AttendeeList eventId={eventId} />
     </div>
   );
 }
