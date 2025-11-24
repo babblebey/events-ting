@@ -200,7 +200,10 @@ export function TicketCard({
         {/* View Ticket Link (non-action mode) */}
         {!showActions && eventSlug && (
           <div className="border-t pt-4">
-            <Link href={`/events/${eventSlug}/tickets/${ticket.id}`} className="block">
+            <Link
+              href={`/events/${eventSlug}/tickets/${ticket.id}`}
+              className="block"
+            >
               <Button size="sm" className="w-full">
                 View Ticket Details
               </Button>

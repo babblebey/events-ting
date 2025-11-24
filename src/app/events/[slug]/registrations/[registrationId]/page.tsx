@@ -25,7 +25,9 @@ export default function RegistrationManagementPage() {
 
   // Modal state
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
-  const [assignmentMode, setAssignmentMode] = useState<"assign" | "reassign">("assign");
+  const [assignmentMode, setAssignmentMode] = useState<"assign" | "reassign">(
+    "assign",
+  );
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [isUnassignModalOpen, setIsUnassignModalOpen] = useState(false);
 

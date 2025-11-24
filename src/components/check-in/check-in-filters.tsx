@@ -13,9 +13,7 @@ interface CheckInFiltersProps {
   defaultValue?: "all" | "checked-in" | "not-checked-in";
 }
 
-export function CheckInFilters({
-  defaultValue = "all",
-}: CheckInFiltersProps) {
+export function CheckInFilters({ defaultValue = "all" }: CheckInFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

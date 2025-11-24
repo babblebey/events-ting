@@ -1,10 +1,10 @@
 /**
  * tRPC API Contracts: Attendee Check-In Service
- * 
+ *
  * This file defines the input/output schemas and TypeScript types for all
  * check-in related tRPC procedures. These contracts serve as the API
  * specification between the client and server.
- * 
+ *
  * Location (implementation): src/server/api/routers/check-in.ts
  * Usage (client): src/app/events/[slug]/check-in/page.tsx
  */
@@ -21,13 +21,13 @@ import { z } from "zod";
  */
 export const listAttendeesInputSchema = z.object({
   eventId: z.string().cuid("Invalid event ID format"),
-  
+
   // Filtering
   filter: z.enum(["all", "checked-in", "not-checked-in"]).default("all"),
-  
+
   // Search by ticket number
   search: z.string().optional(),
-  
+
   // Pagination
   page: z.number().int().min(0).default(0),
   pageSize: z.number().int().min(1).max(100).default(50),
@@ -39,24 +39,26 @@ export type ListAttendeesInput = z.infer<typeof listAttendeesInputSchema>;
  * Check in a ticket (manual entry or QR code)
  * Exactly one of ticketNumber or qrCodeData must be provided
  */
-export const checkInTicketInputSchema = z.object({
-  eventId: z.string().cuid("Invalid event ID format"),
-  
-  // Ticket identifier (one of these required)
-  ticketNumber: z.string().optional(),
-  qrCodeData: z.string().optional(),
-}).refine(
-  (data) => {
-    // Exactly one must be provided
-    const hasTicketNumber = !!data.ticketNumber;
-    const hasQrCode = !!data.qrCodeData;
-    return (hasTicketNumber && !hasQrCode) || (!hasTicketNumber && hasQrCode);
-  },
-  {
-    message: "Provide either ticketNumber or qrCodeData, not both",
-    path: ["ticketNumber"],
-  }
-);
+export const checkInTicketInputSchema = z
+  .object({
+    eventId: z.string().cuid("Invalid event ID format"),
+
+    // Ticket identifier (one of these required)
+    ticketNumber: z.string().optional(),
+    qrCodeData: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      // Exactly one must be provided
+      const hasTicketNumber = !!data.ticketNumber;
+      const hasQrCode = !!data.qrCodeData;
+      return (hasTicketNumber && !hasQrCode) || (!hasTicketNumber && hasQrCode);
+    },
+    {
+      message: "Provide either ticketNumber or qrCodeData, not both",
+      path: ["ticketNumber"],
+    },
+  );
 
 export type CheckInTicketInput = z.infer<typeof checkInTicketInputSchema>;
 
@@ -67,7 +69,9 @@ export const getCheckInMetricsInputSchema = z.object({
   eventId: z.string().cuid("Invalid event ID format"),
 });
 
-export type GetCheckInMetricsInput = z.infer<typeof getCheckInMetricsInputSchema>;
+export type GetCheckInMetricsInput = z.infer<
+  typeof getCheckInMetricsInputSchema
+>;
 
 /**
  * Undo check-in (optional feature for correcting mistakes)
@@ -89,20 +93,20 @@ export type UndoCheckInInput = z.infer<typeof undoCheckInInputSchema>;
 export const attendeeItemSchema = z.object({
   ticketId: z.string().cuid(),
   ticketNumber: z.string(),
-  
+
   // Check-in status
   isCheckedIn: z.boolean(),
   checkedInAt: z.date().nullable(),
   checkedInBy: z.string().nullable(), // User ID of team member
-  
+
   // Attendee info (if ticket is assigned)
   attendeeName: z.string().nullable(),
   attendeeEmail: z.string().email().nullable(),
-  
+
   // Buyer info (always present from Registration)
   buyerName: z.string(),
   buyerEmail: z.string().email(),
-  
+
   // Assignment status
   isAssigned: z.boolean(),
 });
@@ -137,13 +141,13 @@ export type ListAttendeesOutput = z.infer<typeof listAttendeesOutputSchema>;
 export const checkInTicketOutputSchema = z.object({
   success: z.boolean(),
   alreadyCheckedIn: z.boolean(),
-  
+
   ticket: z.object({
     ticketId: z.string().cuid(),
     ticketNumber: z.string(),
     isCheckedIn: z.boolean(),
     checkedInAt: z.date(),
-    
+
     // Display info
     attendeeName: z.string().nullable(),
     attendeeEmail: z.string().email().nullable(),
@@ -173,12 +177,14 @@ export const getCheckInMetricsOutputSchema = z.object({
   checkedInCount: z.number().int().min(0),
   notCheckedInCount: z.number().int().min(0),
   checkInPercentage: z.number().min(0).max(100),
-  
+
   // Recent activity (last 10 check-ins)
   recentCheckIns: z.array(recentCheckInSchema),
 });
 
-export type GetCheckInMetricsOutput = z.infer<typeof getCheckInMetricsOutputSchema>;
+export type GetCheckInMetricsOutput = z.infer<
+  typeof getCheckInMetricsOutputSchema
+>;
 
 /**
  * Undo check-in output
@@ -200,7 +206,7 @@ export type UndoCheckInOutput = z.infer<typeof undoCheckInOutputSchema>;
 
 /**
  * Expected error codes for check-in operations
- * 
+ *
  * NOT_FOUND: Ticket or event doesn't exist
  * FORBIDDEN: User lacks CHECKIN module permission or not a team member
  * UNAUTHORIZED: User not authenticated
@@ -223,29 +229,29 @@ export const CHECK_IN_ERROR_CODES = {
 
 /**
  * Expected tRPC router structure:
- * 
+ *
  * export const checkInRouter = createTRPCRouter({
  *   listAttendees: protectedProcedure
  *     .input(listAttendeesInputSchema)
  *     .output(listAttendeesOutputSchema)
  *     .query(async ({ ctx, input }) => { ... }),
- * 
+ *
  *   checkInTicket: protectedProcedure
  *     .input(checkInTicketInputSchema)
  *     .output(checkInTicketOutputSchema)
  *     .mutation(async ({ ctx, input }) => { ... }),
- * 
+ *
  *   getMetrics: protectedProcedure
  *     .input(getCheckInMetricsInputSchema)
  *     .output(getCheckInMetricsOutputSchema)
  *     .query(async ({ ctx, input }) => { ... }),
- * 
+ *
  *   undoCheckIn: protectedProcedure
  *     .input(undoCheckInInputSchema)
  *     .output(undoCheckInOutputSchema)
  *     .mutation(async ({ ctx, input }) => { ... }),
  * });
- * 
+ *
  * All procedures must:
  * 1. Verify authentication (handled by protectedProcedure)
  * 2. Check CHECKIN module permission via checkModuleAccess()
@@ -260,9 +266,9 @@ export const CHECK_IN_ERROR_CODES = {
 
 /**
  * CLIENT-SIDE USAGE (React Component):
- * 
+ *
  * import { api } from "@/trpc/react";
- * 
+ *
  * function CheckInPage({ eventId }: { eventId: string }) {
  *   // Query for attendee list
  *   const { data, isLoading } = api.checkIn.listAttendees.useQuery({
@@ -271,7 +277,7 @@ export const CHECK_IN_ERROR_CODES = {
  *     page: 0,
  *     pageSize: 50,
  *   });
- * 
+ *
  *   // Mutation for check-in
  *   const utils = api.useUtils();
  *   const checkInMutation = api.checkIn.checkInTicket.useMutation({
@@ -279,21 +285,21 @@ export const CHECK_IN_ERROR_CODES = {
  *       utils.checkIn.listAttendees.invalidate({ eventId });
  *     },
  *   });
- * 
+ *
  *   const handleCheckIn = (ticketNumber: string) => {
  *     checkInMutation.mutate({ eventId, ticketNumber });
  *   };
- * 
+ *
  *   // ...render UI
  * }
  */
 
 /**
  * SERVER-SIDE USAGE (tRPC Procedure):
- * 
+ *
  * import { checkModuleAccess } from "@/server/api/permissions";
  * import { checkInTicketInputSchema, checkInTicketOutputSchema } from "./contracts/check-in-api";
- * 
+ *
  * export const checkInRouter = createTRPCRouter({
  *   checkInTicket: protectedProcedure
  *     .input(checkInTicketInputSchema)
@@ -306,7 +312,7 @@ export const CHECK_IN_ERROR_CODES = {
  *         userId: ctx.session.user.id,
  *         requiredModule: "CHECKIN",
  *       });
- * 
+ *
  *       // 2. Find ticket
  *       const ticket = await ctx.db.ticket.findFirst({
  *         where: {
@@ -317,14 +323,14 @@ export const CHECK_IN_ERROR_CODES = {
  *           ],
  *         },
  *       });
- * 
+ *
  *       if (!ticket) {
  *         throw new TRPCError({
  *           code: "NOT_FOUND",
  *           message: CHECK_IN_ERROR_CODES.TICKET_NOT_FOUND,
  *         });
  *       }
- * 
+ *
  *       // 3. Check if already checked in
  *       if (ticket.isCheckedIn) {
  *         return {
@@ -333,7 +339,7 @@ export const CHECK_IN_ERROR_CODES = {
  *           ticket: { ...ticket },
  *         };
  *       }
- * 
+ *
  *       // 4. Perform check-in
  *       const updated = await ctx.db.ticket.update({
  *         where: { id: ticket.id },
@@ -343,7 +349,7 @@ export const CHECK_IN_ERROR_CODES = {
  *           checkedInBy: ctx.session.user.id,
  *         },
  *       });
- * 
+ *
  *       return {
  *         success: true,
  *         alreadyCheckedIn: false,

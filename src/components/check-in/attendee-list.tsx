@@ -1,6 +1,6 @@
 "use client";
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 
 /**
  * AttendeeList Component
@@ -8,7 +8,16 @@
  * Supports pagination and real-time updates
  */
 
-import { Badge, Button, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from "flowbite-react";
+import {
+  Badge,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeadCell,
+  TableRow,
+} from "flowbite-react";
 import { HiCheck, HiClock } from "react-icons/hi";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
@@ -96,7 +105,8 @@ export function AttendeeList({
       onError: (error) => {
         toast({
           title: "Check-in failed",
-          description: error.message || "Unable to check in attendee. Please try again.",
+          description:
+            error.message || "Unable to check in attendee. Please try again.",
           variant: "destructive",
         });
       },
@@ -141,7 +151,7 @@ export function AttendeeList({
           <TableBody className="divide-y">
             {attendees.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
+                <TableCell colSpan={6} className="py-8 text-center">
                   <p className="text-gray-500 dark:text-gray-400">
                     No attendees found
                   </p>
@@ -153,7 +163,7 @@ export function AttendeeList({
                 key={attendee.ticketId}
                 className="bg-white dark:border-gray-700 dark:bg-gray-800"
               >
-                <TableCell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                <TableCell className="font-medium whitespace-nowrap text-gray-900 dark:text-white">
                   {attendee.ticketNumber}
                 </TableCell>
                 <TableCell>

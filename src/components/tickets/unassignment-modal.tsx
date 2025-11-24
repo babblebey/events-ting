@@ -14,11 +14,7 @@ import {
   Alert,
   Spinner,
 } from "flowbite-react";
-import {
-  HiExclamationCircle,
-  HiUserCircle,
-  HiTicket,
-} from "react-icons/hi";
+import { HiExclamationCircle, HiUserCircle, HiTicket } from "react-icons/hi";
 import { api } from "@/trpc/react";
 
 interface UnassignmentModalProps {
@@ -99,7 +95,9 @@ export function UnassignmentModal({
         >
           <div>
             <span className="font-medium">
-              {confirmed ? "Final Confirmation Required" : "Warning: Permanent Action"}
+              {confirmed
+                ? "Final Confirmation Required"
+                : "Warning: Permanent Action"}
             </span>
             <p className="mt-2 text-sm">
               {confirmed

@@ -1,13 +1,13 @@
 /**
  * useCheckIn Hook
  * Custom hook for managing attendee check-in operations with optimistic updates
- * 
+ *
  * Features:
  * - Optimistic UI updates for immediate feedback
  * - Automatic rollback on error
  * - Query invalidation on success
  * - Loading state management
- * 
+ *
  * @example
  * ```tsx
  * const { checkIn, isCheckingIn, checkingInTicketId } = useCheckIn({
@@ -16,7 +16,7 @@
  *   currentPage: 0,
  *   currentSearch: undefined,
  * });
- * 
+ *
  * // Check in a ticket
  * checkIn("TKT-12345", {
  *   onSuccess: () => {
