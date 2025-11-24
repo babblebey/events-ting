@@ -58,12 +58,12 @@ description: "Task list for Attendee Check-In Service implementation"
 
 ### Implementation for User Story 1
 
-- [ ] T009 Create main check-in page Server Component at src/app/events/[slug]/check-in/page.tsx
-- [ ] T010 [P] Create loading skeleton component at src/app/events/[slug]/check-in/loading.tsx
-- [ ] T011 [P] Create attendee list client component at src/components/check-in/attendee-list.tsx
-- [ ] T012 [P] Create search bar client component at src/components/check-in/search-bar.tsx
-- [ ] T013 [P] Create check-in filters client component at src/components/check-in/check-in-filters.tsx
-- [ ] T014 [P] Create check-in metrics server component at src/components/check-in/check-in-metrics.tsx
+- [X] T009 Create main check-in page Server Component at src/app/events/[slug]/check-in/page.tsx
+- [X] T010 [P] Create loading skeleton component at src/app/events/[slug]/check-in/loading.tsx
+- [X] T011 [P] Create attendee list client component at src/components/check-in/attendee-list.tsx
+- [X] T012 [P] Create search bar client component at src/components/check-in/search-bar.tsx
+- [X] T013 [P] Create check-in filters client component at src/components/check-in/check-in-filters.tsx
+- [X] T014 [P] Create check-in metrics server component at src/components/check-in/check-in-metrics.tsx
 - [ ] T015 Create check-in custom hook at src/hooks/use-check-in.ts with optimistic updates
 - [ ] T016 Add check-in route to event sidebar navigation in src/components/app-sidebar.tsx
 - [ ] T016A [P] Create check-in components barrel export at src/components/check-in/index.ts
