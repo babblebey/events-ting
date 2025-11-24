@@ -18,7 +18,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Button, Modal, Alert } from "flowbite-react";
-import { Camera, X, AlertCircle, CheckCircle } from "lucide-react";
+import { HiQrcode, HiX, HiExclamationCircle, HiCheckCircle, HiCamera } from "react-icons/hi";
 import { Html5Qrcode, Html5QrcodeScannerState } from "html5-qrcode";
 import { parseQrCode, formatQrCodeError } from "@/lib/qr-code";
 
@@ -309,7 +309,7 @@ export function QrScanner({
         onClick={() => setIsOpen(true)}
         disabled={isProcessing}
       >
-        <Camera className="mr-2 h-5 w-5" />
+        <HiQrcode className="mr-2 h-5 w-5" />
         Scan QR Code
       </Button>
 
@@ -323,7 +323,7 @@ export function QrScanner({
         <div className="p-6">
           {/* Header */}
           <div className="mb-4 flex items-center gap-2">
-            <Camera className="h-5 w-5" />
+            <HiQrcode className="h-5 w-5" />
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
               Scan Ticket QR Code
             </h3>
@@ -333,7 +333,7 @@ export function QrScanner({
           <div className="space-y-4">
             {/* Instructions */}
             {scannerState === "scanning" && (
-              <Alert color="info" icon={Camera}>
+              <Alert color="info" icon={HiCamera}>
                 <span className="font-medium">
                   Position QR code in the frame
                 </span>
@@ -346,7 +346,7 @@ export function QrScanner({
 
             {/* Error State */}
             {scannerState === "error" && errorMessage && (
-              <Alert color="failure" icon={AlertCircle}>
+              <Alert color="failure" icon={HiExclamationCircle}>
                 <span className="font-medium">Scanner Error</span>
                 <p className="mt-1 text-sm">{errorMessage}</p>
                 {errorMessage.toLowerCase().includes("permission") && (
@@ -367,7 +367,7 @@ export function QrScanner({
 
             {/* Success State */}
             {scannerState === "success" && (
-              <Alert color="success" icon={CheckCircle}>
+              <Alert color="success" icon={HiCheckCircle}>
                 <span className="font-medium">QR Code Detected</span>
                 <p className="mt-1 text-sm">Processing check-in...</p>
               </Alert>
@@ -375,7 +375,7 @@ export function QrScanner({
 
             {/* Initializing State */}
             {scannerState === "initializing" && (
-              <Alert color="info" icon={Camera}>
+              <Alert color="info" icon={HiCamera}>
                 <span className="font-medium">Starting camera...</span>
                 <p className="mt-1 text-sm">
                   Please allow camera access when prompted by your browser.
@@ -417,7 +417,7 @@ export function QrScanner({
               onClick={handleClose}
               disabled={isProcessing || scannerState === "initializing"}
             >
-              <X className="mr-2 h-4 w-4" />
+              <HiX className="mr-2 h-4 w-4" />
               {scannerState === "success" ? "Done" : "Cancel"}
             </Button>
           </div>
