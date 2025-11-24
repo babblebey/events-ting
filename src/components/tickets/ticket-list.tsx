@@ -35,6 +35,7 @@ interface Ticket {
 interface TicketListProps {
   tickets: Ticket[];
   loading?: boolean;
+  eventSlug?: string;
   eventTimezone?: string;
   showActions?: boolean;
   onAssign?: (ticketId: string) => void;
@@ -48,6 +49,7 @@ type AssignmentFilter = "all" | "assigned" | "unassigned";
 export function TicketList({
   tickets,
   loading = false,
+  eventSlug,
   eventTimezone = "UTC",
   showActions = false,
   onAssign,
@@ -229,6 +231,7 @@ export function TicketList({
             <TicketCard
               key={ticket.id}
               ticket={ticket}
+              eventSlug={eventSlug}
               eventTimezone={eventTimezone}
               showActions={showActions}
               onAssign={onAssign}

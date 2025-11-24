@@ -124,6 +124,7 @@ async function DashboardLayout({
       children: [
         { label: "General", href: `/${eventId}/settings` },
         { label: "Team", href: `/${eventId}/settings/team` },
+        { label: "Registration", href: `/${eventId}/settings/registration` },
       ],
       // Settings is always visible (contains team management)
     },
