@@ -84,13 +84,13 @@ description: "Task list for Attendee Check-In Service implementation"
 
 ### Implementation for User Story 2
 
-- [ ] T019 Create QR scanner client component at src/components/check-in/qr-scanner.tsx
-- [ ] T020 Create QR code utilities module at src/lib/qr-code.ts with validation and parsing functions
-- [ ] T021 Integrate QR scanner component into check-in page at src/app/events/[slug]/check-in/page.tsx
-- [ ] T022 Add camera permission handling and error states in qr-scanner component at src/components/check-in/qr-scanner.tsx
-- [ ] T023 Implement QR code detection and auto check-in flow in qr-scanner component at src/components/check-in/qr-scanner.tsx
-- [ ] T024 Add scanner cleanup on component unmount in qr-scanner component at src/components/check-in/qr-scanner.tsx
-- [ ] T025 Install and configure html5-qrcode library via package.json
+- [X] T019 Create QR scanner client component at src/components/check-in/qr-scanner.tsx
+- [X] T020 Create QR code utilities module at src/lib/qr-code.ts with validation and parsing functions
+- [X] T021 Integrate QR scanner component into check-in page at src/app/events/[slug]/check-in/page.tsx
+- [X] T022 Add camera permission handling and error states in qr-scanner component at src/components/check-in/qr-scanner.tsx
+- [X] T023 Implement QR code detection and auto check-in flow in qr-scanner component at src/components/check-in/qr-scanner.tsx
+- [X] T024 Add scanner cleanup on component unmount in qr-scanner component at src/components/check-in/qr-scanner.tsx
+- [X] T025 Install and configure html5-qrcode library via package.json
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently - team members can check in via list view OR QR scanning
 

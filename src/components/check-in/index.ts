@@ -7,3 +7,4 @@ export { AttendeeList } from "./attendee-list";
 export { SearchBar } from "./search-bar";
 export { CheckInFilters } from "./check-in-filters";
 export { CheckInMetrics } from "./check-in-metrics";
+export { QrScanner } from "./qr-scanner";

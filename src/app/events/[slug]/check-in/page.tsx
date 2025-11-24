@@ -1,13 +1,13 @@
 /**
  * Attendee Check-In Page
  * Server Component for event team members to check in attendees
- * 
+ *
  * Features:
  * - Search attendees by ticket number
  * - Filter by check-in status
  * - Manual check-in operations
  * - Check-in metrics display
- * 
+ *
  * @requires CHECKIN module permission
  */
 
@@ -21,6 +21,7 @@ import {
   CheckInFilters,
   CheckInMetrics,
 } from "@/components/check-in";
+import { QrScannerWrapper } from "./_components/qr-scanner-wrapper";
 
 interface CheckInPageProps {
   params: {
@@ -59,7 +60,7 @@ export default async function CheckInPage({
     [attendeesData, metricsData] = await Promise.all([
       api.checkIn.listAttendees({
         eventId: event.id,
-        filter: filter as "all" | "checked-in" | "not-checked-in",
+        filter: filter,
         search,
         page,
         pageSize: 50,
@@ -125,8 +126,13 @@ export default async function CheckInPage({
 
       {/* Search and Filters */}
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex-1">
-          <SearchBar defaultValue={search} />
+        <div className="flex flex-1 flex-col gap-4 sm:flex-row">
+          <div className="flex-1">
+            <SearchBar defaultValue={search} />
+          </div>
+          <div>
+            <QrScannerWrapper eventId={event.id} />
+          </div>
         </div>
         <div>
           <CheckInFilters defaultValue={filter} />
@@ -140,7 +146,7 @@ export default async function CheckInPage({
           eventSlug={params.slug}
           initialData={attendeesData}
           currentPage={page}
-          currentFilter={filter as "all" | "checked-in" | "not-checked-in"}
+          currentFilter={filter}
           currentSearch={search}
         />
       )}
