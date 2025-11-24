@@ -16,7 +16,7 @@ interface QrScannerWrapperProps {
 
 export function QrScannerWrapper({ eventId }: QrScannerWrapperProps) {
   const searchParams = useSearchParams();
-  const { toast } = useToast();
+  const toast = useToast();
 
   // Get current filter and search state
   const filter = (searchParams.get("filter") ?? "all") as
@@ -37,32 +37,22 @@ export function QrScannerWrapper({ eventId }: QrScannerWrapperProps) {
   const handleScanSuccess = (qrCodeData: string) => {
     checkInByQrCode(qrCodeData, {
       onSuccess: () => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        toast({
-          title: "Success",
-          description: "Attendee checked in successfully via QR code!",
-          variant: "success",
-        });
+        toast.success(
+          "Success",
+          "Attendee checked in successfully via QR code!",
+        );
       },
       onError: (error) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        toast({
-          title: "Check-in failed",
-          description:
-            error.message || "Unable to check in attendee. Please try again.",
-          variant: "destructive",
-        });
+        toast.error(
+          "Check-in failed",
+          error.message || "Unable to check in attendee. Please try again.",
+        );
       },
     });
   };
 
   const handleScanError = (error: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    toast({
-      title: "QR Scan Error",
-      description: error,
-      variant: "destructive",
-    });
+    toast.error("QR Scan Error", error);
   };
 
   return (

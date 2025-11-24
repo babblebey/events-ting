@@ -73,12 +73,48 @@ export function QrScanner({
         setScannerState("initializing");
         setErrorMessage("");
 
+        // Wait for DOM element to be available
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        const element = document.getElementById(scannerElementId);
+        if (!element) {
+          throw new Error("Scanner element not found in DOM");
+        }
+
+        // IMPORTANT: Request camera permission FIRST using getUserMedia
+        // This ensures the browser shows the permission prompt
+        let stream: MediaStream | null = null;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment" }, // Prefer rear camera
+          });
+
+          // Stop the stream immediately - we just needed it for permission
+          stream.getTracks().forEach((track) => track.stop());
+          stream = null;
+        } catch (permError) {
+          if (permError instanceof DOMException) {
+            if (permError.name === "NotAllowedError") {
+              throw new Error(
+                "Camera permission denied. Please allow camera access when prompted.",
+              );
+            } else if (permError.name === "NotFoundError") {
+              throw new Error("No camera found on this device.");
+            } else if (permError.name === "NotReadableError") {
+              throw new Error(
+                "Camera is in use by another application.",
+              );
+            }
+          }
+          throw permError;
+        }
+
         // Create scanner instance
         const scanner = new Html5Qrcode(scannerElementId);
         scannerRef.current = scanner;
         hasInitialized.current = true;
 
-        // Get available cameras
+        // Get available cameras (should work now that permission is granted)
         const devices = await Html5Qrcode.getCameras();
 
         if (!devices || devices.length === 0) {
@@ -107,8 +143,8 @@ export function QrScanner({
             qrbox: { width: 250, height: 250 }, // Scanning area
             aspectRatio: 1.0,
           },
-          onScanSuccess,
-          onScanFailure,
+          handleScanSuccess,
+          handleScanFailure,
         );
 
         setScannerState("scanning");
@@ -117,19 +153,22 @@ export function QrScanner({
 
         let message = "Failed to access camera";
 
-        if (error instanceof Error) {
-          if (error.message.includes("Permission denied")) {
+        // Check for DOMException with specific error types
+        if (error instanceof DOMException) {
+          if (error.name === "NotAllowedError") {
             message =
-              "Camera permission denied. Please allow camera access in your browser settings.";
-          } else if (error.message.includes("No cameras found")) {
+              "Camera permission denied. Please allow camera access when prompted by your browser.";
+          } else if (error.name === "NotFoundError") {
             message =
               "No camera found on this device. Please use manual ticket entry.";
-          } else if (error.message.includes("NotAllowedError")) {
+          } else if (error.name === "NotReadableError") {
             message =
-              "Camera access was blocked. Please enable camera permissions.";
+              "Camera is in use by another application. Please close other apps using the camera.";
           } else {
-            message = error.message;
+            message = `Camera error: ${error.message}`;
           }
+        } else if (error instanceof Error) {
+          message = error.message;
         }
 
         setErrorMessage(message);
@@ -148,7 +187,7 @@ export function QrScanner({
   /**
    * Handle successful QR code scan
    */
-  const onScanSuccess = (decodedText: string, _decodedResult: unknown) => {
+  const handleScanSuccess = (decodedText: string, _decodedResult: unknown) => {
     // Prevent duplicate scans of the same code
     if (decodedText === lastScannedData) {
       return;
@@ -194,7 +233,7 @@ export function QrScanner({
    * Handle QR code scan failures (no code detected in frame)
    * This fires continuously while scanning - we ignore it
    */
-  const onScanFailure = (error: string) => {
+  const handleScanFailure = (error: string) => {
     // Ignore "QR code parse error, error = NotFoundException: No MultiFormat Readers were able to detect the code."
     // This is normal when no QR code is in view
     if (error.includes("NotFoundException")) {
@@ -241,6 +280,19 @@ export function QrScanner({
   };
 
   /**
+   * Retry scanner initialization after error
+   */
+  const handleRetry = () => {
+    hasInitialized.current = false;
+    setScannerState("idle");
+    setErrorMessage("");
+    setLastScannedData("");
+    // Trigger re-initialization by toggling state
+    setIsOpen(false);
+    setTimeout(() => setIsOpen(true), 100);
+  };
+
+  /**
    * Cleanup on component unmount
    */
   useEffect(() => {
@@ -268,14 +320,16 @@ export function QrScanner({
         size="lg"
         dismissible={!isProcessing && scannerState !== "initializing"}
       >
-        <Modal.Header>
-          <div className="flex items-center gap-2">
+        <div className="p-6">
+          {/* Header */}
+          <div className="mb-4 flex items-center gap-2">
             <Camera className="h-5 w-5" />
-            <span>Scan Ticket QR Code</span>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+              Scan Ticket QR Code
+            </h3>
           </div>
-        </Modal.Header>
 
-        <Modal.Body>
+          {/* Body */}
           <div className="space-y-4">
             {/* Instructions */}
             {scannerState === "scanning" && (
@@ -295,6 +349,19 @@ export function QrScanner({
               <Alert color="failure" icon={AlertCircle}>
                 <span className="font-medium">Scanner Error</span>
                 <p className="mt-1 text-sm">{errorMessage}</p>
+                {errorMessage.toLowerCase().includes("permission") && (
+                  <div className="mt-2 text-sm">
+                    <p className="font-medium">To fix this:</p>
+                    <ol className="ml-4 mt-1 list-decimal space-y-1">
+                      <li>
+                        Click the lock/camera icon in your browser&apos;s
+                        address bar
+                      </li>
+                      <li>Allow camera access for this site</li>
+                      <li>Reload the page or close and reopen this modal</li>
+                    </ol>
+                  </div>
+                )}
               </Alert>
             )}
 
@@ -333,18 +400,28 @@ export function QrScanner({
               </p>
             </div>
           </div>
-        </Modal.Body>
 
-        <Modal.Footer>
-          <Button
-            color="gray"
-            onClick={handleClose}
-            disabled={isProcessing || scannerState === "initializing"}
-          >
-            <X className="mr-2 h-4 w-4" />
-            {scannerState === "success" ? "Done" : "Cancel"}
-          </Button>
-        </Modal.Footer>
+          {/* Footer */}
+          <div className="mt-6 flex justify-end gap-2">
+            {scannerState === "error" && (
+              <Button
+                color="purple"
+                onClick={handleRetry}
+                disabled={isProcessing}
+              >
+                Retry
+              </Button>
+            )}
+            <Button
+              color="gray"
+              onClick={handleClose}
+              disabled={isProcessing || scannerState === "initializing"}
+            >
+              <X className="mr-2 h-4 w-4" />
+              {scannerState === "success" ? "Done" : "Cancel"}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </>
   );
