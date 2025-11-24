@@ -20,8 +20,8 @@ import {
   SearchBar,
   CheckInFilters,
   CheckInMetrics,
+  QrScannerWrapper,
 } from "@/components/check-in";
-import { QrScannerWrapper } from "./_components/qr-scanner-wrapper";
 
 interface CheckInPageProps {
   params: {

@@ -5,7 +5,7 @@
 
 "use client";
 
-import { QrScanner } from "@/components/check-in";
+import { QrScanner } from "./qr-scanner";
 import { useCheckIn } from "@/hooks/use-check-in";
 import { useToast } from "@/hooks/use-toast";
 import { useSearchParams } from "next/navigation";
