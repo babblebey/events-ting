@@ -64,11 +64,11 @@ description: "Task list for Attendee Check-In Service implementation"
 - [X] T012 [P] Create search bar client component at src/components/check-in/search-bar.tsx
 - [X] T013 [P] Create check-in filters client component at src/components/check-in/check-in-filters.tsx
 - [X] T014 [P] Create check-in metrics server component at src/components/check-in/check-in-metrics.tsx
-- [ ] T015 Create check-in custom hook at src/hooks/use-check-in.ts with optimistic updates
-- [ ] T016 Add check-in route to event sidebar navigation in src/components/app-sidebar.tsx
-- [ ] T016A [P] Create check-in components barrel export at src/components/check-in/index.ts
-- [ ] T017 Implement pagination controls in attendee-list component at src/components/check-in/attendee-list.tsx
-- [ ] T018 Add error boundary for check-in page at src/app/events/[slug]/check-in/error.tsx
+- [X] T015 Create check-in custom hook at src/hooks/use-check-in.ts with optimistic updates
+- [X] T016 Add check-in route to event sidebar navigation in src/components/app-sidebar.tsx
+- [X] T016A [P] Create check-in components barrel export at src/components/check-in/index.ts
+- [X] T017 Implement pagination controls in attendee-list component at src/components/check-in/attendee-list.tsx
+- [X] T018 Add error boundary for check-in page at src/app/events/[slug]/check-in/error.tsx
 
 **Checkpoint**: At this point, User Story 1 should be fully functional - team members can search and manually check in attendees
 

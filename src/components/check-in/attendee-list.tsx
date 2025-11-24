@@ -8,20 +8,12 @@
  * Supports pagination and real-time updates
  */
 
-import { useState } from "react";
-import {
-  Badge,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeadCell,
-  TableRow,
-} from "flowbite-react";
+import { Badge, Button, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from "flowbite-react";
 import { HiCheck, HiClock } from "react-icons/hi";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
+import { useCheckIn } from "@/hooks/use-check-in";
+import { useToast } from "@/hooks/use-toast";
 
 // Type definitions from contracts
 type AttendeeItem = {
@@ -67,9 +59,7 @@ export function AttendeeList({
   currentSearch,
 }: AttendeeListProps) {
   const router = useRouter();
-  const [checkingInTicketId, setCheckingInTicketId] = useState<string | null>(
-    null,
-  );
+  const { toast } = useToast();
 
   // Use tRPC query with initial data
   const { data } = api.checkIn.listAttendees.useQuery(
@@ -86,88 +76,31 @@ export function AttendeeList({
     },
   );
 
-  const utils = api.useUtils();
-
-  // Check-in mutation
-  const checkInMutation = api.checkIn.checkInTicket.useMutation({
-    onMutate: async (input) => {
-      // Set loading state
-      const ticketToCheckIn = data?.attendees.find(
-        (a) => a.ticketNumber === input.ticketNumber,
-      );
-      if (ticketToCheckIn) {
-        setCheckingInTicketId(ticketToCheckIn.ticketId);
-      }
-
-      // Cancel outgoing refetches
-      await utils.checkIn.listAttendees.cancel({
-        eventId,
-        filter: currentFilter,
-        search: currentSearch,
-        page: currentPage,
-      });
-
-      // Snapshot previous value
-      const previousData = utils.checkIn.listAttendees.getData({
-        eventId,
-        filter: currentFilter,
-        search: currentSearch,
-        page: currentPage,
-      });
-
-      // Optimistically update
-      utils.checkIn.listAttendees.setData(
-        {
-          eventId,
-          filter: currentFilter,
-          search: currentSearch,
-          page: currentPage,
-        },
-        (old) => {
-          if (!old) return old;
-
-          return {
-            ...old,
-            attendees: old.attendees.map((attendee) =>
-              attendee.ticketNumber === input.ticketNumber
-                ? {
-                    ...attendee,
-                    isCheckedIn: true,
-                    checkedInAt: new Date(),
-                  }
-                : attendee,
-            ),
-          };
-        },
-      );
-
-      return { previousData };
-    },
-    onError: (err, input, context) => {
-      // Rollback on error
-      if (context?.previousData) {
-        utils.checkIn.listAttendees.setData(
-          {
-            eventId,
-            filter: currentFilter,
-            search: currentSearch,
-            page: currentPage,
-          },
-          context.previousData,
-        );
-      }
-      setCheckingInTicketId(null);
-    },
-    onSuccess: () => {
-      // Invalidate queries to ensure consistency
-      void utils.checkIn.listAttendees.invalidate({ eventId });
-      void utils.checkIn.getMetrics.invalidate({ eventId });
-      setCheckingInTicketId(null);
-    },
+  // Use check-in hook with optimistic updates
+  const { checkIn, checkingInTicketId } = useCheckIn({
+    eventId,
+    currentFilter,
+    currentPage,
+    currentSearch,
   });
 
   const handleCheckIn = (ticketNumber: string) => {
-    checkInMutation.mutate({ eventId, ticketNumber });
+    checkIn(ticketNumber, {
+      onSuccess: () => {
+        toast({
+          title: "Success",
+          description: "Attendee checked in successfully!",
+          variant: "success",
+        });
+      },
+      onError: (error) => {
+        toast({
+          title: "Check-in failed",
+          description: error.message || "Unable to check in attendee. Please try again.",
+          variant: "destructive",
+        });
+      },
+    });
   };
 
   const handlePageChange = (newPage: number) => {
