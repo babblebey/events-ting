@@ -1,6 +1,6 @@
 # PRD: User Events Dashboard
 
-**Status**: 🔴 Not Started  
+**Status**: IMPLEMENTED ✅ - See https://github.com/babblebey/events-ting/pull/16
 **Priority**: High  
 **Created**: November 11, 2025  
 **Issue**: [#7 - Implement user events dashboard](https://github.com/babblebey/events-ting/issues/7)  

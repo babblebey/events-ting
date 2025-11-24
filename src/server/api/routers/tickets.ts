@@ -662,8 +662,8 @@ export const ticketsRouter = createTRPCRouter({
         `${result.updatedTicket.ticketNumber}.png`,
       );
 
-      // Build ticket URL
-      const ticketUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/tickets/${result.updatedTicket.id}`;
+      // Build ticket URL (event-scoped)
+      const ticketUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/events/${result.updatedTicket.event.slug}/tickets/${result.updatedTicket.id}`;
 
       // Debug: Log attachment structure
       console.log("[Tickets] QR Code attachment:", {
