@@ -229,7 +229,7 @@ export default async function AttendeeDetailPage({
               </dd>
             </div>
             <div className="pt-4">
-              <Link href={`/events/${attendee.ticket.event.slug}/tickets/${attendee.ticket.id}`}>
+              <Link href={`/tickets/${attendee.ticket.id}`}>
                 <Button color="blue" size="sm" className="w-full">
                   View Full Ticket Details
                 </Button>

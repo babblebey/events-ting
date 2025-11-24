@@ -1,6 +1,6 @@
 # PRD: Attendees Import via CSV
 
-**Status**: IMPLEMENTED ✅  
+**Status**: 🔴 Not Started    
 **Priority**: High  
 **Created**: November 11, 2025  
 **Issue**: [#6 - Implement attendees import feature with CSV file](https://github.com/babblebey/events-ting/issues/6)  

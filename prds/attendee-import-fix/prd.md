@@ -1,6 +1,6 @@
 # PRD: Fix Attendee CSV Import to Create Ticket and Attendee Records
 
-**Status**: IMPLEMENTED ✅ 
+**Status**: Draft  
 **Priority**: P0 (Critical Bug)  
 **Created**: 2025-11-21  
 **Owner**: Backend Team  
