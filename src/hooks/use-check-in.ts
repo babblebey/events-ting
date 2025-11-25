@@ -145,17 +145,15 @@ export function useCheckIn({
    * @param callbacks - Optional success/error callbacks
    */
   const checkIn = (ticketNumber: string, callbacks?: CheckInCallbacks) => {
-    checkInMutation.mutate(
+    return checkInMutation.mutateAsync(
       { eventId, ticketNumber },
-      {
-        onSuccess: callbacks?.onSuccess,
-        onError: (error) => {
-          if (callbacks?.onError) {
-            callbacks.onError(error as Error);
-          }
-        },
-      },
-    );
+    ).then((data) => {
+      callbacks?.onSuccess?.();
+      return data;
+    }).catch((error) => {
+      callbacks?.onError?.(error as Error);
+      throw error;
+    });
   };
 
   /**
@@ -167,17 +165,15 @@ export function useCheckIn({
     qrCodeData: string,
     callbacks?: CheckInCallbacks,
   ) => {
-    checkInMutation.mutate(
+    return checkInMutation.mutateAsync(
       { eventId, qrCodeData },
-      {
-        onSuccess: callbacks?.onSuccess,
-        onError: (error) => {
-          if (callbacks?.onError) {
-            callbacks.onError(error as Error);
-          }
-        },
-      },
-    );
+    ).then((data) => {
+      callbacks?.onSuccess?.();
+      return data;
+    }).catch((error) => {
+      callbacks?.onError?.(error as Error);
+      throw error;
+    });
   };
 
   return {
