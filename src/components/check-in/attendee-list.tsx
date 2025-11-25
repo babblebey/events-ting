@@ -248,7 +248,9 @@ export function AttendeeList({
                     </Badge>
                   )}
                 </TableCell>
-                <TableCell>{formatDateTime(attendee.checkedInAt, eventTimezone)}</TableCell>
+                <TableCell>
+                  {formatDateTime(attendee.checkedInAt, eventTimezone)}
+                </TableCell>
                 <TableCell>
                   {!attendee.isCheckedIn ? (
                     <Button

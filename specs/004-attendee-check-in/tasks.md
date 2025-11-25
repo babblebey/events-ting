@@ -130,9 +130,9 @@ description: "Task list for Attendee Check-In Service implementation"
 - [X] T038 Add timezone handling for check-in timestamps (UTC storage, event timezone display)
 - [X] T039 [P] Add documentation for CHECKIN module in docs/modules/team/README.md
 - [X] T040 [P] Update quickstart.md with testing instructions (verify completeness)
-- [ ] T041 Run ESLint and Prettier on all check-in files
-- [ ] T042 Validate all acceptance scenarios from spec.md manually
-- [ ] T043 Add CHECKIN permission option to team member invitation UI
+- [X] T041 Run ESLint and Prettier on all check-in files
+- [X] T042 Validate all acceptance scenarios from spec.md manually
+- [X] T043 Add CHECKIN permission option to team member invitation UI
 
 ---
 
