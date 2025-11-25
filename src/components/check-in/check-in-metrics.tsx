@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * CheckInMetrics Component
  * Displays check-in statistics and recent activity

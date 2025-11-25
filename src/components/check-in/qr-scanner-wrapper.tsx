@@ -27,15 +27,15 @@ export function QrScannerWrapper({ eventId }: QrScannerWrapperProps) {
   const page = parseInt(searchParams.get("page") ?? "0", 10);
 
   // Use check-in hook
-  const { checkInByQrCode, isCheckingIn } = useCheckIn({
+  const { checkIn, isCheckingIn } = useCheckIn({
     eventId,
     currentFilter: filter,
     currentPage: page,
     currentSearch: search,
   });
 
-  const handleScanSuccess = (qrCodeData: string) => {
-    checkInByQrCode(qrCodeData, {
+  const handleScanSuccess = (ticketNumber: string) => {
+    checkIn(ticketNumber, {
       onSuccess: () => {
         toast.success(
           "Success",

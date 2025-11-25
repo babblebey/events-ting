@@ -193,10 +193,14 @@ export function QrScanner({
       return;
     }
 
+    console.log("QR Code scanned:", decodedText);
+
     setLastScannedData(decodedText);
 
     // Parse QR code data
     const parseResult = parseQrCode(decodedText);
+
+    console.log("QR Code parse result:", parseResult);
 
     if (!parseResult.success) {
       const errorMsg = formatQrCodeError(parseResult.error ?? "Unknown error");
@@ -220,8 +224,9 @@ export function QrScanner({
     // Successfully parsed QR code
     setScannerState("success");
 
-    // Call parent handler with QR code data
-    onScanSuccess(parseResult.qrCodeData ?? decodedText);
+    // Call parent handler with ticket number if available, otherwise QR code data
+    // This ensures we use ticketNumber for simple formats and qrCodeData for JWT/complex formats
+    onScanSuccess(parseResult.ticketNumber!);
 
     // Close modal after short delay to show success state
     setTimeout(() => {
