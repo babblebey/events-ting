@@ -120,6 +120,7 @@ export default async function CheckInPage({
             notCheckedInCount={metricsData.notCheckedInCount}
             checkInPercentage={metricsData.checkInPercentage}
             recentCheckIns={metricsData.recentCheckIns}
+            eventTimezone={event.timezone}
           />
         </div>
       )}

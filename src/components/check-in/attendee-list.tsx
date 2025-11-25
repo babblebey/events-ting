@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AttendeeListSkeleton } from "./attendee-list-skeleton";
 import { DuplicateCheckInModal } from "./duplicate-check-in-modal";
 import { useState } from "react";
+import { formatEventTime } from "@/lib/utils/date";
 
 // Type definitions from contracts
 type AttendeeItem = {
@@ -52,6 +53,7 @@ type Pagination = {
 type ListAttendeesOutput = {
   attendees: AttendeeItem[];
   pagination: Pagination;
+  eventTimezone: string;
 };
 
 interface AttendeeListProps {
@@ -150,16 +152,15 @@ export function AttendeeList({
     router.push(`/events/${eventSlug}/check-in?${params.toString()}`);
   };
 
-  const formatDateTime = (date: Date | null) => {
+  const formatDateTime = (date: Date | null, timezone: string) => {
     if (!date) return "—";
-    return new Intl.DateTimeFormat("en-US", {
-      dateStyle: "short",
-      timeStyle: "short",
-    }).format(new Date(date));
+    // Format in event timezone: "11/24/25, 2:30 PM EST"
+    return formatEventTime(new Date(date), timezone, "M/d/yy, h:mm a zzz");
   };
 
   const attendees = data?.attendees ?? [];
   const pagination = data?.pagination ?? initialData.pagination;
+  const eventTimezone = data?.eventTimezone ?? initialData.eventTimezone;
 
   // Show skeleton during initial load
   if (isLoading && !data) {
@@ -247,7 +248,7 @@ export function AttendeeList({
                     </Badge>
                   )}
                 </TableCell>
-                <TableCell>{formatDateTime(attendee.checkedInAt)}</TableCell>
+                <TableCell>{formatDateTime(attendee.checkedInAt, eventTimezone)}</TableCell>
                 <TableCell>
                   {!attendee.isCheckedIn ? (
                     <Button

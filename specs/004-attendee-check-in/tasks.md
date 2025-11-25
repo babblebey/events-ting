@@ -126,10 +126,10 @@ description: "Task list for Attendee Check-In Service implementation"
 - [X] T034 [P] Implement error toast notifications for check-in failures
 - [X] T035 Add duplicate check-in warning modal in attendee-list component at src/components/check-in/attendee-list.tsx
 - [X] T036 [P] Add loading spinners to check-in buttons during mutation
-- [ ] T037 [P] Optimize database queries with proper indexes (verify existing indexes in prisma/schema.prisma)
-- [ ] T038 Add timezone handling for check-in timestamps (UTC storage, event timezone display)
-- [ ] T039 [P] Add documentation for CHECKIN module in docs/modules/team/README.md
-- [ ] T040 [P] Update quickstart.md with testing instructions (verify completeness)
+- [X] T037 [P] Optimize database queries with proper indexes (verify existing indexes in prisma/schema.prisma)
+- [X] T038 Add timezone handling for check-in timestamps (UTC storage, event timezone display)
+- [X] T039 [P] Add documentation for CHECKIN module in docs/modules/team/README.md
+- [X] T040 [P] Update quickstart.md with testing instructions (verify completeness)
 - [ ] T041 Run ESLint and Prettier on all check-in files
 - [ ] T042 Validate all acceptance scenarios from spec.md manually
 - [ ] T043 Add CHECKIN permission option to team member invitation UI

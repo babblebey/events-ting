@@ -8,6 +8,7 @@
 
 import { Card, Progress, Badge } from "flowbite-react";
 import { HiTicket, HiCheck, HiClock, HiTrendingUp } from "react-icons/hi";
+import { formatEventTime } from "@/lib/utils/date";
 
 // Type definitions from contracts
 type RecentCheckIn = {
@@ -22,6 +23,7 @@ interface CheckInMetricsProps {
   notCheckedInCount: number;
   checkInPercentage: number;
   recentCheckIns: RecentCheckIn[];
+  eventTimezone: string;
 }
 
 export function CheckInMetrics({
@@ -30,12 +32,11 @@ export function CheckInMetrics({
   notCheckedInCount,
   checkInPercentage,
   recentCheckIns,
+  eventTimezone,
 }: CheckInMetricsProps) {
   const formatDateTime = (date: Date) => {
-    return new Intl.DateTimeFormat("en-US", {
-      dateStyle: "short",
-      timeStyle: "short",
-    }).format(new Date(date));
+    // Format in event timezone: "11/24/25, 2:30 PM EST"
+    return formatEventTime(new Date(date), eventTimezone, "M/d/yy, h:mm a zzz");
   };
 
   return (

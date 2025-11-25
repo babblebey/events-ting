@@ -131,6 +131,7 @@ export type Pagination = z.infer<typeof paginationSchema>;
 export const listAttendeesOutputSchema = z.object({
   attendees: z.array(attendeeItemSchema),
   pagination: paginationSchema,
+  eventTimezone: z.string().default("UTC"), // IANA timezone for formatting dates
 });
 
 export type ListAttendeesOutput = z.infer<typeof listAttendeesOutputSchema>;
@@ -141,6 +142,7 @@ export type ListAttendeesOutput = z.infer<typeof listAttendeesOutputSchema>;
 export const checkInTicketOutputSchema = z.object({
   success: z.boolean(),
   alreadyCheckedIn: z.boolean(),
+  eventTimezone: z.string().default("UTC"), // IANA timezone for formatting dates
 
   ticket: z.object({
     ticketId: z.string().cuid(),

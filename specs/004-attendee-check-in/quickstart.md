@@ -229,11 +229,11 @@ List all attendees for check-in with filtering and search.
     ticketId: string;
     ticketNumber: string;
     isCheckedIn: boolean;
-    checkedInAt: Date | null;
-    attendeeName: string | null;    // If ticket assigned
-    attendeeEmail: string | null;   // If ticket assigned
-    buyerName: string;              // Always present
-    buyerEmail: string;             // Always present
+    checkedInAt: Date | null;        // UTC timestamp, display in event timezone
+    attendeeName: string | null;     // If ticket assigned
+    attendeeEmail: string | null;    // If ticket assigned
+    buyerName: string;               // Always present
+    buyerEmail: string;              // Always present
     isAssigned: boolean;
   }>;
   pagination: {
@@ -242,6 +242,7 @@ List all attendees for check-in with filtering and search.
     pageSize: number;
     totalPages: number;
   };
+  eventTimezone: string;              // IANA timezone (e.g., "America/New_York")
 }
 ```
 
@@ -299,11 +300,12 @@ Check in a ticket (manual or QR code).
 {
   success: boolean;
   alreadyCheckedIn: boolean;
+  eventTimezone: string;              // IANA timezone for date formatting
   ticket: {
     ticketId: string;
     ticketNumber: string;
     isCheckedIn: boolean;
-    checkedInAt: Date;
+    checkedInAt: Date;                // UTC timestamp, display in event timezone
     attendeeName: string | null;
     attendeeEmail: string | null;
     buyerName: string;
@@ -348,6 +350,49 @@ Undo a check-in (for correcting mistakes).
 ---
 
 ## Testing
+
+### Timezone Handling
+
+Check-in timestamps are stored in UTC but displayed in the event's timezone.
+
+**Example**:
+```typescript
+// Event timezone: America/New_York (EST/EDT)
+const event = await db.event.findUnique({
+  where: { id: eventId },
+  select: { timezone: true },
+});
+
+// Timestamp stored in database (UTC)
+checkedInAt: 2025-11-24T19:30:00.000Z
+
+// Displayed to user (event timezone)
+// Using formatEventTime from @/lib/utils/date
+formatEventTime(checkedInAt, event.timezone, "M/d/yy, h:mm a zzz")
+// Output: "11/24/25, 2:30 PM EST"
+```
+
+**Testing Timezone Display**:
+```typescript
+test("displays check-in time in event timezone", async ({ page }) => {
+  // Create event with specific timezone
+  const event = await db.event.create({
+    data: {
+      timezone: "America/Los_Angeles", // PST/PDT
+      // ...other fields
+    },
+  });
+
+  // Check in at known UTC time
+  const utcTime = new Date("2025-11-24T19:30:00.000Z");
+  
+  // Expected display in PST (UTC-8)
+  const expectedDisplay = "11/24/25, 11:30 AM PST";
+  
+  await page.goto(`/events/${event.slug}/check-in`);
+  await expect(page.getByText(expectedDisplay)).toBeVisible();
+});
+```
 
 ### Integration Tests
 

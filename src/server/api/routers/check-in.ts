@@ -65,7 +65,7 @@ export const checkInRouter = createTRPCRouter({
       // Calculate pagination values
       const totalPages = Math.ceil(total / input.pageSize);
 
-      // Fetch tickets with pagination
+      // Fetch tickets with pagination and event timezone
       const tickets = await ctx.db.ticket.findMany({
         where,
         orderBy: [
@@ -85,6 +85,11 @@ export const checkInRouter = createTRPCRouter({
             select: {
               name: true,
               email: true,
+            },
+          },
+          event: {
+            select: {
+              timezone: true,
             },
           },
         },
@@ -115,6 +120,8 @@ export const checkInRouter = createTRPCRouter({
           pageSize: input.pageSize,
           totalPages,
         },
+        // Include event timezone for client-side date formatting
+        eventTimezone: tickets[0]?.event.timezone ?? "UTC",
       };
     }),
 
@@ -160,6 +167,11 @@ export const checkInRouter = createTRPCRouter({
               email: true,
             },
           },
+          event: {
+            select: {
+              timezone: true,
+            },
+          },
         },
       });
 
@@ -176,6 +188,7 @@ export const checkInRouter = createTRPCRouter({
         return {
           success: true,
           alreadyCheckedIn: true,
+          eventTimezone: ticket.event.timezone,
           ticket: {
             ticketId: ticket.id,
             ticketNumber: ticket.ticketNumber,
@@ -194,7 +207,7 @@ export const checkInRouter = createTRPCRouter({
         where: { id: ticket.id },
         data: {
           isCheckedIn: true,
-          checkedInAt: new Date(),
+          checkedInAt: new Date(), // Store in UTC
           checkedInBy: ctx.session.user.id,
         },
         include: {
@@ -210,12 +223,18 @@ export const checkInRouter = createTRPCRouter({
               email: true,
             },
           },
+          event: {
+            select: {
+              timezone: true,
+            },
+          },
         },
       });
 
       return {
         success: true,
         alreadyCheckedIn: false,
+        eventTimezone: updatedTicket.event.timezone,
         ticket: {
           ticketId: updatedTicket.id,
           ticketNumber: updatedTicket.ticketNumber,
