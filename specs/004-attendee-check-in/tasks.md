@@ -120,12 +120,12 @@ description: "Task list for Attendee Check-In Service implementation"
 
 **Purpose**: Improvements that affect multiple user stories and ensure production readiness
 
-- [ ] T031 [P] Add accessibility attributes (ARIA labels, keyboard navigation) to all check-in components
-- [ ] T032 [P] Implement mobile-responsive design for check-in page (375px minimum width)
-- [ ] T033 [P] Add skeleton loaders for all async operations in check-in components
-- [ ] T034 [P] Implement error toast notifications for check-in failures
-- [ ] T035 Add duplicate check-in warning modal in attendee-list component at src/components/check-in/attendee-list.tsx
-- [ ] T036 [P] Add loading spinners to check-in buttons during mutation
+- [X] T031 [P] Add accessibility attributes (ARIA labels, keyboard navigation) to all check-in components
+- [X] T032 [P] Implement mobile-responsive design for check-in page (375px minimum width)
+- [X] T033 [P] Add skeleton loaders for all async operations in check-in components
+- [X] T034 [P] Implement error toast notifications for check-in failures
+- [X] T035 Add duplicate check-in warning modal in attendee-list component at src/components/check-in/attendee-list.tsx
+- [X] T036 [P] Add loading spinners to check-in buttons during mutation
 - [ ] T037 [P] Optimize database queries with proper indexes (verify existing indexes in prisma/schema.prisma)
 - [ ] T038 Add timezone handling for check-in timestamps (UTC storage, event timezone display)
 - [ ] T039 [P] Add documentation for CHECKIN module in docs/modules/team/README.md

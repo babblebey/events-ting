@@ -17,12 +17,16 @@ import {
   TableHead,
   TableHeadCell,
   TableRow,
+  Spinner,
 } from "flowbite-react";
 import { HiCheck, HiClock } from "react-icons/hi";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 import { useCheckIn } from "@/hooks/use-check-in";
 import { useToast } from "@/hooks/use-toast";
+import { AttendeeListSkeleton } from "./attendee-list-skeleton";
+import { DuplicateCheckInModal } from "./duplicate-check-in-modal";
+import { useState } from "react";
 
 // Type definitions from contracts
 type AttendeeItem = {
@@ -70,8 +74,14 @@ export function AttendeeList({
   const router = useRouter();
   const { toast } = useToast();
 
+  // State for duplicate check-in modal
+  const [duplicateModalOpen, setDuplicateModalOpen] = useState(false);
+  const [pendingCheckIn, setPendingCheckIn] = useState<AttendeeItem | null>(
+    null,
+  );
+
   // Use tRPC query with initial data
-  const { data } = api.checkIn.listAttendees.useQuery(
+  const { data, isLoading } = api.checkIn.listAttendees.useQuery(
     {
       eventId,
       filter: currentFilter,
@@ -93,7 +103,18 @@ export function AttendeeList({
     currentSearch,
   });
 
-  const handleCheckIn = (ticketNumber: string) => {
+  const handleCheckIn = (ticketNumber: string, attendee?: AttendeeItem) => {
+    // Check if attendee is already checked in
+    if (attendee?.isCheckedIn) {
+      setPendingCheckIn(attendee);
+      setDuplicateModalOpen(true);
+      return;
+    }
+
+    performCheckIn(ticketNumber);
+  };
+
+  const performCheckIn = (ticketNumber: string) => {
     checkIn(ticketNumber, {
       onSuccess: () => {
         toast({
@@ -111,6 +132,13 @@ export function AttendeeList({
         });
       },
     });
+  };
+
+  const handleConfirmDuplicateCheckIn = () => {
+    if (pendingCheckIn) {
+      performCheckIn(pendingCheckIn.ticketNumber);
+      setPendingCheckIn(null);
+    }
   };
 
   const handlePageChange = (newPage: number) => {
@@ -133,11 +161,34 @@ export function AttendeeList({
   const attendees = data?.attendees ?? [];
   const pagination = data?.pagination ?? initialData.pagination;
 
+  // Show skeleton during initial load
+  if (isLoading && !data) {
+    return <AttendeeListSkeleton />;
+  }
+
   return (
     <div className="space-y-6">
+      {/* Loading indicator for background refetches */}
+      {isLoading && data && (
+        <div
+          className="flex items-center justify-center gap-2 rounded-lg bg-blue-50 p-2 dark:bg-blue-900/20"
+          role="status"
+          aria-live="polite"
+        >
+          <Spinner size="sm" aria-hidden="true" />
+          <span className="text-sm text-blue-700 dark:text-blue-300">
+            Refreshing data...
+          </span>
+        </div>
+      )}
+
       {/* Table */}
-      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-        <Table>
+      <div
+        className="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+        role="region"
+        aria-label="Attendee list"
+      >
+        <Table className="min-w-[640px]">
           <TableHead>
             <TableHeadCell>Ticket Number</TableHeadCell>
             <TableHeadCell>Name</TableHeadCell>
@@ -152,7 +203,11 @@ export function AttendeeList({
             {attendees.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} className="py-8 text-center">
-                  <p className="text-gray-500 dark:text-gray-400">
+                  <p
+                    className="text-gray-500 dark:text-gray-400"
+                    role="status"
+                    aria-live="polite"
+                  >
                     No attendees found
                   </p>
                 </TableCell>
@@ -194,16 +249,49 @@ export function AttendeeList({
                 </TableCell>
                 <TableCell>{formatDateTime(attendee.checkedInAt)}</TableCell>
                 <TableCell>
-                  {!attendee.isCheckedIn && (
+                  {!attendee.isCheckedIn ? (
                     <Button
                       size="xs"
                       color="success"
-                      onClick={() => handleCheckIn(attendee.ticketNumber)}
+                      onClick={() =>
+                        handleCheckIn(attendee.ticketNumber, attendee)
+                      }
                       disabled={checkingInTicketId === attendee.ticketId}
+                      aria-label={`Check in ${attendee.attendeeName ?? attendee.buyerName} with ticket ${attendee.ticketNumber}`}
+                      aria-busy={checkingInTicketId === attendee.ticketId}
                     >
+                      {checkingInTicketId === attendee.ticketId && (
+                        <Spinner
+                          size="sm"
+                          className="mr-2"
+                          aria-hidden="true"
+                        />
+                      )}
                       {checkingInTicketId === attendee.ticketId
                         ? "Checking In..."
                         : "Check In"}
+                    </Button>
+                  ) : (
+                    <Button
+                      size="xs"
+                      color="warning"
+                      onClick={() =>
+                        handleCheckIn(attendee.ticketNumber, attendee)
+                      }
+                      disabled={checkingInTicketId === attendee.ticketId}
+                      aria-label={`Re-check in ${attendee.attendeeName ?? attendee.buyerName} with ticket ${attendee.ticketNumber}`}
+                      aria-busy={checkingInTicketId === attendee.ticketId}
+                    >
+                      {checkingInTicketId === attendee.ticketId && (
+                        <Spinner
+                          size="sm"
+                          className="mr-2"
+                          aria-hidden="true"
+                        />
+                      )}
+                      {checkingInTicketId === attendee.ticketId
+                        ? "Checking In..."
+                        : "Check In Again"}
                     </Button>
                   )}
                 </TableCell>
@@ -215,8 +303,16 @@ export function AttendeeList({
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-700 dark:text-gray-400">
+        <nav
+          className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between"
+          role="navigation"
+          aria-label="Attendee list pagination"
+        >
+          <p
+            className="text-xs text-gray-700 sm:text-sm dark:text-gray-400"
+            role="status"
+            aria-live="polite"
+          >
             Showing{" "}
             <span className="font-medium">
               {pagination.page * pagination.pageSize + 1}
@@ -236,6 +332,7 @@ export function AttendeeList({
               color="gray"
               onClick={() => handlePageChange(pagination.page - 1)}
               disabled={pagination.page === 0}
+              aria-label="Go to previous page"
             >
               Previous
             </Button>
@@ -244,11 +341,28 @@ export function AttendeeList({
               color="gray"
               onClick={() => handlePageChange(pagination.page + 1)}
               disabled={pagination.page >= pagination.totalPages - 1}
+              aria-label="Go to next page"
             >
               Next
             </Button>
           </div>
-        </div>
+        </nav>
+      )}
+
+      {/* Duplicate Check-In Warning Modal */}
+      {pendingCheckIn && (
+        <DuplicateCheckInModal
+          isOpen={duplicateModalOpen}
+          onClose={() => {
+            setDuplicateModalOpen(false);
+            setPendingCheckIn(null);
+          }}
+          onConfirm={handleConfirmDuplicateCheckIn}
+          attendeeName={pendingCheckIn.attendeeName ?? pendingCheckIn.buyerName}
+          ticketNumber={pendingCheckIn.ticketNumber}
+          checkedInAt={pendingCheckIn.checkedInAt}
+          checkedInBy={pendingCheckIn.checkedInBy}
+        />
       )}
     </div>
   );

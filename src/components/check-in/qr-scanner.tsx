@@ -18,7 +18,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Button, Modal, Alert } from "flowbite-react";
-import { HiQrcode, HiX, HiExclamationCircle, HiCheckCircle, HiCamera } from "react-icons/hi";
+import {
+  HiQrcode,
+  HiX,
+  HiExclamationCircle,
+  HiCheckCircle,
+  HiCamera,
+} from "react-icons/hi";
 import { Html5Qrcode, Html5QrcodeScannerState } from "html5-qrcode";
 import { parseQrCode, formatQrCodeError } from "@/lib/qr-code";
 
@@ -101,9 +107,7 @@ export function QrScanner({
             } else if (permError.name === "NotFoundError") {
               throw new Error("No camera found on this device.");
             } else if (permError.name === "NotReadableError") {
-              throw new Error(
-                "Camera is in use by another application.",
-              );
+              throw new Error("Camera is in use by another application.");
             }
           }
           throw permError;
@@ -313,9 +317,13 @@ export function QrScanner({
         color="purple"
         onClick={() => setIsOpen(true)}
         disabled={isProcessing}
+        aria-label="Open QR code scanner"
+        aria-haspopup="dialog"
+        className="w-full sm:w-auto"
       >
-        <HiQrcode className="mr-2 h-5 w-5" />
-        Scan QR Code
+        <HiQrcode className="h-5 w-5 sm:mr-2" />
+        <span className="hidden sm:inline">Scan QR Code</span>
+        <span className="sm:hidden">Scan</span>
       </Button>
 
       {/* Scanner Modal */}
@@ -324,21 +332,33 @@ export function QrScanner({
         onClose={handleClose}
         size="lg"
         dismissible={!isProcessing && scannerState !== "initializing"}
+        role="dialog"
+        aria-labelledby="qr-scanner-title"
+        aria-describedby="qr-scanner-description"
+        className="p-4"
       >
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {/* Header */}
           <div className="mb-4 flex items-center gap-2">
-            <HiQrcode className="h-5 w-5" />
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+            <HiQrcode className="h-5 w-5" aria-hidden="true" />
+            <h3
+              id="qr-scanner-title"
+              className="text-xl font-semibold text-gray-900 dark:text-white"
+            >
               Scan Ticket QR Code
             </h3>
           </div>
 
           {/* Body */}
-          <div className="space-y-4">
+          <div className="space-y-4" id="qr-scanner-description">
             {/* Instructions */}
             {scannerState === "scanning" && (
-              <Alert color="info" icon={HiCamera}>
+              <Alert
+                color="info"
+                icon={HiCamera}
+                role="status"
+                aria-live="polite"
+              >
                 <span className="font-medium">
                   Position QR code in the frame
                 </span>
@@ -351,13 +371,18 @@ export function QrScanner({
 
             {/* Error State */}
             {scannerState === "error" && errorMessage && (
-              <Alert color="failure" icon={HiExclamationCircle}>
+              <Alert
+                color="failure"
+                icon={HiExclamationCircle}
+                role="alert"
+                aria-live="assertive"
+              >
                 <span className="font-medium">Scanner Error</span>
                 <p className="mt-1 text-sm">{errorMessage}</p>
                 {errorMessage.toLowerCase().includes("permission") && (
                   <div className="mt-2 text-sm">
                     <p className="font-medium">To fix this:</p>
-                    <ol className="ml-4 mt-1 list-decimal space-y-1">
+                    <ol className="mt-1 ml-4 list-decimal space-y-1">
                       <li>
                         Click the lock/camera icon in your browser&apos;s
                         address bar
@@ -372,7 +397,12 @@ export function QrScanner({
 
             {/* Success State */}
             {scannerState === "success" && (
-              <Alert color="success" icon={HiCheckCircle}>
+              <Alert
+                color="success"
+                icon={HiCheckCircle}
+                role="status"
+                aria-live="polite"
+              >
                 <span className="font-medium">QR Code Detected</span>
                 <p className="mt-1 text-sm">Processing check-in...</p>
               </Alert>
@@ -380,7 +410,12 @@ export function QrScanner({
 
             {/* Initializing State */}
             {scannerState === "initializing" && (
-              <Alert color="info" icon={HiCamera}>
+              <Alert
+                color="info"
+                icon={HiCamera}
+                role="status"
+                aria-live="polite"
+              >
                 <span className="font-medium">Starting camera...</span>
                 <p className="mt-1 text-sm">
                   Please allow camera access when prompted by your browser.
@@ -393,13 +428,15 @@ export function QrScanner({
               id={scannerElementId}
               className="mx-auto w-full overflow-hidden rounded-lg border-2 border-gray-300 dark:border-gray-600"
               style={{
-                minHeight: "300px",
+                minHeight: "250px",
                 maxWidth: "500px",
               }}
+              role="img"
+              aria-label="QR code scanner camera view"
             />
 
             {/* Help Text */}
-            <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+            <div className="text-center text-xs text-gray-600 sm:text-sm dark:text-gray-400">
               <p>
                 Having trouble scanning? Try manual ticket number entry instead.
               </p>
@@ -407,12 +444,14 @@ export function QrScanner({
           </div>
 
           {/* Footer */}
-          <div className="mt-6 flex justify-end gap-2">
+          <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
             {scannerState === "error" && (
               <Button
                 color="purple"
                 onClick={handleRetry}
                 disabled={isProcessing}
+                aria-label="Retry QR code scanner"
+                className="w-full sm:w-auto"
               >
                 Retry
               </Button>
@@ -421,8 +460,12 @@ export function QrScanner({
               color="gray"
               onClick={handleClose}
               disabled={isProcessing || scannerState === "initializing"}
+              aria-label={
+                scannerState === "success" ? "Close scanner" : "Cancel scanning"
+              }
+              className="w-full sm:w-auto"
             >
-              <HiX className="mr-2 h-4 w-4" />
+              <HiX className="mr-2 h-4 w-4" aria-hidden="true" />
               {scannerState === "success" ? "Done" : "Cancel"}
             </Button>
           </div>
