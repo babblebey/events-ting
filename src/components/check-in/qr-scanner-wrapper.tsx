@@ -7,12 +7,14 @@
 
 import { useState } from "react";
 import { QrScanner } from "./qr-scanner";
+import { CheckInConfirmationModal } from "./check-in-confirmation-modal";
 import { useCheckIn } from "@/hooks/use-check-in";
 import { useToast } from "@/hooks/use-toast";
 import { useSearchParams } from "next/navigation";
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from "flowbite-react";
 import { HiCheckCircle, HiExclamationCircle } from "react-icons/hi";
 import { formatInTimeZone } from "date-fns-tz";
+import { api } from "@/trpc/react";
 
 interface QrScannerWrapperProps {
   eventId: string;
@@ -21,6 +23,13 @@ interface QrScannerWrapperProps {
 export function QrScannerWrapper({ eventId }: QrScannerWrapperProps) {
   const searchParams = useSearchParams();
   const toast = useToast();
+  const [pendingCheckIn, setPendingCheckIn] = useState<{
+    ticketNumber: string;
+    attendeeName: string | null;
+    attendeeEmail: string | null;
+    buyerName: string;
+    buyerEmail: string;
+  } | null>(null);
   const [alreadyCheckedInData, setAlreadyCheckedInData] = useState<{
     ticketNumber: string;
     attendeeName: string | null;
@@ -45,25 +54,54 @@ export function QrScannerWrapper({ eventId }: QrScannerWrapperProps) {
     currentSearch: search,
   });
 
+  // Fetch ticket details by ticket number
+  const getTicketByNumberMutation = api.checkIn.getTicketByNumber.useMutation();
+
   const handleScanSuccess = async (ticketNumber: string) => {
     try {
-      const result = await checkIn(ticketNumber);
-      
+      // First, fetch the ticket details to show in confirmation modal
+      const ticketData = await getTicketByNumberMutation.mutateAsync({
+        eventId,
+        ticketNumber,
+      });
+
       // Check if already checked in
-      if (result.alreadyCheckedIn) {
+      if (ticketData.isCheckedIn) {
         setAlreadyCheckedInData({
-          ticketNumber: result.ticket.ticketNumber,
-          attendeeName: result.ticket.attendeeName,
-          buyerName: result.ticket.buyerName,
-          checkedInAt: result.ticket.checkedInAt,
-          eventTimezone: result.eventTimezone,
+          ticketNumber: ticketData.ticketNumber,
+          attendeeName: ticketData.attendeeName,
+          buyerName: ticketData.buyerName,
+          checkedInAt: ticketData.checkedInAt!,
+          eventTimezone: ticketData.eventTimezone,
         });
       } else {
-        toast.success(
-          "Success",
-          "Attendee checked in successfully via QR code!",
-        );
+        // Show confirmation modal with ticket details
+        setPendingCheckIn({
+          ticketNumber: ticketData.ticketNumber,
+          attendeeName: ticketData.attendeeName,
+          attendeeEmail: ticketData.attendeeEmail,
+          buyerName: ticketData.buyerName,
+          buyerEmail: ticketData.buyerEmail,
+        });
       }
+    } catch (error) {
+      toast.error(
+        "Failed to fetch ticket details",
+        (error as Error).message || "Unable to retrieve ticket information. Please try again.",
+      );
+    }
+  };
+
+  const handleConfirmCheckIn = async () => {
+    if (!pendingCheckIn) return;
+
+    try {
+      await checkIn(pendingCheckIn.ticketNumber);
+      toast.success(
+        "Success",
+        "Attendee checked in successfully via QR code!",
+      );
+      setPendingCheckIn(null);
     } catch (error) {
       toast.error(
         "Check-in failed",
@@ -82,7 +120,20 @@ export function QrScannerWrapper({ eventId }: QrScannerWrapperProps) {
         eventId={eventId}
         onScanSuccess={handleScanSuccess}
         onScanError={handleScanError}
+        isProcessing={isCheckingIn || getTicketByNumberMutation.isPending}
+      />
+
+      {/* Check-In Confirmation Modal */}
+      <CheckInConfirmationModal
+        isOpen={!!pendingCheckIn}
+        onClose={() => setPendingCheckIn(null)}
+        onConfirm={handleConfirmCheckIn}
         isProcessing={isCheckingIn}
+        ticketNumber={pendingCheckIn?.ticketNumber ?? ""}
+        attendeeName={pendingCheckIn?.attendeeName}
+        attendeeEmail={pendingCheckIn?.attendeeEmail}
+        buyerName={pendingCheckIn?.buyerName}
+        buyerEmail={pendingCheckIn?.buyerEmail}
       />
 
       {/* Already Checked-In Modal */}

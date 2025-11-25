@@ -22,6 +22,8 @@ import {
   checkInTicketOutputSchema,
   getCheckInMetricsInputSchema,
   getCheckInMetricsOutputSchema,
+  getTicketByNumberInputSchema,
+  getTicketByNumberOutputSchema,
   CHECK_IN_ERROR_CODES,
 } from "../../../../specs/004-attendee-check-in/contracts/check-in-api";
 
@@ -312,6 +314,71 @@ export const checkInRouter = createTRPCRouter({
         notCheckedInCount,
         checkInPercentage,
         recentCheckIns: recentCheckInsFormatted,
+      };
+    }),
+
+  /**
+   * Get ticket details by ticket number
+   * Used for confirmation modal before check-in
+   *
+   * @requires CHECKIN module permission
+   */
+  getTicketByNumber: protectedProcedure
+    .input(getTicketByNumberInputSchema)
+    .output(getTicketByNumberOutputSchema)
+    .mutation(async ({ ctx, input }) => {
+      // Verify user has CHECKIN module access
+      await checkModuleAccess({
+        db: ctx.db,
+        eventId: input.eventId,
+        userId: ctx.session.user.id,
+        requiredModule: "CHECKIN",
+      });
+
+      // Find ticket by ticket number
+      const ticket = await ctx.db.ticket.findFirst({
+        where: {
+          eventId: input.eventId,
+          ticketNumber: input.ticketNumber,
+        },
+        include: {
+          attendee: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
+          registration: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
+          event: {
+            select: {
+              timezone: true,
+            },
+          },
+        },
+      });
+
+      // Ticket not found
+      if (!ticket) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: CHECK_IN_ERROR_CODES.TICKET_NOT_FOUND,
+        });
+      }
+
+      return {
+        ticketNumber: ticket.ticketNumber,
+        isCheckedIn: ticket.isCheckedIn,
+        checkedInAt: ticket.checkedInAt,
+        attendeeName: ticket.attendee?.name ?? null,
+        attendeeEmail: ticket.attendee?.email ?? null,
+        buyerName: ticket.registration.name,
+        buyerEmail: ticket.registration.email,
+        eventTimezone: ticket.event.timezone,
       };
     }),
 });

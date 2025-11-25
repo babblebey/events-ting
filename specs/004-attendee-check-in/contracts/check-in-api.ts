@@ -74,6 +74,16 @@ export type GetCheckInMetricsInput = z.infer<
 >;
 
 /**
+ * Get ticket details by ticket number (for confirmation before check-in)
+ */
+export const getTicketByNumberInputSchema = z.object({
+  eventId: z.string().cuid("Invalid event ID format"),
+  ticketNumber: z.string().min(1, "Ticket number is required"),
+});
+
+export type GetTicketByNumberInput = z.infer<typeof getTicketByNumberInputSchema>;
+
+/**
  * Undo check-in (optional feature for correcting mistakes)
  */
 export const undoCheckInInputSchema = z.object({
@@ -187,6 +197,22 @@ export const getCheckInMetricsOutputSchema = z.object({
 export type GetCheckInMetricsOutput = z.infer<
   typeof getCheckInMetricsOutputSchema
 >;
+
+/**
+ * Get ticket by number output
+ */
+export const getTicketByNumberOutputSchema = z.object({
+  ticketNumber: z.string(),
+  isCheckedIn: z.boolean(),
+  checkedInAt: z.date().nullable(),
+  attendeeName: z.string().nullable(),
+  attendeeEmail: z.string().email().nullable(),
+  buyerName: z.string(),
+  buyerEmail: z.string().email(),
+  eventTimezone: z.string().default("UTC"),
+});
+
+export type GetTicketByNumberOutput = z.infer<typeof getTicketByNumberOutputSchema>;
 
 /**
  * Undo check-in output

@@ -30,7 +30,7 @@ import { parseQrCode, formatQrCodeError } from "@/lib/qr-code";
 
 interface QrScannerProps {
   eventId?: string;
-  onScanSuccess: (qrCodeData: string) => void;
+  onScanSuccess: (ticketNumber: string) => void;
   onScanError?: (error: string) => void;
   isProcessing?: boolean;
 }
@@ -42,14 +42,11 @@ type ScannerState = "idle" | "initializing" | "scanning" | "error" | "success";
  *
  * @example
  * ```tsx
- * const { checkInByQrCode } = useCheckIn({ eventId, ... });
- *
  * <QrScanner
  *   eventId={eventId}
- *   onScanSuccess={(qrCodeData) => {
- *     checkInByQrCode(qrCodeData, {
- *       onSuccess: () => toast.success("Checked in!"),
- *     });
+ *   onScanSuccess={(ticketNumber) => {
+ *     // Show confirmation modal or check in directly
+ *     console.log("Scanned ticket:", ticketNumber);
  *   }}
  * />
  * ```
@@ -228,8 +225,7 @@ export function QrScanner({
     // Successfully parsed QR code
     setScannerState("success");
 
-    // Call parent handler with ticket number if available, otherwise QR code data
-    // This ensures we use ticketNumber for simple formats and qrCodeData for JWT/complex formats
+    // Call parent handler with ticket number
     onScanSuccess(parseResult.ticketNumber!);
 
     // Close modal after short delay to show success state
