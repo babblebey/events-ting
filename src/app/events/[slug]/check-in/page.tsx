@@ -21,6 +21,8 @@ import {
   CheckInFilters,
   CheckInMetrics,
   QrScannerWrapper,
+  ModeToggle,
+  QuickModeView,
 } from "@/components/check-in";
 
 interface CheckInPageProps {
@@ -31,12 +33,13 @@ interface CheckInPageProps {
     search?: string;
     filter?: "all" | "checked-in" | "not-checked-in";
     page?: string;
+    mode?: "quick" | "dashboard";
   };
 }
 
 export default async function CheckInPage({
   params,
-  searchParams,
+  searchParams, 
 }: CheckInPageProps) {
   // Fetch event to get ID
   const event = await api.event.getBySlug({ slug: params.slug });
@@ -46,11 +49,64 @@ export default async function CheckInPage({
   }
 
   // Parse search params
+  const mode = searchParams.mode ?? "dashboard";
   const filter = searchParams.filter ?? "all";
   const search = searchParams.search ?? undefined;
   const page = parseInt(searchParams.page ?? "0", 10);
 
-  // Fetch attendees with check-in status
+  // Quick mode doesn't need attendee list or metrics
+  if (mode === "quick") {
+    // Only check permission for quick mode
+    let permissionError = false;
+    
+    try {
+      // Just check if user has access (lightweight permission check)
+      await api.checkIn.getMetrics({ eventId: event.id });
+    } catch (error) {
+      if (
+        error &&
+        typeof error === "object" &&
+        "code" in error &&
+        error.code === "FORBIDDEN"
+      ) {
+        permissionError = true;
+      } else {
+        throw error;
+      }
+    }
+
+    if (permissionError) {
+      return (
+        <div className="container mx-auto max-w-6xl px-4 py-12">
+          <Alert color="failure" icon={LuCircleAlert}>
+            <span className="font-medium">Access Denied</span>
+            <p className="mt-1 text-sm">
+              You don&apos;t have permission to access the check-in module for
+              this event. Please contact the event owner to request access.
+            </p>
+          </Alert>
+        </div>
+      );
+    }
+
+    return (
+      <div className="container mx-auto max-w-3xl px-3 py-6 sm:px-4 sm:py-8">
+        {/* Mode Toggle */}
+        <div className="mb-6 flex justify-center">
+          <ModeToggle eventSlug={params.slug} />
+        </div>
+
+        {/* Quick Mode View */}
+        <QuickModeView
+          eventId={event.id}
+          eventName={event.name}
+          eventTimezone={event.timezone}
+        />
+      </div>
+    );
+  }
+
+  // Dashboard mode - fetch full data
   let attendeesData;
   let metricsData;
   let permissionError = false;
@@ -103,12 +159,19 @@ export default async function CheckInPage({
     <div className="container mx-auto max-w-7xl px-3 py-6 sm:px-4 sm:py-8">
       {/* Header */}
       <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
-          Attendee Check-In
-        </h1>
-        <p className="mt-2 text-sm text-gray-600 sm:text-base dark:text-gray-400">
-          Check in attendees for {event.name}
-        </p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
+              Attendee Check-In
+            </h1>
+            <p className="mt-2 text-sm text-gray-600 sm:text-base dark:text-gray-400">
+              Check in attendees for {event.name}
+            </p>
+          </div>
+          <div className="flex justify-center sm:justify-end">
+            <ModeToggle eventSlug={params.slug} />
+          </div>
+        </div>
       </div>
 
       {/* Metrics Section */}

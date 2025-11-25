@@ -13,3 +13,6 @@ export { QrScanner } from "./qr-scanner";
 export { QrScannerWrapper } from "./qr-scanner-wrapper";
 export { DuplicateCheckInModal } from "./duplicate-check-in-modal";
 export { CheckInConfirmationModal } from "./check-in-confirmation-modal";
+export { ModeToggle } from "./mode-toggle";
+export { QuickModeView } from "./quick-mode-view";
+export { QuickCheckInDrawer } from "./quick-check-in-drawer";
