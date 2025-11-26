@@ -749,6 +749,7 @@ model TeamMember {
 **Module Permissions**:
 - `OVERVIEW` - Dashboard statistics (read-only)
 - `ATTENDEES` - Registration management
+- `CHECKIN` - Attendee check-in at events
 - `TICKETS` - Ticket type management
 - `SCHEDULE` - Schedule building
 - `SPEAKERS` - Speaker profiles

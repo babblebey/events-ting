@@ -4,7 +4,7 @@
 
 This document provides a comprehensive reference of all tRPC routers and their procedures in the Events-Ting platform. Each router is organized by domain feature.
 
-**Total Routers**: 11  
+**Total Routers**: 12  
 **Location**: `src/server/api/routers/`
 
 **Note**: The Dashboard module primarily uses the existing `event.list` procedure with organizer filtering. No separate dashboard router is needed for the MVP.
@@ -19,6 +19,7 @@ This document provides a comprehensive reference of all tRPC routers and their p
 | **ticket** | `ticket.ts` | 6 | Protected | Ticket type management (legacy) |
 | **tickets** | `tickets.ts` | 7 | Mixed | Ticket instance assignment & QR codes |
 | **attendees** | `attendees.ts` | 6 | Mixed | Attendee management & communications |
+| **checkIn** | `check-in.ts` | 4 | Protected | Attendee check-in & QR scanning |
 | **registration** | `registration.ts` | 7 | Mixed | Registration & buyer management |
 | **schedule** | `schedule.ts` | 9 | Mixed | Schedule entries & timeline |
 | **speaker** | `speaker.ts` | 7 | Mixed | Speaker profiles & sessions |
@@ -724,6 +725,45 @@ const result = await ctx.db.$transaction(async (tx) => {
   return registration;
 });
 ```
+
+---
+
+## 5. Check-In Router
+
+**File**: `src/server/api/routers/check-in.ts`  
+**Purpose**: Attendee check-in at events with QR code scanning
+
+### Procedures
+
+#### `checkIn.listAttendees`
+- **Type**: Query
+- **Auth**: Protected (CHECKIN module permission required)
+- **Input**: `{ eventId, filter?, search?, page?, pageSize? }`
+- **Output**: Paginated list of tickets with check-in status
+- **Purpose**: List all attendees for check-in dashboard
+
+#### `checkIn.checkIn`
+- **Type**: Mutation
+- **Auth**: Protected (CHECKIN module permission required)
+- **Input**: `{ eventId, ticketNumber?, qrCodeData? }`
+- **Output**: Check-in result with ticket details
+- **Purpose**: Check in attendee by ticket number or QR code (idempotent)
+
+#### `checkIn.getMetrics`
+- **Type**: Query
+- **Auth**: Protected (CHECKIN module permission required)
+- **Input**: `{ eventId }`
+- **Output**: Check-in statistics (total, checked-in, percentage, recent)
+- **Purpose**: Real-time check-in metrics for dashboard
+
+#### `checkIn.getTicketDetails`
+- **Type**: Mutation
+- **Auth**: Protected (CHECKIN module permission required)
+- **Input**: `{ eventId, ticketNumber }`
+- **Output**: Ticket details for confirmation modal
+- **Purpose**: Fetch ticket details before check-in
+
+**Documentation**: [Check-In Module](../modules/check-in/)
 
 ---
 

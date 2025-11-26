@@ -63,6 +63,7 @@ graph LR
     
     Tickets --> Registration[Registration Module]
     Registration --> Attendees[Attendees Module]
+    Attendees --> CheckIn[Check-In Module]
     
     CFP --> Speakers[Speakers Module]
     Speakers --> Schedule
@@ -79,6 +80,7 @@ graph LR
     style CFP fill:#ef4444
     style Comms fill:#06b6d4
     style Attendees fill:#14b8a6
+    style CheckIn fill:#84cc16
 ```
 
 ### Module Dependencies
@@ -87,6 +89,7 @@ graph LR
 - **Events** (Core): Foundation module - all other modules depend on it
 - **Tickets** → **Registration**: Tickets define what attendees can register for
 - **Registration** → **Attendees**: Attendees view is essentially registration management
+- **Attendees** → **Check-In**: Check-in tracks physical arrival at events
 - **CFP** → **Speakers**: Accepted proposals automatically create speaker profiles
 - **Speakers** → **Schedule**: Speakers are assigned to schedule sessions
 - **Communications**: Broadcasts to any combination of attendees, speakers, or custom groups
@@ -109,7 +112,9 @@ Each module has comprehensive documentation covering backend, frontend, data mod
 #### Core Modules
 - **[Events](./modules/events/)** - Event creation, publishing, and management
 - **[Tickets](./modules/tickets/)** - Ticket types and availability management
-- **[Registration](./modules/registration/)** - Attendee registration and check-in
+- **[Registration](./modules/registration/)** - Attendee registration and ticket purchasing
+- **[Attendees](./modules/attendees/)** - Attendee management and tracking
+- **[Check-In](./modules/check-in/)** - QR code scanning and attendee check-in at events
 
 #### Advanced Modules
 - **[Schedule](./modules/schedule/)** - Event schedules, sessions, and tracks
@@ -117,7 +122,6 @@ Each module has comprehensive documentation covering backend, frontend, data mod
 - **[CFP (Call for Papers)](./modules/cfp/)** - Proposal submission and review workflow
 - **[Team](./modules/team/)** - Team collaboration and module-based permissions
 - **[Communications](./modules/communications/)** - Email campaigns and messaging
-- **[Attendees](./modules/attendees/)** - Attendee management and tracking
 
 ### API Reference
 - **[tRPC Overview](./api/trpc-overview.md)** - tRPC setup and patterns

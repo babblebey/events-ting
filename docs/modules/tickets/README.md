@@ -94,7 +94,7 @@ This module does NOT handle:
 
 **This module is required by:**
 - **[Attendees Module](../attendees/)**: Each ticket creates an Attendee when assigned
-- **Check-in Module** (future): QR code scanning for event entry
+- **[Check-In Module](../check-in/)**: QR code scanning and check-in status tracking
 
 **Creates data for**:
 - Attendee records (via assignment)

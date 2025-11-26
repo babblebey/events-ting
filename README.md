@@ -10,6 +10,7 @@ Built with the [T3 Stack](https://create.t3.gg/) (Next.js 15, tRPC, Prisma, Next
 
 - **🎪 Event Management**: Create and manage unlimited events with customizable settings
 - **🎟️ Ticketing & Registration**: Manage ticket types and attendee registrations (free tickets MVP)
+- **✅ Attendee Check-In**: QR code scanning and manual check-in with real-time metrics
 - **📅 Schedule Builder**: Create event schedules with sessions, tracks, and speaker assignments
 - **📢 Call for Papers (CFP)**: Accept and review session proposals from the community
 - **🎤 Speaker Management**: Manage speaker profiles with photos, bios, and session assignments
@@ -122,6 +123,7 @@ src/
 │   ├── ui/                   # Reusable UI components
 │   ├── events/               # Event-specific components
 │   ├── tickets/              # Ticket & registration components
+│   ├── check-in/             # Attendee check-in components
 │   ├── schedule/             # Schedule components
 │   ├── cfp/                  # Call for Papers components
 │   ├── speakers/             # Speaker components
@@ -221,12 +223,13 @@ See [.specify/memory/constitution.md](./.specify/memory/constitution.md) for ful
 #### Module Documentation
 - **[Events](./docs/modules/events/)** - Event creation and management
 - **[Tickets](./docs/modules/tickets/)** - Ticketing and registration
+- **[Attendees](./docs/modules/attendees/)** - Attendee management
+- **[Check-In](./docs/modules/check-in/)** - QR code scanning and attendee check-in
 - **[Schedule](./docs/modules/schedule/)** - Event schedules and sessions
 - **[Speakers](./docs/modules/speakers/)** - Speaker profiles and management
 - **[CFP](./docs/modules/cfp/)** - Call for Papers workflow
 - **[Team](./docs/modules/team/)** - Team collaboration and permissions
 - **[Communications](./docs/modules/communications/)** - Email campaigns
-- **[Attendees](./docs/modules/attendees/)** - Attendee management
 
 #### API & Components
 - **[tRPC API Reference](./docs/api/routers.md)** - Complete API documentation
