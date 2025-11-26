@@ -49,7 +49,7 @@ export default async function CheckInPage({
   }
 
   // Parse search params
-  const mode = searchParams.mode ?? "dashboard";
+  const mode = searchParams.mode ?? "quick";
   const filter = searchParams.filter ?? "all";
   const search = searchParams.search ?? undefined;
   const page = parseInt(searchParams.page ?? "0", 10);

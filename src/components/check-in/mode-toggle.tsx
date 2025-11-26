@@ -16,15 +16,15 @@ interface ModeToggleProps {
 export function ModeToggle({ eventSlug }: ModeToggleProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const currentMode = searchParams.get("mode") ?? "dashboard";
+  const currentMode = searchParams.get("mode") ?? "quick";
 
   const handleModeChange = (mode: "quick" | "dashboard") => {
     const params = new URLSearchParams(searchParams.toString());
     
     if (mode === "dashboard") {
-      params.delete("mode");
-    } else {
       params.set("mode", mode);
+    } else {
+      params.delete("mode");
     }
     
     router.push(`/events/${eventSlug}/check-in?${params.toString()}`, {
@@ -33,10 +33,10 @@ export function ModeToggle({ eventSlug }: ModeToggleProps) {
   };
 
   return (
-    <div className="inline-flex rounded-lg border border-gray-200 bg-white p-1 dark:border-gray-700 dark:bg-gray-800">
+    <div className="inline-flex rounded-lg border border-gray-200 bg-white p-1 dark:border-gray-700 dark:bg-gray-800 gap-1">
       <Button
         size="sm"
-        color={currentMode === "quick" ? "blue" : "gray"}
+        color={currentMode === "quick" ? "blue" : "alternative"}
         onClick={() => handleModeChange("quick")}
         className="flex items-center gap-2"
       >
@@ -46,7 +46,7 @@ export function ModeToggle({ eventSlug }: ModeToggleProps) {
       </Button>
       <Button
         size="sm"
-        color={currentMode === "dashboard" ? "blue" : "gray"}
+        color={currentMode === "dashboard" ? "blue" : "alternative"}
         onClick={() => handleModeChange("dashboard")}
         className="flex items-center gap-2"
       >

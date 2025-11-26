@@ -322,7 +322,7 @@ export function QuickModeView({ eventId, eventName, eventTimezone }: QuickModeVi
       {/* QR Scanner Section */}
       <div className="flex-1">
         <div className="mb-4 rounded-lg border-2 border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-          <div className="mb-3 flex items-center gap-2">
+          <div className="mb-3 flex items-center justify-center gap-2">
             <HiQrcode className="h-5 w-5 text-purple-600 dark:text-purple-400" />
             <h2 className="font-semibold text-gray-900 dark:text-white">
               Scan QR Code
@@ -384,7 +384,7 @@ export function QuickModeView({ eventId, eventName, eventTimezone }: QuickModeVi
 
       {/* Ticket Search Form */}
       <div className="rounded-lg border-2 border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-        <div className="mb-3 flex items-center gap-2">
+        <div className="mb-3 flex items-center justify-center gap-2">
           <HiSearch className="h-5 w-5 text-blue-600 dark:text-blue-400" />
           <h2 className="font-semibold text-gray-900 dark:text-white">
             Search by Ticket Number
@@ -393,9 +393,6 @@ export function QuickModeView({ eventId, eventName, eventTimezone }: QuickModeVi
 
         <form onSubmit={handleSearchSubmit} className="space-y-3">
           <div>
-            <Label htmlFor="ticket-search" className="mb-2">
-              Ticket Number
-            </Label>
             <TextInput
               id="ticket-search"
               type="text"
