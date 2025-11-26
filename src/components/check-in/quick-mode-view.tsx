@@ -100,7 +100,10 @@ export function QuickModeView({ eventId, eventName, eventTimezone }: QuickModeVi
    * Initialize embedded QR scanner on mount
    */
   useEffect(() => {
+    // Prevent duplicate initialization
     if (hasInitialized.current) return;
+
+    let isCleaningUp = false;
 
     const initializeScanner = async () => {
       try {
@@ -109,6 +112,9 @@ export function QuickModeView({ eventId, eventName, eventTimezone }: QuickModeVi
 
         // Wait for DOM
         await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // Check if cleanup started during wait
+        if (isCleaningUp) return;
 
         const element = document.getElementById(scannerElementId);
         if (!element) {
@@ -135,16 +141,23 @@ export function QuickModeView({ eventId, eventName, eventTimezone }: QuickModeVi
           throw permError;
         }
 
-        // Create scanner
-        const scanner = new Html5Qrcode(scannerElementId);
-        scannerRef.current = scanner;
-        hasInitialized.current = true;
+        // Check if cleanup started during camera permission check
+        if (isCleaningUp) return;
+
+        // Create scanner only if we don't have one yet
+        if (!scannerRef.current) {
+          const scanner = new Html5Qrcode(scannerElementId);
+          scannerRef.current = scanner;
+        }
 
         // Get cameras
         const devices = await Html5Qrcode.getCameras();
         if (!devices || devices.length === 0) {
           throw new Error("No cameras found");
         }
+
+        // Check if cleanup started during device enumeration
+        if (isCleaningUp) return;
 
         // Prefer rear camera
         const rearCamera = devices.find(
@@ -160,7 +173,7 @@ export function QuickModeView({ eventId, eventName, eventTimezone }: QuickModeVi
         }
 
         // Start scanning
-        await scanner.start(
+        await scannerRef.current!.start(
           cameraId,
           {
             fps: 10,
@@ -172,8 +185,15 @@ export function QuickModeView({ eventId, eventName, eventTimezone }: QuickModeVi
           () => {}, // Ignore scan failures (no QR in view)
         );
 
-        setScannerState("scanning");
+        // Mark as initialized and update state only if we're not cleaning up
+        if (!isCleaningUp) {
+          hasInitialized.current = true;
+          setScannerState("scanning");
+        }
       } catch (error) {
+        // Don't show errors if we're cleaning up
+        if (isCleaningUp) return;
+
         console.error("QR Scanner error:", error);
         let message = "Failed to access camera";
         
@@ -198,22 +218,26 @@ export function QuickModeView({ eventId, eventName, eventTimezone }: QuickModeVi
 
     // Cleanup
     return () => {
-      if (scannerRef.current) {
-        const stopScanner = async () => {
-          try {
-            const state = scannerRef.current!.getState();
-            if (state === Html5QrcodeScannerState.SCANNING) {
-              await scannerRef.current!.stop();
-            }
-            scannerRef.current!.clear();
-          } catch (error) {
-            console.error("Error stopping scanner:", error);
-          }
-          scannerRef.current = null;
-        };
-        void stopScanner();
-      }
+      isCleaningUp = true;
       hasInitialized.current = false;
+
+      const stopScanner = async () => {
+        if (!scannerRef.current) return;
+
+        try {
+          const state = scannerRef.current.getState();
+          if (state === Html5QrcodeScannerState.SCANNING) {
+            await scannerRef.current.stop();
+          }
+          await scannerRef.current.clear();
+        } catch (error) {
+          console.error("Error stopping scanner:", error);
+        } finally {
+          scannerRef.current = null;
+        }
+      };
+
+      void stopScanner();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -294,16 +318,109 @@ export function QuickModeView({ eventId, eventName, eventTimezone }: QuickModeVi
   /**
    * Retry scanner initialization
    */
-  const handleRetryScanner = () => {
-    hasInitialized.current = false;
-    setScannerState("idle");
+  const handleRetryScanner = async () => {
+    // Stop existing scanner if any
+    if (scannerRef.current) {
+      try {
+        const state = scannerRef.current.getState();
+        if (state === Html5QrcodeScannerState.SCANNING) {
+          await scannerRef.current.stop();
+        }
+        await scannerRef.current.clear();
+      } catch (error) {
+        console.error("Error stopping scanner during retry:", error);
+      }
+      scannerRef.current = null;
+    }
+
+    // Reset state
+    setScannerState("initializing");
     setScannerError("");
-    
-    // Re-trigger initialization
-    const element = document.getElementById(scannerElementId);
-    if (element) {
-      // Force re-render
-      window.location.reload();
+
+    // Reinitialize scanner
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const element = document.getElementById(scannerElementId);
+      if (!element) {
+        throw new Error("Scanner element not found");
+      }
+
+      // Request camera permission
+      let stream: MediaStream | null = null;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+        });
+        stream.getTracks().forEach((track) => track.stop());
+      } catch (permError) {
+        if (permError instanceof DOMException) {
+          if (permError.name === "NotAllowedError") {
+            throw new Error("Camera permission denied. Please allow camera access.");
+          } else if (permError.name === "NotFoundError") {
+            throw new Error("No camera found on this device.");
+          } else if (permError.name === "NotReadableError") {
+            throw new Error("Camera is in use by another application.");
+          }
+        }
+        throw permError;
+      }
+
+      // Create new scanner
+      const scanner = new Html5Qrcode(scannerElementId);
+      scannerRef.current = scanner;
+
+      // Get cameras
+      const devices = await Html5Qrcode.getCameras();
+      if (!devices || devices.length === 0) {
+        throw new Error("No cameras found");
+      }
+
+      // Prefer rear camera
+      const rearCamera = devices.find(
+        (device) =>
+          device.label.toLowerCase().includes("back") ||
+          device.label.toLowerCase().includes("rear") ||
+          device.label.toLowerCase().includes("environment"),
+      );
+
+      const cameraId = rearCamera?.id ?? devices[0]?.id;
+      if (!cameraId) {
+        throw new Error("Unable to access camera");
+      }
+
+      // Start scanning
+      await scanner.start(
+        cameraId,
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0,
+        },
+        (decodedText: string) => { void handleQrScanSuccess(decodedText); },
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        () => {}, // Ignore scan failures (no QR in view)
+      );
+
+      setScannerState("scanning");
+    } catch (error) {
+      console.error("QR Scanner retry error:", error);
+      let message = "Failed to access camera";
+      
+      if (error instanceof DOMException) {
+        if (error.name === "NotAllowedError") {
+          message = "Camera permission denied. Please allow camera access.";
+        } else if (error.name === "NotFoundError") {
+          message = "No camera found. Use ticket search below.";
+        } else if (error.name === "NotReadableError") {
+          message = "Camera is in use by another app.";
+        }
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+
+      setScannerError(message);
+      setScannerState("error");
     }
   };
 
@@ -401,7 +518,7 @@ export function QuickModeView({ eventId, eventName, eventTimezone }: QuickModeVi
               onChange={(e) => setTicketNumber(e.target.value)}
               disabled={isSearching}
               sizing="lg"
-              className="font-mono"
+              className="font-mono [&_input]:text-center" 
             />
           </div>
 
