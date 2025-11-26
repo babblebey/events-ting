@@ -210,7 +210,7 @@ export function QuickCheckInDrawer({
                   className="flex-1"
                   size="lg"
                 >
-                  {isProcessing && <Spinner size="sm" className="mr-2" />}
+                  {isProcessing ? <Spinner size="sm" className="mr-2" /> : <HiCheckCircle className="mr-2" />}
                   {isProcessing ? "Checking In..." : "Check In"}
                 </Button>
               </>
