@@ -513,12 +513,12 @@ export function QuickModeView({ eventId, eventName, eventTimezone }: QuickModeVi
             <TextInput
               id="ticket-search"
               type="text"
-              placeholder="Enter ticket number..."
+              placeholder="Enter ticket number"
               value={ticketNumber}
               onChange={(e) => setTicketNumber(e.target.value)}
               disabled={isSearching}
               sizing="lg"
-              className="font-mono [&_input]:text-center" 
+              className="font-mono [&_input]:text-center [&_input]:uppercase [&_input]:tracking-widest [&_input]:placeholder:tracking-normal [&_input]:placeholder:font-normal [&_input]:font-bold" 
             />
           </div>
 
