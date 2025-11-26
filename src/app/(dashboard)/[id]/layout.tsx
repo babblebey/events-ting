@@ -25,6 +25,7 @@ const MODULE_MAP: Record<string, ModuleName> = {
   speakers: "SPEAKERS",
   cfp: "CFP",
   communications: "COMMUNICATIONS",
+  checkin: "CHECKIN",
 };
 
 async function DashboardLayout({
@@ -82,6 +83,12 @@ async function DashboardLayout({
       icon: "HiUsers",
       count: event._count?.registrations,
       module: "attendees",
+    },
+    {
+      href: `/events/${event.slug}/check-in`,
+      label: "Check-In",
+      icon: "HiCheck",
+      module: "checkin",
     },
     {
       href: `/${eventId}/tickets`,

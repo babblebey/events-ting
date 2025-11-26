@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { FC, SVGProps } from "react";
 import { usePathname } from "next/navigation";
 import { BiBuoy } from "react-icons/bi";
-import { HiViewBoards, HiMenu, HiX } from "react-icons/hi";
+import { HiViewBoards, HiMenu, HiX, HiCheck } from "react-icons/hi";
 import { FaCalendarAlt } from "react-icons/fa";
 import { RiMegaphoneFill, RiSettings3Fill } from "react-icons/ri";
 import { AiFillDashboard } from "react-icons/ai";
@@ -23,6 +23,7 @@ const iconMap: Record<string, FC<SVGProps<SVGSVGElement>>> = {
   AiFillDashboard,
   HiUsers,
   HiTicket,
+  HiCheck,
   FaCalendarAlt,
   PiMicrophoneStageFill,
   RiMegaphoneFill,

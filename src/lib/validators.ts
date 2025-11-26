@@ -380,6 +380,7 @@ export const MODULE_NAMES = [
   "SPEAKERS",
   "CFP",
   "COMMUNICATIONS",
+  "CHECKIN",
 ] as const;
 
 export type ModuleName = (typeof MODULE_NAMES)[number];

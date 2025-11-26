@@ -36,6 +36,7 @@ Feature-specific documentation organized by domain:
 - **[Registration](./modules/registration/)** - Ticket purchasing and transaction management
 - **[Tickets](./modules/tickets/)** - Ticket assignment and management
 - **[Attendees](./modules/attendees/)** - Event participant management and tracking
+- **[Check-In](./modules/check-in/)** - QR code scanning and attendee check-in at events
 
 #### Advanced Modules
 - **[Schedule](./modules/schedule/)** - Event schedules, sessions, and tracks
@@ -267,14 +268,14 @@ grep -ri "search term" docs/
 | Category | Files | Status |
 |----------|-------|--------|
 | Foundation | 9 files | ✅ Complete |
-| Core Modules | 22 files | ✅ Complete |
+| Core Modules | 26 files | ✅ Complete |
 | Advanced Modules | 21 files | ✅ Complete |
 | API Documentation | 4 files | ✅ Complete |
 | Components | 4 files | ✅ Complete |
 | Deployment | 5 files | ✅ Complete |
 | Development | 4 files | ✅ Complete |
 | Troubleshooting | 1 file | ✅ Complete |
-| **Total** | **70 files** | **100%** |
+| **Total** | **74 files** | **100%** |
 
 ---
 

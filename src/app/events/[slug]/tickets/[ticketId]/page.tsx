@@ -189,12 +189,20 @@ export default function IndividualTicketViewPage() {
                   <HiCalendar className="mt-1 h-5 w-5 shrink-0 text-gray-500 dark:text-gray-400" />
                   <div>
                     <p className="font-medium text-gray-900 dark:text-white">
-                      {formatDate(ensureDate(ticket.event.startDate), timezone, "PPPp")}
+                      {formatDate(
+                        ensureDate(ticket.event.startDate),
+                        timezone,
+                        "PPPp",
+                      )}
                     </p>
                     {ticket.event.endDate && (
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         Ends:{" "}
-                        {formatDate(ensureDate(ticket.event.endDate), timezone, "PPPp")}
+                        {formatDate(
+                          ensureDate(ticket.event.endDate),
+                          timezone,
+                          "PPPp",
+                        )}
                       </p>
                     )}
                   </div>
@@ -248,7 +256,11 @@ export default function IndividualTicketViewPage() {
                         Assigned:
                       </span>
                       <span className="text-sm text-gray-900 dark:text-white">
-                        {formatDate(ensureDate(ticket.assignedAt), timezone, "PPp")}
+                        {formatDate(
+                          ensureDate(ticket.assignedAt),
+                          timezone,
+                          "PPp",
+                        )}
                       </span>
                     </div>
                   )}
@@ -269,12 +281,14 @@ export default function IndividualTicketViewPage() {
                                 {key.replace(/([A-Z])/g, " $1").trim()}:
                               </span>
                               <span className="text-sm font-medium text-gray-900 dark:text-white">
-                                {value !== null && value !== undefined 
-                                  ? (typeof value === "object" 
-                                      ? JSON.stringify(value) 
-                                      : typeof value === "string" || typeof value === "number" || typeof value === "boolean"
-                                        ? String(value)
-                                        : "Invalid type")
+                                {value !== null && value !== undefined
+                                  ? typeof value === "object"
+                                    ? JSON.stringify(value)
+                                    : typeof value === "string" ||
+                                        typeof value === "number" ||
+                                        typeof value === "boolean"
+                                      ? String(value)
+                                      : "Invalid type"
                                   : "N/A"}
                               </span>
                             </div>
@@ -318,7 +332,11 @@ export default function IndividualTicketViewPage() {
                       Checked In
                     </p>
                     <p className="text-sm text-green-700 dark:text-green-400">
-                      {formatDate(ensureDate(ticket.checkedInAt), timezone, "PPp")}
+                      {formatDate(
+                        ensureDate(ticket.checkedInAt),
+                        timezone,
+                        "PPp",
+                      )}
                     </p>
                   </div>
                 </div>

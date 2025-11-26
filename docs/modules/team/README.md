@@ -37,7 +37,7 @@ The Team Collaboration module enables event organizers to invite collaborators w
 - See all their event memberships in one dashboard
 - Cannot invite other collaborators
 - Cannot access SETTINGS module
-- Can be assigned any combination of: OVERVIEW, ATTENDEES, TICKETS, SCHEDULE, SPEAKERS, CFP, COMMUNICATIONS
+- Can be assigned any combination of: OVERVIEW, ATTENDEES, TICKETS, SCHEDULE, SPEAKERS, CFP, COMMUNICATIONS, CHECKIN
 
 ### Public Users
 - No access to team features
@@ -102,6 +102,7 @@ Permissions are **binary** - having access to a module grants full CRUD operatio
 | SPEAKERS | Speaker profiles and management |
 | CFP | Call for Papers review |
 | COMMUNICATIONS | Email campaigns |
+| CHECKIN | Attendee check-in operations |
 
 **Note**: SETTINGS module is owner-only and cannot be assigned to collaborators.
 
@@ -241,9 +242,16 @@ Can: Build schedule, manage sessions, create speaker profiles
 Cannot: Access registrations, view financials, change settings
 ```
 
+### Check-In Staff
+```
+Modules: CHECKIN
+Can: Process attendee check-ins via manual lookup or QR code scanning, view check-in metrics
+Cannot: Access attendee data outside check-in context, modify registrations, access other modules
+```
+
 ### Full Event Manager
 ```
-Modules: OVERVIEW, ATTENDEES, TICKETS, SCHEDULE, SPEAKERS, CFP, COMMUNICATIONS
+Modules: OVERVIEW, ATTENDEES, TICKETS, SCHEDULE, SPEAKERS, CFP, COMMUNICATIONS, CHECKIN
 Can: Manage all operational aspects of the event
 Cannot: Access SETTINGS (owner-only)
 ```

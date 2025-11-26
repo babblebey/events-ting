@@ -84,7 +84,7 @@ model Attendee {
 
 **This module is required by:**
 - **Communications Module**: Target recipients for email campaigns
-- **Check-in Module** (future): Attendee check-in at event
+- **[Check-In Module](../check-in/)**: Attendee check-in at event
 
 ## Module Scope
 

@@ -95,6 +95,17 @@ const MODULE_PERMISSIONS: ModulePermission[] = [
       "View email analytics",
     ],
   },
+  {
+    name: "CHECKIN",
+    label: "Check-In",
+    description: "Process attendee check-ins at the event venue",
+    capabilities: [
+      "View attendee check-in list",
+      "Check in attendees manually",
+      "Scan QR codes for check-in",
+      "Filter by check-in status",
+    ],
+  },
 ];
 
 export function PermissionExplainer() {

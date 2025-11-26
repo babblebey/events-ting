@@ -50,6 +50,10 @@ const MODULE_INFO: Record<ModuleName, { label: string; description: string }> =
       label: "Communications",
       description: "Create and send email campaigns to attendees",
     },
+    CHECKIN: {
+      label: "Check-In",
+      description: "Check in attendees at the event venue",
+    },
   };
 
 export function ModulePermissionsSelector({

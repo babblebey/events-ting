@@ -879,7 +879,7 @@ db.registration.findMany({
 ### Future Enhancements
 
 - **Payment Models**: Stripe/Paystack payment intents, refunds
-- **Check-in Model**: Track attendee check-in at event
+- ✅ **Check-in Model**: Track attendee check-in at event (Implemented - see Ticket model)
 - **Survey Model**: Post-event feedback forms
 - **Sponsor Model**: Event sponsors with logo/booth info
 - **Discount Codes**: Coupon codes for ticket discounts
