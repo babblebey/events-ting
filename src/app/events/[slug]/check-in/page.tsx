@@ -12,7 +12,8 @@
  */
 
 import { api } from "@/trpc/server";
-import { notFound } from "next/navigation";
+import { auth } from "@/server/auth";
+import { notFound, redirect } from "next/navigation";
 import { Alert } from "flowbite-react";
 import { LuCircleAlert } from "react-icons/lu";
 import {
@@ -41,6 +42,14 @@ export default async function CheckInPage({
   params,
   searchParams, 
 }: CheckInPageProps) {
+  // Check authentication
+  const session = await auth();
+
+  // Redirect to sign-in if not authenticated
+  if (!session?.user) {
+    redirect(`/auth/signin?callbackUrl=/events/${params.slug}/check-in`);
+  }
+
   // Fetch event to get ID
   const event = await api.event.getBySlug({ slug: params.slug });
 
