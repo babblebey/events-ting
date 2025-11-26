@@ -11,7 +11,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Button, TextInput, Label, Spinner, Alert } from "flowbite-react";
+import { Button, TextInput, Spinner, Alert } from "flowbite-react";
 import { HiSearch, HiQrcode, HiExclamationCircle } from "react-icons/hi";
 import { Html5Qrcode, Html5QrcodeScannerState } from "html5-qrcode";
 import { parseQrCode, formatQrCodeError } from "@/lib/qr-code";
@@ -173,7 +173,7 @@ export function QuickModeView({ eventId, eventName, eventTimezone }: QuickModeVi
         }
 
         // Start scanning
-        await scannerRef.current!.start(
+        await scannerRef.current.start(
           cameraId,
           {
             fps: 10,
@@ -229,7 +229,7 @@ export function QuickModeView({ eventId, eventName, eventTimezone }: QuickModeVi
           if (state === Html5QrcodeScannerState.SCANNING) {
             await scannerRef.current.stop();
           }
-          await scannerRef.current.clear();
+          scannerRef.current.clear();
         } catch (error) {
           console.error("Error stopping scanner:", error);
         } finally {
@@ -326,7 +326,7 @@ export function QuickModeView({ eventId, eventName, eventTimezone }: QuickModeVi
         if (state === Html5QrcodeScannerState.SCANNING) {
           await scannerRef.current.stop();
         }
-        await scannerRef.current.clear();
+        scannerRef.current.clear();
       } catch (error) {
         console.error("Error stopping scanner during retry:", error);
       }
