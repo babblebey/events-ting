@@ -187,12 +187,15 @@ export default async function CheckInPage({
       {metricsData && (
         <div className="mb-6 sm:mb-8">
           <CheckInMetrics
-            totalTickets={metricsData.totalTickets}
-            checkedInCount={metricsData.checkedInCount}
-            notCheckedInCount={metricsData.notCheckedInCount}
-            checkInPercentage={metricsData.checkInPercentage}
-            recentCheckIns={metricsData.recentCheckIns}
+            eventId={event.id}
             eventTimezone={event.timezone}
+            initialData={{
+              totalTickets: metricsData.totalTickets,
+              checkedInCount: metricsData.checkedInCount,
+              notCheckedInCount: metricsData.notCheckedInCount,
+              checkInPercentage: metricsData.checkInPercentage,
+              recentCheckIns: metricsData.recentCheckIns,
+            }}
           />
         </div>
       )}

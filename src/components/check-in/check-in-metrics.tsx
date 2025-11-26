@@ -3,12 +3,14 @@
 /**
  * CheckInMetrics Component
  * Displays check-in statistics and recent activity
- * Server Component for optimal performance
+ * Client Component with reactive data fetching for real-time updates
  */
 
 import { Card, Progress, Badge } from "flowbite-react";
 import { HiTicket, HiCheck, HiClock, HiTrendingUp } from "react-icons/hi";
 import { formatEventTime } from "@/lib/utils/date";
+import { api } from "@/trpc/react";
+import { CheckInMetricsSkeleton } from "./check-in-metrics-skeleton";
 
 // Type definitions from contracts
 type RecentCheckIn = {
@@ -17,27 +19,50 @@ type RecentCheckIn = {
   checkedInAt: Date;
 };
 
-interface CheckInMetricsProps {
+type MetricsData = {
   totalTickets: number;
   checkedInCount: number;
   notCheckedInCount: number;
   checkInPercentage: number;
   recentCheckIns: RecentCheckIn[];
+};
+
+interface CheckInMetricsProps {
+  eventId: string;
   eventTimezone: string;
+  initialData: MetricsData;
 }
 
 export function CheckInMetrics({
-  totalTickets,
-  checkedInCount,
-  notCheckedInCount,
-  checkInPercentage,
-  recentCheckIns,
+  eventId,
   eventTimezone,
+  initialData,
 }: CheckInMetricsProps) {
+  // Fetch metrics with tRPC query for reactive updates
+  const { data, isLoading } = api.checkIn.getMetrics.useQuery(
+    { eventId },
+    {
+      initialData,
+      refetchInterval: 10000, // Refetch every 10 seconds for real-time updates
+    },
+  );
+
   const formatDateTime = (date: Date) => {
     // Format in event timezone: "11/24/25, 2:30 PM EST"
     return formatEventTime(new Date(date), eventTimezone, "M/d/yy, h:mm a zzz");
   };
+
+  // Use data from query or fallback to initial data
+  const totalTickets = data?.totalTickets ?? initialData.totalTickets;
+  const checkedInCount = data?.checkedInCount ?? initialData.checkedInCount;
+  const notCheckedInCount = data?.notCheckedInCount ?? initialData.notCheckedInCount;
+  const checkInPercentage = data?.checkInPercentage ?? initialData.checkInPercentage;
+  const recentCheckIns = data?.recentCheckIns ?? initialData.recentCheckIns;
+
+  // Show skeleton during initial load
+  if (isLoading && !data) {
+    return <CheckInMetricsSkeleton />;
+  }
 
   return (
     <div className="space-y-6">

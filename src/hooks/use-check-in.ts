@@ -73,14 +73,17 @@ export function useCheckIn({
       }
 
       // Cancel outgoing refetches to prevent race conditions
-      await utils.checkIn.listAttendees.cancel({
-        eventId,
-        filter: currentFilter,
-        search: currentSearch,
-        page: currentPage,
-      });
+      await Promise.all([
+        utils.checkIn.listAttendees.cancel({
+          eventId,
+          filter: currentFilter,
+          search: currentSearch,
+          page: currentPage,
+        }),
+        utils.checkIn.getMetrics.cancel({ eventId }),
+      ]);
 
-      // Snapshot previous value for rollback
+      // Snapshot previous values for rollback
       const previousData = utils.checkIn.listAttendees.getData({
         eventId,
         filter: currentFilter,
@@ -88,7 +91,9 @@ export function useCheckIn({
         page: currentPage,
       });
 
-      // Optimistically update the cache
+      const previousMetrics = utils.checkIn.getMetrics.getData({ eventId });
+
+      // Optimistically update the attendee list cache
       utils.checkIn.listAttendees.setData(
         {
           eventId,
@@ -114,10 +119,42 @@ export function useCheckIn({
         },
       );
 
-      return { previousData };
+      // Optimistically update the metrics cache
+      utils.checkIn.getMetrics.setData({ eventId }, (old) => {
+        if (!old) return old;
+
+        const wasAlreadyCheckedIn = ticketToCheckIn?.isCheckedIn ?? false;
+        
+        // Only update metrics if the ticket wasn't already checked in
+        if (wasAlreadyCheckedIn) return old;
+
+        const newCheckedInCount = old.checkedInCount + 1;
+        const newNotCheckedInCount = old.notCheckedInCount - 1;
+        const newCheckInPercentage =
+          old.totalTickets > 0
+            ? (newCheckedInCount / old.totalTickets) * 100
+            : 0;
+
+        return {
+          ...old,
+          checkedInCount: newCheckedInCount,
+          notCheckedInCount: newNotCheckedInCount,
+          checkInPercentage: newCheckInPercentage,
+          recentCheckIns: [
+            {
+              ticketNumber: input.ticketNumber,
+              name: ticketToCheckIn?.attendeeName ?? ticketToCheckIn?.buyerName ?? "Unknown",
+              checkedInAt: new Date(),
+            },
+            ...old.recentCheckIns.slice(0, 4), // Keep only the 5 most recent
+          ],
+        };
+      });
+
+      return { previousData, previousMetrics };
     },
     onError: (err, input, context) => {
-      // Rollback optimistic update on error
+      // Rollback optimistic updates on error
       if (context?.previousData) {
         utils.checkIn.listAttendees.setData(
           {
@@ -128,6 +165,9 @@ export function useCheckIn({
           },
           context.previousData,
         );
+      }
+      if (context?.previousMetrics) {
+        utils.checkIn.getMetrics.setData({ eventId }, context.previousMetrics);
       }
       setCheckingInTicketId(null);
     },
